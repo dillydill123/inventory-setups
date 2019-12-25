@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Dillon <https://github.com/dillydill123>
+ * Copyright (c) 2019, dillydill123 <https://github.com/dillydill123>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,6 @@
 
 package inventorysetups.ui;
 
-//import com.sun.deploy.uitoolkit.impl.awt.ui.SwingConsoleWindow;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
 

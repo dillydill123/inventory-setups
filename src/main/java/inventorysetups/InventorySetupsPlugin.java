@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Dillon <https://github.com/dillydill123>
+ * Copyright (c) 2019, dillydill123 <https://github.com/dillydill123>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,14 @@ package inventorysetups;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.google.inject.Provides;
+import inventorysetups.ui.InventorySetupPluginPanel;
 import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
-import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
-//import net.runelite.api.events.ConfigChanged;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.client.callback.ClientThread;
@@ -44,7 +42,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import inventorysetups.ui.InventorySetupPluginPanel;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -57,14 +54,10 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.stream.Stream;
 
 @PluginDescriptor(
 		name = "Inventory Setups",
-		description = "Save inventory setups",
-		tags = { "items", "inventory", "setups"},
-		enabledByDefault = false
+		description = "Save gear setups for specific activities"
 )
 
 @Slf4j
@@ -129,7 +122,7 @@ public class InventorySetupsPlugin extends Plugin
 		panel.rebuild();
 
 		// load all the inventory setups from the config file
-		// not needed anymore? Suddenly causing issues
+		// not needed anymore? Suddenly causing issues but before was needed
 //		clientThread.invokeLater(() ->
 //		{
 //			switch (client.getGameState())
@@ -289,6 +282,8 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				final Item item = items[i];
 				String itemName = "";
+
+				// only the client thread can retrieve the name. Therefore, do not use names to compare!
 				if (client.isClientThread())
 				{
 					itemName = itemManager.getItemComposition(item.getId()).getName();

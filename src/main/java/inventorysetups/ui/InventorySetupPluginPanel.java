@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Dillon <https://github.com/dillydill123>
+ * Copyright (c) 2019, dillydill123 <https://github.com/dillydill123>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,19 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.PluginErrorPanel;
 import net.runelite.client.util.ImageUtil;
 
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -248,6 +258,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invPanel.setSlots(inventorySetup);
 		eqpPanel.setSlots(inventorySetup);
 
+		// Check if we need to highlight differences
 		if (currentSelectedSetup.isHighlightDifference())
 		{
 			final ArrayList<InventorySetupItem> normInv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
