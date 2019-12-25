@@ -109,15 +109,7 @@ public class InventorySetupPanel extends JPanel
 
 	static
 	{
-		final BufferedImage highlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/delete_icon.png");
-		final BufferedImage highlightHover = ImageUtil.luminanceOffset(highlightImg, -150);
-		HIGHLIGHT_COLOR_ICON = new ImageIcon(highlightImg);
-		HIGHLIGHT_COLOR_HOVER_ICON = new ImageIcon(highlightHover);
-
-		NO_HIGHLIGHT_COLOR_ICON = new ImageIcon(highlightHover);
-		NO_HIGHLIGHT_COLOR_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(highlightHover, -100));
-
-		final BufferedImage stackImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/delete_icon.png");
+		final BufferedImage stackImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/stack_icon.png");
 		final BufferedImage stackHover = ImageUtil.luminanceOffset(stackImg, -150);
 		STACK_DIFFERENCE_ICON = new ImageIcon(stackImg);
 		STACK_DIFFERENCE_HOVER_ICON = new ImageIcon(stackHover);
@@ -125,7 +117,7 @@ public class InventorySetupPanel extends JPanel
 		NO_STACK_DIFFERENCE_ICON = new ImageIcon(stackHover);
 		NO_STACK_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(stackHover, -100));
 
-		final BufferedImage variationImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/delete_icon.png");
+		final BufferedImage variationImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/variation_icon.png");
 		final BufferedImage variationHover = ImageUtil.luminanceOffset(variationImg, -150);
 		VARIATION_DIFFERENCE_ICON = new ImageIcon(variationImg);
 		VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(variationHover);
@@ -133,13 +125,21 @@ public class InventorySetupPanel extends JPanel
 		NO_VARIATION_DIFFERENCE_ICON = new ImageIcon(variationHover);
 		NO_VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(variationHover, -100));
 
-		final BufferedImage highlightToggleImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/delete_icon.png");
+		final BufferedImage highlightToggleImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/highlight_icon.png");
 		final BufferedImage highlightToggleHover = ImageUtil.luminanceOffset(highlightToggleImg, -150);
 		TOGGLE_HIGHLIGHT_ICON = new ImageIcon(highlightToggleImg);
 		TOGGLE_HIGHLIGHT_HOVER_ICON = new ImageIcon(highlightToggleHover);
 
 		NO_TOGGLE_HIGHLIGHT_ICON = new ImageIcon(highlightToggleHover);
 		NO_TOGGLE_HIGHLIGHT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(highlightToggleHover, -100));
+
+		final BufferedImage highlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/highlight_color_icon.png");
+		final BufferedImage highlightHover = ImageUtil.luminanceOffset(highlightImg, -150);
+		HIGHLIGHT_COLOR_ICON = new ImageIcon(highlightImg);
+		HIGHLIGHT_COLOR_HOVER_ICON = new ImageIcon(highlightHover);
+
+		NO_HIGHLIGHT_COLOR_ICON = new ImageIcon(highlightHover);
+		NO_HIGHLIGHT_COLOR_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(highlightHover, -100));
 
 		final BufferedImage viewImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/visible_icon.png");
 		final BufferedImage viewImgHover = ImageUtil.luminanceOffset(viewImg, -150);
@@ -366,7 +366,7 @@ public class InventorySetupPanel extends JPanel
 				highlightColorIndicator.setIcon(inventorySetup.isHighlightDifference() ? HIGHLIGHT_COLOR_ICON : NO_HIGHLIGHT_COLOR_ICON);
 			}
 		});
-		
+
 		leftActions.add(stackDifferenceIndicator);
 		leftActions.add(variationDifferenceIndicator);
 		leftActions.add(highlightIndicator);

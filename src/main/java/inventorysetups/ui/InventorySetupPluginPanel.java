@@ -26,6 +26,7 @@ package inventorysetups.ui;
 
 import net.runelite.api.InventoryID;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
@@ -33,9 +34,11 @@ import inventorysetups.InventorySetupPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.PluginErrorPanel;
+import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
+import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -45,17 +48,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+
+import static jogamp.common.os.elf.SectionArmAttributes.Tag.File;
 
 public class InventorySetupPluginPanel extends PluginPanel
 {
@@ -86,9 +88,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 		ADD_ICON = new ImageIcon(addIcon);
 		ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
 
-		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/delete_icon.png");
-		BACK_ICON = new ImageIcon(backIcon);
-		BACK_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(backIcon, 0.53f));
+		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/back_arrow_icon.png");
+		BACK_ICON = new ImageIcon(ImageUtil.flipImage(backIcon, true, false));
+		BACK_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(ImageUtil.flipImage(backIcon, true, false), 0.53f));
 
 	}
 
@@ -102,6 +104,24 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
+
+
+		AsyncBufferedImage rod = itemManager.getImage(ItemID.RING_OF_DUELING8);
+		rod.onLoaded(new Runnable() {
+			@Override
+			public void run() {
+				File outputFile = new File("C:/Users/Dillon/Desktop/test.png");
+				try {
+					BufferedImage blackAndWhite = new BufferedImage(rod.getWidth(), rod.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
+					Graphics2D graphics = blackAndWhite.createGraphics();
+					graphics.drawImage(rod, 0, 0, null);
+					ImageIO.write(blackAndWhite, "png", outputFile);
+				}
+				catch(IOException e) {
+
+				}
+			}
+		});
 
 		// setup the title
 		final JLabel title = new JLabel();

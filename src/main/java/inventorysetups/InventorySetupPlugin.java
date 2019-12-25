@@ -120,9 +120,9 @@ public class InventorySetupPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
-
 		loadConfig();
 		panel.rebuild();
+
 		// load all the inventory setups from the config file
 //		clientThread.invokeLater(() ->
 //		{
@@ -130,6 +130,7 @@ public class InventorySetupPlugin extends Plugin
 //			{
 //				case STARTING:
 //				case UNKNOWN:
+//				case HOPPING:
 //					return false;
 //			}
 //
