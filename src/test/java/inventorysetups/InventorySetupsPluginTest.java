@@ -7,7 +7,7 @@ public class InventorySetupsPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(InventorySetupPlugin.class);
+		ExternalPluginManager.loadBuiltin(InventorySetupsPlugin.class);
 		RuneLite.main(args);
 	}
 }

@@ -26,7 +26,7 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupPlugin;
+import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -66,22 +66,22 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	private InventorySetup currentSelectedSetup;
 
-	private final InventorySetupPlugin plugin;
+	private final InventorySetupsPlugin plugin;
 
 	static
 	{
-		final BufferedImage addIcon = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/add_icon.png");
+		final BufferedImage addIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/add_icon.png");
 		ADD_ICON = new ImageIcon(addIcon);
 		ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
 
-		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/back_arrow_icon.png");
+		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/back_arrow_icon.png");
 		BACK_ICON = new ImageIcon(ImageUtil.flipImage(backIcon, true, false));
 		BACK_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(ImageUtil.flipImage(backIcon, true, false), 0.53f));
 
 		MAIN_TITLE = "Inventory Setups";
 	}
 
-	public InventorySetupPluginPanel(final InventorySetupPlugin plugin, final ItemManager itemManager)
+	public InventorySetupPluginPanel(final InventorySetupsPlugin plugin, final ItemManager itemManager)
 	{
 		super(false);
 		this.currentSelectedSetup = null;

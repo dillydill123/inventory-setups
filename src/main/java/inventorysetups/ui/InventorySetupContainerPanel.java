@@ -29,13 +29,12 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupPlugin;
+import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.util.ArrayList;
 
 public abstract class InventorySetupContainerPanel extends JPanel
@@ -43,9 +42,9 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected ItemManager itemManager;
 
-	private final InventorySetupPlugin plugin;
+	private final InventorySetupsPlugin plugin;
 
-	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupPlugin plugin, String captionText)
+	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
 	{
 		this.itemManager = itemManager;
 		this.plugin = plugin;

@@ -27,7 +27,7 @@ package inventorysetups.ui;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupPlugin;
+import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JPanel;
@@ -42,7 +42,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 	private ArrayList<InventorySetupSlot> inventorySlots;
 
-	InventorySetupInventoryPanel(final ItemManager itemManager, final InventorySetupPlugin plugin)
+	InventorySetupInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Inventory");
 	}

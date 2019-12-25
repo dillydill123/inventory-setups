@@ -1,2 +1,2 @@
 # Inventory Setups
-FIXME
+Save gear setups for specific activies

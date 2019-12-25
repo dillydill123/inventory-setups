@@ -68,7 +68,7 @@ import java.util.stream.Stream;
 )
 
 @Slf4j
-public class InventorySetupPlugin extends Plugin
+public class InventorySetupsPlugin extends Plugin
 {
 
 	private static final String CONFIG_GROUP = "inventorysetups";
@@ -159,7 +159,7 @@ public class InventorySetupPlugin extends Plugin
 		{
 			return;
 		}
-		
+
 		clientThread.invoke(() ->
 		{
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);

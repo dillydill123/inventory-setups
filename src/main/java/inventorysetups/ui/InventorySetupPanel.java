@@ -27,7 +27,7 @@ package inventorysetups.ui;
 
 //import com.sun.deploy.uitoolkit.impl.awt.ui.SwingConsoleWindow;
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupPlugin;
+import inventorysetups.InventorySetupsPlugin;
 
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -89,7 +89,7 @@ public class InventorySetupPanel extends JPanel
 	private static final ImageIcon DELETE_ICON;
 	private static final ImageIcon DELETE_HOVER_ICON;
 
-	private final InventorySetupPlugin plugin;
+	private final InventorySetupsPlugin plugin;
 	private final InventorySetupPluginPanel panel;
 	private final InventorySetup inventorySetup;
 
@@ -109,7 +109,7 @@ public class InventorySetupPanel extends JPanel
 
 	static
 	{
-		final BufferedImage stackImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/stack_icon.png");
+		final BufferedImage stackImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/stack_icon.png");
 		final BufferedImage stackHover = ImageUtil.luminanceOffset(stackImg, -150);
 		STACK_DIFFERENCE_ICON = new ImageIcon(stackImg);
 		STACK_DIFFERENCE_HOVER_ICON = new ImageIcon(stackHover);
@@ -117,7 +117,7 @@ public class InventorySetupPanel extends JPanel
 		NO_STACK_DIFFERENCE_ICON = new ImageIcon(stackHover);
 		NO_STACK_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(stackHover, -100));
 
-		final BufferedImage variationImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/variation_icon.png");
+		final BufferedImage variationImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/variation_icon.png");
 		final BufferedImage variationHover = ImageUtil.luminanceOffset(variationImg, -150);
 		VARIATION_DIFFERENCE_ICON = new ImageIcon(variationImg);
 		VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(variationHover);
@@ -125,7 +125,7 @@ public class InventorySetupPanel extends JPanel
 		NO_VARIATION_DIFFERENCE_ICON = new ImageIcon(variationHover);
 		NO_VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(variationHover, -100));
 
-		final BufferedImage highlightToggleImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/highlight_icon.png");
+		final BufferedImage highlightToggleImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/highlight_icon.png");
 		final BufferedImage highlightToggleHover = ImageUtil.luminanceOffset(highlightToggleImg, -150);
 		TOGGLE_HIGHLIGHT_ICON = new ImageIcon(highlightToggleImg);
 		TOGGLE_HIGHLIGHT_HOVER_ICON = new ImageIcon(highlightToggleHover);
@@ -133,7 +133,7 @@ public class InventorySetupPanel extends JPanel
 		NO_TOGGLE_HIGHLIGHT_ICON = new ImageIcon(highlightToggleHover);
 		NO_TOGGLE_HIGHLIGHT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(highlightToggleHover, -100));
 
-		final BufferedImage highlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/highlight_color_icon.png");
+		final BufferedImage highlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/highlight_color_icon.png");
 		final BufferedImage highlightHover = ImageUtil.luminanceOffset(highlightImg, -150);
 		HIGHLIGHT_COLOR_ICON = new ImageIcon(highlightImg);
 		HIGHLIGHT_COLOR_HOVER_ICON = new ImageIcon(highlightHover);
@@ -141,17 +141,17 @@ public class InventorySetupPanel extends JPanel
 		NO_HIGHLIGHT_COLOR_ICON = new ImageIcon(highlightHover);
 		NO_HIGHLIGHT_COLOR_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(highlightHover, -100));
 
-		final BufferedImage viewImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/visible_icon.png");
+		final BufferedImage viewImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/visible_icon.png");
 		final BufferedImage viewImgHover = ImageUtil.luminanceOffset(viewImg, -150);
 		VIEW_SETUP_ICON = new ImageIcon(viewImg);
 		VIEW_SETUP_HOVER_ICON = new ImageIcon(viewImgHover);
 
-		final BufferedImage deleteImg = ImageUtil.getResourceStreamFromClass(InventorySetupPlugin.class, "/delete_icon.png");
+		final BufferedImage deleteImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/delete_icon.png");
 		DELETE_ICON = new ImageIcon(deleteImg);
 		DELETE_HOVER_ICON = new ImageIcon(ImageUtil.luminanceOffset(deleteImg, -100));
 	}
 
-	InventorySetupPanel(InventorySetupPlugin plugin, InventorySetupPluginPanel panel, InventorySetup inventorySetup)
+	InventorySetupPanel(InventorySetupsPlugin plugin, InventorySetupPluginPanel panel, InventorySetup inventorySetup)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
