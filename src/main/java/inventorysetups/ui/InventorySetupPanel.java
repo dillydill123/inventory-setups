@@ -269,13 +269,14 @@ public class InventorySetupPanel extends JPanel
 		JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
 		leftActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		stackDifferenceIndicator.setToolTipText("Toggle stack difference");
+		stackDifferenceIndicator.setToolTipText("Enable highlighting for stack differences");
 		stackDifferenceIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
 				inventorySetup.setStackDifference(!inventorySetup.isStackDifference());
+				stackDifferenceIndicator.setToolTipText(inventorySetup.isStackDifference() ? "Disable highlighting for stack differences" : "Enable highlighting for stack differences");
 				updateToggleHighlightLabel();
 				plugin.updateConfig();
 			}
@@ -293,13 +294,14 @@ public class InventorySetupPanel extends JPanel
 			}
 		});
 
-		variationDifferenceIndicator.setToolTipText("Toggle variation difference");
+		variationDifferenceIndicator.setToolTipText("Enable highlighting for variation differences");
 		variationDifferenceIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
 				inventorySetup.setVariationDifference(!inventorySetup.isVariationDifference());
+				variationDifferenceIndicator.setToolTipText(inventorySetup.isVariationDifference() ? "Disable highlighting for variation differences" : "Enable highlighting for variation differences");
 				updateToggleHighlightLabel();
 				plugin.updateConfig();
 			}
@@ -317,13 +319,14 @@ public class InventorySetupPanel extends JPanel
 			}
 		});
 
-		highlightIndicator.setToolTipText("Toggle highlighting");
+		highlightIndicator.setToolTipText("Enable highlighting");
 		highlightIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
 				inventorySetup.setHighlightDifference(!inventorySetup.isHighlightDifference());
+				highlightIndicator.setToolTipText(inventorySetup.isHighlightDifference() ? "Disable highlighting" : "Enable highlighting");
 				updateToggleHighlightLabel();
 				updateHighlightColorLabel();
 				plugin.updateConfig();
