@@ -97,6 +97,13 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		// important note: do not use item names for comparisons
 		// they are all empty to avoid clientThread usage when highlighting
 
+		// if the plugin says we cannot highlight, do not highlight
+		if(!plugin.isAllowHighlighting())
+		{
+			containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			return;
+		}
+
 		// first check if stack differences are enabled and compare quantities
 		if (setup.isStackDifference() && currItem.getQuantity() != savedItem.getQuantity())
 		{

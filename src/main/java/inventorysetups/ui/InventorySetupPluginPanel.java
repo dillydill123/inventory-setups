@@ -24,40 +24,23 @@
  */
 package inventorysetups.ui;
 
-import net.runelite.api.InventoryID;
-import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
-import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
 import inventorysetups.InventorySetupPlugin;
+import net.runelite.api.InventoryID;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.PluginErrorPanel;
-import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.SwingUtil;
 
-import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-
-import static jogamp.common.os.elf.SectionArmAttributes.Tag.File;
 
 public class InventorySetupPluginPanel extends PluginPanel
 {
@@ -67,11 +50,14 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private static ImageIcon BACK_ICON;
 	private static ImageIcon BACK_HOVER_ICON;
 
+	private static String MAIN_TITLE;
+
 	private final JPanel noSetupsPanel;
 	private final JPanel invEqPanel;
 	private final JPanel overviewPanel;
 	private final JScrollPane contentWrapperPane;
 
+	private final JLabel title;
 	private final JLabel addMarker;
 	private final JLabel backMarker;
 
@@ -92,6 +78,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		BACK_ICON = new ImageIcon(ImageUtil.flipImage(backIcon, true, false));
 		BACK_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(ImageUtil.flipImage(backIcon, true, false), 0.53f));
 
+		MAIN_TITLE = "Inventory Setups";
 	}
 
 	public InventorySetupPluginPanel(final InventorySetupPlugin plugin, final ItemManager itemManager)
@@ -105,27 +92,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
 
-
-		AsyncBufferedImage rod = itemManager.getImage(ItemID.RING_OF_DUELING8);
-		rod.onLoaded(new Runnable() {
-			@Override
-			public void run() {
-				File outputFile = new File("C:/Users/Dillon/Desktop/test.png");
-				try {
-					BufferedImage blackAndWhite = new BufferedImage(rod.getWidth(), rod.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
-					Graphics2D graphics = blackAndWhite.createGraphics();
-					graphics.drawImage(rod, 0, 0, null);
-					ImageIO.write(blackAndWhite, "png", outputFile);
-				}
-				catch(IOException e) {
-
-				}
-			}
-		});
-
 		// setup the title
-		final JLabel title = new JLabel();
-		title.setText("Inventory Setups");
+		this.title = new JLabel();
+		title.setText(MAIN_TITLE);
 		title.setForeground(Color.WHITE);
 
 		// setup the add marker (+ sign in the top right)
@@ -152,7 +121,6 @@ public class InventorySetupPluginPanel extends PluginPanel
 			}
 		});
 
-		// back to overview marker TODO: should be same height as add icon
 		backMarker = new JLabel(BACK_ICON);
 		backMarker.setToolTipText("Return to setups");
 		backMarker.addMouseListener(new MouseAdapter()
@@ -165,7 +133,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 				backMarker.setVisible(false);
 				overviewPanel.setVisible(true);
 				addMarker.setVisible(true);
-
+				title.setText(MAIN_TITLE);
 			}
 
 			@Override
@@ -300,6 +268,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invEqPanel.setVisible(true);
 		noSetupsPanel.setVisible(false);
 		overviewPanel.setVisible(false);
+
+		title.setText(inventorySetup.getName());
 
 		// reset scrollbar back to top
 		this.contentWrapperPane.getVerticalScrollBar().setValue(0);

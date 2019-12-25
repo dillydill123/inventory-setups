@@ -103,6 +103,9 @@ public class InventorySetupPlugin extends Plugin
 
 	private NavigationButton navButton;
 
+	@Getter
+	private boolean allowHighlighting;
+
 	@Override
 	public void startUp()
 	{
@@ -120,10 +123,13 @@ public class InventorySetupPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
+		allowHighlighting = false;
+
 		loadConfig();
 		panel.rebuild();
 
 		// load all the inventory setups from the config file
+		// not needed anymore? Suddenly causing issues
 //		clientThread.invokeLater(() ->
 //		{
 //			switch (client.getGameState())
@@ -153,16 +159,7 @@ public class InventorySetupPlugin extends Plugin
 		{
 			return;
 		}
-
-		if (name.isEmpty())
-		{
-			JOptionPane.showMessageDialog(panel,
-					"Invalid Setup Name",
-					"Names must not be empty.",
-					JOptionPane.PLAIN_MESSAGE);
-			return;
-		}
-
+		
 		clientThread.invoke(() ->
 		{
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
@@ -246,21 +243,22 @@ public class InventorySetupPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-//		switch (event.getGameState())
-//		{
-//			// set the highlighting off if login screen shows up
-//			case LOGIN_SCREEN:
-//				highlightDifference = false;
-//				break;
-//
-//			// set highlighting
-//			case LOGGED_IN:
-//				highlightDifference = config.getHighlightDifferences();
-//				break;
-//
-//			default:
-//				return;
-//		}
+		switch (event.getGameState())
+		{
+			// set the highlighting off if login screen shows up
+			case LOGGED_IN:
+			case HOPPING:
+			case CONNECTION_LOST:
+				allowHighlighting = true;
+				break;
+
+			default:
+				allowHighlighting = false;
+				break;
+		}
+
+		panel.highlightDifferences(InventoryID.INVENTORY);
+		panel.highlightDifferences(InventoryID.EQUIPMENT);
 	}
 
 	public ArrayList<InventorySetupItem> getNormalizedContainer(final InventoryID id)

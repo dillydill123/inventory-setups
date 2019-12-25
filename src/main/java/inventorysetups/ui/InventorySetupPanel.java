@@ -276,7 +276,6 @@ public class InventorySetupPanel extends JPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				// TODO update setup and config
 				inventorySetup.setStackDifference(!inventorySetup.isStackDifference());
 				updateToggleHighlightLabel();
 				plugin.updateConfig();
@@ -301,7 +300,6 @@ public class InventorySetupPanel extends JPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				// TODO update setup and config
 				inventorySetup.setVariationDifference(!inventorySetup.isVariationDifference());
 				updateToggleHighlightLabel();
 				plugin.updateConfig();
@@ -492,7 +490,6 @@ public class InventorySetupPanel extends JPanel
 		colorPicker.setLocation(getLocationOnScreen());
 		colorPicker.setOnColorChange(c ->
 		{
-			// TODO update color
 			inventorySetup.setHighlightColor(c);
 			updateHighlightColorLabel();
 		});
