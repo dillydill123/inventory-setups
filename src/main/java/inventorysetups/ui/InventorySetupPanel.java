@@ -146,7 +146,7 @@ public class InventorySetupPanel extends JPanel
 		VIEW_SETUP_ICON = new ImageIcon(viewImg);
 		VIEW_SETUP_HOVER_ICON = new ImageIcon(viewImgHover);
 
-		final BufferedImage exportImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/visible_icon.png");
+		final BufferedImage exportImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/export_icon.png");
 		final BufferedImage exportImgHover = ImageUtil.luminanceOffset(exportImg, -150);
 		EXPORT_ICON = new ImageIcon(exportImg);
 		EXPORT_HOVER_ICON = new ImageIcon(exportImgHover);
