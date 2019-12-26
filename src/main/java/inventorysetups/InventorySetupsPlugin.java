@@ -31,6 +31,7 @@ import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
@@ -51,6 +52,8 @@ import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -116,7 +119,8 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
-		allowHighlighting = false;
+		// TODO also update readme
+		determineIfHighlightingAllowed(client.getGameState());
 
 		loadConfig();
 		panel.rebuild();
@@ -159,13 +163,7 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, DEFAULT_HIGHLIGHT_COLOR, false, false, false);
-			SwingUtilities.invokeLater(() ->
-			{
-				inventorySetups.add(invSetup);
-				panel.rebuild();
-
-				updateConfig();
-			});
+			addInventorySetupClientThread(invSetup);
 		});
 	}
 
@@ -236,20 +234,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		switch (event.getGameState())
-		{
-			// set the highlighting off if login screen shows up
-			case LOGGED_IN:
-			case HOPPING:
-			case CONNECTION_LOST:
-				allowHighlighting = true;
-				break;
-
-			default:
-				allowHighlighting = false;
-				break;
-		}
-
+		determineIfHighlightingAllowed(event.getGameState());
 		panel.highlightDifferences(InventoryID.INVENTORY);
 		panel.highlightDifferences(InventoryID.EQUIPMENT);
 	}
@@ -295,10 +280,51 @@ public class InventorySetupsPlugin extends Plugin
 		return newContainer;
 	}
 
+	public void exportSetup(final InventorySetup setup)
+	{
+		final Gson gson = new Gson();
+		final String json = gson.toJson(setup);
+		final StringSelection contents = new StringSelection(json);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
+	}
+
+	public void importSetup(final String setup)
+	{
+		try
+		{
+			final Gson gson = new Gson();
+			Type type = new TypeToken<InventorySetup>() {
+
+			}.getType();
+			final InventorySetup newSetup  = gson.fromJson(setup, type);
+			addInventorySetupClientThread(newSetup);
+		}
+		catch (Exception e)
+		{
+			// TODO add error message here
+		}
+	}
+
 	@Override
 	public void shutDown()
 	{
 		clientToolbar.removeNavigation(navButton);
+	}
+
+	private void determineIfHighlightingAllowed(final GameState gameState)
+	{
+		allowHighlighting =  gameState == GameState.LOGGED_IN;
+	}
+
+	private void addInventorySetupClientThread(final InventorySetup newSetup)
+	{
+		SwingUtilities.invokeLater(() ->
+		{
+			inventorySetups.add(newSetup);
+			panel.rebuild();
+
+			updateConfig();
+		});
 	}
 
 }
