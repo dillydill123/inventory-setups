@@ -81,12 +81,14 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	}
 
 	@Override
-	public void highlightDifferences(final ArrayList<InventorySetupItem> currInventory, final InventorySetup inventorySetup)
+	public void highlightSlotDifferences(final ArrayList<InventorySetupItem> currInventory, final InventorySetup inventorySetup)
 	{
 
 		final ArrayList<InventorySetupItem> inventoryToCheck = inventorySetup.getInventory();
 
 		assert currInventory.size() == inventoryToCheck.size() : "size mismatch";
+
+		isHighlighted = true;
 
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
@@ -97,9 +99,17 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	@Override
 	public void resetSlotColors()
 	{
+		// Don't waste time resetting if we were never highlighted to begin with
+		if (!isHighlighted)
+		{
+			return;
+		}
+
 		for (InventorySetupSlot inventorySlot : inventorySlots)
 		{
 			inventorySlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		}
+
+		isHighlighted = false;
 	}
 }

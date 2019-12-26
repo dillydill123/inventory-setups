@@ -99,9 +99,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	private NavigationButton navButton;
 
-	@Getter
-	private boolean allowHighlighting;
-
 	@Override
 	public void startUp()
 	{
@@ -118,9 +115,6 @@ public class InventorySetupsPlugin extends Plugin
 				.build();
 
 		clientToolbar.addNavigation(navButton);
-
-		// TODO also update readme
-		determineIfHighlightingAllowed(client.getGameState());
 
 		loadConfig();
 		panel.rebuild();
@@ -234,7 +228,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		determineIfHighlightingAllowed(event.getGameState());
 		panel.highlightDifferences(InventoryID.INVENTORY);
 		panel.highlightDifferences(InventoryID.EQUIPMENT);
 	}
@@ -286,22 +279,42 @@ public class InventorySetupsPlugin extends Plugin
 		final String json = gson.toJson(setup);
 		final StringSelection contents = new StringSelection(json);
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
+
+		JOptionPane.showMessageDialog(panel,
+				"Setup data was copied to clipboard.",
+				"Export Setup Succeeded",
+				JOptionPane.PLAIN_MESSAGE);
 	}
 
-	public void importSetup(final String setup)
+	public void importSetup()
 	{
 		try
 		{
+			final String setup = JOptionPane.showInputDialog(panel,
+					"Enter setup data",
+					"Import New Setup",
+					JOptionPane.PLAIN_MESSAGE);
+
+			// cancel button was clicked
+			if (setup == null)
+			{
+				return;
+			}
+
 			final Gson gson = new Gson();
 			Type type = new TypeToken<InventorySetup>() {
 
 			}.getType();
+
 			final InventorySetup newSetup  = gson.fromJson(setup, type);
 			addInventorySetupClientThread(newSetup);
 		}
 		catch (Exception e)
 		{
-			// TODO add error message here
+			JOptionPane.showMessageDialog(panel,
+					"Invalid setup data",
+					"Import Setup Failed",
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -311,9 +324,9 @@ public class InventorySetupsPlugin extends Plugin
 		clientToolbar.removeNavigation(navButton);
 	}
 
-	private void determineIfHighlightingAllowed(final GameState gameState)
+	public boolean isHighlightingAllowed()
 	{
-		allowHighlighting =  gameState == GameState.LOGGED_IN;
+		return client.getGameState() == GameState.LOGGED_IN;
 	}
 
 	private void addInventorySetupClientThread(final InventorySetup newSetup)

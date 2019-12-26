@@ -56,7 +56,6 @@ import java.awt.image.BufferedImage;
 
 public class InventorySetupPanel extends JPanel
 {
-	//private static final int DEFAULT_FILL_OPACITY = 75;
 
 	private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
 			BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
@@ -88,6 +87,9 @@ public class InventorySetupPanel extends JPanel
 	private static final ImageIcon DELETE_ICON;
 	private static final ImageIcon DELETE_HOVER_ICON;
 
+	private static final ImageIcon EXPORT_ICON;
+	private static final ImageIcon EXPORT_HOVER_ICON;
+
 	private final InventorySetupsPlugin plugin;
 	private final InventorySetupPluginPanel panel;
 	private final InventorySetup inventorySetup;
@@ -97,14 +99,13 @@ public class InventorySetupPanel extends JPanel
 	private final JLabel variationDifferenceIndicator = new JLabel();
 	private final JLabel highlightIndicator = new JLabel();
 	private final JLabel viewSetupLabel = new JLabel();
+	private final JLabel exportLabel = new JLabel();
 	private final JLabel deleteLabel = new JLabel();
 
 	private final FlatTextField nameInput = new FlatTextField();
 	private final JLabel save = new JLabel("Save");
 	private final JLabel cancel = new JLabel("Cancel");
 	private final JLabel rename = new JLabel("Rename");
-
-	//private boolean visible;
 
 	static
 	{
@@ -145,16 +146,21 @@ public class InventorySetupPanel extends JPanel
 		VIEW_SETUP_ICON = new ImageIcon(viewImg);
 		VIEW_SETUP_HOVER_ICON = new ImageIcon(viewImgHover);
 
+		final BufferedImage exportImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/visible_icon.png");
+		final BufferedImage exportImgHover = ImageUtil.luminanceOffset(exportImg, -150);
+		EXPORT_ICON = new ImageIcon(exportImg);
+		EXPORT_HOVER_ICON = new ImageIcon(exportImgHover);
+
 		final BufferedImage deleteImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/delete_icon.png");
 		DELETE_ICON = new ImageIcon(deleteImg);
 		DELETE_HOVER_ICON = new ImageIcon(ImageUtil.luminanceOffset(deleteImg, -100));
 	}
 
-	InventorySetupPanel(InventorySetupsPlugin plugin, InventorySetupPluginPanel panel, InventorySetup inventorySetup)
+	InventorySetupPanel(InventorySetupsPlugin plugin, InventorySetupPluginPanel panel, InventorySetup invSetup)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
-		this.inventorySetup = inventorySetup;
+		this.inventorySetup = invSetup;
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -383,7 +389,6 @@ public class InventorySetupPanel extends JPanel
 			public void mousePressed(MouseEvent mouseEvent)
 			{
 				panel.setCurrentInventorySetup(inventorySetup);
-				plugin.updateConfig();
 			}
 
 			@Override
@@ -396,6 +401,29 @@ public class InventorySetupPanel extends JPanel
 			public void mouseExited(MouseEvent mouseEvent)
 			{
 				viewSetupLabel.setIcon(VIEW_SETUP_ICON);
+			}
+		});
+
+		exportLabel.setToolTipText("Export setup");
+		exportLabel.setIcon(EXPORT_ICON);
+		exportLabel.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				plugin.exportSetup(inventorySetup);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent mouseEvent)
+			{
+				exportLabel.setIcon(EXPORT_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent mouseEvent)
+			{
+				exportLabel.setIcon(EXPORT_ICON);
 			}
 		});
 
@@ -430,6 +458,7 @@ public class InventorySetupPanel extends JPanel
 		});
 
 		rightActions.add(viewSetupLabel);
+		rightActions.add(exportLabel);
 		rightActions.add(deleteLabel);
 
 		bottomContainer.add(leftActions, BorderLayout.WEST);

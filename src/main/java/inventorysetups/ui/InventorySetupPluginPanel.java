@@ -50,6 +50,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.nio.Buffer;
 import java.util.ArrayList;
 
 public class InventorySetupPluginPanel extends PluginPanel
@@ -59,6 +60,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private static ImageIcon ADD_HOVER_ICON;
 	private static ImageIcon BACK_ICON;
 	private static ImageIcon BACK_HOVER_ICON;
+	private static ImageIcon IMPORT_ICON;
+	private static ImageIcon IMPORT_HOVER_ICON;
 
 	private static String MAIN_TITLE;
 
@@ -67,8 +70,12 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final JPanel overviewPanel;
 	private final JScrollPane contentWrapperPane;
 
+	private final JPanel overviewTopRightButtonsPanel;
+	private final JPanel setupTopRightButtonsPanel;
+
 	private final JLabel title;
 	private final JLabel addMarker;
+	private final JLabel importMarker;
 	private final JLabel backMarker;
 
 	private final InventorySetupContainerPanel invPanel;
@@ -83,6 +90,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 		final BufferedImage addIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/add_icon.png");
 		ADD_ICON = new ImageIcon(addIcon);
 		ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
+
+		final BufferedImage importIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/add_icon.png");
+		IMPORT_ICON = new ImageIcon(importIcon);
+		IMPORT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(importIcon, 0.53f));
 
 		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/back_arrow_icon.png");
 		BACK_ICON = new ImageIcon(ImageUtil.flipImage(backIcon, true, false));
@@ -107,8 +118,27 @@ public class InventorySetupPluginPanel extends PluginPanel
 		title.setText(MAIN_TITLE);
 		title.setForeground(Color.WHITE);
 
+		this.importMarker = new JLabel(IMPORT_ICON);
+		importMarker.setToolTipText("Import a new inventory setup");
+		importMarker.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				plugin.importSetup();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				importMarker.setIcon(IMPORT_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				importMarker.setIcon(IMPORT_ICON);
+			}
+		});
+
 		// setup the add marker (+ sign in the top right)
-		addMarker = new JLabel(ADD_ICON);
+		this.addMarker = new JLabel(ADD_ICON);
 		addMarker.setToolTipText("Add a new inventory setup");
 		addMarker.addMouseListener(new MouseAdapter()
 		{
@@ -140,9 +170,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 			{
 				noSetupsPanel.setVisible(false);
 				invEqPanel.setVisible(false);
-				backMarker.setVisible(false);
 				overviewPanel.setVisible(true);
-				addMarker.setVisible(true);
+				overviewTopRightButtonsPanel.setVisible(true);
+				setupTopRightButtonsPanel.setVisible(false);
 				title.setText(MAIN_TITLE);
 			}
 
@@ -159,13 +189,20 @@ public class InventorySetupPluginPanel extends PluginPanel
 			}
 		});
 
-		// the panel on the top right that holds the add and delete buttons
+		this.overviewTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+		overviewTopRightButtonsPanel.add(importMarker);
+		overviewTopRightButtonsPanel.add(addMarker);
+
+		this.setupTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+		setupTopRightButtonsPanel.add(backMarker);
+
+		// the panel on the top right that holds the buttons
 		final JPanel markersPanel = new JPanel();
 		markersPanel.setLayout(new FlowLayout());
-		markersPanel.add(addMarker);
-		markersPanel.add(backMarker);
-		backMarker.setVisible(false);
-		addMarker.setVisible(true);
+		markersPanel.add(overviewTopRightButtonsPanel);
+		markersPanel.add(setupTopRightButtonsPanel);
+		overviewTopRightButtonsPanel.setVisible(true);
+		setupTopRightButtonsPanel.setVisible(false);
 
 		// the top panel that has the title and the buttons
 		final JPanel titleAndMarkersPanel = new JPanel();
@@ -258,29 +295,17 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invPanel.setSlots(inventorySetup);
 		eqpPanel.setSlots(inventorySetup);
 
-		// Check if we need to highlight differences
-		if (currentSelectedSetup.isHighlightDifference())
-		{
-			final ArrayList<InventorySetupItem> normInv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
-			final ArrayList<InventorySetupItem> normEqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-
-			invPanel.highlightDifferences(normInv, inventorySetup);
-			eqpPanel.highlightDifferences(normEqp, inventorySetup);
-		}
-		else
-		{
-			invPanel.resetSlotColors();
-			eqpPanel.resetSlotColors();
-		}
-
-		addMarker.setVisible(false);
-		backMarker.setVisible(true);
+		overviewTopRightButtonsPanel.setVisible(false);
+		setupTopRightButtonsPanel.setVisible(true);
 
 		invEqPanel.setVisible(true);
 		noSetupsPanel.setVisible(false);
 		overviewPanel.setVisible(false);
 
 		title.setText(inventorySetup.getName());
+
+		highlightDifferences(InventoryID.INVENTORY);
+		highlightDifferences(InventoryID.EQUIPMENT);
 
 		// reset scrollbar back to top
 		this.contentWrapperPane.getVerticalScrollBar().setValue(0);
@@ -292,8 +317,18 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	public void highlightDifferences(final InventoryID type)
 	{
-		if (!invEqPanel.isVisible() || !currentSelectedSetup.isHighlightDifference())
+		// if the panel itself isn't visible, don't waste time doing any highlighting logic
+		if (!invEqPanel.isVisible())
 		{
+			return;
+		}
+
+		// if the panel is visible, check if highlighting is enabled on the setup and globally
+		// if any of the two, reset the slots so they aren't highlighted
+		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
+		{
+			invPanel.resetSlotColors();
+			eqpPanel.resetSlotColors();
 			return;
 		}
 
@@ -301,11 +336,11 @@ public class InventorySetupPluginPanel extends PluginPanel
 		switch (type)
 		{
 			case INVENTORY:
-				invPanel.highlightDifferences(container, currentSelectedSetup);
+				invPanel.highlightSlotDifferences(container, currentSelectedSetup);
 				break;
 
 			case EQUIPMENT:
-				eqpPanel.highlightDifferences(container, currentSelectedSetup);
+				eqpPanel.highlightSlotDifferences(container, currentSelectedSetup);
 				break;
 		}
 	}

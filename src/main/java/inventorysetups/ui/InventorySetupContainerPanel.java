@@ -42,12 +42,15 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected ItemManager itemManager;
 
+	protected boolean isHighlighted;
+
 	private final InventorySetupsPlugin plugin;
 
 	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
 	{
 		this.itemManager = itemManager;
 		this.plugin = plugin;
+		this.isHighlighted = false;
 		JPanel containerPanel = new JPanel();
 
 		final JPanel containerSlotsPanel = new JPanel();
@@ -96,13 +99,6 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		// important note: do not use item names for comparisons
 		// they are all empty to avoid clientThread usage when highlighting
 
-		// if the plugin says we cannot highlight, do not highlight
-		if(!plugin.isAllowHighlighting())
-		{
-			containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			return;
-		}
-
 		// first check if stack differences are enabled and compare quantities
 		if (setup.isStackDifference() && currItem.getQuantity() != savedItem.getQuantity())
 		{
@@ -133,7 +129,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	abstract public void setupContainerPanel(final JPanel containerSlotsPanel);
 
-	abstract public void highlightDifferences(final ArrayList<InventorySetupItem> currContainer, final InventorySetup inventorySetup);
+	abstract public void highlightSlotDifferences(final ArrayList<InventorySetupItem> currContainer, final InventorySetup inventorySetup);
 
 	abstract public void setSlots(final InventorySetup setup);
 

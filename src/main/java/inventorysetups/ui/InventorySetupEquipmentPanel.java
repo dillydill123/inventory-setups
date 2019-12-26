@@ -93,11 +93,13 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 	}
 
 	@Override
-	public void highlightDifferences(final ArrayList<InventorySetupItem> currEquipment, final InventorySetup inventorySetup)
+	public void highlightSlotDifferences(final ArrayList<InventorySetupItem> currEquipment, final InventorySetup inventorySetup)
 	{
 		final ArrayList<InventorySetupItem> equipToCheck = inventorySetup.getEquipment();
 
 		assert currEquipment.size() == equipToCheck.size() : "size mismatch";
+
+		isHighlighted = true;
 
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
@@ -109,9 +111,17 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 	@Override
 	public void resetSlotColors()
 	{
+		// Don't waste time resetting if we were never highlighted to begin with
+		if (!isHighlighted)
+		{
+			return;
+		}
+
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			equipmentSlots.get(slot).setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		}
+
+		isHighlighted = false;
 	}
 }
