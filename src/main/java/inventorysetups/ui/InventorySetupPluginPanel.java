@@ -251,6 +251,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 		add(northAnchoredPanel, BorderLayout.NORTH);
 		add(this.contentWrapperPane, BorderLayout.CENTER);
 
+		// make sure the invEq panel isn't visible upon startup
+		invEqPanel.setVisible(false);
+
 	}
 
 	public void init()

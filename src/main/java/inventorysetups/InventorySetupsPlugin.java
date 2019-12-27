@@ -26,6 +26,7 @@ package inventorysetups;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.jna.platform.win32.Advapi32Util;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import joptsimple.internal.Strings;
 import lombok.Getter;
@@ -37,9 +38,14 @@ import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.client.account.AccountSession;
+import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.SessionClose;
+import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -77,6 +83,9 @@ public class InventorySetupsPlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private SessionManager sessionManager;
+
+	@Inject
 	private ItemManager itemManager;
 
 	@Inject
@@ -103,8 +112,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void startUp()
 	{
 
-		panel = new InventorySetupPluginPanel(this, itemManager);
-
+		this.panel = new InventorySetupPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
 
 		navButton = NavigationButton.builder()
@@ -116,27 +124,29 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
-		loadConfig();
-		panel.rebuild();
-
 		// load all the inventory setups from the config file
 		// not needed anymore? Suddenly causing issues but before was needed
-//		clientThread.invokeLater(() ->
-//		{
-//			switch (client.getGameState())
-//			{
-//				case STARTING:
-//				case UNKNOWN:
-//				case HOPPING:
-//					return false;
-//			}
-//
-//			loadConfig();
-//			panel.rebuild();
-//			return true;
-//		});
+		clientThread.invokeLater(() ->
+		{
+			switch (client.getGameState())
+			{
+				case STARTING:
+				case UNKNOWN:
+					return false;
+			}
+
+			loadConfig();
+
+			SwingUtilities.invokeLater(() ->
+			{
+				panel.rebuild();
+			});
+
+			return true;
+		});
 
 	}
+
 
 	public void addInventorySetup()
 	{
@@ -170,12 +180,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void updateConfig()
 	{
-		if (inventorySetups.isEmpty())
-		{
-			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY);
-			return;
-		}
-
 		final Gson gson = new Gson();
 		final String json = gson.toJson(inventorySetups);
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
@@ -203,8 +207,43 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				inventorySetups = new ArrayList<>();
 			}
-
 		}
+	}
+
+	@Subscribe
+	public void onSessionOpen(SessionOpen event)
+	{
+		final AccountSession session = sessionManager.getAccountSession();
+		if (session != null && session.getUsername() != null)
+		{
+			// config will have changed to new account, load it up
+			clientThread.invokeLater(() ->
+			{
+				loadConfig();
+				SwingUtilities.invokeLater(() ->
+				{
+					panel.rebuild();
+				});
+
+				return true;
+			});
+		}
+	}
+
+	@Subscribe
+	public void onSessionClose(SessionClose event)
+	{
+		// config will have changed to local file
+		clientThread.invokeLater(() ->
+		{
+			loadConfig();
+			SwingUtilities.invokeLater(() ->
+			{
+				panel.rebuild();
+			});
+
+			return true;
+		});
 	}
 
 	@Subscribe
