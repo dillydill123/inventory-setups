@@ -26,7 +26,6 @@ package inventorysetups;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sun.jna.platform.win32.Advapi32Util;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import joptsimple.internal.Strings;
 import lombok.Getter;
@@ -43,7 +42,6 @@ import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
