@@ -123,7 +123,6 @@ public class InventorySetupsPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 
 		// load all the inventory setups from the config file
-		// not needed anymore? Suddenly causing issues but before was needed
 		clientThread.invokeLater(() ->
 		{
 			switch (client.getGameState())

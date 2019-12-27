@@ -24,3 +24,11 @@ To import a setup, click on the green import button in the top right. It will pr
 ### Support and Suggestions
 
 If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
+
+### Changelog
+
+#### 1.0
+Plugin added
+
+#### 1.1
+Import and export feature added
