@@ -71,6 +71,11 @@ public class InventorySetupPanel extends JPanel
 	private static final ImageIcon NO_TOGGLE_HIGHLIGHT_ICON;
 	private static final ImageIcon NO_TOGGLE_HIGHLIGHT_HOVER_ICON;
 
+	private static final ImageIcon BANK_FILTER_ICON;
+	private static final ImageIcon BANK_FILTER_HOVER_ICON;
+	private static final ImageIcon NO_BANK_FILTER_ICON;
+	private static final ImageIcon NO_BANK_FILTER_HOVER_ICON;
+
 	private static final ImageIcon STACK_DIFFERENCE_ICON;
 	private static final ImageIcon STACK_DIFFERENCE_HOVER_ICON;
 	private static final ImageIcon NO_STACK_DIFFERENCE_ICON;
@@ -97,6 +102,7 @@ public class InventorySetupPanel extends JPanel
 	private final JLabel highlightColorIndicator = new JLabel();
 	private final JLabel stackDifferenceIndicator = new JLabel();
 	private final JLabel variationDifferenceIndicator = new JLabel();
+	private final JLabel bankFilterIndicator = new JLabel();
 	private final JLabel highlightIndicator = new JLabel();
 	private final JLabel viewSetupLabel = new JLabel();
 	private final JLabel exportLabel = new JLabel();
@@ -124,6 +130,14 @@ public class InventorySetupPanel extends JPanel
 
 		NO_VARIATION_DIFFERENCE_ICON = new ImageIcon(variationHover);
 		NO_VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(variationHover, -100));
+
+		final BufferedImage bankFilterImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/delete_icon.png");
+		final BufferedImage bankFilterHover = ImageUtil.luminanceOffset(bankFilterImg, -150);
+		BANK_FILTER_ICON = new ImageIcon(bankFilterImg);
+		BANK_FILTER_HOVER_ICON = new ImageIcon(bankFilterHover);
+
+		NO_BANK_FILTER_ICON = new ImageIcon(bankFilterHover);
+		NO_BANK_FILTER_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(bankFilterHover, -100));
 
 		final BufferedImage highlightToggleImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/highlight_icon.png");
 		final BufferedImage highlightToggleHover = ImageUtil.luminanceOffset(highlightToggleImg, -150);
@@ -272,10 +286,8 @@ public class InventorySetupPanel extends JPanel
 		bottomContainer.setBorder(new EmptyBorder(8, 0, 8, 0));
 		bottomContainer.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-		leftActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
 		stackDifferenceIndicator.setToolTipText("Enable highlighting for stack differences");
+		stackDifferenceIndicator.setIcon(inventorySetup.isStackDifference() ? STACK_DIFFERENCE_ICON : NO_STACK_DIFFERENCE_ICON);
 		stackDifferenceIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -301,6 +313,7 @@ public class InventorySetupPanel extends JPanel
 		});
 
 		variationDifferenceIndicator.setToolTipText("Enable highlighting for variation differences");
+		variationDifferenceIndicator.setIcon(inventorySetup.isVariationDifference() ? VARIATION_DIFFERENCE_ICON : NO_VARIATION_DIFFERENCE_ICON);
 		variationDifferenceIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -325,7 +338,29 @@ public class InventorySetupPanel extends JPanel
 			}
 		});
 
+		bankFilterIndicator.setToolTipText("Enable bank filtering");
+		bankFilterIndicator.setIcon(inventorySetup.isFilterBank() ? BANK_FILTER_ICON : NO_BANK_FILTER_ICON);
+		bankFilterIndicator.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				inventorySetup.setFilterBank(!inventorySetup.isFilterBank());
+				bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
+				updateBankFilterLabel();
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				bankFilterIndicator.setIcon(inventorySetup.isFilterBank() ? BANK_FILTER_HOVER_ICON : NO_BANK_FILTER_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				bankFilterIndicator.setIcon(inventorySetup.isFilterBank() ? BANK_FILTER_ICON : NO_BANK_FILTER_ICON);
+			}
+		});
+
 		highlightIndicator.setToolTipText("Enable highlighting");
+		highlightIndicator.setIcon(inventorySetup.isHighlightDifference() ? TOGGLE_HIGHLIGHT_ICON : NO_TOGGLE_HIGHLIGHT_ICON);
 		highlightIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -352,6 +387,7 @@ public class InventorySetupPanel extends JPanel
 		});
 
 		highlightColorIndicator.setToolTipText("Edit highlight color");
+		highlightColorIndicator.setIcon(inventorySetup.isHighlightDifference() ? HIGHLIGHT_COLOR_ICON : NO_HIGHLIGHT_COLOR_ICON);
 		highlightColorIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -373,8 +409,12 @@ public class InventorySetupPanel extends JPanel
 			}
 		});
 
+		JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+		leftActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
 		leftActions.add(stackDifferenceIndicator);
 		leftActions.add(variationDifferenceIndicator);
+		leftActions.add(bankFilterIndicator);
 		leftActions.add(highlightIndicator);
 		leftActions.add(highlightColorIndicator);
 
@@ -427,8 +467,8 @@ public class InventorySetupPanel extends JPanel
 			}
 		});
 
-		deleteLabel.setIcon(DELETE_ICON);
 		deleteLabel.setToolTipText("Delete setup");
+		deleteLabel.setIcon(DELETE_ICON);
 		deleteLabel.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -502,6 +542,11 @@ public class InventorySetupPanel extends JPanel
 	private void updateVariationDifferenceLabel()
 	{
 		variationDifferenceIndicator.setIcon(inventorySetup.isVariationDifference() ? VARIATION_DIFFERENCE_ICON : NO_VARIATION_DIFFERENCE_ICON);
+	}
+
+	private void updateBankFilterLabel()
+	{
+		bankFilterIndicator.setIcon(inventorySetup.isFilterBank() ? BANK_FILTER_ICON : NO_BANK_FILTER_ICON);
 	}
 
 	private void updateToggleHighlightLabel()

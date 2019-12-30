@@ -194,9 +194,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
 
-		// TODO, check if filtering is enabled for setup before continuing
-
-		if (currentSelectedSetup != null)
+		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
 		{
 			bankSearch.search(InputType.SEARCH, INV_SEARCH + currentSelectedSetup.getName(), true);
 		}
