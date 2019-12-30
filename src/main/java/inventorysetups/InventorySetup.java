@@ -59,4 +59,9 @@ public class InventorySetup
 	@Getter
 	@Setter
 	private boolean highlightDifference;
+
+	@Getter
+	@Setter
+	private boolean filterBank;
+
 }

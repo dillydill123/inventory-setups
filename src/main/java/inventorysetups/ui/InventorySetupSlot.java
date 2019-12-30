@@ -24,6 +24,8 @@
  */
 package inventorysetups.ui;
 
+import lombok.Getter;
+import net.runelite.api.InventoryID;
 import net.runelite.client.util.AsyncBufferedImage;
 
 import javax.swing.JLabel;
@@ -34,17 +36,20 @@ import java.awt.Dimension;
 
 public class InventorySetupSlot extends JPanel
 {
-
+	@Getter
 	private final JLabel imageLabel;
 
-	public InventorySetupSlot(Color color)
+	@Getter
+	private final InventoryID inventoryID;
+
+	public InventorySetupSlot(Color color, InventoryID id)
 	{
-		imageLabel = new JLabel();
+		this.inventoryID = id;
+		this.imageLabel = new JLabel();
 		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
 		setPreferredSize(new Dimension(46, 42));
 		setBackground(color);
 		add(imageLabel);
-
 	}
 
 	public void setImageLabel(String toolTip, AsyncBufferedImage itemImage)
@@ -63,7 +68,5 @@ public class InventorySetupSlot extends JPanel
 		validate();
 		repaint();
 	}
-
-
 
 }

@@ -26,10 +26,10 @@ package inventorysetups.ui;
 
 import net.runelite.api.EquipmentInventorySlot;
 
+import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JPanel;
@@ -41,9 +41,9 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 {
 	private HashMap<EquipmentInventorySlot, InventorySetupSlot> equipmentSlots;
 
-	InventorySetupEquipmentPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
+	InventorySetupEquipmentPanel(final ItemManager itemManager, final InventorySetupPluginPanel panel)
 	{
-		super(itemManager, plugin, "Equipment");
+		super(itemManager, panel, "Equipment");
 	}
 
 	@Override
@@ -52,25 +52,27 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 		this.equipmentSlots = new HashMap<>();
 		for (EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
-			equipmentSlots.put(slot, new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR));
+			final InventorySetupSlot setupSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventoryID.EQUIPMENT);
+			super.addMouseListenerToSlot(setupSlot);
+			equipmentSlots.put(slot, setupSlot);
 		}
 
 		final GridLayout gridLayout = new GridLayout(5, 3, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
 		// add the grid layouts, including invisible ones
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.HEAD));
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.CAPE));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMULET));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMMO));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.WEAPON));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.BODY));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.SHIELD));
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.LEGS));
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.GLOVES));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.BOOTS));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.RING));

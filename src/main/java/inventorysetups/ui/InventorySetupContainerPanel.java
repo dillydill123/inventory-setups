@@ -24,16 +24,18 @@
  */
 package inventorysetups.ui;
 
+import net.runelite.api.InventoryID;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 
@@ -44,12 +46,12 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected boolean isHighlighted;
 
-	private final InventorySetupsPlugin plugin;
+	private final InventorySetupPluginPanel panel;
 
-	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
+	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupPluginPanel panel, String captionText)
 	{
 		this.itemManager = itemManager;
-		this.plugin = plugin;
+		this.panel = panel;
 		this.isHighlighted = false;
 		JPanel containerPanel = new JPanel();
 
@@ -72,6 +74,34 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		containerPanel.add(containerSlotsPanel, BorderLayout.CENTER);
 
 		add(containerPanel);
+	}
+
+	protected void addMouseListenerToSlot(final InventorySetupSlot slot)
+	{
+
+		JPopupMenu popupMenu = new JPopupMenu();
+		JMenuItem updateFromContainer = new JMenuItem("Update Slot from " + (slot.getInventoryID() == InventoryID.INVENTORY ? "Inventory" : "Equipment"));
+		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
+		popupMenu.add(updateFromContainer);
+		popupMenu.add(updateFromSearch);
+
+		updateFromContainer.addActionListener(e ->
+		{
+			System.out.printf("Update From Container Slot %s was clicked\n", slot.getImageLabel().getToolTipText());
+
+			// TODO tell plugin panel to do refresh function?
+		});
+
+		updateFromSearch.addActionListener(e ->
+		{
+			System.out.printf("Update Slot From Search %s was clicked\n", slot.getImageLabel().getToolTipText());
+		});
+
+		// both the panel and image label need adapters
+		// because the image will cover the entire panel
+		slot.setComponentPopupMenu(popupMenu);
+		slot.getImageLabel().setComponentPopupMenu(popupMenu);
+
 	}
 
 	void setContainerSlot(int index, final InventorySetupSlot containerSlot, final ArrayList<InventorySetupItem> items)

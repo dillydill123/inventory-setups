@@ -27,6 +27,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
 import inventorysetups.InventorySetupsPlugin;
+import lombok.Getter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -80,6 +81,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final InventorySetupContainerPanel invPanel;
 	private final InventorySetupContainerPanel eqpPanel;
 
+	@Getter
 	private InventorySetup currentSelectedSetup;
 
 	private final InventorySetupsPlugin plugin;
@@ -106,8 +108,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		super(false);
 		this.currentSelectedSetup = null;
 		this.plugin = plugin;
-		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin);
-		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, plugin);
+		this.invPanel = new InventorySetupInventoryPanel(itemManager, this);
+		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, this);
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
@@ -173,6 +175,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 				overviewTopRightButtonsPanel.setVisible(true);
 				setupTopRightButtonsPanel.setVisible(false);
 				title.setText(MAIN_TITLE);
+				currentSelectedSetup = null;
+				plugin.resetBankSearch();
 			}
 
 			@Override
@@ -311,6 +315,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		// reset scrollbar back to top
 		this.contentWrapperPane.getVerticalScrollBar().setValue(0);
+
+		plugin.doBankSearch();
 
 		validate();
 		repaint();

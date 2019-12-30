@@ -34,9 +34,14 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.ScriptCallbackEvent;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.vars.InputType;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.account.AccountSession;
 import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
@@ -45,8 +50,10 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.banktags.tabs.BankSearch;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -71,8 +78,9 @@ import java.util.ArrayList;
 public class InventorySetupsPlugin extends Plugin
 {
 
-	private static final String CONFIG_GROUP = "inventorysetups";
-	private static final String CONFIG_KEY = "setups";
+	public static final String CONFIG_GROUP = "inventorysetups";
+	public static final String CONFIG_KEY = "setups";
+	public static final String INV_SEARCH = "inv:";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final Color DEFAULT_HIGHLIGHT_COLOR = Color.RED;
@@ -105,6 +113,9 @@ public class InventorySetupsPlugin extends Plugin
 	private ArrayList<InventorySetup> inventorySetups;
 
 	private NavigationButton navButton;
+
+	@Inject
+	private BankSearch bankSearch;
 
 	@Override
 	public void startUp()
@@ -163,9 +174,74 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, DEFAULT_HIGHLIGHT_COLOR, false, false, false);
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, DEFAULT_HIGHLIGHT_COLOR, false, false, false, false);
 			addInventorySetupClientThread(invSetup);
 		});
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		if (event.getGroupId() != WidgetID.BANK_GROUP_ID)
+		{
+			return;
+		}
+
+		doBankSearch();
+	}
+
+	public void doBankSearch()
+	{
+		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
+
+		// TODO, check if filtering is enabled for setup before continuing
+
+		if (currentSelectedSetup != null)
+		{
+			bankSearch.search(InputType.SEARCH, INV_SEARCH + currentSelectedSetup.getName(), true);
+		}
+	}
+
+	public void resetBankSearch()
+	{
+		bankSearch.reset(true);
+	}
+
+	@Subscribe
+	public void onScriptCallbackEvent(ScriptCallbackEvent event)
+	{
+		String eventName = event.getEventName();
+
+		int[] intStack = client.getIntStack();
+		String[] stringStack = client.getStringStack();
+		int intStackSize = client.getIntStackSize();
+		int stringStackSize = client.getStringStackSize();
+
+		if (eventName.equals("bankSearchFilter"))
+		{
+			String search = stringStack[stringStackSize - 1];
+
+			if (search.startsWith(INV_SEARCH))
+			{
+				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+
+				// TODO, consider variation mapping?
+
+				if (currentSetup != null)
+				{
+					int itemId = intStack[intStackSize - 1];
+					if (containsItem(currentSetup, itemId))
+					{
+						// return true
+						intStack[intStackSize - 2] = 1;
+					}
+					else
+					{
+						intStack[intStackSize - 2] = 0;
+					}
+				}
+			}
+		}
 	}
 
 	public void removeInventorySetup(final InventorySetup setup)
@@ -358,6 +434,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void shutDown()
 	{
 		clientToolbar.removeNavigation(navButton);
+		// TODO bank search shut down or anything similar?
 	}
 
 	public boolean isHighlightingAllowed()
@@ -374,6 +451,60 @@ public class InventorySetupsPlugin extends Plugin
 
 			updateConfig();
 		});
+	}
+
+	private boolean containsItem(final InventorySetup setup, int itemID)
+	{
+
+		// So place holders will show up in the bank.
+		itemID = itemManager.canonicalize(itemID);
+
+		// don't variation map unless it's been selected
+		if (!setup.isVariationDifference())
+		{
+			itemID = ItemVariationMapping.map(itemID);
+		}
+
+		for (final InventorySetupItem item : setup.getInventory())
+		{
+
+			if (itemID == getCorrectID(setup.isVariationDifference(), item.getId()))
+			{
+				return true;
+			}
+		}
+
+		for (final InventorySetupItem item : setup.getEquipment())
+		{
+			if (itemID == getCorrectID(setup.isVariationDifference(), item.getId()))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private int getCorrectID(boolean variationDifference, int itemId)
+	{
+
+		// if variation difference isn't selected, get the canonical ID
+		if (!variationDifference)
+		{
+			return ItemVariationMapping.map(itemManager.canonicalize(itemId));
+		}
+
+		int idToCompare = itemId;
+
+		// if it is selected, make sure we aren't showing note form
+		ItemComposition comp = itemManager.getItemComposition(itemId);
+		if (comp.getNote() != -1)
+		{
+			idToCompare = comp.getLinkedNoteId();
+		}
+
+		return idToCompare;
+
 	}
 
 }
