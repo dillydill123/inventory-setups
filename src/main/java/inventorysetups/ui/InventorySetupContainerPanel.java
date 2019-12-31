@@ -24,6 +24,7 @@
  */
 package inventorysetups.ui;
 
+import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.InventoryID;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
@@ -46,12 +47,12 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected boolean isHighlighted;
 
-	private final InventorySetupPluginPanel panel;
+	private final InventorySetupsPlugin plugin;
 
-	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupPluginPanel panel, String captionText)
+	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
 	{
 		this.itemManager = itemManager;
-		this.panel = panel;
+		this.plugin = plugin;
 		this.isHighlighted = false;
 		JPanel containerPanel = new JPanel();
 
@@ -87,14 +88,12 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 		updateFromContainer.addActionListener(e ->
 		{
-			System.out.printf("Update From Container Slot %s was clicked\n", slot.getImageLabel().getToolTipText());
-
-			// TODO tell plugin panel to do refresh function?
+			plugin.updateSlotFromContainer(slot);
 		});
 
 		updateFromSearch.addActionListener(e ->
 		{
-			System.out.printf("Update Slot From Search %s was clicked\n", slot.getImageLabel().getToolTipText());
+			plugin.updateSlotFromSearch(slot);
 		});
 
 		// both the panel and image label need adapters
@@ -104,9 +103,22 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	}
 
-	void setContainerSlot(int index, final InventorySetupSlot containerSlot, final ArrayList<InventorySetupItem> items)
+	protected void setContainerSlot(int index, final InventorySetupSlot containerSlot, final InventorySetup setup)
 	{
-		if (index >= items.size() || items.get(index).getId() == -1)
+		assert containerSlot.getInventoryID() == InventoryID.INVENTORY || containerSlot.getInventoryID() == InventoryID.EQUIPMENT : "Wrong Inventory ID";
+
+		ArrayList<InventorySetupItem> items = setup.getInventory();
+
+		if (containerSlot.getInventoryID() == InventoryID.EQUIPMENT)
+		{
+			items = setup.getEquipment();
+		}
+
+		assert index < items.size() : "Index Off Array";
+
+		containerSlot.setParentSetup(setup);
+
+		if (items.get(index).getId() == -1)
 		{
 			containerSlot.setImageLabel(null, null);
 			return;
@@ -124,7 +136,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		containerSlot.setImageLabel(toolTip, itemImg);
 	}
 
-	void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupItem savedItem, InventorySetupItem currItem, final InventorySetupSlot containerSlot)
+	protected void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupItem savedItem, InventorySetupItem currItem, final InventorySetupSlot containerSlot)
 	{
 		// important note: do not use item names for comparisons
 		// they are all empty to avoid clientThread usage when highlighting

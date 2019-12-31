@@ -27,6 +27,7 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import inventorysetups.ui.InventorySetupPluginPanel;
+import inventorysetups.ui.InventorySetupSlot;
 import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,9 @@ import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
+import net.runelite.client.game.chatbox.ChatboxItemSearch;
+import net.runelite.client.game.chatbox.ChatboxPanelManager;
+import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.banktags.tabs.BankSearch;
@@ -116,6 +120,14 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Inject
 	private BankSearch bankSearch;
+
+	@Inject
+	private ChatboxItemSearch itemSearch;
+
+	@Inject
+	private ChatboxPanelManager chatboxPanelManager;
+
+	private ChatboxTextInput searchInput;
 
 	@Override
 	public void startUp()
@@ -223,8 +235,6 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
 
-				// TODO, consider variation mapping?
-
 				if (currentSetup != null)
 				{
 					int itemId = intStack[intStackSize - 1];
@@ -242,6 +252,99 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
+	public void updateSlotFromContainer(final InventorySetupSlot slot)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"You must be logged in to search.",
+					"Cannot Search for Item",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+
+		// must be invoked on client thread to get the name
+		clientThread.invokeLater(() ->
+		{
+			final ArrayList<InventorySetupItem> playerContainer = getNormalizedContainer(slot.getInventoryID());
+			final InventorySetupItem newItem = playerContainer.get(slot.getIndexInSlot());
+			container.set(slot.getIndexInSlot(), newItem);
+			updateConfig();
+			panel.refreshCurrentSetup();
+		});
+
+	}
+
+	public void updateSlotFromSearch(final InventorySetupSlot slot)
+	{
+
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"You must be logged in to search.",
+					"Cannot Search for Item",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+
+		itemSearch
+			.tooltipText("Set slot to")
+			.onItemSelected((itemId) ->
+			{
+				clientThread.invokeLater(() ->
+				{
+					// if it's stackable, ask for a quantity
+					int canonicalId = itemManager.canonicalize(itemId);
+					if (itemManager.getItemComposition(canonicalId).isStackable())
+					{
+						searchInput = chatboxPanelManager.openTextInput("Enter amount")
+							.addCharValidator(arg -> arg >= 48 && arg <= 57) // only allow numbers (ASCII)
+							.onDone((input) ->
+							{
+								clientThread.invokeLater(() ->
+								{
+									// TODO check
+									String inputParsed = input;
+									if (inputParsed.length() > 10)
+									{
+										inputParsed = inputParsed.substring(0, 10);
+									}
+
+									int quantity = 1;
+
+									// limit to max int value
+									long quantityLong = Long.parseLong(inputParsed);
+									quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
+									quantity = Math.max(quantity, 1);
+
+									final String itemName = itemManager.getItemComposition(itemId).getName();
+									final InventorySetupItem newItem = new InventorySetupItem(itemId, itemName, quantity);
+
+									container.set(slot.getIndexInSlot(), newItem);
+									updateConfig();
+									panel.refreshCurrentSetup();
+
+								});
+							}).build();
+					}
+					else
+					{
+						final String itemName = itemManager.getItemComposition(itemId).getName();
+						final InventorySetupItem newItem = new InventorySetupItem(itemId, itemName, 1);
+						container.set(slot.getIndexInSlot(), newItem);
+						updateConfig();
+						panel.refreshCurrentSetup();
+					}
+
+				});
+			})
+			.build();
+	}
+
 	public void removeInventorySetup(final InventorySetup setup)
 	{
 		inventorySetups.remove(setup);
@@ -254,31 +357,6 @@ public class InventorySetupsPlugin extends Plugin
 		final Gson gson = new Gson();
 		final String json = gson.toJson(inventorySetups);
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
-	}
-
-	private void loadConfig()
-	{
-		// serialize the internal data structure from the json in the configuration
-		final String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
-		if (Strings.isNullOrEmpty(json))
-		{
-			inventorySetups = new ArrayList<>();
-		}
-		else
-		{
-			try
-			{
-				final Gson gson = new Gson();
-				Type type = new TypeToken<ArrayList<InventorySetup>>() {
-
-				}.getType();
-				inventorySetups = gson.fromJson(json, type);
-			}
-			catch (Exception e)
-			{
-				inventorySetups = new ArrayList<>();
-			}
-		}
 	}
 
 	@Subscribe
@@ -422,7 +500,7 @@ public class InventorySetupsPlugin extends Plugin
 		catch (Exception e)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"Invalid setup data",
+					"Invalid setup data.",
 					"Import Setup Failed",
 					JOptionPane.ERROR_MESSAGE);
 		}
@@ -432,12 +510,54 @@ public class InventorySetupsPlugin extends Plugin
 	public void shutDown()
 	{
 		clientToolbar.removeNavigation(navButton);
-		// TODO bank search shut down or anything similar?
+		bankSearch.reset(true);
 	}
 
 	public boolean isHighlightingAllowed()
 	{
 		return client.getGameState() == GameState.LOGGED_IN;
+	}
+
+
+
+	private ArrayList<InventorySetupItem> getContainerFromSlot(final InventorySetupSlot slot)
+	{
+		ArrayList<InventorySetupItem> container = slot.getParentSetup().getInventory();
+
+		if (slot.getInventoryID() == InventoryID.EQUIPMENT)
+		{
+			container = slot.getParentSetup().getEquipment();
+		}
+
+		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
+		assert slot.getIndexInSlot() < container.size() : "Index is greater than container size";
+
+		return container;
+	}
+
+	private void loadConfig()
+	{
+		// serialize the internal data structure from the json in the configuration
+		final String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
+		if (Strings.isNullOrEmpty(json))
+		{
+			inventorySetups = new ArrayList<>();
+		}
+		else
+		{
+			try
+			{
+				final Gson gson = new Gson();
+				Type type = new TypeToken<ArrayList<InventorySetup>>() {
+
+				}.getType();
+				inventorySetups = gson.fromJson(json, type);
+			}
+			catch (Exception e)
+			{
+				inventorySetups = new ArrayList<>();
+			}
+		}
 	}
 
 	private void addInventorySetupClientThread(final InventorySetup newSetup)

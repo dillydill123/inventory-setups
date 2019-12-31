@@ -428,7 +428,7 @@ public class InventorySetupPanel extends JPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				panel.setCurrentInventorySetup(inventorySetup);
+				panel.setCurrentInventorySetup(inventorySetup, true);
 			}
 
 			@Override
