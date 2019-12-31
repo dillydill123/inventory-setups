@@ -5,7 +5,6 @@ import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Range;
 
 @ConfigGroup("inventorysetupplugin")
 public interface InventorySetupConfig extends Config
@@ -13,7 +12,8 @@ public interface InventorySetupConfig extends Config
 	@ConfigItem(
 		keyName = "highlightStackDiff",
 		name = "Highlight Stack Differences",
-		description = "Configures whether or not to highlight differences in stack quantities"
+		description = "Configures whether or not to highlight differences in stack quantities",
+		position = 1
 	)
 	default boolean highlightStackDiff()
 	{
@@ -23,7 +23,8 @@ public interface InventorySetupConfig extends Config
 	@ConfigItem(
 		keyName = "highlightVarDiff",
 		name = "Highlight Variation Differences",
-		description = "Configures whether or not to highlight variations in similar equipment"
+		description = "Configures whether or not to highlight variations in similar equipment",
+		position = 2
 	)
 	default boolean highlightVarDiff()
 	{
@@ -31,9 +32,21 @@ public interface InventorySetupConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "filter",
+		name = "Filter bank",
+		description = "Configures whether or not to filter your bank to show items in your setup",
+		position = 3
+	)
+	default boolean filter()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 		keyName = "highlight",
 		name = "Highlight by default",
-		description = "Configures whether or not to highlight differences in equipment"
+		description = "Configures whether or not to highlight differences in equipment",
+		position = 4
 	)
 	default boolean highlight()
 	{
@@ -44,7 +57,8 @@ public interface InventorySetupConfig extends Config
 	@ConfigItem(
 		keyName = "highlightColor",
 		name = "Color of highlights",
-		description = "Configures the default highlighting color"
+		description = "Configures the default highlighting color",
+		position = 5
 	)
 	default Color highlightColor()
 	{

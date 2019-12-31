@@ -26,6 +26,7 @@ package inventorysetups;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import joptsimple.internal.Strings;
 import lombok.Getter;
@@ -104,6 +105,9 @@ public class InventorySetupsPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private InventorySetupConfig config;
+
+	@Inject
 	@Getter
 	private ColorPickerManager colorPickerManager;
 
@@ -116,6 +120,12 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Inject
 	private BankSearch bankSearch;
+
+	@Provides
+	InventorySetupConfig getConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(InventorySetupConfig.class);
+	}
 
 	@Override
 	public void startUp()
@@ -174,7 +184,7 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, DEFAULT_HIGHLIGHT_COLOR, false, false, false, false);
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, config.highlightColor(), config.highlightStackDiff(), config.highlightVarDiff(), config.highlight(), config.filter());
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -269,7 +279,8 @@ public class InventorySetupsPlugin extends Plugin
 			try
 			{
 				final Gson gson = new Gson();
-				Type type = new TypeToken<ArrayList<InventorySetup>>() {
+				Type type = new TypeToken<ArrayList<InventorySetup>>()
+				{
 
 				}.getType();
 				inventorySetups = gson.fromJson(json, type);
@@ -412,7 +423,8 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			final Gson gson = new Gson();
-			Type type = new TypeToken<InventorySetup>() {
+			Type type = new TypeToken<InventorySetup>()
+			{
 
 			}.getType();
 
