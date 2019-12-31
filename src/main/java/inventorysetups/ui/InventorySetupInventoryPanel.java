@@ -24,6 +24,7 @@
  */
 package inventorysetups.ui;
 
+import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
@@ -42,9 +43,9 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 	private ArrayList<InventorySetupSlot> inventorySlots;
 
-	InventorySetupInventoryPanel(final ItemManager itemManager, final InventorySetupPluginPanel panel)
+	InventorySetupInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
-		super(itemManager, panel, "Inventory");
+		super(itemManager, plugin, "Inventory");
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		this.inventorySlots = new ArrayList<>();
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
-			inventorySlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventoryID.INVENTORY));
+			inventorySlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventoryID.INVENTORY, i));
 		}
 
 		int numRows = (NUM_INVENTORY_ITEMS + ITEMS_PER_ROW - 1) / ITEMS_PER_ROW;
@@ -68,16 +69,13 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	@Override
 	public void setSlots(final InventorySetup setup)
 	{
-		ArrayList<InventorySetupItem> inventory = setup.getInventory();
-
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
-			super.setContainerSlot(i, inventorySlots.get(i), inventory);
+			super.setContainerSlot(i, inventorySlots.get(i), setup);
 		}
 
 		validate();
 		repaint();
-
 	}
 
 	@Override

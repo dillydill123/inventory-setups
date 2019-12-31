@@ -108,8 +108,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		super(false);
 		this.currentSelectedSetup = null;
 		this.plugin = plugin;
-		this.invPanel = new InventorySetupInventoryPanel(itemManager, this);
-		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, this);
+		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin);
+		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
@@ -295,7 +295,15 @@ public class InventorySetupPluginPanel extends PluginPanel
 		repaint();
 	}
 
-	public void setCurrentInventorySetup(final InventorySetup inventorySetup)
+	public void refreshCurrentSetup()
+	{
+		if (currentSelectedSetup != null)
+		{
+			setCurrentInventorySetup(currentSelectedSetup, false);
+		}
+	}
+
+	public void setCurrentInventorySetup(final InventorySetup inventorySetup, boolean resetScrollBar)
 	{
 		currentSelectedSetup = inventorySetup;
 		invPanel.setSlots(inventorySetup);
@@ -313,8 +321,11 @@ public class InventorySetupPluginPanel extends PluginPanel
 		highlightDifferences(InventoryID.INVENTORY);
 		highlightDifferences(InventoryID.EQUIPMENT);
 
-		// reset scrollbar back to top
-		this.contentWrapperPane.getVerticalScrollBar().setValue(0);
+		if (resetScrollBar)
+		{
+			// reset scrollbar back to top
+			this.contentWrapperPane.getVerticalScrollBar().setValue(0);
+		}
 
 		plugin.doBankSearch();
 

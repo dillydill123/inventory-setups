@@ -131,7 +131,7 @@ public class InventorySetupPanel extends JPanel
 		NO_VARIATION_DIFFERENCE_ICON = new ImageIcon(variationHover);
 		NO_VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(variationHover, -100));
 
-		final BufferedImage bankFilterImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/delete_icon.png");
+		final BufferedImage bankFilterImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/filter_icon.png");
 		final BufferedImage bankFilterHover = ImageUtil.luminanceOffset(bankFilterImg, -150);
 		BANK_FILTER_ICON = new ImageIcon(bankFilterImg);
 		BANK_FILTER_HOVER_ICON = new ImageIcon(bankFilterHover);
@@ -428,7 +428,7 @@ public class InventorySetupPanel extends JPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				panel.setCurrentInventorySetup(inventorySetup);
+				panel.setCurrentInventorySetup(inventorySetup, true);
 			}
 
 			@Override

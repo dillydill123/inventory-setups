@@ -24,6 +24,7 @@
  */
 package inventorysetups.ui;
 
+import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.EquipmentInventorySlot;
 
 import net.runelite.api.InventoryID;
@@ -41,9 +42,9 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 {
 	private HashMap<EquipmentInventorySlot, InventorySetupSlot> equipmentSlots;
 
-	InventorySetupEquipmentPanel(final ItemManager itemManager, final InventorySetupPluginPanel panel)
+	InventorySetupEquipmentPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
-		super(itemManager, panel, "Equipment");
+		super(itemManager, plugin, "Equipment");
 	}
 
 	@Override
@@ -52,7 +53,7 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 		this.equipmentSlots = new HashMap<>();
 		for (EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
-			final InventorySetupSlot setupSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventoryID.EQUIPMENT);
+			final InventorySetupSlot setupSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventoryID.EQUIPMENT, slot.getSlotIdx());
 			super.addMouseListenerToSlot(setupSlot);
 			equipmentSlots.put(slot, setupSlot);
 		}
@@ -61,18 +62,18 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 		containerSlotsPanel.setLayout(gridLayout);
 
 		// add the grid layouts, including invisible ones
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT, -1));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.HEAD));
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT, -1));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.CAPE));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMULET));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMMO));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.WEAPON));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.BODY));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.SHIELD));
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT, -1));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.LEGS));
-		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT));
+		containerSlotsPanel.add(new InventorySetupSlot(ColorScheme.DARK_GRAY_COLOR, InventoryID.EQUIPMENT, -1));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.GLOVES));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.BOOTS));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.RING));
@@ -82,12 +83,10 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 	@Override
 	public void setSlots(final InventorySetup setup)
 	{
-		final ArrayList<InventorySetupItem> equipment = setup.getEquipment();
-
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			int i = slot.getSlotIdx();
-			super.setContainerSlot(i, equipmentSlots.get(slot), equipment);
+			super.setContainerSlot(i, equipmentSlots.get(slot), setup);
 		}
 
 		validate();
