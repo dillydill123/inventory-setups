@@ -167,7 +167,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-
 	public void addInventorySetup()
 	{
 		final String name = JOptionPane.showInputDialog(panel,
@@ -186,7 +185,7 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, DEFAULT_HIGHLIGHT_COLOR, false, false, false, false);
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, DEFAULT_HIGHLIGHT_COLOR, false, false, false, false, false);
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -299,21 +298,23 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int finalId = itemManager.canonicalize(itemId);
 
-					// NOTE: the itemSearch shows items from skill guides which can be selected
-					// And it does not show equipment variants for worn items that reduce weight.
-					// Variation mapping would fix this issue for the inventory,
-					// but then it would cause rings, potions, etc to be the same when it may not be desired
-					// If a worn item is selected for the equipment, it will not be the correct itemID since
-					// only the inventory variant and the skill guide variants show up in the search
-					// If there is a way to figure out if and item is a skill guide item, then the inventory
-					// issue can be solved. For equipment, you would also need a way to get the equipment variant
-					// of a worn item that has weight reduction from the inventory counterpart
-					//
-					// For now, it's possible that the user will pick a skill guide item, and it will cause highlighting
-					// This only occurs if variation differences are turned on. Weight reducing equipment
-					// will also be highlighted if selected for equipment if variation differences are turned on.
+					/*
+					 NOTE: the itemSearch shows items from skill guides which can be selected
+					 And it does not show equipment variants for worn items that reduce weight.
+					 Variation mapping would fix this issue for the inventory,
+					 but then it would cause rings, potions, etc to be the same when it may not be desired
+					 If a worn item is selected for the equipment, it will not be the correct itemID since
+					 only the inventory variant and the skill guide variants show up in the search
+					 If there is a way to figure out if and item is a skill guide item, then the inventory
+					 issue can be solved. For equipment, you would also need a way to get the equipment variant
+					 of a worn item that has weight reduction from the inventory counterpart
 
-					// if it's stackable, ask for a quantity
+					 For now, it's possible that the user will pick a skill guide item, and it will cause highlighting
+					 This only occurs if variation differences are turned on. Weight reducing equipment
+					 will also be highlighted if selected for equipment if variation differences are turned on.
+					*/
+
+					// if the item is stackable, ask for a quantity
 					if (itemManager.getItemComposition(finalId).isStackable())
 					{
 						final int finalIdCopy = finalId;

@@ -90,8 +90,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 		isHighlighted = true;
 
-		// TODO, add logic for determining what type of highlighting to do
-		if (true)
+		if (inventorySetup.isUnorderedHighlight())
 		{
 			doUnorderedHighlighting(currInventory, inventorySetup);
 			return;
