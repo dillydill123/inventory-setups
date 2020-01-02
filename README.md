@@ -19,7 +19,7 @@ One of the many buttons on each inventory setup panel is a bank filtering option
 
 ### Highlighting
 
-You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup. They are represented by most of the buttons on the left side of the setup panel.
+You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup. They are represented by most of the buttons on the left side of the setup panel. These options do influence what items appear in the bank when filtering is active.
 
 ##### Stack Difference
 
@@ -27,7 +27,7 @@ Enabling this will cause a slot to become highlighted if the stack size of the i
 
 ##### Variation Difference
 
-Enabling this will cause a slot to become highlighted if the item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed, even if it is very close. An example of this are rings of dueling. By default, a ring of dueling(8) will be considered the same as a ring of dueling(1). Enabling variation difference will make them distinct for the purposes of highlighting.
+Enabling this will cause a slot to become highlighted if the item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed, even if it is very close. An example of this are rings of dueling. By default, a ring of dueling(8) will be considered the same as a ring of dueling(1). Enabling variation difference will make them distinct for the purposes of highlighting. This is useful if you are using bank filtering and you don't want all doses of potions to show up when gearing up.
 
 ##### Unordered Highlighting
 
@@ -38,6 +38,10 @@ Enabling this will cause highlighting to ignore order and only highlight items i
 It is possible to import and export inventory setups. This is useful if you would like to share your setups with your friends. To export an inventory setup, click on the export button next to the view setup button. This will copy the setup to your clipboard. You can then send this to your friends.
 
 To import a setup, click on the green import button in the top right. It will prompt for a setup. Paste the setup and confirm. The new setup will be added to the bottom of the list of setups.
+
+### Configuration Settings
+
+In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color.
 
 ### Support and Suggestions
 
@@ -52,4 +56,4 @@ Plugin added
 Import and export feature added
 
 ##### 1.2
-Bank filtering, unordered highlighting, and update individual slots added.
+Settings, bank filtering, unordered highlighting, and update individual slots added.
