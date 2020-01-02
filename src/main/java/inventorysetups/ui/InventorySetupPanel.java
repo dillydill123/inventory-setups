@@ -147,7 +147,7 @@ public class InventorySetupPanel extends JPanel
 		NO_VARIATION_DIFFERENCE_ICON = new ImageIcon(variationHover);
 		NO_VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(variationHover, -100));
 
-		final BufferedImage unorderedHighlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/delete_icon.png");
+		final BufferedImage unorderedHighlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/unordered_highlight_icon.png");
 		final BufferedImage unorderedHighlightHover = ImageUtil.luminanceOffset(unorderedHighlightImg, -150);
 		UNORDERED_HIGHLIGHT_ICON = new ImageIcon(unorderedHighlightImg);
 		UNORDERED_HIGHLIGHT_HOVER_ICON = new ImageIcon(unorderedHighlightHover);
