@@ -257,8 +257,8 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You must be logged in to search.",
-					"Cannot Search for Item",
+					"You must be logged in to update from " + (slot.getInventoryID() == InventoryID.INVENTORY ? "inventory." : "equipment."),
+					"Cannot Update Item",
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
@@ -297,17 +297,32 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				clientThread.invokeLater(() ->
 				{
+					int finalId = itemManager.canonicalize(itemId);
+
+					// NOTE: the itemSearch shows items from skill guides which can be selected
+					// And it does not show equipment variants for worn items that reduce weight.
+					// Variation mapping would fix this issue for the inventory,
+					// but then it would cause rings, potions, etc to be the same when it may not be desired
+					// If a worn item is selected for the equipment, it will not be the correct itemID since
+					// only the inventory variant and the skill guide variants show up in the search
+					// If there is a way to figure out if and item is a skill guide item, then the inventory
+					// issue can be solved. For equipment, you would also need a way to get the equipment variant
+					// of a worn item that has weight reduction from the inventory counterpart
+					//
+					// For now, it's possible that the user will pick a skill guide item, and it will cause highlighting
+					// This only occurs if variation differences are turned on. Weight reducing equipment
+					// will also be highlighted if selected for equipment if variation differences are turned on.
+
 					// if it's stackable, ask for a quantity
-					int canonicalId = itemManager.canonicalize(itemId);
-					if (itemManager.getItemComposition(canonicalId).isStackable())
+					if (itemManager.getItemComposition(finalId).isStackable())
 					{
+						final int finalIdCopy = finalId;
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
 							.addCharValidator(arg -> arg >= 48 && arg <= 57) // only allow numbers (ASCII)
 							.onDone((input) ->
 							{
 								clientThread.invokeLater(() ->
 								{
-									// TODO check
 									String inputParsed = input;
 									if (inputParsed.length() > 10)
 									{
@@ -321,8 +336,8 @@ public class InventorySetupsPlugin extends Plugin
 									quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
 									quantity = Math.max(quantity, 1);
 
-									final String itemName = itemManager.getItemComposition(itemId).getName();
-									final InventorySetupItem newItem = new InventorySetupItem(itemId, itemName, quantity);
+									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
+									final InventorySetupItem newItem = new InventorySetupItem(finalIdCopy, itemName, quantity);
 
 									container.set(slot.getIndexInSlot(), newItem);
 									updateConfig();
@@ -333,8 +348,8 @@ public class InventorySetupsPlugin extends Plugin
 					}
 					else
 					{
-						final String itemName = itemManager.getItemComposition(itemId).getName();
-						final InventorySetupItem newItem = new InventorySetupItem(itemId, itemName, 1);
+						final String itemName = itemManager.getItemComposition(finalId).getName();
+						final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1);
 						container.set(slot.getIndexInSlot(), newItem);
 						updateConfig();
 						panel.refreshCurrentSetup();
