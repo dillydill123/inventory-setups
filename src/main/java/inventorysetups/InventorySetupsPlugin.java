@@ -67,7 +67,6 @@ import net.runelite.client.util.ImageUtil;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
@@ -88,7 +87,6 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String INV_SEARCH = "inv:";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
-	private static final Color DEFAULT_HIGHLIGHT_COLOR = Color.RED;
 
 	@Inject
 	private Client client;
@@ -195,7 +193,13 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, name, config.highlightColor(), config.highlightStackDiff(), config.highlightVarDiff(), config.highlight(), config.filter());
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, name,
+													config.highlightColor(),
+													config.highlightStackDifference(),
+													config.highlightVariationDifference(),
+													config.highlightDifference(),
+													config.bankFilter(),
+													config.highlightUnorderedDifference());
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -383,32 +387,6 @@ public class InventorySetupsPlugin extends Plugin
 		final Gson gson = new Gson();
 		final String json = gson.toJson(inventorySetups);
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
-	}
-
-	private void loadConfig()
-	{
-		// serialize the internal data structure from the json in the configuration
-		final String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
-		if (Strings.isNullOrEmpty(json))
-		{
-			inventorySetups = new ArrayList<>();
-		}
-		else
-		{
-			try
-			{
-				final Gson gson = new Gson();
-				Type type = new TypeToken<ArrayList<InventorySetup>>()
-				{
-
-				}.getType();
-				inventorySetups = gson.fromJson(json, type);
-			}
-			catch (Exception e)
-			{
-				inventorySetups = new ArrayList<>();
-			}
-		}
 	}
 
 	@Subscribe
@@ -601,7 +579,8 @@ public class InventorySetupsPlugin extends Plugin
 			try
 			{
 				final Gson gson = new Gson();
-				Type type = new TypeToken<ArrayList<InventorySetup>>() {
+				Type type = new TypeToken<ArrayList<InventorySetup>>()
+				{
 
 				}.getType();
 				inventorySetups = gson.fromJson(json, type);

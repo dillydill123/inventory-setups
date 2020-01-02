@@ -1,3 +1,27 @@
+/*
+ * Copyright (c) 2019, dillydill123 <https://github.com/dillydill123>
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package inventorysetups;
 
 import java.awt.Color;
@@ -6,58 +30,69 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("inventorysetupplugin")
+@ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
 public interface InventorySetupConfig extends Config
 {
 	@ConfigItem(
-		keyName = "highlightStackDiff",
-		name = "Highlight Stack Differences",
-		description = "Configures whether or not to highlight differences in stack quantities",
+		keyName = "bankFilter",
+		name = "Default Filter Bank",
+		description = "Configures the default setting for bank filtering in new setups",
 		position = 1
 	)
-	default boolean highlightStackDiff()
+	default boolean bankFilter()
 	{
 		return false;
 	}
 
 	@ConfigItem(
-		keyName = "highlightVarDiff",
-		name = "Highlight Variation Differences",
-		description = "Configures whether or not to highlight variations in similar equipment",
+		keyName = "highlightStackDifference",
+		name = "Default Highlight Stack Difference",
+		description = "Configures the default setting for highlighting stack differences in new setups",
+		position = 1
+	)
+	default boolean highlightStackDifference()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "highlightVarianceDifference",
+		name = "Default Highlight Variation Difference",
+		description = "Configures the default setting for highlighting variations in new setups",
 		position = 2
 	)
-	default boolean highlightVarDiff()
+	default boolean highlightVariationDifference()
 	{
 		return false;
 	}
 
 	@ConfigItem(
-		keyName = "filter",
-		name = "Filter bank",
-		description = "Configures whether or not to filter your bank to show items in your setup",
-		position = 3
+			keyName = "highlightUnorderedDifference",
+			name = "Default Highlight Unordered Difference",
+			description = "Configures the default setting for unordered highlighting in new setups",
+			position = 2
 	)
-	default boolean filter()
+	default boolean highlightUnorderedDifference()
 	{
 		return false;
 	}
 
 	@ConfigItem(
-		keyName = "highlight",
-		name = "Highlight by default",
-		description = "Configures whether or not to highlight differences in equipment",
+		keyName = "highlightDifference",
+		name = "Default Highlight",
+		description = "Configures the default setting for highlighting differences in new setups",
 		position = 4
 	)
-	default boolean highlight()
+	default boolean highlightDifference()
 	{
-		return true;
+		return false;
 	}
 
 	@Alpha
 	@ConfigItem(
 		keyName = "highlightColor",
-		name = "Color of highlights",
-		description = "Configures the default highlighting color",
+		name = "Default Color of Highlighting",
+		description = "Configures the default highlighting color for new setups",
 		position = 5
 	)
 	default Color highlightColor()
