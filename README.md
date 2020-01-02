@@ -7,13 +7,31 @@ To start, turn on the plugin and click on the equipment panel icon on the sideba
 
 To create a new setup, click on the green plus button in the top right. It will prompt for a name, and then will take your current inventory and equipment and create a new setup.
 
-You can view the setup by clicking on the eye icon, and you can go back to the overview panel by clicking on the back arrow in the top right.
+You can view the setup by clicking on the view setups button (the eye icon), and you can go back to the overview panel by clicking on the back arrow in the top right.
+
+### Editing a Setup
+
+When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot. If you select from search, it will open a search menu where you can search for the item, and then ask for a quantity if applicable. These two options are only available when logged in.
+
+### Bank Filtering
+
+One of the many buttons on each inventory setup panel is a bank filtering option. Enabling this will cause the bank to only show the items in your setup when being viewed. This is very similar to the bank tags plugin.
 
 ### Highlighting
 
-There are highlighting options for each setup. They are represented by the four buttons on the left side of the setup panel. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed.
+You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup. They are represented by most of the buttons on the left side of the setup panel.
 
-There are also options to change when highlighting will occur. The first option is stack difference. Enabling this will cause a slot to become highlighted if the item in the player's inventory or equipment does match the corresponding slot in the setup being viewed, but the stack size doesn't match. The second option is variation difference. Enabling this will cause a slot to become highlighted if the item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed, even if it is very close. An example of this are rings of dueling. By default, a ring of dueling(8) will be considered the same as a ring of dueling(1). Enabling the variation difference will make them distinct for the purposes of highlighting.
+##### Stack Difference
+
+Enabling this will cause a slot to become highlighted if the stack size of the item in the player's inventory or equipment does not match the corresponding slot in the setup being viewed. This might be useful if you are at the chaos altar training prayer, and you want to be sure you don't bring more gp than needed to unnote the bones.
+
+##### Variation Difference
+
+Enabling this will cause a slot to become highlighted if the item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed, even if it is very close. An example of this are rings of dueling. By default, a ring of dueling(8) will be considered the same as a ring of dueling(1). Enabling variation difference will make them distinct for the purposes of highlighting.
+
+##### Unordered Highlighting
+
+Enabling this will cause highlighting to ignore order and only highlight items in the setup that are not present in the player's inventory. This is useful if you don't care about order and just want to make sure your inventory has all the items in the selected setup. It will not inform the player if they have extra items in their inventory that are not in the setup.
 
 ### Exporting and Importing Setups
 
@@ -27,8 +45,11 @@ If you need help, have any suggestions, or notice any bugs, you can comment them
 
 ### Changelog
 
-#### 1.0
+##### 1.0
 Plugin added
 
-#### 1.1
+##### 1.1
 Import and export feature added
+
+##### 1.2
+Bank filtering, unordered highlighting, and update individual slots added.

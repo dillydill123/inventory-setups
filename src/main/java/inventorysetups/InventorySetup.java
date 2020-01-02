@@ -64,4 +64,8 @@ public class InventorySetup
 	@Setter
 	private boolean filterBank;
 
+	@Getter
+	@Setter
+	private boolean unorderedHighlight;
+
 }

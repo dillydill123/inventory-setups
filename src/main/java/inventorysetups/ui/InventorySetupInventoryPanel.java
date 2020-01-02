@@ -25,15 +25,18 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsPlugin;
+import javafx.util.Pair;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
+import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 {
@@ -81,12 +84,17 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	@Override
 	public void highlightSlotDifferences(final ArrayList<InventorySetupItem> currInventory, final InventorySetup inventorySetup)
 	{
-
 		final ArrayList<InventorySetupItem> inventoryToCheck = inventorySetup.getInventory();
 
 		assert currInventory.size() == inventoryToCheck.size() : "size mismatch";
 
 		isHighlighted = true;
+
+		if (inventorySetup.isUnorderedHighlight())
+		{
+			doUnorderedHighlighting(currInventory, inventorySetup);
+			return;
+		}
 
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
@@ -109,5 +117,65 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		}
 
 		isHighlighted = false;
+	}
+
+	private void doUnorderedHighlighting(final ArrayList<InventorySetupItem> currInventory, final InventorySetup inventorySetup)
+	{
+		HashMap<Pair<Integer, Integer>, Integer> currInvMap = new HashMap<>();
+
+		for (final InventorySetupItem item : currInventory)
+		{
+			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
+			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
+			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
+
+			Pair<Integer, Integer> key = new Pair<Integer, Integer>(itemId, quantity);
+			int count = currInvMap.get(key) == null ? 0 : currInvMap.get(key);
+			currInvMap.put(key, count + 1);
+		}
+
+		final ArrayList<InventorySetupItem> setupInv = inventorySetup.getInventory();
+		for (int i = 0; i < setupInv.size(); i++)
+		{
+			final InventorySetupItem item = setupInv.get(i);
+
+			/*
+			 don't count empty spaces. We only want to show items that are missing, not "extra items"
+			 that would be indicated by highlighting empty slots.
+			*/
+			if (item.getId() == -1)
+			{
+				inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
+				continue;
+			}
+
+			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
+			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
+			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
+
+			Pair<Integer, Integer> key = new Pair<>(itemId, quantity);
+			Integer currentCount = currInvMap.get(key);
+
+			// current inventory doesn't have this item, highlight
+			if (currentCount == null)
+			{
+				inventorySlots.get(i).setBackground(inventorySetup.getHighlightColor());
+				continue;
+			}
+
+			if (currentCount == 1)
+			{
+				currInvMap.remove(key);
+			}
+			else
+			{
+				currInvMap.put(key, currentCount - 1);
+			}
+
+			inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+		}
+
+
 	}
 }
