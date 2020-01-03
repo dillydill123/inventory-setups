@@ -38,6 +38,7 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
@@ -221,6 +222,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
 		{
+			client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
 			bankSearch.search(InputType.SEARCH, INV_SEARCH + currentSelectedSetup.getName(), true);
 		}
 	}
@@ -548,8 +550,6 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		return client.getGameState() == GameState.LOGGED_IN;
 	}
-
-
 
 	private ArrayList<InventorySetupItem> getContainerFromSlot(final InventorySetupSlot slot)
 	{

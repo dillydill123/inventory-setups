@@ -121,19 +121,23 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		this.importMarker = new JLabel(IMPORT_ICON);
 		importMarker.setToolTipText("Import a new inventory setup");
-		importMarker.addMouseListener(new MouseAdapter() {
+		importMarker.addMouseListener(new MouseAdapter()
+		{
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void mouseClicked(MouseEvent e)
+			{
 				plugin.importSetup();
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {
+			public void mouseEntered(MouseEvent e)
+			{
 				importMarker.setIcon(IMPORT_HOVER_ICON);
 			}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
+			public void mouseExited(MouseEvent e)
+			{
 				importMarker.setIcon(IMPORT_ICON);
 			}
 		});
