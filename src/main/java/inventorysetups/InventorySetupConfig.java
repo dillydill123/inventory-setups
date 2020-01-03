@@ -91,8 +91,8 @@ public interface InventorySetupConfig extends Config
 	@Alpha
 	@ConfigItem(
 		keyName = "highlightColor",
-		name = "Default Color of Highlighting",
-		description = "Configures the default highlighting color for new setups",
+		name = "Default Highlight Color",
+		description = "Configures the default highlighting color in new setups",
 		position = 5
 	)
 	default Color highlightColor()

@@ -25,7 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsPlugin;
-import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
@@ -121,7 +121,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 	private void doUnorderedHighlighting(final ArrayList<InventorySetupItem> currInventory, final InventorySetup inventorySetup)
 	{
-		HashMap<Pair<Integer, Integer>, Integer> currInvMap = new HashMap<>();
+		HashMap<ImmutablePair<Integer, Integer>, Integer> currInvMap = new HashMap<>();
 
 		for (final InventorySetupItem item : currInventory)
 		{
@@ -129,7 +129,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
 			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
 
-			Pair<Integer, Integer> key = new Pair<Integer, Integer>(itemId, quantity);
+			ImmutablePair<Integer, Integer> key = new ImmutablePair<>(itemId, quantity);
 			int count = currInvMap.get(key) == null ? 0 : currInvMap.get(key);
 			currInvMap.put(key, count + 1);
 		}
@@ -153,7 +153,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
 			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
 
-			Pair<Integer, Integer> key = new Pair<>(itemId, quantity);
+			ImmutablePair<Integer, Integer> key = new ImmutablePair<>(itemId, quantity);
 			Integer currentCount = currInvMap.get(key);
 
 			// current inventory doesn't have this item, highlight
