@@ -312,6 +312,7 @@ public class InventorySetupPanel extends JPanel
 				inventorySetup.setFilterBank(!inventorySetup.isFilterBank());
 				bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
 				updateBankFilterLabel();
+				plugin.updateConfig();
 			}
 
 			@Override
@@ -379,7 +380,7 @@ public class InventorySetupPanel extends JPanel
 			}
 		});
 
-		unorderedHighlightIndicator.setToolTipText("Only highlight items that are missing from the inventory (unordered)");
+		unorderedHighlightIndicator.setToolTipText("Only highlight items that are missing from the inventory and ignore order");
 		unorderedHighlightIndicator.setIcon(inventorySetup.isUnorderedHighlight() ? UNORDERED_HIGHLIGHT_ICON : NO_UNORDERED_HIGHLIGHT_ICON);
 		unorderedHighlightIndicator.addMouseListener(new MouseAdapter()
 		{
@@ -387,8 +388,9 @@ public class InventorySetupPanel extends JPanel
 			public void mousePressed(MouseEvent e)
 			{
 				inventorySetup.setUnorderedHighlight(!inventorySetup.isUnorderedHighlight());
-				unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory");
+				unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory and ignore order");
 				updateUnorderedHighlightIndicator();
+				plugin.updateConfig();
 			}
 
 			@Override
