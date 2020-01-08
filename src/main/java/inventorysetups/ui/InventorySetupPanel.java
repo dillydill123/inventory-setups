@@ -519,14 +519,7 @@ public class InventorySetupPanel extends JPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				int confirm = JOptionPane.showConfirmDialog(InventorySetupPanel.this,
-						"Are you sure you want to permanently delete this inventory setup?",
-						"Warning", JOptionPane.OK_CANCEL_OPTION);
-
-				if (confirm == JOptionPane.YES_OPTION)
-				{
-					plugin.removeInventorySetup(inventorySetup);
-				}
+				plugin.removeInventorySetup(inventorySetup);
 			}
 
 			@Override

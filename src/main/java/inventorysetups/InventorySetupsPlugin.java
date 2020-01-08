@@ -27,6 +27,7 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.ui.InventorySetupPanel;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import inventorysetups.ui.InventorySetupSlot;
 import joptsimple.internal.Strings;
@@ -189,7 +190,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		clientThread.invoke(() ->
+		clientThread.invokeLater(() ->
 		{
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
@@ -253,7 +254,7 @@ public class InventorySetupsPlugin extends Plugin
 				if (currentSetup != null)
 				{
 					int itemId = intStack[intStackSize - 1];
-					if (containsItem(currentSetup, itemId))
+					if (setupContainsItem(currentSetup, itemId))
 					{
 						// return true
 						intStack[intStackSize - 2] = 1;
@@ -265,6 +266,30 @@ public class InventorySetupsPlugin extends Plugin
 				}
 			}
 		}
+	}
+
+	public void updateCurrentSetup(InventorySetup setup)
+	{
+		int confirm = JOptionPane.showConfirmDialog(panel,
+				"Are you sure you want update this inventory setup?",
+				"Warning", JOptionPane.OK_CANCEL_OPTION);
+
+		// cancel button was clicked
+		if (confirm != JOptionPane.YES_OPTION)
+		{
+			return;
+		}
+
+		// must be on client thread to get names
+		clientThread.invokeLater(() ->
+		{
+			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
+			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+
+			setup.updateInventory(inv);
+			setup.updateEquipment(eqp);
+			panel.refreshCurrentSetup();
+		});
 	}
 
 	public void updateSlotFromContainer(final InventorySetupSlot slot)
@@ -379,6 +404,15 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void removeInventorySetup(final InventorySetup setup)
 	{
+		int confirm = JOptionPane.showConfirmDialog(panel,
+				"Are you sure you want to permanently delete this inventory setup?",
+				"Warning", JOptionPane.OK_CANCEL_OPTION);
+
+		if (confirm != JOptionPane.YES_OPTION)
+		{
+			return;
+		}
+
 		inventorySetups.remove(setup);
 		panel.rebuild();
 		updateConfig();
@@ -603,7 +637,7 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	private boolean containsItem(final InventorySetup setup, int itemID)
+	private boolean setupContainsItem(final InventorySetup setup, int itemID)
 	{
 
 		// So place holders will show up in the bank.

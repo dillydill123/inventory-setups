@@ -68,4 +68,14 @@ public class InventorySetup
 	@Setter
 	private boolean unorderedHighlight;
 
+	public void updateInventory(final ArrayList<InventorySetupItem> inv)
+	{
+		inventory = inv;
+	}
+
+	public void updateEquipment(final ArrayList<InventorySetupItem> eqp)
+	{
+		equipment = eqp;
+	}
+
 }

@@ -62,6 +62,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private static ImageIcon BACK_HOVER_ICON;
 	private static ImageIcon IMPORT_ICON;
 	private static ImageIcon IMPORT_HOVER_ICON;
+	private static ImageIcon UPDATE_ICON;
+	private static ImageIcon UPDATE_HOVER_ICON;
 
 	private static String MAIN_TITLE;
 
@@ -76,6 +78,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final JLabel title;
 	private final JLabel addMarker;
 	private final JLabel importMarker;
+	private final JLabel updateMarker;
 	private final JLabel backMarker;
 
 	private final InventorySetupContainerPanel invPanel;
@@ -95,6 +98,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 		final BufferedImage importIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/import_icon.png");
 		IMPORT_ICON = new ImageIcon(importIcon);
 		IMPORT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(importIcon, 0.53f));
+
+		final BufferedImage updateIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/update_icon.png");
+		UPDATE_ICON = new ImageIcon(updateIcon);
+		UPDATE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(updateIcon, 0.53f));
 
 		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/back_arrow_icon.png");
 		BACK_ICON = new ImageIcon(ImageUtil.flipImage(backIcon, true, false));
@@ -124,7 +131,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		importMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
-			public void mouseClicked(MouseEvent e)
+			public void mousePressed(MouseEvent e)
 			{
 				plugin.importSetup();
 			}
@@ -148,7 +155,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		addMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
-			public void mouseClicked(MouseEvent e)
+			public void mousePressed(MouseEvent e)
 			{
 				plugin.addInventorySetup();
 			}
@@ -166,12 +173,35 @@ public class InventorySetupPluginPanel extends PluginPanel
 			}
 		});
 
-		backMarker = new JLabel(BACK_ICON);
+		this.updateMarker = new JLabel(UPDATE_ICON);
+		updateMarker.setToolTipText("Update setup with current inventory and equipment");
+		updateMarker.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				plugin.updateCurrentSetup(currentSelectedSetup);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				updateMarker.setIcon(UPDATE_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				updateMarker.setIcon(UPDATE_ICON);
+			}
+		});
+
+		this.backMarker = new JLabel(BACK_ICON);
 		backMarker.setToolTipText("Return to setups");
 		backMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
-			public void mouseClicked(MouseEvent e)
+			public void mousePressed(MouseEvent e)
 			{
 				noSetupsPanel.setVisible(false);
 				invEqPanel.setVisible(false);
@@ -201,6 +231,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		overviewTopRightButtonsPanel.add(addMarker);
 
 		this.setupTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+		setupTopRightButtonsPanel.add(updateMarker);
 		setupTopRightButtonsPanel.add(backMarker);
 
 		// the panel on the top right that holds the buttons
