@@ -219,8 +219,10 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 				rpPanel.highlightAllSlots(inventorySetup);
 			}
 		}
-
-
+		else
+		{
+			rpPanel.resetSlotColors();
+		}
 
 	}
 }

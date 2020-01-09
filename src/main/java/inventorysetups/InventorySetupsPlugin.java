@@ -292,7 +292,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int itemId = intStack[intStackSize - 1];
 
-					// TODO check if rune pouch has items, if so include them
+					// TODO check if rune pouch has items, if so include them in the filter
 
 					if (setupContainsItem(currentSetup, itemId))
 					{
@@ -344,7 +344,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You must be logged in to update from " + (slot.getSlotID().toString()),
+					"You must be logged in to update from " + (slot.getSlotID().toString().toLowerCase() + "."),
 					"Cannot Update Item",
 					JOptionPane.ERROR_MESSAGE);
 			return;
