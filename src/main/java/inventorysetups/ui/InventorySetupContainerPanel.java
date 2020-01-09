@@ -25,7 +25,6 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsPlugin;
-import net.runelite.api.InventoryID;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
@@ -47,7 +46,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected boolean isHighlighted;
 
-	private final InventorySetupsPlugin plugin;
+	protected final InventorySetupsPlugin plugin;
 
 	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
 	{
@@ -81,7 +80,27 @@ public abstract class InventorySetupContainerPanel extends JPanel
 	{
 
 		JPopupMenu popupMenu = new JPopupMenu();
-		JMenuItem updateFromContainer = new JMenuItem("Update Slot from " + (slot.getInventoryID() == InventoryID.INVENTORY ? "Inventory" : "Equipment"));
+
+		String updateContainerFrom = "";
+		switch (slot.getSlotID())
+		{
+			case INVENTORY:
+				updateContainerFrom = "Inventory";
+				break;
+			case EQUIPMENT:
+				updateContainerFrom = "Equipment";
+				break;
+			case RUNE_POUCH:
+				updateContainerFrom = "Rune Pouch";
+				break;
+			case SPELL_BOOK:
+				updateContainerFrom = "Spell Book";
+				break;
+			default:
+				assert false : "Wrong slot ID!";
+				break;
+		}
+		JMenuItem updateFromContainer = new JMenuItem("Update Slot from " + updateContainerFrom);
 		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
 		popupMenu.add(updateFromContainer);
 		popupMenu.add(updateFromSearch);
@@ -105,16 +124,24 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected void setContainerSlot(int index, final InventorySetupSlot containerSlot, final InventorySetup setup)
 	{
-		assert containerSlot.getInventoryID() == InventoryID.INVENTORY || containerSlot.getInventoryID() == InventoryID.EQUIPMENT : "Wrong Inventory ID";
-
-		ArrayList<InventorySetupItem> items = setup.getInventory();
-
-		if (containerSlot.getInventoryID() == InventoryID.EQUIPMENT)
+		ArrayList<InventorySetupItem> items = null;
+		switch (containerSlot.getSlotID())
 		{
-			items = setup.getEquipment();
+			case INVENTORY:
+				items = setup.getInventory();
+				break;
+			case EQUIPMENT:
+				items = setup.getEquipment();
+				break;
+			case RUNE_POUCH:
+				items = setup.getRune_pouch();
+				break;
+			default:
+				assert false : "Wrong slot ID!";
+				break;
 		}
 
-		assert index < items.size() : "Index Off Array";
+		assert index < items.size() && index > 0 : "Index Off Array";
 
 		containerSlot.setParentSetup(setup);
 

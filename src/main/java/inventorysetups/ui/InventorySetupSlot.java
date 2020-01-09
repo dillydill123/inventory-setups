@@ -25,6 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
+import inventorysetups.InventorySetupSlotID;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.api.InventoryID;
@@ -42,7 +43,7 @@ public class InventorySetupSlot extends JPanel
 	private final JLabel imageLabel;
 
 	@Getter
-	private final InventoryID inventoryID;
+	private final InventorySetupSlotID slotID;
 
 	@Getter
 	@Setter
@@ -51,9 +52,9 @@ public class InventorySetupSlot extends JPanel
 	@Getter
 	private int indexInSlot;
 
-	public InventorySetupSlot(Color color, InventoryID id, int indexInSlot)
+	public InventorySetupSlot(Color color, InventorySetupSlotID id, int indexInSlot)
 	{
-		this.inventoryID = id;
+		this.slotID = id;
 		this.imageLabel = new JLabel();
 		this.parentSetup = null;
 		this.indexInSlot = indexInSlot;

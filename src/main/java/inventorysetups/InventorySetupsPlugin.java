@@ -24,10 +24,10 @@
  */
 package inventorysetups;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
-import inventorysetups.ui.InventorySetupPanel;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import inventorysetups.ui.InventorySetupSlot;
 import joptsimple.internal.Strings;
@@ -39,6 +39,7 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemID;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
@@ -61,6 +62,7 @@ import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.banktags.tabs.BankSearch;
+import net.runelite.client.plugins.runepouch.Runes;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -72,8 +74,11 @@ import javax.swing.SwingUtilities;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 @PluginDescriptor(
 		name = "Inventory Setups",
@@ -132,6 +137,15 @@ public class InventorySetupsPlugin extends Plugin
 	private ChatboxPanelManager chatboxPanelManager;
 
 	private ChatboxTextInput searchInput;
+
+	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
+			{
+					Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3
+			};
+	private static final Varbits[] RUNE_POUCH_RUNE_VARBITS =
+			{
+					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
+			};
 
 	@Provides
 	InventorySetupConfig getConfig(ConfigManager configManager)
@@ -195,7 +209,13 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, name,
+			ArrayList<InventorySetupItem> runePouchData = null;
+			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false))
+			{
+				runePouchData = getRunePouchData();
+			}
+
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, name,
 													config.highlightColor(),
 													config.highlightStackDifference(),
 													config.highlightVariationDifference(),
@@ -233,6 +253,23 @@ public class InventorySetupsPlugin extends Plugin
 		bankSearch.reset(true);
 	}
 
+	public ArrayList<InventorySetupItem> getRunePouchData()
+	{
+		ArrayList<InventorySetupItem> runePouchData = new ArrayList<>();
+		for (int i = 0; i < RUNE_POUCH_RUNE_VARBITS.length; i++)
+		{
+			int runeId = client.getVar(RUNE_POUCH_RUNE_VARBITS[i]);
+			Runes rune = Runes.getRune(runeId);
+			int runeAmount = rune == null ? 0 : client.getVar(RUNE_POUCH_AMOUNT_VARBITS[i]);
+			String runeName = rune == null ? "" : rune.getName();
+			int runeItemId = rune == null ? -1 : rune.getItemId();
+
+			runePouchData.add(new InventorySetupItem(runeItemId, runeName, runeAmount));
+		}
+
+		return runePouchData;
+	}
+
 	@Subscribe
 	public void onScriptCallbackEvent(ScriptCallbackEvent event)
 	{
@@ -254,6 +291,9 @@ public class InventorySetupsPlugin extends Plugin
 				if (currentSetup != null)
 				{
 					int itemId = intStack[intStackSize - 1];
+
+					// TODO check if rune pouch has items, if so include them
+
 					if (setupContainsItem(currentSetup, itemId))
 					{
 						// return true
@@ -286,6 +326,13 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
+			ArrayList<InventorySetupItem> runePouchData = null;
+			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false))
+			{
+				runePouchData = getRunePouchData();
+			}
+
+			setup.updateRunePouch(runePouchData);
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			panel.refreshCurrentSetup();
@@ -297,7 +344,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You must be logged in to update from " + (slot.getInventoryID() == InventoryID.INVENTORY ? "inventory." : "equipment."),
+					"You must be logged in to update from " + (slot.getSlotID().toString()),
 					"Cannot Update Item",
 					JOptionPane.ERROR_MESSAGE);
 			return;
@@ -308,7 +355,7 @@ public class InventorySetupsPlugin extends Plugin
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
 		{
-			final ArrayList<InventorySetupItem> playerContainer = getNormalizedContainer(slot.getInventoryID());
+			final ArrayList<InventorySetupItem> playerContainer = getNormalizedContainer(slot.getSlotID());
 			final InventorySetupItem newItem = playerContainer.get(slot.getIndexInSlot());
 			container.set(slot.getIndexInSlot(), newItem);
 			updateConfig();
@@ -371,11 +418,9 @@ public class InventorySetupsPlugin extends Plugin
 										inputParsed = inputParsed.substring(0, 10);
 									}
 
-									int quantity = 1;
-
 									// limit to max int value
 									long quantityLong = Long.parseLong(inputParsed);
-									quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
+									int quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
 									quantity = Math.max(quantity, 1);
 
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
@@ -470,11 +515,11 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (container == client.getItemContainer(InventoryID.INVENTORY))
 		{
-			panel.highlightDifferences(InventoryID.INVENTORY);
+			panel.highlightInventory();
 		}
 		else if (container == client.getItemContainer(InventoryID.EQUIPMENT))
 		{
-			panel.highlightDifferences(InventoryID.EQUIPMENT);
+			panel.highlightEquipment();
 		}
 
 	}
@@ -482,8 +527,22 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		panel.highlightDifferences(InventoryID.INVENTORY);
-		panel.highlightDifferences(InventoryID.EQUIPMENT);
+		panel.highlightInventory();
+		panel.highlightEquipment();
+	}
+
+	public ArrayList<InventorySetupItem> getNormalizedContainer(final InventorySetupSlotID id)
+	{
+		switch (id)
+		{
+			case INVENTORY:
+				return getNormalizedContainer(InventoryID.INVENTORY);
+			case EQUIPMENT:
+				return getNormalizedContainer(InventoryID.EQUIPMENT);
+			default:
+				assert false : "Wrong slot ID!";
+				return null;
+		}
 	}
 
 	public ArrayList<InventorySetupItem> getNormalizedContainer(final InventoryID id)
@@ -589,7 +648,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		ArrayList<InventorySetupItem> container = slot.getParentSetup().getInventory();
 
-		if (slot.getInventoryID() == InventoryID.EQUIPMENT)
+		if (slot.getSlotID() == InventorySetupSlotID.EQUIPMENT)
 		{
 			container = slot.getParentSetup().getEquipment();
 		}
@@ -649,18 +708,15 @@ public class InventorySetupsPlugin extends Plugin
 			itemID = ItemVariationMapping.map(itemID);
 		}
 
-		for (final InventorySetupItem item : setup.getInventory())
-		{
+		return checkIfContainerContainsItem(itemID, setup.getInventory(), setup.isVariationDifference()) ||
+				checkIfContainerContainsItem(itemID, setup.getEquipment(), setup.isVariationDifference());
+	}
 
-			if (itemID == getCorrectID(setup.isVariationDifference(), item.getId()))
-			{
-				return true;
-			}
-		}
-
-		for (final InventorySetupItem item : setup.getEquipment())
+	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> container, boolean isVariationDifference)
+	{
+		for (final InventorySetupItem item : container)
 		{
-			if (itemID == getCorrectID(setup.isVariationDifference(), item.getId()))
+			if (itemID == getCorrectID(isVariationDifference, item.getId()))
 			{
 				return true;
 			}
@@ -690,5 +746,6 @@ public class InventorySetupsPlugin extends Plugin
 		return idToCompare;
 
 	}
+
 
 }

@@ -42,6 +42,10 @@ public class InventorySetup
 
 	@Getter
 	@Setter
+	private ArrayList<InventorySetupItem> rune_pouch;
+
+	@Getter
+	@Setter
 	private String name;
 
 	@Getter
@@ -76,6 +80,11 @@ public class InventorySetup
 	public void updateEquipment(final ArrayList<InventorySetupItem> eqp)
 	{
 		equipment = eqp;
+	}
+
+	public void updateRunePouch(final ArrayList<InventorySetupItem> rp)
+	{
+		rune_pouch = rp;
 	}
 
 }

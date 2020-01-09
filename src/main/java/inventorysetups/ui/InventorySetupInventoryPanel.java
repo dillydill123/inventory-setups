@@ -24,7 +24,9 @@
  */
 package inventorysetups.ui;
 
+import inventorysetups.InventorySetupSlotID;
 import inventorysetups.InventorySetupsPlugin;
+import net.runelite.api.ItemID;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
@@ -45,10 +47,12 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	private static final int NUM_INVENTORY_ITEMS = 28;
 
 	private ArrayList<InventorySetupSlot> inventorySlots;
+	private InventorySetupRunePouchPanel rpPanel;
 
-	InventorySetupInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
+	InventorySetupInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, final InventorySetupRunePouchPanel rpPanel)
 	{
 		super(itemManager, plugin, "Inventory");
+		this.rpPanel = rpPanel;
 	}
 
 	@Override
@@ -57,7 +61,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		this.inventorySlots = new ArrayList<>();
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
-			inventorySlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventoryID.INVENTORY, i));
+			inventorySlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.INVENTORY, i));
 		}
 
 		int numRows = (NUM_INVENTORY_ITEMS + ITEMS_PER_ROW - 1) / ITEMS_PER_ROW;
@@ -96,9 +100,26 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			return;
 		}
 
+		boolean currInvHasRunePouch = false;
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
+			InventorySetupItem currInvItem = currInventory.get(i);
+			InventorySetupItem itemToCheck = inventoryToCheck.get(i);
+			if (itemToCheck.getId() == ItemID.RUNE_POUCH && currInvItem.getId() == ItemID.RUNE_POUCH)
+			{
+				currInvHasRunePouch = true;
+				ArrayList<InventorySetupItem> runePouchToCheck = plugin.getRunePouchData();
+				rpPanel.highlightSlotDifferences(runePouchToCheck, inventorySetup);
+
+			}
+
 			super.highlightDifferentSlotColor(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
+		}
+
+		// if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
+		if (!currInvHasRunePouch && inventorySetup.getRune_pouch() != null)
+		{
+			rpPanel.highlightAllSlots(inventorySetup);
 		}
 	}
 
@@ -116,6 +137,8 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			inventorySlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		}
 
+		rpPanel.resetSlotColors();
+
 		isHighlighted = false;
 	}
 
@@ -123,11 +146,17 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	{
 		HashMap<ImmutablePair<Integer, Integer>, Integer> currInvMap = new HashMap<>();
 
+		boolean currInvHasRunePouch = false;
 		for (final InventorySetupItem item : currInventory)
 		{
 			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
 			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
 			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
+
+			if (item.getId() == ItemID.RUNE_POUCH)
+			{
+				currInvHasRunePouch = true;
+			}
 
 			ImmutablePair<Integer, Integer> key = new ImmutablePair<>(itemId, quantity);
 			int count = currInvMap.get(key) == null ? 0 : currInvMap.get(key);
@@ -175,6 +204,22 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		}
+
+		if (inventorySetup.getRune_pouch() != null)
+		{
+
+			// attempt to highlight if rune pouch is available
+			if (currInvHasRunePouch)
+			{
+				ArrayList<InventorySetupItem> runePouchToCheck = plugin.getRunePouchData();
+				rpPanel.highlightSlotDifferences(runePouchToCheck, inventorySetup);
+			}
+			else // if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
+			{
+				rpPanel.highlightAllSlots(inventorySetup);
+			}
+		}
+
 
 
 	}

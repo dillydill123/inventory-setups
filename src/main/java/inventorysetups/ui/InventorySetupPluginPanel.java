@@ -81,8 +81,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final JLabel updateMarker;
 	private final JLabel backMarker;
 
-	private final InventorySetupContainerPanel invPanel;
-	private final InventorySetupContainerPanel eqpPanel;
+	private final InventorySetupInventoryPanel invPanel;
+	private final InventorySetupEquipmentPanel eqpPanel;
+	private final InventorySetupRunePouchPanel rpPanel;
 
 	@Getter
 	private InventorySetup currentSelectedSetup;
@@ -115,7 +116,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		super(false);
 		this.currentSelectedSetup = null;
 		this.plugin = plugin;
-		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin);
+		this.rpPanel = new InventorySetupRunePouchPanel(itemManager, plugin);
+		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin, rpPanel);
 		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
@@ -261,6 +263,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invEqPanel.setLayout(invEqLayout);
 		invEqPanel.add(invPanel);
 		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		invEqPanel.add(rpPanel);
+		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		invEqPanel.add(eqpPanel);
 
 		// setup the error panel. It's wrapped around a normal panel
@@ -342,6 +346,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	{
 		currentSelectedSetup = inventorySetup;
 		invPanel.setSlots(inventorySetup);
+		rpPanel.setSlots(inventorySetup);
 		eqpPanel.setSlots(inventorySetup);
 
 		overviewTopRightButtonsPanel.setVisible(false);
@@ -353,8 +358,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		title.setText(inventorySetup.getName());
 
-		highlightDifferences(InventoryID.INVENTORY);
-		highlightDifferences(InventoryID.EQUIPMENT);
+		highlightInventory();
+		highlightEquipment();
 
 		if (resetScrollBar)
 		{
@@ -369,7 +374,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	}
 
-	public void highlightDifferences(final InventoryID type)
+	public void highlightInventory()
 	{
 		// if the panel itself isn't visible, don't waste time doing any highlighting logic
 		if (!invEqPanel.isVisible())
@@ -382,21 +387,31 @@ public class InventorySetupPluginPanel extends PluginPanel
 		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
 		{
 			invPanel.resetSlotColors();
+			return;
+		}
+
+		final ArrayList<InventorySetupItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
+		invPanel.highlightSlotDifferences(inv, currentSelectedSetup);
+	}
+
+	public void highlightEquipment()
+	{
+		// if the panel itself isn't visible, don't waste time doing any highlighting logic
+		if (!invEqPanel.isVisible())
+		{
+			return;
+		}
+
+		// if the panel is visible, check if highlighting is enabled on the setup and globally
+		// if any of the two, reset the slots so they aren't highlighted
+		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
+		{
 			eqpPanel.resetSlotColors();
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> container = plugin.getNormalizedContainer(type);
-		switch (type)
-		{
-			case INVENTORY:
-				invPanel.highlightSlotDifferences(container, currentSelectedSetup);
-				break;
-
-			case EQUIPMENT:
-				eqpPanel.highlightSlotDifferences(container, currentSelectedSetup);
-				break;
-		}
+		final ArrayList<InventorySetupItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+		eqpPanel.highlightSlotDifferences(eqp, currentSelectedSetup);
 	}
 
 }
