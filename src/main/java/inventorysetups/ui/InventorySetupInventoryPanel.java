@@ -27,6 +27,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetupSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.ItemID;
+import net.runelite.client.plugins.grounditems.config.ItemHighlightMode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
@@ -105,7 +106,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		{
 			InventorySetupItem currInvItem = currInventory.get(i);
 			InventorySetupItem itemToCheck = inventoryToCheck.get(i);
-			if (itemToCheck.getId() == ItemID.RUNE_POUCH && currInvItem.getId() == ItemID.RUNE_POUCH)
+			if (ItemVariationMapping.map(itemToCheck.getId()) == ItemID.RUNE_POUCH && ItemVariationMapping.map(currInvItem.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
 				ArrayList<InventorySetupItem> runePouchToCheck = plugin.getRunePouchData();
@@ -156,7 +157,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
 			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
 
-			if (item.getId() == ItemID.RUNE_POUCH)
+			if (ItemVariationMapping.map(item.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
 			}

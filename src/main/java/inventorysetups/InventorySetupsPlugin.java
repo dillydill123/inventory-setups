@@ -24,10 +24,10 @@
  */
 package inventorysetups;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.ui.InventorySetupContainerPanel;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import inventorysetups.ui.InventorySetupSlot;
 import joptsimple.internal.Strings;
@@ -77,8 +77,6 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
 
 @PluginDescriptor(
 		name = "Inventory Setups",
@@ -355,6 +353,13 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			final ArrayList<InventorySetupItem> playerContainer = getNormalizedContainer(slot.getSlotID());
 			final InventorySetupItem newItem = playerContainer.get(slot.getIndexInSlot());
+
+			// update the rune pouch data
+			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+			{
+				return;
+			}
+
 			container.set(slot.getIndexInSlot(), newItem);
 			updateConfig();
 			panel.refreshCurrentSetup();
@@ -424,6 +429,12 @@ public class InventorySetupsPlugin extends Plugin
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
 									final InventorySetupItem newItem = new InventorySetupItem(finalIdCopy, itemName, quantity);
 
+									// update the rune pouch data
+									if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+									{
+										return;
+									}
+
 									container.set(slot.getIndexInSlot(), newItem);
 									updateConfig();
 									panel.refreshCurrentSetup();
@@ -435,6 +446,13 @@ public class InventorySetupsPlugin extends Plugin
 					{
 						final String itemName = itemManager.getItemComposition(finalId).getName();
 						final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1);
+
+						// update the rune pouch data
+						if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+						{
+							return;
+						}
+
 						container.set(slot.getIndexInSlot(), newItem);
 						updateConfig();
 						panel.refreshCurrentSetup();
@@ -754,5 +772,48 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
+	private boolean updateIfRunePouch(final InventorySetupSlot slot, final InventorySetupItem oldItem, final InventorySetupItem newItem)
+	{
+
+		if (ItemVariationMapping.map(newItem.getId()) == ItemID.RUNE_POUCH)
+		{
+			if (slot.getSlotID() != InventorySetupSlotID.INVENTORY)
+			{
+
+				SwingUtilities.invokeLater(() ->
+				{
+					JOptionPane.showMessageDialog(panel,
+							"You can't have a Rune Pouch there.",
+							"Invalid Item",
+							JOptionPane.ERROR_MESSAGE);
+				});
+
+				return false;
+			}
+
+			if (slot.getParentSetup().getRune_pouch() != null)
+			{
+				SwingUtilities.invokeLater(() ->
+				{
+					JOptionPane.showMessageDialog(panel,
+							"You can't have two Rune Pouches.",
+							"Invalid Item",
+							JOptionPane.ERROR_MESSAGE);
+				});
+				return false;
+			}
+
+			slot.getParentSetup().updateRunePouch(getRunePouchData());
+
+		}
+
+		// update the rune pouch data if its getting replaced
+		if (ItemVariationMapping.map(oldItem.getId()) == ItemID.RUNE_POUCH)
+		{
+			slot.getParentSetup().updateRunePouch(null);
+		}
+
+		return true;
+	}
 
 }

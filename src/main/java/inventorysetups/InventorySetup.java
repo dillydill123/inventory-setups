@@ -41,7 +41,6 @@ public class InventorySetup
 	private ArrayList<InventorySetupItem> equipment;
 
 	@Getter
-	@Setter
 	private ArrayList<InventorySetupItem> rune_pouch;
 
 	@Getter

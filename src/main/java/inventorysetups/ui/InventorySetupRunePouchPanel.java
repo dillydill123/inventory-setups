@@ -10,6 +10,11 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 {
@@ -56,18 +61,31 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 
 		final ArrayList<InventorySetupItem> setupRunePouch = inventorySetup.getRune_pouch();
 
-		for (int i = 0; i < setupRunePouch.size(); i++)
+		Map<Integer, Long> currInvMap = currContainer.stream()
+											.map(InventorySetupItem::getId)
+											.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+		for (int i = setupRunePouch.size() - 1; i >= 0; i--)
 		{
-			boolean foundRune = false;
-			for (int j = 0; j < currContainer.size(); j++)
+			int itemID = setupRunePouch.get(i).getId();
+			Long currentCount = currInvMap.get(itemID);
+
+			if (currentCount == null)
 			{
-				if (setupRunePouch.get(i).getId() == currContainer.get(j).getId())
-				{
-					foundRune = true;
-					break;
-				}
+				runeSlots.get(i).setBackground(inventorySetup.getHighlightColor());
+				continue;
 			}
-			runeSlots.get(i).setBackground(foundRune ? ColorScheme.DARKER_GRAY_COLOR : inventorySetup.getHighlightColor());
+
+			if (currentCount == 1)
+			{
+				currInvMap.remove(itemID);
+			}
+			else
+			{
+				currInvMap.put(itemID, currentCount - 1);
+			}
+
+			runeSlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		}
 	}
 
