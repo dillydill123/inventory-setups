@@ -292,8 +292,6 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int itemId = intStack[intStackSize - 1];
 
-					// TODO check if rune pouch has items, if so include them in the filter
-
 					if (setupContainsItem(currentSetup, itemId))
 					{
 						// return true
@@ -706,6 +704,15 @@ public class InventorySetupsPlugin extends Plugin
 		if (!setup.isVariationDifference())
 		{
 			itemID = ItemVariationMapping.map(itemID);
+		}
+
+		// check the rune pouch to see if it has the item (runes in this case)
+		if (setup.getRune_pouch() != null)
+		{
+			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch(), false))
+			{
+				return true;
+			}
 		}
 
 		return checkIfContainerContainsItem(itemID, setup.getInventory(), setup.isVariationDifference()) ||

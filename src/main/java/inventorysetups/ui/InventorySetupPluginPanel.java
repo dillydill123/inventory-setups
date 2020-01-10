@@ -358,7 +358,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		title.setText(inventorySetup.getName());
 
-		// TODO show or hide rune pouch panel depending on it the setup contains it
+		// only show the rune pouch if the setup has a rune pouch
+		rpPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 
 		highlightInventory();
 		highlightEquipment();

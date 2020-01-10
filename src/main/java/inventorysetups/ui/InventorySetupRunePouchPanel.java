@@ -26,7 +26,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 	public void setupContainerPanel(JPanel containerSlotsPanel)
 	{
 		runeSlots = new ArrayList<>();
-		// TODO update rune pouch slot
+		// TODO update rune pouch slot to show image and tooltip
 		RunePouchSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.RUNE_POUCH, -1);
 		for (int i = 0; i < 3; i++)
 		{

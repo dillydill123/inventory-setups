@@ -110,7 +110,6 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 				currInvHasRunePouch = true;
 				ArrayList<InventorySetupItem> runePouchToCheck = plugin.getRunePouchData();
 				rpPanel.highlightSlotDifferences(runePouchToCheck, inventorySetup);
-
 			}
 
 			super.highlightDifferentSlotColor(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
@@ -120,6 +119,10 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		if (!currInvHasRunePouch && inventorySetup.getRune_pouch() != null)
 		{
 			rpPanel.highlightAllSlots(inventorySetup);
+		}
+		else if (inventorySetup.getRune_pouch() == null)
+		{
+			rpPanel.resetSlotColors();
 		}
 	}
 
