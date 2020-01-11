@@ -28,7 +28,6 @@ import inventorysetups.InventorySetupSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.EquipmentInventorySlot;
 
-import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;

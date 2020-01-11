@@ -27,7 +27,6 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
-import inventorysetups.ui.InventorySetupContainerPanel;
 import inventorysetups.ui.InventorySetupPluginPanel;
 import inventorysetups.ui.InventorySetupSlot;
 import joptsimple.internal.Strings;
@@ -74,7 +73,6 @@ import javax.swing.SwingUtilities;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 

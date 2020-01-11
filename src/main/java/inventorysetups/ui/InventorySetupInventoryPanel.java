@@ -27,9 +27,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetupSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.ItemID;
-import net.runelite.client.plugins.grounditems.config.ItemHighlightMode;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
@@ -105,26 +103,15 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			InventorySetupItem currInvItem = currInventory.get(i);
-			InventorySetupItem itemToCheck = inventoryToCheck.get(i);
-			if (ItemVariationMapping.map(itemToCheck.getId()) == ItemID.RUNE_POUCH && ItemVariationMapping.map(currInvItem.getId()) == ItemID.RUNE_POUCH)
+			if (!currInvHasRunePouch && ItemVariationMapping.map(currInvItem.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
-				ArrayList<InventorySetupItem> runePouchToCheck = plugin.getRunePouchData();
-				rpPanel.highlightSlotDifferences(runePouchToCheck, inventorySetup);
 			}
-
 			super.highlightDifferentSlotColor(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
 
-		// if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
-		if (!currInvHasRunePouch && inventorySetup.getRune_pouch() != null)
-		{
-			rpPanel.highlightAllSlots(inventorySetup);
-		}
-		else if (inventorySetup.getRune_pouch() == null)
-		{
-			rpPanel.resetSlotColors();
-		}
+		handleRunePouchHighlighting(inventorySetup, currInvHasRunePouch);
+
 	}
 
 	@Override
@@ -209,6 +196,12 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 		}
 
+		handleRunePouchHighlighting(inventorySetup, currInvHasRunePouch);
+
+	}
+
+	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, boolean currInvHasRunePouch)
+	{
 		if (inventorySetup.getRune_pouch() != null)
 		{
 
@@ -227,6 +220,5 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		{
 			rpPanel.resetSlotColors();
 		}
-
 	}
 }

@@ -10,16 +10,12 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 {
-	private InventorySetupSlot RunePouchSlot;
-
 	private ArrayList<InventorySetupSlot> runeSlots;
 
 	InventorySetupRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
@@ -31,8 +27,6 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 	public void setupContainerPanel(JPanel containerSlotsPanel)
 	{
 		runeSlots = new ArrayList<>();
-		// TODO update rune pouch slot to show image and tooltip
-		RunePouchSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.RUNE_POUCH, -1);
 		for (int i = 0; i < 3; i++)
 		{
 			runeSlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.RUNE_POUCH, i));
@@ -41,7 +35,6 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 		final GridLayout gridLayout = new GridLayout(1, 4, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
-		containerSlotsPanel.add(RunePouchSlot);
 		for (final InventorySetupSlot slot : runeSlots)
 		{
 			containerSlotsPanel.add(slot);
