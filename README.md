@@ -39,6 +39,10 @@ It is possible to import and export inventory setups. This is useful if you woul
 
 To import a setup, click on the green import button in the top right. It will prompt for a setup. Paste the setup and confirm. The new setup will be added to the bottom of the list of setups.
 
+### Rune Pouch Support
+
+Recently support for rune pouches was added. If you have old setups that contain a rune pouch, you will need to update the inventory setup as the rune pouch will only show empty runes. You can update the rune pouch individually by right clicking the slot with the rune pouch and updating from inventory.
+
 ### Configuration Settings
 
 In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color.

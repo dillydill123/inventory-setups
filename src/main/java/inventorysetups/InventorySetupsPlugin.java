@@ -695,6 +695,13 @@ public class InventorySetupsPlugin extends Plugin
 
 				}.getType();
 				inventorySetups = gson.fromJson(json, type);
+				for (final InventorySetup setup : inventorySetups)
+				{
+					if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false))
+					{
+						setup.updateRunePouch(getRunePouchData());
+					}
+				}
 			}
 			catch (Exception e)
 			{
