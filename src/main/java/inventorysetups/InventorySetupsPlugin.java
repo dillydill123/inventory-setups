@@ -816,8 +816,9 @@ public class InventorySetupsPlugin extends Plugin
 
 			slot.getParentSetup().updateRunePouch(getRunePouchData());
 		}
-		else
+		else if (ItemVariationMapping.map(oldItem.getId()) == ItemID.RUNE_POUCH)
 		{
+			// if the old item is a rune pouch, need to update it to null 
 			slot.getParentSetup().updateRunePouch(null);
 		}
 
