@@ -57,3 +57,6 @@ Import and export feature added
 
 ##### 1.2
 Settings, bank filtering, unordered highlighting, and update individual slots added.
+
+##### 1.3
+Added Reset all button and rune pouch support.
