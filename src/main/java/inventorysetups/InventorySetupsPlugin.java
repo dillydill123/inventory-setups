@@ -786,6 +786,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (ItemVariationMapping.map(newItem.getId()) == ItemID.RUNE_POUCH)
 		{
+
 			if (slot.getSlotID() != InventorySetupSlotID.INVENTORY)
 			{
 
@@ -800,7 +801,8 @@ public class InventorySetupsPlugin extends Plugin
 				return false;
 			}
 
-			if (slot.getParentSetup().getRune_pouch() != null)
+			// only display this message if we aren't replacing a rune pouch with a new rune pouch
+			if (slot.getParentSetup().getRune_pouch() != null && ItemVariationMapping.map(oldItem.getId()) != ItemID.RUNE_POUCH)
 			{
 				SwingUtilities.invokeLater(() ->
 				{
@@ -813,11 +815,8 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			slot.getParentSetup().updateRunePouch(getRunePouchData());
-
 		}
-
-		// update the rune pouch data if its getting replaced
-		if (ItemVariationMapping.map(oldItem.getId()) == ItemID.RUNE_POUCH)
+		else
 		{
 			slot.getParentSetup().updateRunePouch(null);
 		}
