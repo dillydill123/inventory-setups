@@ -329,6 +329,7 @@ public class InventorySetupsPlugin extends Plugin
 			setup.updateRunePouch(runePouchData);
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
+			updateConfig();
 			panel.refreshCurrentSetup();
 		});
 	}
