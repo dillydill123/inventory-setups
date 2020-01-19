@@ -75,6 +75,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @PluginDescriptor(
 		name = "Inventory Setups",
@@ -220,6 +224,14 @@ public class InventorySetupsPlugin extends Plugin
 													config.highlightUnorderedDifference());
 			addInventorySetupClientThread(invSetup);
 		});
+	}
+
+	public List<InventorySetup> filterSetups(String textToFilter)
+	{
+		final String textToFilterLower = textToFilter.toLowerCase();
+		return inventorySetups.stream()
+				.filter(i -> i.getName().toLowerCase().contains(textToFilterLower))
+				.collect(Collectors.toList());
 	}
 
 	@Subscribe

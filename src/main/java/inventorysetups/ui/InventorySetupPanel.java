@@ -216,6 +216,7 @@ public class InventorySetupPanel extends JPanel
 				nameInput.setEditable(false);
 				updateNameActions(false);
 				requestFocusInWindow();
+				panel.rebuild();
 			}
 
 			@Override
