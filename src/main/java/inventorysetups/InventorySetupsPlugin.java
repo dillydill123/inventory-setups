@@ -43,9 +43,8 @@ import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
-import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.events.VarClientIntChanged;
 import net.runelite.api.vars.InputType;
-import net.runelite.api.widgets.WidgetID;
 import net.runelite.client.account.AccountSession;
 import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
@@ -76,8 +75,6 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @PluginDescriptor(
@@ -156,7 +153,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void startUp()
 	{
-
 		this.panel = new InventorySetupPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
 
@@ -234,17 +230,6 @@ public class InventorySetupsPlugin extends Plugin
 				.collect(Collectors.toList());
 	}
 
-	@Subscribe
-	public void onWidgetLoaded(WidgetLoaded event)
-	{
-		if (event.getGroupId() != WidgetID.BANK_GROUP_ID)
-		{
-			return;
-		}
-
-		doBankSearch();
-	}
-
 	public void doBankSearch()
 	{
 		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
@@ -254,6 +239,27 @@ public class InventorySetupsPlugin extends Plugin
 			client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
 			bankSearch.search(InputType.SEARCH, INV_SEARCH + currentSelectedSetup.getName(), true);
 		}
+	}
+
+	@Subscribe
+	public void onVarClientIntChanged(VarClientIntChanged event)
+	{
+		if (event.getIndex() != 386)
+		{
+			return;
+		}
+
+		// must be invoked later otherwise causes freezing.
+		clientThread.invokeLater(() ->
+		{
+			// checks to see if the hide worn items button was clicked or bank was opened
+			int value = client.getVarcIntValue(386);
+			if (value == 0)
+			{
+				doBankSearch();
+			}
+		});
+
 	}
 
 	public void resetBankSearch()
