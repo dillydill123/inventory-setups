@@ -103,7 +103,7 @@ public interface InventorySetupConfig extends Config
 
 	@ConfigItem(
 			keyName = "hotkey",
-			name = "Return to setups hotkey",
+			name = "Return To Setups Hotkey",
 			description = "Configures the hotkey for returning to setups",
 			position = 6
 	)
