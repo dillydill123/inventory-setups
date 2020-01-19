@@ -214,15 +214,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				noSetupsPanel.setVisible(false);
-				invEqPanel.setVisible(false);
-				overviewPanel.setVisible(true);
-				overviewTopRightButtonsPanel.setVisible(true);
-				setupTopRightButtonsPanel.setVisible(false);
-				title.setText(MAIN_TITLE);
-				currentSelectedSetup = null;
-				searchBar.setVisible(true);
-				plugin.resetBankSearch();
+				returnToOverviewPanel();
 			}
 
 			@Override
@@ -461,4 +453,16 @@ public class InventorySetupPluginPanel extends PluginPanel
 		eqpPanel.highlightSlotDifferences(eqp, currentSelectedSetup);
 	}
 
+	public void returnToOverviewPanel()
+	{
+		noSetupsPanel.setVisible(false);
+		invEqPanel.setVisible(false);
+		overviewPanel.setVisible(true);
+		overviewTopRightButtonsPanel.setVisible(true);
+		setupTopRightButtonsPanel.setVisible(false);
+		title.setText(MAIN_TITLE);
+		currentSelectedSetup = null;
+		searchBar.setVisible(true);
+		plugin.resetBankSearch();
+	}
 }

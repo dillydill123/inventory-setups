@@ -29,6 +29,7 @@ import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.Keybind;
 
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
 public interface InventorySetupConfig extends Config
@@ -98,5 +99,16 @@ public interface InventorySetupConfig extends Config
 	default Color highlightColor()
 	{
 		return Color.RED;
+	}
+
+	@ConfigItem(
+			keyName = "hotkey",
+			name = "Return to setups hotkey",
+			description = "Configures the hotkey for returning to setups",
+			position = 6
+	)
+	default Keybind hotkey()
+	{
+		return Keybind.NOT_SET;
 	}
 }

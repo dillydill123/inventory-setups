@@ -57,6 +57,7 @@ import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.game.chatbox.ChatboxItemSearch;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.game.chatbox.ChatboxTextInput;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.banktags.tabs.BankSearch;
@@ -64,6 +65,7 @@ import net.runelite.client.plugins.runepouch.Runes;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
@@ -74,6 +76,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -128,6 +131,9 @@ public class InventorySetupsPlugin extends Plugin
 	private BankSearch bankSearch;
 
 	@Inject
+	private KeyManager keyManager;
+
+	@Inject
 	private ChatboxItemSearch itemSearch;
 
 	@Inject
@@ -143,6 +149,15 @@ public class InventorySetupsPlugin extends Plugin
 			{
 					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
 			};
+
+	private final HotkeyListener hotkeyListener = new HotkeyListener(() -> config.hotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			panel.returnToOverviewPanel();
+		}
+	};
 
 	@Provides
 	InventorySetupConfig getConfig(ConfigManager configManager)
@@ -164,6 +179,7 @@ public class InventorySetupsPlugin extends Plugin
 				.build();
 
 		clientToolbar.addNavigation(navButton);
+		keyManager.registerKeyListener(hotkeyListener);
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
