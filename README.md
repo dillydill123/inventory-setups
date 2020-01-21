@@ -9,6 +9,8 @@ To create a new setup, click on the green plus button in the top right. It will 
 
 You can view the setup by clicking on the view setups button (the eye icon), and you can go back to the overview panel by clicking on the back arrow in the top right.
 
+You can also search for setups using the search bar. When typing in the search bar, setups will be filtered if they contain the search text.
+
 ### Editing a Setup
 
 When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot. If you select from search, it will open a search menu where you can search for the item, and then ask for a quantity if applicable. These two options are only available when logged in.
@@ -45,7 +47,7 @@ Recently support for rune pouches was added. If you have old setups that contain
 
 ### Configuration Settings
 
-In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color.
+In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color. It also contains some key binds that you can set to return to the overview panel quickly, or filter the bank again if you accidentally clicked on a different tab.
 
 ### Support and Suggestions
 
@@ -64,3 +66,6 @@ Settings, bank filtering, unordered highlighting, and update individual slots ad
 
 ##### 1.3
 Added Reset all button and rune pouch support.
+
+##### 1.4
+Added search bar and hotkeys for returning to setups and filtering bank
