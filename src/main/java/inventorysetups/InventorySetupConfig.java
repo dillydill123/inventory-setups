@@ -102,12 +102,23 @@ public interface InventorySetupConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "hotkey",
+			keyName = "returnToSetupsHotkey",
 			name = "Return To Setups Hotkey",
 			description = "Configures the hotkey for returning to setups",
 			position = 6
 	)
-	default Keybind hotkey()
+	default Keybind returnToSetupsHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+			keyName = "filterBankHotkey",
+			name = "Filter Bank Hotkey",
+			description = "Configures the hotkey for filtering the bank",
+			position = 7
+	)
+	default Keybind filterBankHotkey()
 	{
 		return Keybind.NOT_SET;
 	}

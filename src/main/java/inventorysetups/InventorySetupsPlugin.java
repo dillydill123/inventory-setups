@@ -150,12 +150,36 @@ public class InventorySetupsPlugin extends Plugin
 					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
 			};
 
-	private final HotkeyListener hotkeyListener = new HotkeyListener(() -> config.hotkey())
+	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
 		@Override
 		public void hotkeyPressed()
 		{
 			panel.returnToOverviewPanel();
+		}
+	};
+
+	private final HotkeyListener filterBankHotkeyListener = new HotkeyListener(() -> config.filterBankHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			// you must wait at least one game tick otherwise
+			// the bank filter will work but then go back to the previous tab.
+			// For some reason this can still happen but it is very rare,
+			// and only when the user clicks a tab and the hot key extremely shortly after.
+			int gameTick = client.getTickCount();
+			clientThread.invokeLater(() ->
+			{
+				int gameTick2 = client.getTickCount();
+				if (gameTick2 <= gameTick)
+				{
+					return false;
+				}
+
+				doBankSearch();
+				return true;
+			});
 		}
 	};
 
@@ -179,7 +203,8 @@ public class InventorySetupsPlugin extends Plugin
 				.build();
 
 		clientToolbar.addNavigation(navButton);
-		keyManager.registerKeyListener(hotkeyListener);
+		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
+		keyManager.registerKeyListener(filterBankHotkeyListener);
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
