@@ -50,6 +50,7 @@ import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
@@ -91,6 +92,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY = "setups";
+	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
 	public static final String INV_SEARCH = "inv:";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
@@ -114,6 +116,7 @@ public class InventorySetupsPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	@Getter
 	private InventorySetupConfig config;
 
 	@Inject
@@ -187,6 +190,23 @@ public class InventorySetupsPlugin extends Plugin
 	InventorySetupConfig getConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(InventorySetupConfig.class);
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (event.getGroup().equals(CONFIG_GROUP))
+		{
+			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE))
+			{
+				panel.rebuild();
+			}
+		}
+	}
+
+	public void switchViews(boolean compactMode)
+	{
+		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_COMPACT_MODE, compactMode);
 	}
 
 	@Override

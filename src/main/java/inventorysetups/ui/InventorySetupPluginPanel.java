@@ -25,6 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
+import inventorysetups.InventorySetupConfig;
 import inventorysetups.InventorySetupItem;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.Getter;
@@ -49,8 +50,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -58,11 +57,14 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class InventorySetupPluginPanel extends PluginPanel
 {
 
+	private static ImageIcon COMPACT_VIEW_ICON;
+	private static ImageIcon COMPACT_VIEW_HOVER_ICON;
+	private static ImageIcon NO_COMPACT_VIEW_ICON;
+	private static ImageIcon NO_COMPACT_VIEW_HOVER_ICON;
 	private static ImageIcon ADD_ICON;
 	private static ImageIcon ADD_HOVER_ICON;
 	private static ImageIcon BACK_ICON;
@@ -83,6 +85,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final JPanel setupTopRightButtonsPanel;
 
 	private final JLabel title;
+	private final JLabel compactViewMarker;
 	private final JLabel addMarker;
 	private final JLabel importMarker;
 	private final JLabel updateMarker;
@@ -101,6 +104,14 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	static
 	{
+		final BufferedImage compactIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/import_icon.png");
+		final BufferedImage compactIconHover = ImageUtil.luminanceOffset(compactIcon, -150);
+		COMPACT_VIEW_ICON = new ImageIcon(compactIcon);
+		COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIcon, 0.53f));
+
+		NO_COMPACT_VIEW_ICON = new ImageIcon(compactIconHover);
+		NO_COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIconHover, -100));
+
 		final BufferedImage addIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/add_icon.png");
 		ADD_ICON = new ImageIcon(addIcon);
 		ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
@@ -136,6 +147,29 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.title = new JLabel();
 		title.setText(MAIN_TITLE);
 		title.setForeground(Color.WHITE);
+
+		this.compactViewMarker = new JLabel(COMPACT_VIEW_ICON);
+		compactViewMarker.setToolTipText("Switch to " + (plugin.getConfig().compactMode() ? "standard mode" : "compact mode"));
+		compactViewMarker.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				plugin.switchViews(!plugin.getConfig().compactMode());
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_HOVER_ICON : NO_COMPACT_VIEW_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
+			}
+		});
 
 		this.importMarker = new JLabel(IMPORT_ICON);
 		importMarker.setToolTipText("Import a new inventory setup");
@@ -231,6 +265,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		});
 
 		this.overviewTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		overviewTopRightButtonsPanel.add(compactViewMarker);
 		overviewTopRightButtonsPanel.add(importMarker);
 		overviewTopRightButtonsPanel.add(addMarker);
 		addMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
@@ -342,7 +377,15 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		for (final InventorySetup setup : setups)
 		{
-			InventorySetupPanel newPanel = new InventorySetupPanel(plugin, this, setup);
+			InventorySetupPanel newPanel = null;
+			if (plugin.getConfig().compactMode())
+			{
+				newPanel = new InventorySetupCompactPanel(plugin, this, setup);
+			}
+			else
+			{
+				newPanel = new InventorySetupStandardPanel(plugin, this, setup);
+			}
 			overviewPanel.add(newPanel, constraints);
 			constraints.gridy++;
 
