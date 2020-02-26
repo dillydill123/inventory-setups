@@ -104,7 +104,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	static
 	{
-		final BufferedImage compactIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/import_icon.png");
+		final BufferedImage compactIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/compact_mode_icon.png");
 		final BufferedImage compactIconHover = ImageUtil.luminanceOffset(compactIcon, -150);
 		COMPACT_VIEW_ICON = new ImageIcon(compactIcon);
 		COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIcon, 0.53f));
@@ -149,13 +149,13 @@ public class InventorySetupPluginPanel extends PluginPanel
 		title.setForeground(Color.WHITE);
 
 		this.compactViewMarker = new JLabel(COMPACT_VIEW_ICON);
-		compactViewMarker.setToolTipText("Switch to " + (plugin.getConfig().compactMode() ? "standard mode" : "compact mode"));
 		compactViewMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
 				plugin.switchViews(!plugin.getConfig().compactMode());
+				updateCompactViewMarker();
 			}
 
 			@Override
@@ -268,6 +268,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		overviewTopRightButtonsPanel.add(compactViewMarker);
 		overviewTopRightButtonsPanel.add(importMarker);
 		overviewTopRightButtonsPanel.add(addMarker);
+		importMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		addMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 
 		this.setupTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
@@ -361,13 +362,14 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		// make sure the invEq panel isn't visible upon startup
 		invEqPanel.setVisible(false);
-
+		updateCompactViewMarker();
 	}
 
 	public void init(List<InventorySetup> setups)
 	{
 		overviewPanel.setLayout(new GridBagLayout());
 		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+
 
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.HORIZONTAL;
@@ -507,5 +509,11 @@ public class InventorySetupPluginPanel extends PluginPanel
 		currentSelectedSetup = null;
 		searchBar.setVisible(true);
 		plugin.resetBankSearch();
+	}
+
+	private void updateCompactViewMarker()
+	{
+		compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
+		compactViewMarker.setToolTipText("Switch to " + (plugin.getConfig().compactMode() ? "standard mode" : "compact mode"));
 	}
 }
