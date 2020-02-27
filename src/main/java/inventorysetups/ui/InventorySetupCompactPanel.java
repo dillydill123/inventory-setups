@@ -6,6 +6,7 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.FlatTextField;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -42,12 +43,16 @@ public class InventorySetupCompactPanel extends InventorySetupPanel
 
 		add(nameWrapper, BorderLayout.NORTH);
 
+		nameInput.getTextField().setComponentPopupMenu(moveSetupPopupMenu);
 		nameInput.getTextField().addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				panel.setCurrentInventorySetup(inventorySetup, true);
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					panel.setCurrentInventorySetup(inventorySetup, true);
+				}
 			}
 
 			@Override

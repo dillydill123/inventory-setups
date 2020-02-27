@@ -204,13 +204,16 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				inventorySetup.setName(nameInput.getText());
-				plugin.updateConfig();
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					inventorySetup.setName(nameInput.getText());
+					plugin.updateConfig();
 
-				nameInput.setEditable(false);
-				updateNameActions(false);
-				requestFocusInWindow();
-				panel.rebuild();
+					nameInput.setEditable(false);
+					updateNameActions(false);
+					requestFocusInWindow();
+					panel.rebuild();
+				}
 			}
 
 			@Override
@@ -234,10 +237,13 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				nameInput.setEditable(false);
-				nameInput.setText(inventorySetup.getName());
-				updateNameActions(false);
-				requestFocusInWindow();
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					nameInput.setEditable(false);
+					nameInput.setText(inventorySetup.getName());
+					updateNameActions(false);
+					requestFocusInWindow();
+				}
 			}
 
 			@Override
@@ -260,8 +266,11 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				nameInput.setEditable(true);
-				updateNameActions(true);
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					nameInput.setEditable(true);
+					updateNameActions(true);
+				}
 			}
 
 			@Override
@@ -288,6 +297,7 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 		nameInput.setPreferredSize(new Dimension(0, 24));
 		nameInput.getTextField().setForeground(Color.WHITE);
 		nameInput.getTextField().setBorder(new EmptyBorder(0, 8, 0, 0));
+		nameInput.getTextField().setComponentPopupMenu(moveSetupPopupMenu);
 
 		nameWrapper.add(nameInput, BorderLayout.CENTER);
 		nameWrapper.add(nameActions, BorderLayout.EAST);
@@ -303,10 +313,13 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				inventorySetup.setFilterBank(!inventorySetup.isFilterBank());
-				bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
-				updateBankFilterLabel();
-				plugin.updateConfig();
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					inventorySetup.setFilterBank(!inventorySetup.isFilterBank());
+					bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
+					updateBankFilterLabel();
+					plugin.updateConfig();
+				}
 			}
 
 			@Override
@@ -329,10 +342,13 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				inventorySetup.setStackDifference(!inventorySetup.isStackDifference());
-				stackDifferenceIndicator.setToolTipText(inventorySetup.isStackDifference() ? "Disable highlighting for stack differences" : "Enable highlighting for stack differences");
-				updateStackDifferenceLabel();
-				plugin.updateConfig();
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					inventorySetup.setStackDifference(!inventorySetup.isStackDifference());
+					stackDifferenceIndicator.setToolTipText(inventorySetup.isStackDifference() ? "Disable highlighting for stack differences" : "Enable highlighting for stack differences");
+					updateStackDifferenceLabel();
+					plugin.updateConfig();
+				}
 			}
 
 			@Override
@@ -355,10 +371,13 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				inventorySetup.setVariationDifference(!inventorySetup.isVariationDifference());
-				variationDifferenceIndicator.setToolTipText(inventorySetup.isVariationDifference() ? "Disable highlighting for variation differences" : "Enable highlighting for variation differences");
-				updateVariationDifferenceLabel();
-				plugin.updateConfig();
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					inventorySetup.setVariationDifference(!inventorySetup.isVariationDifference());
+					variationDifferenceIndicator.setToolTipText(inventorySetup.isVariationDifference() ? "Disable highlighting for variation differences" : "Enable highlighting for variation differences");
+					updateVariationDifferenceLabel();
+					plugin.updateConfig();
+				}
 			}
 
 			@Override
@@ -381,10 +400,13 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				inventorySetup.setUnorderedHighlight(!inventorySetup.isUnorderedHighlight());
-				unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory and ignore order");
-				updateUnorderedHighlightIndicator();
-				plugin.updateConfig();
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					inventorySetup.setUnorderedHighlight(!inventorySetup.isUnorderedHighlight());
+					unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory and ignore order");
+					updateUnorderedHighlightIndicator();
+					plugin.updateConfig();
+				}
 			}
 
 			@Override
@@ -407,11 +429,14 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				inventorySetup.setHighlightDifference(!inventorySetup.isHighlightDifference());
-				highlightIndicator.setToolTipText(inventorySetup.isHighlightDifference() ? "Disable highlighting" : "Enable highlighting");
-				updateToggleHighlightLabel();
-				updateHighlightColorLabel();
-				plugin.updateConfig();
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					inventorySetup.setHighlightDifference(!inventorySetup.isHighlightDifference());
+					highlightIndicator.setToolTipText(inventorySetup.isHighlightDifference() ? "Disable highlighting" : "Enable highlighting");
+					updateToggleHighlightLabel();
+					updateHighlightColorLabel();
+					plugin.updateConfig();
+				}
 			}
 
 			@Override
@@ -434,7 +459,10 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				openHighlightColorPicker();
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					openHighlightColorPicker();
+				}
 			}
 
 			@Override
@@ -467,7 +495,10 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				panel.setCurrentInventorySetup(inventorySetup, true);
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					panel.setCurrentInventorySetup(inventorySetup, true);
+				}
 			}
 
 			@Override
@@ -490,7 +521,10 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				plugin.exportSetup(inventorySetup);
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					plugin.exportSetup(inventorySetup);
+				}
 			}
 
 			@Override
@@ -513,7 +547,10 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				plugin.removeInventorySetup(inventorySetup);
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					plugin.removeInventorySetup(inventorySetup);
+				}
 			}
 
 			@Override

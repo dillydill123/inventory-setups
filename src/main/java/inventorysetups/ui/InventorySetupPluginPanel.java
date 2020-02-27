@@ -43,6 +43,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -154,8 +155,11 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				plugin.switchViews(!plugin.getConfig().compactMode());
-				updateCompactViewMarker();
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					plugin.switchViews(!plugin.getConfig().compactMode());
+					updateCompactViewMarker();
+				}
 			}
 
 			@Override
@@ -178,7 +182,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				plugin.importSetup();
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					plugin.importSetup();
+				}
 			}
 
 			@Override
@@ -202,7 +209,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				plugin.addInventorySetup();
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					plugin.addInventorySetup();
+				}
 			}
 
 			@Override
@@ -225,7 +235,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				plugin.updateCurrentSetup(currentSelectedSetup);
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					plugin.updateCurrentSetup(currentSelectedSetup);
+				}
 			}
 
 			@Override
@@ -248,7 +261,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mousePressed(MouseEvent e)
 			{
-				returnToOverviewPanel();
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					returnToOverviewPanel();
+				}
 			}
 
 			@Override
