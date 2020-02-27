@@ -11,6 +11,8 @@ You can view the setup by clicking on the view setups button (the eye icon), and
 
 You can also search for setups using the search bar. When typing in the search bar, setups will be filtered if they contain the search text.
 
+Is it possible to move a setup up and down the list by right clicking near the setup name and selecting one of the menu options.
+
 ### Editing a Setup
 
 When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot. If you select from search, it will open a search menu where you can search for the item, and then ask for a quantity if applicable. These two options are only available when logged in.
@@ -69,3 +71,6 @@ Added Reset all button and rune pouch support.
 
 ##### 1.4
 Added search bar and hotkeys for returning to setups and filtering bank
+
+#### 1.5
+Added compact view and the ability to move setups up and odwn the list
