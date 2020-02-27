@@ -27,15 +27,9 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
-import net.runelite.client.ui.ColorScheme;
-
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
 
 public class InventorySetupPanel extends JPanel
 {
@@ -59,12 +53,12 @@ public class InventorySetupPanel extends JPanel
 
 		moveUp.addActionListener(e ->
 		{
-			System.out.println("Move up");
+			plugin.moveSetupUp(invSetup);
 		});
 
 		moveDown.addActionListener(e ->
 		{
-			System.out.println("Move down");
+			plugin.moveSetupDown(invSetup);
 		});
 
 		setComponentPopupMenu(moveSetupPopupMenu);

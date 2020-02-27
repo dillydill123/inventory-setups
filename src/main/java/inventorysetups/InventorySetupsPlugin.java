@@ -77,6 +77,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -280,6 +281,38 @@ public class InventorySetupsPlugin extends Plugin
 													config.highlightUnorderedDifference());
 			addInventorySetupClientThread(invSetup);
 		});
+	}
+
+	public void moveSetupDown(final InventorySetup setup)
+	{
+		int invIndex = inventorySetups.indexOf(setup);
+		assert invIndex >= 0 && invIndex < inventorySetups.size();
+
+		// return if this is setup is at the bottom. It cant be moved further
+		if (invIndex == inventorySetups.size() - 1)
+		{
+			return;
+		}
+
+		Collections.swap(inventorySetups, invIndex, invIndex + 1);
+		panel.rebuild();
+		updateConfig();
+	}
+
+	public void moveSetupUp(final InventorySetup setup)
+	{
+		int invIndex = inventorySetups.indexOf(setup);
+		assert invIndex >= 0 && invIndex < inventorySetups.size();
+
+		// return if this is setup is at the top. It cant be moved further
+		if (invIndex == 0)
+		{
+			return;
+		}
+
+		Collections.swap(inventorySetups, invIndex, invIndex - 1);
+		panel.rebuild();
+		updateConfig();
 	}
 
 	public List<InventorySetup> filterSetups(String textToFilter)

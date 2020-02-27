@@ -25,7 +25,6 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupConfig;
 import inventorysetups.InventorySetupItem;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.Getter;
@@ -385,7 +384,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	{
 		overviewPanel.setLayout(new GridBagLayout());
 		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-
+		updateCompactViewMarker();
 
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.HORIZONTAL;
