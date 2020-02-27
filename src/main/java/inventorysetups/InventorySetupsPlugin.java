@@ -77,7 +77,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -218,7 +217,7 @@ public class InventorySetupsPlugin extends Plugin
 		navButton = NavigationButton.builder()
 				.tooltip("Inventory Setups")
 				.icon(icon)
-				.priority(9)
+				.priority(6)
 				.panel(panel)
 				.build();
 
@@ -822,8 +821,10 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
+		// for worn equipment always have variation off so things like graceful will show. This will also
+		// cause rings and amulets with different charges or imbues to show but it's preferable over graceful not showing.
 		return checkIfContainerContainsItem(itemID, setup.getInventory(), setup.isVariationDifference()) ||
-				checkIfContainerContainsItem(itemID, setup.getEquipment(), setup.isVariationDifference());
+				checkIfContainerContainsItem(ItemVariationMapping.map(itemID), setup.getEquipment(), false);
 	}
 
 	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> container, boolean isVariationDifference)
