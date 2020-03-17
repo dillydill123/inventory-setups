@@ -36,15 +36,20 @@ import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
-import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
+import net.runelite.api.SpriteID;
+import net.runelite.api.VarClientInt;
+import net.runelite.api.VarClientStr;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarClientIntChanged;
 import net.runelite.api.vars.InputType;
+import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.account.AccountSession;
 import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
@@ -152,6 +157,9 @@ public class InventorySetupsPlugin extends Plugin
 			{
 					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
 			};
+
+	// Used to remember if filtering is currently active in the bank
+	private boolean filteringActive = false;
 
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
@@ -267,7 +275,7 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			ArrayList<InventorySetupItem> runePouchData = null;
-			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false))
+			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false, true))
 			{
 				runePouchData = getRunePouchData();
 			}
@@ -331,8 +339,36 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
 			bankSearch.search(InputType.SEARCH, INV_SEARCH + currentSelectedSetup.getName(), true);
+
+			// When tab is selected with search window open, the search window closes but the search button
+			// stays highlighted, this solves that issue
+			clientThread.invoke(() ->
+			{
+				Widget bankContainer = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
+				if (bankContainer != null && !bankContainer.isHidden())
+				{
+					Widget searchBackground = client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND);
+					searchBackground.setSpriteId(SpriteID.EQUIPMENT_SLOT_TILE);
+				}
+			});
 		}
 	}
+
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event)
+	{
+		if (panel.getCurrentSelectedSetup() != null
+				&& event.getWidgetId() == WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND.getId()
+				&& client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND).getSpriteId() != SpriteID.EQUIPMENT_SLOT_SELECTED)
+		{
+			// This ensures that when clicking Search when tab is selected, the search input is opened rather
+			// than client trying to close it first
+			client.setVar(VarClientStr.INPUT_TEXT, "");
+			client.setVar(VarClientInt.INPUT_TYPE, 0);
+		}
+	}
+
+
 
 	@Subscribe
 	public void onVarClientIntChanged(VarClientIntChanged event)
@@ -345,6 +381,11 @@ public class InventorySetupsPlugin extends Plugin
 		// must be invoked later otherwise causes freezing.
 		clientThread.invokeLater(() ->
 		{
+			// Note: small bug here because when the settings or equip items button is pressed
+			// it will re filter the bank even if the user has clicked somewhere to remove the filter
+			// possible fix: use MenuOptionClicked for buttons and check spriteId to see if they are being unclicked
+			// and go back to widgetOpened to check if the bank was opened.
+
 			// checks to see if the hide worn items button was clicked or bank was opened
 			int value = client.getVarcIntValue(386);
 			if (value == 0)
@@ -387,30 +428,51 @@ public class InventorySetupsPlugin extends Plugin
 		int intStackSize = client.getIntStackSize();
 		int stringStackSize = client.getStringStackSize();
 
-		if (eventName.equals("bankSearchFilter"))
+		switch (eventName)
 		{
-			String search = stringStack[stringStackSize - 1];
-
-			if (search.startsWith(INV_SEARCH))
+			case "setBankTitle":
+				filteringActive = false;
+				break;
+			case "bankSearchFilter":
 			{
-				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+				String search = stringStack[stringStackSize - 1];
 
-				if (currentSetup != null)
+				boolean invSearch = search.startsWith(INV_SEARCH);
+				if (invSearch)
 				{
-					int itemId = intStack[intStackSize - 1];
+					filteringActive = true;
+					final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
 
-					if (setupContainsItem(currentSetup, itemId))
+					if (currentSetup != null)
 					{
-						// return true
-						intStack[intStackSize - 2] = 1;
-					}
-					else
-					{
-						intStack[intStackSize - 2] = 0;
+						int itemId = intStack[intStackSize - 1];
+
+						if (setupContainsItem(currentSetup, itemId))
+						{
+							// return true
+							intStack[intStackSize - 2] = 1;
+						}
+						else
+						{
+							intStack[intStackSize - 2] = 0;
+						}
 					}
 				}
+				break;
 			}
+			case "getSearchingTagTab":
+				if (panel.getCurrentSelectedSetup() != null && filteringActive)
+				{
+					intStack[intStackSize - 1] = 1;
+				}
+				else
+				{
+					intStack[intStackSize - 1] = 0;
+				}
+				break;
 		}
+
+
 	}
 
 	public void updateCurrentSetup(InventorySetup setup)
@@ -432,7 +494,7 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			ArrayList<InventorySetupItem> runePouchData = null;
-			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false))
+			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false, true))
 			{
 				runePouchData = getRunePouchData();
 			}
@@ -747,7 +809,7 @@ public class InventorySetupsPlugin extends Plugin
 			}.getType();
 
 			final InventorySetup newSetup  = gson.fromJson(setup, type);
-			if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory(), false))
+			if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory(), false, true))
 			{
 				newSetup.updateRunePouch(getRunePouchData());
 			}
@@ -809,7 +871,7 @@ public class InventorySetupsPlugin extends Plugin
 				inventorySetups = gson.fromJson(json, type);
 				for (final InventorySetup setup : inventorySetups)
 				{
-					if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false))
+					if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false, true))
 					{
 						setup.updateRunePouch(getRunePouchData());
 					}
@@ -848,23 +910,22 @@ public class InventorySetupsPlugin extends Plugin
 		// check the rune pouch to see if it has the item (runes in this case)
 		if (setup.getRune_pouch() != null)
 		{
-			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch(), false))
+			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch(), false, true))
 			{
 				return true;
 			}
 		}
 
-		// for worn equipment always have variation off so things like graceful will show. This will also
-		// cause rings and amulets with different charges or imbues to show but it's preferable over graceful not showing.
-		return checkIfContainerContainsItem(itemID, setup.getInventory(), setup.isVariationDifference()) ||
-				checkIfContainerContainsItem(ItemVariationMapping.map(itemID), setup.getEquipment(), false);
+		// canonicalize is needed for equipment to deal with worn items like graceful.
+		return checkIfContainerContainsItem(itemID, setup.getInventory(), setup.isVariationDifference(), true) ||
+				checkIfContainerContainsItem(itemID, setup.getEquipment(), setup.isVariationDifference(), true);
 	}
 
-	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> container, boolean isVariationDifference)
+	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> container, boolean isVariationDifference, boolean canonicalize)
 	{
 		for (final InventorySetupItem item : container)
 		{
-			if (itemID == getCorrectID(isVariationDifference, item.getId()))
+			if (itemID == getCorrectID(isVariationDifference, canonicalize, item.getId()))
 			{
 				return true;
 			}
@@ -873,26 +934,21 @@ public class InventorySetupsPlugin extends Plugin
 		return false;
 	}
 
-	private int getCorrectID(boolean variationDifference, int itemId)
+	private int getCorrectID(boolean variationDifference, boolean canonicalize, int itemId)
 	{
 
-		// if variation difference isn't selected, get the canonical ID
+		if (canonicalize)
+		{
+			itemId = itemManager.canonicalize(itemId);
+		}
+
+		// if variation difference isn't selected, get the mapped id
 		if (!variationDifference)
 		{
-			return ItemVariationMapping.map(itemManager.canonicalize(itemId));
+			return ItemVariationMapping.map(itemId);
 		}
 
-		int idToCompare = itemId;
-
-		// if it is selected, make sure we aren't showing note form
-		ItemComposition comp = itemManager.getItemComposition(itemId);
-		if (comp.getNote() != -1)
-		{
-			idToCompare = comp.getLinkedNoteId();
-		}
-
-		return idToCompare;
-
+		return itemId;
 	}
 
 	private boolean updateIfRunePouch(final InventorySetupSlot slot, final InventorySetupItem oldItem, final InventorySetupItem newItem)
