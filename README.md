@@ -15,7 +15,7 @@ Is it possible to move a setup up and down the list by right clicking near the s
 
 ### Editing a Setup
 
-When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot. If you select from search, it will open a search menu where you can search for the item, and then ask for a quantity if applicable. These two options are only available when logged in.
+When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot. If you select from search, it will open a search menu where you can search for the item, and then ask for a quantity if applicable. These two options are only available when logged in. You can also refresh an entire setup by using the refresh icon when viewing a setup.
 
 ### Bank Filtering
 
@@ -45,7 +45,7 @@ To import a setup, click on the green import button in the top right. It will pr
 
 ### Rune Pouch Support
 
-Recently support for rune pouches was added. If you have old setups that contain a rune pouch, you will need to update the inventory setup as the rune pouch will only show empty runes. You can update the rune pouch individually by right clicking the slot with the rune pouch and updating from inventory.
+Recently support for rune pouches was added. If you have a old setup that contains a rune pouch, you will need to update the inventory setup as the rune pouch will only show empty runes. You can update the rune pouch individually by right clicking the slot with the rune pouch and updating from inventory.
 
 ### Configuration Settings
 
@@ -72,5 +72,5 @@ Added Reset all button and rune pouch support.
 ##### 1.4
 Added search bar and hotkeys for returning to setups and filtering bank
 
-#### 1.5
-Added compact view and the ability to move setups up and odwn the list
+##### 1.5
+Added compact view and the ability to move setups up and down the list
