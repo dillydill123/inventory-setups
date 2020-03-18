@@ -29,6 +29,7 @@ import inventorysetups.InventorySetupItem;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
+import net.runelite.api.vars.InputType;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -466,7 +467,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			this.contentWrapperPane.getVerticalScrollBar().setValue(0);
 		}
 
-		plugin.doBankSearch();
+		plugin.doBankSearch(InputType.SEARCH);
 
 		validate();
 		repaint();

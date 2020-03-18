@@ -38,11 +38,13 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
+import net.runelite.api.MenuAction;
 import net.runelite.api.SpriteID;
 import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.ScriptCallbackEvent;
@@ -149,6 +151,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	private ChatboxTextInput searchInput;
 
+	private boolean doBankSearchOnNextGameTick;
+
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
 			{
 					Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3
@@ -157,9 +161,6 @@ public class InventorySetupsPlugin extends Plugin
 			{
 					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
 			};
-
-	// Used to remember if filtering is currently active in the bank
-	private boolean filteringActive = false;
 
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
@@ -188,7 +189,7 @@ public class InventorySetupsPlugin extends Plugin
 					return false;
 				}
 
-				doBankSearch();
+				doBankSearch(InputType.SEARCH);
 				return true;
 			});
 		}
@@ -220,6 +221,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void startUp()
 	{
+		this.doBankSearchOnNextGameTick = false;
 		this.panel = new InventorySetupPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
 
@@ -331,14 +333,14 @@ public class InventorySetupsPlugin extends Plugin
 				.collect(Collectors.toList());
 	}
 
-	public void doBankSearch()
+	public void doBankSearch(InputType type)
 	{
 		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
 
 		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
 		{
 			client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
-			bankSearch.search(InputType.SEARCH, INV_SEARCH + currentSelectedSetup.getName(), true);
+			bankSearch.search(type, INV_SEARCH + currentSelectedSetup.getName(), true);
 
 			// When tab is selected with search window open, the search window closes but the search button
 			// stays highlighted, this solves that issue
@@ -355,17 +357,59 @@ public class InventorySetupsPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onGameTick(GameTick event)
+	{
+		// filter the bank if the requirements are met
+		// this is for when withdraw-x or deposit-x are clicked.
+		if (doBankSearchOnNextGameTick
+			&& panel.getCurrentSelectedSetup() != null
+			&& client.getVar(VarClientInt.INPUT_TYPE) == InputType.NONE.getType()
+			&& !bankIsFiltered())
+		{
+			doBankSearch(InputType.NONE);
+			doBankSearchOnNextGameTick = false;
+		}
+	}
+
+	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (panel.getCurrentSelectedSetup() != null
-				&& event.getWidgetId() == WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND.getId()
+		if (panel.getCurrentSelectedSetup() == null)
+		{
+			return;
+		}
+
+		if (event.getWidgetId() == WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND.getId()
 				&& client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND).getSpriteId() != SpriteID.EQUIPMENT_SLOT_SELECTED)
 		{
 			// This ensures that when clicking Search when tab is selected, the search input is opened rather
 			// than client trying to close it first
 			client.setVar(VarClientStr.INPUT_TEXT, "");
 			client.setVar(VarClientInt.INPUT_TYPE, 0);
+
+			// don't allow the bank to retry a filter if the search button is clicked
+			doBankSearchOnNextGameTick = false;
 		}
+
+		// if withdraw or deposit x is clicked, we need to refilter the bank
+		if ((event.getWidgetId() == WidgetInfo.BANK_ITEM_CONTAINER.getId()
+				|| event.getWidgetId() == WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.getId())
+				&& event.getMenuAction() == MenuAction.CC_OP_LOW_PRIORITY
+				&& (event.getMenuOption().equalsIgnoreCase("withdraw-x")
+				|| event.getMenuOption().equalsIgnoreCase("deposit-x"))
+				&& bankIsFiltered())
+		{
+			doBankSearchOnNextGameTick = true;
+		}
+
+		// if a bank tab is clicked, then make sure we do not try to filter
+		if (doBankSearchOnNextGameTick
+				&& event.getWidgetId() == WidgetInfo.BANK_TAB_CONTAINER.getId()
+				&& event.getMenuOption().startsWith("View"))
+		{
+			doBankSearchOnNextGameTick = false;
+		}
+
 	}
 
 
@@ -390,7 +434,7 @@ public class InventorySetupsPlugin extends Plugin
 			int value = client.getVarcIntValue(386);
 			if (value == 0)
 			{
-				doBankSearch();
+				doBankSearch(InputType.SEARCH);
 			}
 		});
 
@@ -430,9 +474,6 @@ public class InventorySetupsPlugin extends Plugin
 
 		switch (eventName)
 		{
-			case "setBankTitle":
-				filteringActive = false;
-				break;
 			case "bankSearchFilter":
 			{
 				String search = stringStack[stringStackSize - 1];
@@ -440,7 +481,6 @@ public class InventorySetupsPlugin extends Plugin
 				boolean invSearch = search.startsWith(INV_SEARCH);
 				if (invSearch)
 				{
-					filteringActive = true;
 					final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
 
 					if (currentSetup != null)
@@ -461,14 +501,13 @@ public class InventorySetupsPlugin extends Plugin
 				break;
 			}
 			case "getSearchingTagTab":
-				if (panel.getCurrentSelectedSetup() != null && filteringActive)
+				if (panel.getCurrentSelectedSetup() == null)
 				{
-					intStack[intStackSize - 1] = 1;
+					return;
 				}
-				else
-				{
-					intStack[intStackSize - 1] = 0;
-				}
+
+				// check if the bank is filtered. If it is, don't lay out again.
+				intStack[intStackSize - 1] = bankIsFiltered() ? 1 : 0;
 				break;
 		}
 
@@ -993,6 +1032,21 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		return true;
+	}
+
+	private boolean bankIsFiltered()
+	{
+		if (panel.getCurrentSelectedSetup() != null)
+		{
+			Widget bankWidget = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
+			if (bankWidget == null || bankWidget.isHidden())
+			{
+				return false;
+			}
+			String bankTitle = bankWidget.getText();
+			return bankTitle.equals("Showing items: <col=ff0000>" + INV_SEARCH + panel.getCurrentSelectedSetup().getName() + "</col>");
+		}
+		return false;
 	}
 
 }
