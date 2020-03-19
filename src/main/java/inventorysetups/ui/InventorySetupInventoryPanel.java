@@ -110,7 +110,11 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			super.highlightDifferentSlotColor(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
 
-		handleRunePouchHighlighting(inventorySetup, currInvHasRunePouch);
+		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
+		plugin.getClientThread().invokeLater(() ->
+		{
+			handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal);
+		});
 
 	}
 
@@ -196,7 +200,11 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 		}
 
-		handleRunePouchHighlighting(inventorySetup, currInvHasRunePouch);
+		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
+		plugin.getClientThread().invokeLater(() ->
+		{
+			handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal);
+		});
 
 	}
 

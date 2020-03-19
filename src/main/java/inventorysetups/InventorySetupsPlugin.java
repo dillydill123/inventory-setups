@@ -117,6 +117,7 @@ public class InventorySetupsPlugin extends Plugin
 	private ClientToolbar clientToolbar;
 
 	@Inject
+	@Getter
 	private ClientThread clientThread;
 
 	@Inject
@@ -448,6 +449,7 @@ public class InventorySetupsPlugin extends Plugin
 	public ArrayList<InventorySetupItem> getRunePouchData()
 	{
 		ArrayList<InventorySetupItem> runePouchData = new ArrayList<>();
+
 		for (int i = 0; i < RUNE_POUCH_RUNE_VARBITS.length; i++)
 		{
 			int runeId = client.getVar(RUNE_POUCH_RUNE_VARBITS[i]);
@@ -848,11 +850,14 @@ public class InventorySetupsPlugin extends Plugin
 			}.getType();
 
 			final InventorySetup newSetup  = gson.fromJson(setup, type);
-			if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory(), false, true))
+			clientThread.invokeLater(() ->
 			{
-				newSetup.updateRunePouch(getRunePouchData());
-			}
-			addInventorySetupClientThread(newSetup);
+				if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory(), false, true))
+				{
+					newSetup.updateRunePouch(getRunePouchData());
+				}
+				addInventorySetupClientThread(newSetup);
+			});
 		}
 		catch (Exception e)
 		{
@@ -908,13 +913,16 @@ public class InventorySetupsPlugin extends Plugin
 
 				}.getType();
 				inventorySetups = gson.fromJson(json, type);
-				for (final InventorySetup setup : inventorySetups)
+				clientThread.invokeLater(() ->
 				{
-					if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false, true))
+					for (final InventorySetup setup : inventorySetups)
 					{
-						setup.updateRunePouch(getRunePouchData());
+						if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false, true))
+						{
+							setup.updateRunePouch(getRunePouchData());
+						}
 					}
-				}
+				});
 			}
 			catch (Exception e)
 			{
@@ -1044,7 +1052,7 @@ public class InventorySetupsPlugin extends Plugin
 				return false;
 			}
 			String bankTitle = bankWidget.getText();
-			return bankTitle.equals("Showing items: <col=ff0000>" + INV_SEARCH + panel.getCurrentSelectedSetup().getName() + "</col>");
+			return bankTitle.equalsIgnoreCase("Showing items: <col=ff0000>" + INV_SEARCH + panel.getCurrentSelectedSetup().getName() + "</col>");
 		}
 		return false;
 	}
