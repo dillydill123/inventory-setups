@@ -49,6 +49,7 @@ import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarClientIntChanged;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.vars.InputType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
@@ -62,6 +63,7 @@ import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
+import net.runelite.client.game.SpriteManager;
 import net.runelite.client.game.chatbox.ChatboxItemSearch;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.game.chatbox.ChatboxTextInput;
@@ -103,8 +105,10 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String INV_SEARCH = "inv:";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
+	private static final int SPELLBOOK_VARBIT = 4070;
 
 	@Inject
+	@Getter
 	private Client client;
 
 	@Inject
@@ -112,6 +116,10 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Inject
 	private ItemManager itemManager;
+
+	@Inject
+	@Getter
+	private SpriteManager spriteManager;
 
 	@Inject
 	private ClientToolbar clientToolbar;
@@ -283,13 +291,16 @@ public class InventorySetupsPlugin extends Plugin
 				runePouchData = getRunePouchData();
 			}
 
+			int spellbook = getCurrentSpellbook();
+
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, name,
 													config.highlightColor(),
 													config.highlightStackDifference(),
 													config.highlightVariationDifference(),
 													config.highlightDifference(),
 													config.bankFilter(),
-													config.highlightUnorderedDifference());
+													config.highlightUnorderedDifference(),
+													spellbook);
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -418,26 +429,39 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onVarClientIntChanged(VarClientIntChanged event)
 	{
-		if (event.getIndex() != 386)
+		if (event.getIndex() == 386)
 		{
-			return;
+			// must be invoked later otherwise causes freezing.
+			clientThread.invokeLater(() ->
+			{
+				// Note: small bug here because when the settings or equip items button is pressed
+				// it will re filter the bank even if the user has clicked somewhere to remove the filter
+				// possible fix: use MenuOptionClicked for buttons and check spriteId to see if they are being unclicked
+				// and go back to widgetOpened to check if the bank was opened.
+
+				// checks to see if the hide worn items button was clicked or bank was opened
+				int value = client.getVarcIntValue(386);
+				if (value == 0)
+				{
+					doBankSearch(InputType.SEARCH);
+				}
+			});
 		}
 
-		// must be invoked later otherwise causes freezing.
-		clientThread.invokeLater(() ->
-		{
-			// Note: small bug here because when the settings or equip items button is pressed
-			// it will re filter the bank even if the user has clicked somewhere to remove the filter
-			// possible fix: use MenuOptionClicked for buttons and check spriteId to see if they are being unclicked
-			// and go back to widgetOpened to check if the bank was opened.
+	}
 
-			// checks to see if the hide worn items button was clicked or bank was opened
-			int value = client.getVarcIntValue(386);
-			if (value == 0)
+	@Subscribe
+	public void onVarbitChanged(VarbitChanged event)
+	{
+
+		if (event.getIndex() == 439 && client.getGameState() == GameState.LOGGED_IN)
+		{
+			// must be invoked later otherwise causes freezing.
+			clientThread.invokeLater(() ->
 			{
-				doBankSearch(InputType.SEARCH);
-			}
-		});
+				panel.highlightSpellbook();
+			});
+		}
 
 	}
 
@@ -543,6 +567,7 @@ public class InventorySetupsPlugin extends Plugin
 			setup.updateRunePouch(runePouchData);
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
+			setup.updateSpellbook(getCurrentSpellbook());
 			updateConfig();
 			panel.refreshCurrentSetup();
 		});
@@ -676,6 +701,20 @@ public class InventorySetupsPlugin extends Plugin
 			.build();
 	}
 
+	public void updateSpellbookInSetup(int newSpellbook)
+	{
+		assert panel.getCurrentSelectedSetup() != null : "Setup is null";
+		assert newSpellbook >= 0 && newSpellbook < 4 : "New spellbook out of range";
+
+		clientThread.invokeLater(() ->
+		{
+			panel.getCurrentSelectedSetup().updateSpellbook(newSpellbook);
+			updateConfig();
+			panel.refreshCurrentSetup();
+		});
+
+	}
+
 	public void removeInventorySetup(final InventorySetup setup)
 	{
 		int confirm = JOptionPane.showConfirmDialog(panel,
@@ -758,6 +797,14 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		panel.highlightInventory();
 		panel.highlightEquipment();
+		panel.highlightSpellbook();
+	}
+
+	// Must be called on client thread!
+	public int getCurrentSpellbook()
+	{
+		assert client.isClientThread() : "getCurrentSpellbook must be called on Client Thread";
+		return client.getVarbitValue(SPELLBOOK_VARBIT);
 	}
 
 	public ArrayList<InventorySetupItem> getNormalizedContainer(final InventorySetupSlotID id)

@@ -30,11 +30,16 @@ import lombok.Getter;
 import lombok.Setter;
 import net.runelite.client.util.AsyncBufferedImage;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 
 public class InventorySetupSlot extends JPanel
 {
@@ -58,9 +63,11 @@ public class InventorySetupSlot extends JPanel
 		this.parentSetup = null;
 		this.indexInSlot = indexInSlot;
 		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(46, 42));
 		setBackground(color);
-		add(imageLabel);
+		add(imageLabel, BorderLayout.CENTER);
 	}
 
 	public void setImageLabel(String toolTip, AsyncBufferedImage itemImage)
@@ -75,6 +82,23 @@ public class InventorySetupSlot extends JPanel
 
 		imageLabel.setToolTipText(toolTip);
 		itemImage.addTo(imageLabel);
+
+		validate();
+		repaint();
+	}
+
+	public void setImageLabel(String toolTip, BufferedImage itemImage)
+	{
+		if (itemImage == null || toolTip == null)
+		{
+			imageLabel.setToolTipText("");
+			imageLabel.setIcon(null);
+			imageLabel.revalidate();
+			return;
+		}
+
+		imageLabel.setToolTipText(toolTip);
+		imageLabel.setIcon(new ImageIcon(itemImage));
 
 		validate();
 		repaint();

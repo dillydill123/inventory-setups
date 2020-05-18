@@ -71,6 +71,18 @@ public class InventorySetup
 	@Setter
 	private boolean unorderedHighlight;
 
+	/*
+		0 = Standard
+		1 = Ancient
+		2 = Lunar
+		3 = Arceuus
+
+		Avoiding Enum because won't work well with GSON (defaults to null)
+	*/
+	@Getter
+	@Setter
+	private int spellBook;
+
 	public void updateInventory(final ArrayList<InventorySetupItem> inv)
 	{
 		inventory = inv;
@@ -84,6 +96,11 @@ public class InventorySetup
 	public void updateRunePouch(final ArrayList<InventorySetupItem> rp)
 	{
 		rune_pouch = rp;
+	}
+
+	public void updateSpellbook(final int sb)
+	{
+		spellBook = sb;
 	}
 
 }

@@ -97,6 +97,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final InventorySetupInventoryPanel invPanel;
 	private final InventorySetupEquipmentPanel eqpPanel;
 	private final InventorySetupRunePouchPanel rpPanel;
+	private final InventorySetupSpellbookPanel sbPanel;
 
 	@Getter
 	private InventorySetup currentSelectedSetup;
@@ -140,6 +141,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.rpPanel = new InventorySetupRunePouchPanel(itemManager, plugin);
 		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin, rpPanel);
 		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, plugin);
+		this.sbPanel = new InventorySetupSpellbookPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
@@ -349,6 +351,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invEqPanel.add(rpPanel);
 		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		invEqPanel.add(eqpPanel);
+		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		invEqPanel.add(sbPanel);
 
 		// setup the error panel. It's wrapped around a normal panel
 		// so it doesn't stretch to fill the parent panel
@@ -444,6 +448,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invPanel.setSlots(inventorySetup);
 		rpPanel.setSlots(inventorySetup);
 		eqpPanel.setSlots(inventorySetup);
+		sbPanel.setSlots(inventorySetup);
 
 		overviewTopRightButtonsPanel.setVisible(false);
 		setupTopRightButtonsPanel.setVisible(true);
@@ -460,6 +465,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		highlightInventory();
 		highlightEquipment();
+		highlightSpellbook();
 
 		if (resetScrollBar)
 		{
@@ -512,6 +518,25 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		final ArrayList<InventorySetupItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
 		eqpPanel.highlightSlotDifferences(eqp, currentSelectedSetup);
+	}
+
+	public void highlightSpellbook()
+	{
+		// if the panel itself isn't visible, don't waste time doing any highlighting logic
+		if (!invEqPanel.isVisible())
+		{
+			return;
+		}
+
+		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
+		{
+			sbPanel.resetSlotColors();
+			return;
+		}
+
+		// pass it a dummy container because it only needs the current selected setup
+		sbPanel.highlightSlotDifferences(new ArrayList<InventorySetupItem>(), currentSelectedSetup);
+
 	}
 
 	public void returnToOverviewPanel()

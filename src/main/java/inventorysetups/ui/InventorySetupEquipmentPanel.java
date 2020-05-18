@@ -54,7 +54,7 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 		for (EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			final InventorySetupSlot setupSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.EQUIPMENT, slot.getSlotIdx());
-			super.addMouseListenerToSlot(setupSlot);
+			super.addUpdateFromSetupAndSearchMouseListenersToSlot(setupSlot);
 			equipmentSlots.put(slot, setupSlot);
 		}
 

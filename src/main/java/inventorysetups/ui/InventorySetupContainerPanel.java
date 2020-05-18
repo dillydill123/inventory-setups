@@ -76,7 +76,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		add(containerPanel);
 	}
 
-	protected void addMouseListenerToSlot(final InventorySetupSlot slot)
+	protected void addUpdateFromSetupAndSearchMouseListenersToSlot(final InventorySetupSlot slot)
 	{
 
 		JPopupMenu popupMenu = new JPopupMenu();
@@ -89,12 +89,6 @@ public abstract class InventorySetupContainerPanel extends JPanel
 				break;
 			case EQUIPMENT:
 				updateContainerFrom = "Equipment";
-				break;
-			case RUNE_POUCH:
-				updateContainerFrom = "Rune Pouch";
-				break;
-			case SPELL_BOOK:
-				updateContainerFrom = "Spell Book";
 				break;
 			default:
 				assert false : "Wrong slot ID!";
