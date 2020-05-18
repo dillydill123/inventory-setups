@@ -424,6 +424,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	public void rebuild()
 	{
+		returnToOverviewPanel();
 		overviewPanel.removeAll();
 
 		final String text = searchBar.getText();
