@@ -75,8 +75,10 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.banktags.tabs.BankSearch;
 import net.runelite.client.plugins.runepouch.Runes;
 import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
@@ -107,6 +109,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY = "setups";
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
 	public static final String INV_SEARCH = "inv:";
+	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final int SPELLBOOK_VARBIT = 4070;
@@ -244,8 +247,8 @@ public class InventorySetupsPlugin extends Plugin
 			for (int i = 0; i < inventorySetups.size(); i++)
 			{
 				MenuEntry menuEntry = menuEntries[oldMenuSize + i] = new MenuEntry();
-				menuEntry.setOption(inventorySetups.get(inventorySetups.size() - 1 - i).getName());
-				menuEntry.setTarget(event.getTarget());
+				menuEntry.setOption(OPEN_SETUP_MENU_ENTRY);
+				menuEntry.setTarget(ColorUtil.prependColorTag(inventorySetups.get(inventorySetups.size() - 1 - i).getName(), JagexColors.MENU_TARGET));
 
 				// The param will used to find the correct setup if a menu entry is clicked
 				menuEntry.setParam0(inventorySetups.size() - 1 - i);
@@ -421,9 +424,11 @@ public class InventorySetupsPlugin extends Plugin
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
 
-		if (event.getMenuAction() == MenuAction.RUNELITE)
+		if (event.getMenuAction() == MenuAction.RUNELITE && event.getMenuOption().equals(OPEN_SETUP_MENU_ENTRY))
 		{
 			assert event.getActionParam() >= 0 && event.getActionParam() < inventorySetups.size() : "Action param out of range";
+
+			resetBankSearch();
 			panel.setCurrentInventorySetup(inventorySetups.get(event.getActionParam()), true);
 			return;
 		}
