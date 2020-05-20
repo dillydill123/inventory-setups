@@ -39,6 +39,7 @@ import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.SpriteID;
 import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
@@ -46,6 +47,7 @@ import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.VarClientIntChanged;
@@ -78,6 +80,7 @@ import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
+
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -86,6 +89,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -219,6 +223,36 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				panel.rebuild();
 			}
+		}
+	}
+
+	@Subscribe
+	public void onMenuEntryAdded(MenuEntryAdded event)
+	{
+		Widget bankWidget = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
+		if (bankWidget == null || bankWidget.isHidden())
+		{
+			return;
+		}
+
+		if (event.getOption().equals("Show worn items"))
+		{
+			MenuEntry[] menuEntries = client.getMenuEntries();
+			final int oldMenuSize = menuEntries.length;
+			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + inventorySetups.size());
+
+			for (int i = 0; i < inventorySetups.size(); i++)
+			{
+				MenuEntry menuEntry = menuEntries[oldMenuSize + i] = new MenuEntry();
+				menuEntry.setOption(inventorySetups.get(inventorySetups.size() - 1 - i).getName());
+				menuEntry.setTarget(event.getTarget());
+
+				// The param will used to find the correct setup if a menu entry is clicked
+				menuEntry.setParam0(inventorySetups.size() - 1 - i);
+				menuEntry.setType(MenuAction.RUNELITE.getId());
+			}
+
+			client.setMenuEntries(menuEntries);
 		}
 	}
 
@@ -386,6 +420,16 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+
+		if (event.getMenuAction() == MenuAction.RUNELITE)
+		{
+			System.out.println(event.getMenuOption());
+			System.out.println(event.getActionParam());
+			assert event.getActionParam() >= 0 && event.getActionParam() < inventorySetups.size() : "Action param out of range";
+			panel.setCurrentInventorySetup(inventorySetups.get(event.getActionParam()), true);
+			return;
+		}
+
 		if (panel.getCurrentSelectedSetup() == null)
 		{
 			return;
