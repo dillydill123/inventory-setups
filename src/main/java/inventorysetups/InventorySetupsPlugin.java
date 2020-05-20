@@ -251,7 +251,7 @@ public class InventorySetupsPlugin extends Plugin
 				menuEntry.setTarget(ColorUtil.prependColorTag(inventorySetups.get(inventorySetups.size() - 1 - i).getName(), JagexColors.MENU_TARGET));
 
 				// The param will used to find the correct setup if a menu entry is clicked
-				menuEntry.setParam0(inventorySetups.size() - 1 - i);
+				menuEntry.setIdentifier(inventorySetups.size() - 1 - i);
 				menuEntry.setType(MenuAction.RUNELITE.getId());
 			}
 
@@ -426,10 +426,10 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (event.getMenuAction() == MenuAction.RUNELITE && event.getMenuOption().equals(OPEN_SETUP_MENU_ENTRY))
 		{
-			assert event.getActionParam() >= 0 && event.getActionParam() < inventorySetups.size() : "Action param out of range";
+			assert event.getId() >= 0 && event.getId() < inventorySetups.size() : "Action param out of range";
 
 			resetBankSearch();
-			panel.setCurrentInventorySetup(inventorySetups.get(event.getActionParam()), true);
+			panel.setCurrentInventorySetup(inventorySetups.get(event.getId()), true);
 			return;
 		}
 
