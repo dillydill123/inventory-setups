@@ -423,8 +423,6 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (event.getMenuAction() == MenuAction.RUNELITE)
 		{
-			System.out.println(event.getMenuOption());
-			System.out.println(event.getActionParam());
 			assert event.getActionParam() >= 0 && event.getActionParam() < inventorySetups.size() : "Action param out of range";
 			panel.setCurrentInventorySetup(inventorySetups.get(event.getActionParam()), true);
 			return;
