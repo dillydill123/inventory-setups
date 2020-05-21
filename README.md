@@ -107,7 +107,7 @@ In the settings of Inventory Setups, you can change the default options of bank 
 
 ### Compatibility with Bank Tags
 
-Currently there is one known compatibility issue with Bank Tags. If Bank Tags and Inventory Setups are both enabled, switching the withdraw type from Items to Notes (or vice versa) will cause the filter to exit. This is unfortunately not something that can be fixed. The only solution is to turn off the Bank Tags plugin. More info can be found ![Here](https://github.com/dillydill123/inventory-setups/issues/29).
+Currently there is one known compatibility issue with Bank Tags. If Bank Tags and Inventory Setups are both enabled, switching the withdraw type from Items to Notes (or vice versa) will cause the filter to exit. This is unfortunately not something that can be fixed. The only solution is to turn off the Bank Tags plugin. More info can be found [Here](https://github.com/dillydill123/inventory-setups/issues/29).
 
 ### Support and Suggestions
 
