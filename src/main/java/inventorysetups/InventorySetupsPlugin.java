@@ -110,6 +110,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
 	public static final String INV_SEARCH = "inv:";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
+	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final int SPELLBOOK_VARBIT = 4070;
@@ -242,7 +243,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			final int oldMenuSize = menuEntries.length;
-			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + inventorySetups.size());
+			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + inventorySetups.size() + 1);
 
 			for (int i = 0; i < inventorySetups.size(); i++)
 			{
@@ -254,6 +255,13 @@ public class InventorySetupsPlugin extends Plugin
 				menuEntry.setIdentifier(inventorySetups.size() - 1 - i);
 				menuEntry.setType(MenuAction.RUNELITE.getId());
 			}
+
+			// add menu entry to close setup
+			MenuEntry menuEntryCloseSetup = menuEntries[menuEntries.length - 1] = new MenuEntry();
+			menuEntryCloseSetup.setOption(RETURN_TO_OVERVIEW_ENTRY);
+			menuEntryCloseSetup.setType(MenuAction.RUNELITE.getId());
+			menuEntryCloseSetup.setTarget("");
+			menuEntryCloseSetup.setIdentifier(0);
 
 			client.setMenuEntries(menuEntries);
 		}
@@ -424,13 +432,21 @@ public class InventorySetupsPlugin extends Plugin
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
 
-		if (event.getMenuAction() == MenuAction.RUNELITE && event.getMenuOption().equals(OPEN_SETUP_MENU_ENTRY))
+		if (event.getMenuAction() == MenuAction.RUNELITE)
 		{
-			assert event.getId() >= 0 && event.getId() < inventorySetups.size() : "Action param out of range";
+			if (event.getMenuOption().equals(OPEN_SETUP_MENU_ENTRY))
+			{
+				assert event.getId() >= 0 && event.getId() < inventorySetups.size() : "Action param out of range";
 
-			resetBankSearch();
-			panel.setCurrentInventorySetup(inventorySetups.get(event.getId()), true);
-			return;
+				resetBankSearch();
+				panel.setCurrentInventorySetup(inventorySetups.get(event.getId()), true);
+				return;
+			}
+
+			if (event.getMenuOption().equals(RETURN_TO_OVERVIEW_ENTRY))
+			{
+				panel.returnToOverviewPanel();
+			}
 		}
 
 		if (panel.getCurrentSelectedSetup() == null)
