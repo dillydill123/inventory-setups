@@ -542,9 +542,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	public void returnToOverviewPanel()
 	{
-		noSetupsPanel.setVisible(false);
+		noSetupsPanel.setVisible(plugin.getInventorySetups().size() == 0);
 		invEqPanel.setVisible(false);
-		overviewPanel.setVisible(true);
+		overviewPanel.setVisible(plugin.getInventorySetups().size() > 0);
 		overviewTopRightButtonsPanel.setVisible(true);
 		setupTopRightButtonsPanel.setVisible(false);
 		title.setText(MAIN_TITLE);
