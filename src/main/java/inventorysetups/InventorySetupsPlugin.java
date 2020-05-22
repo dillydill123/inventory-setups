@@ -447,6 +447,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (event.getMenuOption().equals(RETURN_TO_OVERVIEW_ENTRY))
 			{
 				panel.returnToOverviewPanel();
+				return;
 			}
 		}
 
