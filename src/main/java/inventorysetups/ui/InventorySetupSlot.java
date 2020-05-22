@@ -30,12 +30,10 @@ import lombok.Getter;
 import lombok.Setter;
 import net.runelite.client.util.AsyncBufferedImage;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.Border;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

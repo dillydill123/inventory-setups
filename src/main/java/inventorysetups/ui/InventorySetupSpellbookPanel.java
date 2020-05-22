@@ -11,7 +11,6 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
