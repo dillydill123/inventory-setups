@@ -32,6 +32,7 @@ import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.Keybind;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
 public interface InventorySetupConfig extends Config
@@ -132,6 +133,17 @@ public interface InventorySetupConfig extends Config
 			position = 8
 	)
 	default boolean compactMode()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_HIDE_BUTTON,
+			name = "Hide Help Button",
+			description = "Hide the help button",
+			position = 9
+	)
+	default boolean hideButton()
 	{
 		return false;
 	}

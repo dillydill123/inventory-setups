@@ -108,6 +108,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY = "setups";
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
+	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String INV_SEARCH = "inv:";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
@@ -223,7 +224,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getGroup().equals(CONFIG_GROUP))
 		{
-			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE))
+			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
 			{
 				panel.rebuild();
 			}

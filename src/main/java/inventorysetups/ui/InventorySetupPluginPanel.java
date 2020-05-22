@@ -36,6 +36,7 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.ui.components.PluginErrorPanel;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -62,6 +63,8 @@ import java.util.List;
 public class InventorySetupPluginPanel extends PluginPanel
 {
 
+	private static ImageIcon HELP_ICON;
+	private static ImageIcon HELP_HOVER_ICON;
 	private static ImageIcon COMPACT_VIEW_ICON;
 	private static ImageIcon COMPACT_VIEW_HOVER_ICON;
 	private static ImageIcon NO_COMPACT_VIEW_ICON;
@@ -86,6 +89,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final JPanel setupTopRightButtonsPanel;
 
 	private final JLabel title;
+	private final JLabel helpButton;
 	private final JLabel compactViewMarker;
 	private final JLabel addMarker;
 	private final JLabel importMarker;
@@ -106,6 +110,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	static
 	{
+		final BufferedImage helpIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/help_button.png");
+		HELP_ICON = new ImageIcon(helpIcon);
+		HELP_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(helpIcon, 0.53f));
+
 		final BufferedImage compactIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/compact_mode_icon.png");
 		final BufferedImage compactIconHover = ImageUtil.luminanceOffset(compactIcon, -150);
 		COMPACT_VIEW_ICON = new ImageIcon(compactIcon);
@@ -150,6 +158,32 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.title = new JLabel();
 		title.setText(MAIN_TITLE);
 		title.setForeground(Color.WHITE);
+
+		this.helpButton = new JLabel(HELP_ICON);
+		helpButton.setToolTipText("Click for help. This button can be hidden in the config.");
+		helpButton.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					LinkBrowser.browse("https://github.com/dillydill123/inventory-setups#inventory-setups");
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				helpButton.setIcon(HELP_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				helpButton.setIcon(HELP_ICON);
+			}
+		});
 
 		this.compactViewMarker = new JLabel(COMPACT_VIEW_ICON);
 		compactViewMarker.addMouseListener(new MouseAdapter()
@@ -302,10 +336,16 @@ public class InventorySetupPluginPanel extends PluginPanel
 		overviewTopRightButtonsPanel.setVisible(true);
 		setupTopRightButtonsPanel.setVisible(false);
 
+		final JPanel titleAndHelpButton = new JPanel();
+		titleAndHelpButton.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		titleAndHelpButton.add(title);
+		titleAndHelpButton.add(helpButton);
+		helpButton.setBorder(new EmptyBorder(0, 8, 0, 0));
+
 		// the top panel that has the title and the buttons, and search bar
 		final JPanel titleAndMarkersPanel = new JPanel();
 		titleAndMarkersPanel.setLayout(new BorderLayout());
-		titleAndMarkersPanel.add(title, BorderLayout.WEST);
+		titleAndMarkersPanel.add(titleAndHelpButton, BorderLayout.WEST);
 		titleAndMarkersPanel.add(markersPanel, BorderLayout.EAST);
 
 		this.searchBar = new IconTextField();
@@ -382,6 +422,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		// make sure the invEq panel isn't visible upon startup
 		invEqPanel.setVisible(false);
+		helpButton.setVisible(!plugin.getConfig().hideButton());
 		updateCompactViewMarker();
 	}
 
@@ -459,6 +500,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		overviewPanel.setVisible(false);
 
 		title.setText(inventorySetup.getName());
+		helpButton.setVisible(false);
 		searchBar.setVisible(false);
 
 		// only show the rune pouch if the setup has a rune pouch
@@ -548,6 +590,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		overviewTopRightButtonsPanel.setVisible(true);
 		setupTopRightButtonsPanel.setVisible(false);
 		title.setText(MAIN_TITLE);
+		helpButton.setVisible(!plugin.getConfig().hideButton());
 		currentSelectedSetup = null;
 		searchBar.setVisible(true);
 		plugin.resetBankSearch();
