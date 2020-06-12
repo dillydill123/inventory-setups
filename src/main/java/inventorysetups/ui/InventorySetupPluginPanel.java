@@ -372,7 +372,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 				rebuild();
 			}
 		});
-		searchBar.addClearListener(actionEvent -> rebuild());
+		searchBar.addClearListener(this::rebuild);
 
 		// the panel that stays at the top and doesn't scroll
 		// contains the title and buttons
