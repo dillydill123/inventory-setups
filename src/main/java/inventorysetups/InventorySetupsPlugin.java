@@ -868,6 +868,8 @@ public class InventorySetupsPlugin extends Plugin
 				return getNormalizedContainer(InventoryID.INVENTORY);
 			case EQUIPMENT:
 				return getNormalizedContainer(InventoryID.EQUIPMENT);
+			case RUNE_POUCH:
+				return getRunePouchData();
 			default:
 				assert false : "Wrong slot ID!";
 				return null;
@@ -991,6 +993,10 @@ public class InventorySetupsPlugin extends Plugin
 		if (slot.getSlotID() == InventorySetupSlotID.EQUIPMENT)
 		{
 			container = slot.getParentSetup().getEquipment();
+		}
+		else if (slot.getSlotID() == InventorySetupSlotID.RUNE_POUCH)
+		{
+			container = slot.getParentSetup().getRune_pouch();
 		}
 
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";

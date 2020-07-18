@@ -90,6 +90,9 @@ public abstract class InventorySetupContainerPanel extends JPanel
 			case EQUIPMENT:
 				updateContainerFrom = "Equipment";
 				break;
+			case RUNE_POUCH:
+				updateContainerFrom = "Rune Pouch";
+				break;
 			default:
 				assert false : "Wrong slot ID!";
 				break;
