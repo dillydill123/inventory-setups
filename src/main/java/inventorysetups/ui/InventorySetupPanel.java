@@ -28,6 +28,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
@@ -48,17 +49,74 @@ public class InventorySetupPanel extends JPanel
 
 		JMenuItem moveUp = new JMenuItem("Move Inventory Setup Up");
 		JMenuItem moveDown = new JMenuItem("Move Inventory Setup Down");
+		JMenuItem moveToTop = new JMenuItem("Move Inventory Setup to Top");
+		JMenuItem moveToBottom = new JMenuItem("Move Inventory Setup to Bottom");
+		JMenuItem moveToPosition = new JMenuItem("Move Inventory Setup to Position...");
 		moveSetupPopupMenu.add(moveUp);
 		moveSetupPopupMenu.add(moveDown);
+		moveSetupPopupMenu.add(moveToTop);
+		moveSetupPopupMenu.add(moveToBottom);
+		moveSetupPopupMenu.add(moveToPosition);
 
 		moveUp.addActionListener(e ->
 		{
-			plugin.moveSetupUp(invSetup);
+			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+			plugin.moveSetup(invIndex, invIndex - 1);
 		});
 
 		moveDown.addActionListener(e ->
 		{
-			plugin.moveSetupDown(invSetup);
+			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+			plugin.moveSetup(invIndex, invIndex + 1);
+		});
+
+		moveToTop.addActionListener(e ->
+		{
+			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+			plugin.moveSetup(invIndex, 0);
+		});
+		moveToBottom.addActionListener(e ->
+		{
+			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+			plugin.moveSetup(invIndex, plugin.getInventorySetups().size() - 1);
+		});
+		moveToPosition.addActionListener(e ->
+		{
+			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+			final String posDialog = "Enter a position between 1 and " + String.valueOf(plugin.getInventorySetups().size()) +
+									". Current setup is in position " + String.valueOf(invIndex + 1) + ".";
+			final String newPositionStr = JOptionPane.showInputDialog(panel,
+					posDialog,
+					"Move Setup",
+					JOptionPane.PLAIN_MESSAGE);
+
+			// cancel button was clicked
+			if (newPositionStr == null)
+			{
+				return;
+			}
+
+			try
+			{
+				int newPosition = Integer.parseInt(newPositionStr);
+				if (newPosition < 1 || newPosition > plugin.getInventorySetups().size())
+				{
+					JOptionPane.showMessageDialog(panel,
+							"Invalid position.",
+							"Move Setup Failed",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				plugin.moveSetup(invIndex, newPosition - 1);
+			}
+			catch (NumberFormatException ex)
+			{
+				JOptionPane.showMessageDialog(panel,
+						"Invalid position.",
+						"Move Setup Failed",
+						JOptionPane.ERROR_MESSAGE);
+			}
+
 		});
 
 		setComponentPopupMenu(moveSetupPopupMenu);

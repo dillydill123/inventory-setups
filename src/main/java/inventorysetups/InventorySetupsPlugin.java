@@ -351,34 +351,15 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	public void moveSetupDown(final InventorySetup setup)
+	public void moveSetup(int invIndex, int newPosition)
 	{
-		int invIndex = inventorySetups.indexOf(setup);
-		assert invIndex >= 0 && invIndex < inventorySetups.size();
-
-		// return if this is setup is at the bottom. It cant be moved further
-		if (invIndex == inventorySetups.size() - 1)
+		// Setup is already in the specified position or is out of position
+		if (invIndex == newPosition || newPosition < 0 || newPosition >= inventorySetups.size())
 		{
 			return;
 		}
-
-		Collections.swap(inventorySetups, invIndex, invIndex + 1);
-		panel.rebuild();
-		updateConfig();
-	}
-
-	public void moveSetupUp(final InventorySetup setup)
-	{
-		int invIndex = inventorySetups.indexOf(setup);
-		assert invIndex >= 0 && invIndex < inventorySetups.size();
-
-		// return if this is setup is at the top. It cant be moved further
-		if (invIndex == 0)
-		{
-			return;
-		}
-
-		Collections.swap(inventorySetups, invIndex, invIndex - 1);
+		InventorySetup setup = inventorySetups.remove(invIndex);
+		inventorySetups.add(newPosition, setup);
 		panel.rebuild();
 		updateConfig();
 	}
