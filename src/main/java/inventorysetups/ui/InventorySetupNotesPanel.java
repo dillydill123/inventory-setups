@@ -107,7 +107,6 @@ public class InventorySetupNotesPanel extends InventorySetupContainerPanel
 			public void focusLost(FocusEvent e)
 			{
 				notesChanged(getNotes());
-				System.out.println("Focus lost");
 			}
 
 			private void notesChanged(String data)
