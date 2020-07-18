@@ -102,6 +102,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 	private final InventorySetupEquipmentPanel eqpPanel;
 	private final InventorySetupRunePouchPanel rpPanel;
 	private final InventorySetupSpellbookPanel sbPanel;
+	private final InventorySetupNotesPanel notesPanel;
 
 	@Getter
 	private InventorySetup currentSelectedSetup;
@@ -150,6 +151,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin, rpPanel);
 		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, plugin);
 		this.sbPanel = new InventorySetupSpellbookPanel(itemManager, plugin);
+		this.notesPanel = new InventorySetupNotesPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
@@ -393,6 +395,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 		invEqPanel.add(eqpPanel);
 		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		invEqPanel.add(sbPanel);
+		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		invEqPanel.add(notesPanel);
 
 		// setup the error panel. It's wrapped around a normal panel
 		// so it doesn't stretch to fill the parent panel
@@ -491,6 +495,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		rpPanel.setSlots(inventorySetup);
 		eqpPanel.setSlots(inventorySetup);
 		sbPanel.setSlots(inventorySetup);
+		notesPanel.setSlots(inventorySetup);
 
 		overviewTopRightButtonsPanel.setVisible(false);
 		setupTopRightButtonsPanel.setVisible(true);

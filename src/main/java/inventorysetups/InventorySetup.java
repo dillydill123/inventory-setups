@@ -49,6 +49,10 @@ public class InventorySetup
 
 	@Getter
 	@Setter
+	private String notes;
+
+	@Getter
+	@Setter
 	private Color highlightColor;
 
 	@Getter
@@ -101,6 +105,11 @@ public class InventorySetup
 	public void updateSpellbook(final int sb)
 	{
 		spellBook = sb;
+	}
+
+	public void updateNotes(final String text)
+	{
+		notes = text;
 	}
 
 }

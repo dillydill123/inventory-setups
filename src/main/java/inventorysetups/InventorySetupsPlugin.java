@@ -339,7 +339,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			int spellbook = getCurrentSpellbook();
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, name,
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, name, "",
 													config.highlightColor(),
 													config.highlightStackDifference(),
 													config.highlightVariationDifference(),
@@ -488,8 +488,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 	}
-
-
 
 	@Subscribe
 	public void onVarClientIntChanged(VarClientIntChanged event)
@@ -780,6 +778,15 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
+	public void updateNotesInSetup(final InventorySetup setup, final String text)
+	{
+		clientThread.invokeLater(() ->
+		{
+			setup.updateNotes(text);
+			updateConfig();
+		});
+	}
+
 	public void removeInventorySetup(final InventorySetup setup)
 	{
 		int confirm = JOptionPane.showConfirmDialog(panel,
@@ -968,6 +975,10 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					newSetup.updateRunePouch(getRunePouchData());
 				}
+				if (newSetup.getNotes() == null)
+				{
+					newSetup.updateNotes("");
+				}
 				addInventorySetupClientThread(newSetup);
 			});
 		}
@@ -1032,6 +1043,10 @@ public class InventorySetupsPlugin extends Plugin
 						if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false, true))
 						{
 							setup.updateRunePouch(getRunePouchData());
+						}
+						if (setup.getNotes() == null)
+						{
+							setup.updateNotes("");
 						}
 					}
 				});
