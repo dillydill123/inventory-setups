@@ -92,7 +92,6 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,6 +107,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY = "setups";
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
+	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String INV_SEARCH = "inv:";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
@@ -180,6 +180,8 @@ public class InventorySetupsPlugin extends Plugin
 					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
 			};
 
+
+
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
 		@Override
@@ -224,7 +226,8 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getGroup().equals(CONFIG_GROUP))
 		{
-			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
+			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
+				event.getKey().equals(CONFIG_KEY_SORTING_MODE))
 			{
 				panel.rebuild();
 			}
@@ -271,6 +274,11 @@ public class InventorySetupsPlugin extends Plugin
 	public void switchViews(boolean compactMode)
 	{
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_COMPACT_MODE, compactMode);
+	}
+
+	public void toggleAlphabeticalMode(InventorySetupSorting mode)
+	{
+		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SORTING_MODE, mode);
 	}
 
 	@Override

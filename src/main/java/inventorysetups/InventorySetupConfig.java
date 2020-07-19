@@ -33,6 +33,7 @@ import net.runelite.client.config.Keybind;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
 public interface InventorySetupConfig extends Config
@@ -138,10 +139,21 @@ public interface InventorySetupConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = CONFIG_KEY_SORTING_MODE,
+			name = "Sorting Mode",
+			description = "Configures the sorting of setups",
+			position = 9
+	)
+	default InventorySetupSorting sortingMode()
+	{
+		return InventorySetupSorting.DEFAULT;
+	}
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_HIDE_BUTTON,
 			name = "Hide Help Button",
 			description = "Hide the help button",
-			position = 9
+			position = 10
 	)
 	default boolean hideButton()
 	{
