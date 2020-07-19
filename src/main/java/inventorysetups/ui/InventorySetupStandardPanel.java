@@ -212,7 +212,7 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 					nameInput.setEditable(false);
 					updateNameActions(false);
 					requestFocusInWindow();
-					panel.rebuild();
+					panel.rebuild(false);
 				}
 			}
 

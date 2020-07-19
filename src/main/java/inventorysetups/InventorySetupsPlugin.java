@@ -187,7 +187,7 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			panel.returnToOverviewPanel();
+			panel.returnToOverviewPanel(false);
 		}
 	};
 
@@ -229,7 +229,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
 				event.getKey().equals(CONFIG_KEY_SORTING_MODE))
 			{
-				panel.rebuild();
+				panel.rebuild(true);
 			}
 		}
 	}
@@ -313,7 +313,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			SwingUtilities.invokeLater(() ->
 			{
-				panel.rebuild();
+				panel.rebuild(true);
 			});
 
 			return true;
@@ -368,7 +368,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		InventorySetup setup = inventorySetups.remove(invIndex);
 		inventorySetups.add(newPosition, setup);
-		panel.rebuild();
+		panel.rebuild(false);
 		updateConfig();
 	}
 
@@ -435,7 +435,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (event.getMenuOption().equals(RETURN_TO_OVERVIEW_ENTRY))
 			{
-				panel.returnToOverviewPanel();
+				panel.returnToOverviewPanel(false);
 				return;
 			}
 		}
@@ -788,7 +788,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		inventorySetups.remove(setup);
-		panel.rebuild();
+		panel.rebuild(false);
 		updateConfig();
 	}
 
@@ -811,7 +811,7 @@ public class InventorySetupsPlugin extends Plugin
 				loadConfig();
 				SwingUtilities.invokeLater(() ->
 				{
-					panel.rebuild();
+					panel.rebuild(true);
 				});
 
 				return true;
@@ -828,7 +828,7 @@ public class InventorySetupsPlugin extends Plugin
 			loadConfig();
 			SwingUtilities.invokeLater(() ->
 			{
-				panel.rebuild();
+				panel.rebuild(true);
 			});
 
 			return true;
@@ -1058,7 +1058,7 @@ public class InventorySetupsPlugin extends Plugin
 		SwingUtilities.invokeLater(() ->
 		{
 			inventorySetups.add(newSetup);
-			panel.rebuild();
+			panel.rebuild(true);
 
 			updateConfig();
 		});

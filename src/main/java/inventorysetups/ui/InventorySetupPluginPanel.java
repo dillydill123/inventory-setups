@@ -348,7 +348,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					returnToOverviewPanel();
+					returnToOverviewPanel(false);
 				}
 			}
 
@@ -420,10 +420,10 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
-				rebuild();
+				rebuild(true);
 			}
 		});
-		searchBar.addClearListener(this::rebuild);
+		searchBar.addClearListener(() -> rebuild(true));
 
 		// the panel that stays at the top and doesn't scroll
 		// contains the title and buttons
@@ -518,9 +518,9 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	}
 
-	public void rebuild()
+	public void rebuild(boolean resetScrollBar)
 	{
-		returnToOverviewPanel();
+		returnToOverviewPanel(resetScrollBar);
 		overviewPanel.removeAll();
 
 		final String text = searchBar.getText();
@@ -555,7 +555,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	public void setCurrentInventorySetup(final InventorySetup inventorySetup, boolean resetScrollBar)
 	{
-		overviewPanelScrollPosition =  contentWrapperPane.getVerticalScrollBar().getValue();
+		overviewPanelScrollPosition = contentWrapperPane.getVerticalScrollBar().getValue();
 		currentSelectedSetup = inventorySetup;
 		invPanel.setSlots(inventorySetup);
 		rpPanel.setSlots(inventorySetup);
@@ -653,8 +653,18 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	}
 
-	public void returnToOverviewPanel()
+	public void returnToOverviewPanel(boolean resetScrollBar)
 	{
+		if (resetScrollBar)
+		{
+			overviewPanelScrollPosition = 0;
+			contentWrapperPane.getVerticalScrollBar().setValue(overviewPanelScrollPosition);
+		}
+		else if (currentSelectedSetup != null)
+		{
+			contentWrapperPane.getVerticalScrollBar().setValue(overviewPanelScrollPosition);
+		}
+
 		noSetupsPanel.setVisible(plugin.getInventorySetups().size() == 0);
 		invEqPanel.setVisible(false);
 		overviewPanel.setVisible(plugin.getInventorySetups().size() > 0);
@@ -664,7 +674,6 @@ public class InventorySetupPluginPanel extends PluginPanel
 		helpButton.setVisible(!plugin.getConfig().hideButton());
 		currentSelectedSetup = null;
 		searchBar.setVisible(true);
-		contentWrapperPane.getVerticalScrollBar().setValue(overviewPanelScrollPosition);
 		plugin.resetBankSearch();
 	}
 
