@@ -40,8 +40,7 @@ public class InventorySetupNotesPanel extends InventorySetupContainerPanel
 	@Override
 	public void setupContainerPanel(JPanel containerSlotsPanel)
 	{
-		//setLayout(new BorderLayout());
-		this.notesEditor = new JTextArea();
+		this.notesEditor = new JTextArea(10, 0);
 		this.undoRedo = new UndoManager();
 		this.currentInventorySetup = null;
 
@@ -116,7 +115,6 @@ public class InventorySetupNotesPanel extends InventorySetupContainerPanel
 		});
 
 		int width = 46 * 4 + 3;
-		//containerSlotsPanel.setPreferredSize(new Dimension(100, 200));
 		containerSlotsPanel.setLayout(new BorderLayout());
 		containerSlotsPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		containerSlotsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
