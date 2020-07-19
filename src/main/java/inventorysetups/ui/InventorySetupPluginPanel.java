@@ -114,6 +114,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 	@Getter
 	private InventorySetup currentSelectedSetup;
 
+	private int overviewPanelScrollPosition;
+
 	private final InventorySetupsPlugin plugin;
 
 	static
@@ -170,6 +172,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
+		this.overviewPanelScrollPosition = 0;
 
 		// setup the title
 		this.title = new JLabel();
@@ -552,6 +555,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	public void setCurrentInventorySetup(final InventorySetup inventorySetup, boolean resetScrollBar)
 	{
+		overviewPanelScrollPosition =  contentWrapperPane.getVerticalScrollBar().getValue();
 		currentSelectedSetup = inventorySetup;
 		invPanel.setSlots(inventorySetup);
 		rpPanel.setSlots(inventorySetup);
@@ -660,6 +664,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		helpButton.setVisible(!plugin.getConfig().hideButton());
 		currentSelectedSetup = null;
 		searchBar.setVisible(true);
+		contentWrapperPane.getVerticalScrollBar().setValue(overviewPanelScrollPosition);
 		plugin.resetBankSearch();
 	}
 
