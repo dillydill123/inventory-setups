@@ -386,13 +386,13 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
 		{
-			client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
-			bankSearch.search(type, INV_SEARCH + currentSelectedSetup.getName(), true);
-
 			// When tab is selected with search window open, the search window closes but the search button
 			// stays highlighted, this solves that issue
 			clientThread.invoke(() ->
 			{
+				client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
+				bankSearch.search(type, INV_SEARCH + currentSelectedSetup.getName(), true);
+
 				Widget bankContainer = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
 				if (bankContainer != null && !bankContainer.isHidden())
 				{
