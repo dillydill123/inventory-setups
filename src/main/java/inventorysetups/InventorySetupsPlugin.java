@@ -243,6 +243,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
+		// Adds menu entries to show worn items button
 		if (event.getOption().equals("Show worn items"))
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
@@ -442,6 +443,15 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() == null)
 		{
+			return;
+		}
+
+		if (event.getWidgetId() == WidgetInfo.BANK_ITEM_CONTAINER.getId() && event.getMenuOption().startsWith("View tab"))
+		{
+			if (config.disableBankTabBar())
+			{
+				event.consume();
+			}
 			return;
 		}
 

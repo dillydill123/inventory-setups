@@ -159,4 +159,15 @@ public interface InventorySetupConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "disableBankTabBar",
+			name = "Disable Bank Tab Bar",
+			description = "Stops the thin bank tab bar from removing the bank filter when clicked",
+			position = 11
+	)
+	default boolean disableBankTabBar()
+	{
+		return false;
+	}
 }
