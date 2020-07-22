@@ -13,6 +13,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -130,7 +131,13 @@ public class InventorySetupNotesPanel extends InventorySetupContainerPanel
 	@Override
 	public void setSlots(InventorySetup setup)
 	{
+		// Set the caret to not update right before setting the text
+		// this stops it from scrolling down the parent scroll pane
+		DefaultCaret caret = (DefaultCaret)notesEditor.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
 		notesEditor.setText(setup.getNotes());
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
 		currentInventorySetup = setup;
 	}
 
