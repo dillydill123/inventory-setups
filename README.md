@@ -11,9 +11,16 @@ To create a new setup, gear up for the activity you would like to save, and then
 
 ![Green Plus Button](readme_images_and_gifs/green_plus_button.png)
 
-You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune pouch (if present), and spellbook are saved in the setup. 
+### Overview Panel
+The overview panel contains all the setups and options to manipulate them.
+
+#### Viewing a Setup
+
+You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune pouch (if present), spellbook, and notes are saved in the setup. 
 
 ![View Setup](readme_images_and_gifs/view_setup_button.png)
+
+![View Setup](readme_images_and_gifs/view_setup.gif)
 
 It is also possible to view setups in game. You can do this by right clicking the "Show worn items" button in the top left of the bank, and clicking on one of your setups.
 
@@ -27,13 +34,25 @@ You can also search for setups using the search bar. When typing in the search b
 
 ![Search Bar](readme_images_and_gifs/search_bar.gif)
 
-Is it possible to move a setup up and down the list by right clicking near the setup name and selecting one of the menu options.
-
-![Move Setups](readme_images_and_gifs/move_setups.gif)
-
 You can switch the overview panel to "compact" mode by clicking on the triple rectangular button at the top. Compact mode will only show the names of the setups on a shorter panel with no options so more can be seen without needing to scroll.
 
 ![Compact Mode](readme_images_and_gifs/compact_mode.gif)
+
+#### Sorting Modes
+
+Sorting modes allow for setups to be ordered in the overview panel in different ways.
+
+Currently there is only one additional sorting mode, alphabetical. This will organize all setups alphabetically. You can return to the default sorting mode through the config or by clicking the alphabetical sort button.
+
+![Alphabetical Mode](readme_images_and_gifs/alphabetical_sort.gif)
+
+#### Moving a Setup
+
+Is it possible to move a setup up and down the list by right clicking near the setup name and selecting one of the menu options.
+
+![Move Setups](readme_images_and_gifs/move_setup_options.gif)
+
+You cannot move setups if a sorting mode is enabled.
 
 ### Editing a Setup
 
@@ -101,9 +120,17 @@ Rune pouches are supported. If you have a old setup that contains a rune pouch, 
 
 ![Rune Pouch](readme_images_and_gifs/update_rune_pouch.gif)
 
+You can also update the slots individually.
+
+![Rune Pouch Individual](readme_images_and_gifs/update_from_rune_pouch.gif)
+
 ### Configuration Settings
 
-In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color. It also contains some key binds that you can set to return to the overview panel quickly, or filter the bank again if you accidentally clicked on a different tab. You can also enable compact mode here, and hide the help button.
+In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color. It also contains some key binds that you can set to return to the overview panel quickly, or filter the bank again if you accidentally clicked on a different tab. You can also enable compact mode here, hide the help button, and change the sorting method of setups.
+
+One config setting worth noting is "Disable Bank Tab Bar". Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items.
+
+![Disable Bank Tab Bar](readme_images_and_gifs/disable_tab_bar.png)
 
 ### Compatibility with Bank Tags
 
@@ -135,3 +162,6 @@ Added compact view and the ability to move setups up and down the list
 
 ##### 1.6
 Added ability to switch setups in game with "Show worn items" button. Added spellbook to setups. Added help button (which can be disabled in the config settings).
+
+##### 1.7
+Added Notes
