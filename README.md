@@ -164,4 +164,4 @@ Added compact view and the ability to move setups up and down the list
 Added ability to switch setups in game with "Show worn items" button. Added spellbook to setups. Added help button (which can be disabled in the config settings).
 
 ##### 1.7
-Added Notes
+Added notes, alphabetical sorting mode, more options to move setups, and more options to update rune pouch slots
