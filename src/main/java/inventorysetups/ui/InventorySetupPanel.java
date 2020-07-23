@@ -26,6 +26,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
+import inventorysetups.InventorySetupSorting;
 import inventorysetups.InventorySetupsPlugin;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -60,28 +61,48 @@ public class InventorySetupPanel extends JPanel
 
 		moveUp.addActionListener(e ->
 		{
+			if (!checkSortingMode())
+			{
+				return;
+			}
 			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
 			plugin.moveSetup(invIndex, invIndex - 1);
 		});
 
 		moveDown.addActionListener(e ->
 		{
+			if (!checkSortingMode())
+			{
+				return;
+			}
 			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
 			plugin.moveSetup(invIndex, invIndex + 1);
 		});
 
 		moveToTop.addActionListener(e ->
 		{
+			if (!checkSortingMode())
+			{
+				return;
+			}
 			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
 			plugin.moveSetup(invIndex, 0);
 		});
 		moveToBottom.addActionListener(e ->
 		{
+			if (!checkSortingMode())
+			{
+				return;
+			}
 			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
 			plugin.moveSetup(invIndex, plugin.getInventorySetups().size() - 1);
 		});
 		moveToPosition.addActionListener(e ->
 		{
+			if (!checkSortingMode())
+			{
+				return;
+			}
 			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
 			final String posDialog = "Enter a position between 1 and " + String.valueOf(plugin.getInventorySetups().size()) +
 									". Current setup is in position " + String.valueOf(invIndex + 1) + ".";
@@ -120,5 +141,19 @@ public class InventorySetupPanel extends JPanel
 		});
 
 		setComponentPopupMenu(moveSetupPopupMenu);
+	}
+
+	private boolean checkSortingMode()
+	{
+		if (plugin.getConfig().sortingMode() != InventorySetupSorting.DEFAULT)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"You cannot move setups while a sorting mode is enabled.",
+					"Move Setup Failed",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+
+		return true;
 	}
 }
