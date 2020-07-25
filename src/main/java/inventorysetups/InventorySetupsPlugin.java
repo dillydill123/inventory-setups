@@ -40,19 +40,19 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
+import net.runelite.api.ScriptID;
 import net.runelite.api.SpriteID;
 import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.ScriptCallbackEvent;
-import net.runelite.api.events.VarClientIntChanged;
+import net.runelite.api.events.ScriptPostFired;
+import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
-import net.runelite.api.vars.InputType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.account.AccountSession;
@@ -72,7 +72,6 @@ import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.banktags.tabs.BankSearch;
 import net.runelite.client.plugins.runepouch.Runes;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
@@ -156,7 +155,7 @@ public class InventorySetupsPlugin extends Plugin
 	private NavigationButton navButton;
 
 	@Inject
-	private BankSearch bankSearch;
+	private InventorySetupsBankSearch bankSearch;
 
 	@Inject
 	private KeyManager keyManager;
@@ -169,7 +168,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	private ChatboxTextInput searchInput;
 
-	private boolean doBankSearchOnNextGameTick;
+	// global filtering is allowed for any setup
+	private boolean filteringIsAllowed;
 
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
 			{
@@ -209,7 +209,7 @@ public class InventorySetupsPlugin extends Plugin
 					return false;
 				}
 
-				doBankSearch(InputType.SEARCH);
+				doBankSearch();
 				return true;
 			});
 		}
@@ -285,7 +285,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void startUp()
 	{
-		this.doBankSearchOnNextGameTick = false;
+		this.filteringIsAllowed = true;
 		this.panel = new InventorySetupPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
 
@@ -381,19 +381,21 @@ public class InventorySetupsPlugin extends Plugin
 				.collect(Collectors.toList());
 	}
 
-	public void doBankSearch(InputType type)
+	public void doBankSearch()
 	{
 		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
+		filteringIsAllowed = true;
 
 		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
 		{
-			// When tab is selected with search window open, the search window closes but the search button
-			// stays highlighted, this solves that issue
+
 			clientThread.invoke(() ->
 			{
 				client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
-				bankSearch.search(type, INV_SEARCH + currentSelectedSetup.getName(), true);
+				bankSearch.layoutBank();
 
+				// When tab is selected with search window open, the search window closes but the search button
+				// stays highlighted, this solves that issue
 				Widget bankContainer = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
 				if (bankContainer != null && !bankContainer.isHidden())
 				{
@@ -401,21 +403,6 @@ public class InventorySetupsPlugin extends Plugin
 					searchBackground.setSpriteId(SpriteID.EQUIPMENT_SLOT_TILE);
 				}
 			});
-		}
-	}
-
-	@Subscribe
-	public void onGameTick(GameTick event)
-	{
-		// filter the bank if the requirements are met
-		// this is for when withdraw-x or deposit-x are clicked.
-		if (doBankSearchOnNextGameTick
-			&& panel.getCurrentSelectedSetup() != null
-			&& client.getVar(VarClientInt.INPUT_TYPE) == InputType.NONE.getType()
-			&& !bankIsFiltered())
-		{
-			doBankSearch(InputType.NONE);
-			doBankSearchOnNextGameTick = false;
 		}
 	}
 
@@ -455,8 +442,15 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		if (event.getWidgetId() == WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND.getId()
-				&& client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND).getSpriteId() != SpriteID.EQUIPMENT_SLOT_SELECTED)
+		else if (panel.getCurrentSelectedSetup() != null
+				&& (event.getMenuOption().startsWith("View tab") || event.getMenuOption().equals("View all items")))
+		{
+			filteringIsAllowed = false;
+			return;
+		}
+
+		if (event.getMenuOption().equals("Search")
+			&& client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND).getSpriteId() != SpriteID.EQUIPMENT_SLOT_SELECTED)
 		{
 			// This ensures that when clicking Search when tab is selected, the search input is opened rather
 			// than client trying to close it first
@@ -464,52 +458,8 @@ public class InventorySetupsPlugin extends Plugin
 			client.setVar(VarClientInt.INPUT_TYPE, 0);
 
 			// don't allow the bank to retry a filter if the search button is clicked
-			doBankSearchOnNextGameTick = false;
+			filteringIsAllowed = false;
 		}
-
-		// if withdraw or deposit x is clicked, we need to refilter the bank
-		if ((event.getWidgetId() == WidgetInfo.BANK_ITEM_CONTAINER.getId()
-				|| event.getWidgetId() == WidgetInfo.BANK_INVENTORY_ITEMS_CONTAINER.getId())
-				&& event.getMenuAction() == MenuAction.CC_OP_LOW_PRIORITY
-				&& (event.getMenuOption().equalsIgnoreCase("withdraw-x")
-				|| event.getMenuOption().equalsIgnoreCase("deposit-x"))
-				&& bankIsFiltered())
-		{
-			doBankSearchOnNextGameTick = true;
-		}
-
-		// if a bank tab is clicked, then make sure we do not try to filter
-		if (doBankSearchOnNextGameTick
-				&& event.getWidgetId() == WidgetInfo.BANK_TAB_CONTAINER.getId()
-				&& event.getMenuOption().startsWith("View"))
-		{
-			doBankSearchOnNextGameTick = false;
-		}
-
-	}
-
-	@Subscribe
-	public void onVarClientIntChanged(VarClientIntChanged event)
-	{
-		if (event.getIndex() == 386)
-		{
-			// must be invoked later otherwise causes freezing.
-			clientThread.invokeLater(() ->
-			{
-				// Note: small bug here because when the settings or equip items button is pressed
-				// it will re filter the bank even if the user has clicked somewhere to remove the filter
-				// possible fix: use MenuOptionClicked for buttons and check spriteId to see if they are being unclicked
-				// and go back to widgetOpened to check if the bank was opened.
-
-				// checks to see if the hide worn items button was clicked or bank was opened
-				int value = client.getVarcIntValue(386);
-				if (value == 0)
-				{
-					doBankSearch(InputType.SEARCH);
-				}
-			});
-		}
-
 	}
 
 	@Subscribe
@@ -556,50 +506,62 @@ public class InventorySetupsPlugin extends Plugin
 		String eventName = event.getEventName();
 
 		int[] intStack = client.getIntStack();
-		String[] stringStack = client.getStringStack();
 		int intStackSize = client.getIntStackSize();
-		int stringStackSize = client.getStringStackSize();
 
 		switch (eventName)
 		{
 			case "bankSearchFilter":
 			{
-				String search = stringStack[stringStackSize - 1];
-
-				boolean invSearch = search.startsWith(INV_SEARCH);
-				if (invSearch)
+				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+				if (currentSetup != null && currentSetup.isFilterBank() && filteringIsAllowed)
 				{
-					final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+					int itemId = intStack[intStackSize - 1];
 
-					if (currentSetup != null)
+					if (setupContainsItem(currentSetup, itemId))
 					{
-						int itemId = intStack[intStackSize - 1];
-
-						if (setupContainsItem(currentSetup, itemId))
-						{
-							// return true
-							intStack[intStackSize - 2] = 1;
-						}
-						else
-						{
-							intStack[intStackSize - 2] = 0;
-						}
+						// return true
+						intStack[intStackSize - 2] = 1;
+					}
+					else
+					{
+						intStack[intStackSize - 2] = 0;
 					}
 				}
 				break;
 			}
-			case "getSearchingTagTab":
-				if (panel.getCurrentSelectedSetup() == null)
-				{
-					return;
-				}
-
-				// check if the bank is filtered. If it is, don't lay out again.
-				intStack[intStackSize - 1] = bankIsFiltered() ? 1 : 0;
-				break;
 		}
 
 
+	}
+
+	@Subscribe
+	public void onScriptPreFired(ScriptPreFired event)
+	{
+		if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
+		{
+			// Since we apply tag tab search filters even when the bank is not in search mode,
+			// bankkmain_build will reset the bank title to "The Bank of Gielinor". So apply our
+			// own title.
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
+			{
+				Widget bankTitle = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
+				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
+			}
+		}
+	}
+
+	@Subscribe
+	public void onScriptPostFired(ScriptPostFired event)
+	{
+		if (event.getScriptId() == ScriptID.BANKMAIN_SEARCHING)
+		{
+			// The return value of bankmain_searching is on the stack. If we have a tag tab active
+			// make it return true to put the bank in a searching state.
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
+			{
+				client.getIntStack()[client.getIntStackSize() - 1] = 1; // true
+			}
+		}
 	}
 
 	public void updateCurrentSetup(InventorySetup setup)
@@ -995,8 +957,8 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void shutDown()
 	{
+		resetBankSearch();
 		clientToolbar.removeNavigation(navButton);
-		bankSearch.reset(true);
 	}
 
 	public boolean isHighlightingAllowed()
@@ -1172,21 +1134,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		return true;
-	}
-
-	private boolean bankIsFiltered()
-	{
-		if (panel.getCurrentSelectedSetup() != null)
-		{
-			Widget bankWidget = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
-			if (bankWidget == null || bankWidget.isHidden())
-			{
-				return false;
-			}
-			String bankTitle = bankWidget.getText();
-			return bankTitle.equalsIgnoreCase("Showing items: <col=ff0000>" + INV_SEARCH + panel.getCurrentSelectedSetup().getName() + "</col>");
-		}
-		return false;
 	}
 
 }

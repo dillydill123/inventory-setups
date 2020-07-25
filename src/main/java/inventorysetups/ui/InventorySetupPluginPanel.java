@@ -587,7 +587,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			this.contentWrapperPane.getVerticalScrollBar().setValue(0);
 		}
 
-		plugin.doBankSearch(InputType.SEARCH);
+		plugin.doBankSearch();
 
 		validate();
 		repaint();
