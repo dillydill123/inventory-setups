@@ -72,7 +72,6 @@ import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.banktags.tabs.BankSearch;
 import net.runelite.client.plugins.runepouch.Runes;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
@@ -156,7 +155,7 @@ public class InventorySetupsPlugin extends Plugin
 	private NavigationButton navButton;
 
 	@Inject
-	private BankSearch bankSearch;
+	private InventorySetupBankSearch bankSearch;
 
 	@Inject
 	private KeyManager keyManager;
