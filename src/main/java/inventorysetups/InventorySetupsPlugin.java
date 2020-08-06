@@ -53,7 +53,9 @@ import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.account.AccountSession;
 import net.runelite.client.account.SessionManager;
@@ -89,6 +91,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -270,6 +273,26 @@ public class InventorySetupsPlugin extends Plugin
 			menuEntryCloseSetup.setIdentifier(0);
 
 			client.setMenuEntries(menuEntries);
+		}
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded event)
+	{
+		// when the bank is loaded up allowing filtering again
+		// this is to make it so the bank will refilter if a tab was clicked and then the player exited the bank
+		if (event.getGroupId() == WidgetID.BANK_GROUP_ID)
+		{
+			filteringIsAllowed = true;
+
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
+			{
+				// Set the bank tab to 0 so the filtering will work if the user had a different tab selected
+				clientThread.invoke(() ->
+				{
+					client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
+				});
+			}
 		}
 	}
 
