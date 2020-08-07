@@ -287,11 +287,8 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
 			{
-				// Set the bank tab to 0 so the filtering will work if the user had a different tab selected
-				clientThread.invoke(() ->
-				{
-					client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
-				});
+				// start a bank search so the bank is filtered when it's opened
+				doBankSearch();
 			}
 		}
 	}
@@ -553,6 +550,21 @@ public class InventorySetupsPlugin extends Plugin
 				}
 				break;
 			}
+			case "getSearchingTagTab":
+				// Clicking on a bank tab that isn't the first one (main tab),
+				// then filtering the bank (either by selecting a setup or hotkey),
+				// then clicking on "item" or "note" would cause the bank to show the tab
+				// and remove the filter. This stops this from happening.
+				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+				if (currentSetup != null && currentSetup.isFilterBank() && filteringIsAllowed)
+				{
+					intStack[intStackSize - 1] = 1;
+				}
+				else
+				{
+					intStack[intStackSize - 1] = 0;
+				}
+				break;
 		}
 
 
