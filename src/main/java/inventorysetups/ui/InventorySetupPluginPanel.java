@@ -536,7 +536,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		if (plugin.getConfig().sortingMode() == InventorySetupSorting.ALPHABETICAL)
 		{
-			setupsToAdd.sort(Comparator.comparing(InventorySetup::getName));
+			setupsToAdd.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
 
 		init(setupsToAdd);
