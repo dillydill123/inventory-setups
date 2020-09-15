@@ -99,8 +99,10 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		}
 		JMenuItem updateFromContainer = new JMenuItem("Update Slot from " + updateContainerFrom);
 		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
+		JMenuItem removeSlot = new JMenuItem("Remove Item from Slot");
 		popupMenu.add(updateFromContainer);
 		popupMenu.add(updateFromSearch);
+		popupMenu.add(removeSlot);
 
 		updateFromContainer.addActionListener(e ->
 		{
@@ -110,6 +112,11 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		updateFromSearch.addActionListener(e ->
 		{
 			plugin.updateSlotFromSearch(slot);
+		});
+
+		removeSlot.addActionListener(e ->
+		{
+			plugin.remoteItemFromSlot(slot);
 		});
 
 		// both the panel and image label need adapters

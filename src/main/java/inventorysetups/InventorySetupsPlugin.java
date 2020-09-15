@@ -91,7 +91,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -759,6 +758,35 @@ public class InventorySetupsPlugin extends Plugin
 				});
 			})
 			.build();
+	}
+
+	public void remoteItemFromSlot(final InventorySetupSlot slot)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"You must be logged in to remove item from the slot.",
+					"Cannot Remove Item",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+
+		// must be invoked on client thread to get the name
+		clientThread.invokeLater(() ->
+		{
+			// update the rune pouch data
+			final InventorySetupItem dummyItem = new InventorySetupItem(-1, "", 0);
+			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), dummyItem))
+			{
+				return;
+			}
+
+			container.set(slot.getIndexInSlot(), dummyItem);
+			updateConfig();
+			panel.refreshCurrentSetup();
+		});
 	}
 
 	public void updateSpellbookInSetup(int newSpellbook)
