@@ -8,7 +8,6 @@ import javax.swing.SwingUtilities;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class InventorySetupCycleButton<T> extends JLabel
 {
@@ -17,33 +16,31 @@ public class InventorySetupCycleButton<T> extends JLabel
 	private final ArrayList<ImageIcon> icons;
 	private final ArrayList<ImageIcon> hoverIcons;
 	private final ArrayList<String> tooltips;
-	private final ArrayList<Runnable> runnables;
+	private final Runnable runnable;
 	private int currentIndex;
 
 	InventorySetupCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips)
 	{
-		this(plugin, states, icons, hoverIcons, tooltips, new ArrayList<>(Collections.nCopies(states.size(), () ->
+		this(plugin, states, icons, hoverIcons, tooltips, () ->
 		{
-		}
-		)));
+		});
 	}
 
-	InventorySetupCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips, final ArrayList<Runnable> runnables)
+	InventorySetupCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips, final Runnable runnable)
 	{
 		super();
 		this.plugin = plugin;
 		this.states = states;
 		this.icons = icons;
 		this.hoverIcons = hoverIcons;
-		this.runnables = runnables;
+		this.runnable = runnable;
 		this.tooltips = tooltips;
 		this.currentIndex = 0;
 
 		// sizes must be equal
 		assert this.states.size() == this.icons.size();
 		assert this.icons.size() == this.hoverIcons.size();
-		assert this.hoverIcons.size() == this.runnables.size();
-		assert this.runnables.size() == this.tooltips.size();
+		assert this.hoverIcons.size() == this.tooltips.size();
 
 		addMouseListener(new MouseAdapter()
 		{
@@ -53,14 +50,10 @@ public class InventorySetupCycleButton<T> extends JLabel
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
 					currentIndex = (currentIndex + 1) % states.size();
-					runnables.get(currentIndex).run();
+					runnable.run();
 					setToolTipText(tooltips.get(currentIndex));
 					setIcon(icons.get(currentIndex));
 					plugin.updateConfig();
-					//inventorySetup.setStackDifference(!inventorySetup.isStackDifference());
-					//stackDifferenceIndicator.setToolTipText(inventorySetup.isStackDifference() ? "Disable highlighting for stack differences" : "Enable highlighting for stack differences");
-					//updateStackDifferenceLabel();
-					//plugin.updateConfig();
 				}
 			}
 
