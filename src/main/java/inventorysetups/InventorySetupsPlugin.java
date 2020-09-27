@@ -25,6 +25,9 @@
 package inventorysetups;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupPluginPanel;
@@ -370,7 +373,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, name, "",
 													config.highlightColor(),
-													config.highlightStackDifference(),
+													config.highlightStackDifference().ordinal(),
 													config.highlightVariationDifference(),
 													config.highlightDifference(),
 													config.bankFilter(),
@@ -1052,7 +1055,8 @@ public class InventorySetupsPlugin extends Plugin
 	private void loadConfig()
 	{
 		// serialize the internal data structure from the json in the configuration
-		final String json = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
+		final String json = fixOldJSONData(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
+
 		if (Strings.isNullOrEmpty(json))
 		{
 			inventorySetups = new ArrayList<>();
@@ -1198,6 +1202,25 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		return true;
+	}
+
+	private String fixOldJSONData(final String json)
+	{
+		final Gson gson = new Gson();
+		JsonElement je = gson.fromJson(json, JsonElement.class);
+		JsonArray ja = je.getAsJsonArray();
+		for (JsonElement elem : ja)
+		{
+			JsonObject setup = elem.getAsJsonObject();
+			// Fix old configs that had stackDifference as a boolean (before it had more options)
+			if (setup.getAsJsonPrimitive("stackDifference").isBoolean())
+			{
+				int stackDiff = setup.get("stackDifference").getAsBoolean() ? 1 : 0;
+				setup.remove("stackDifference");
+				setup.addProperty("stackDifference", stackDiff);
+			}
+		}
+		return je.toString();
 	}
 
 }

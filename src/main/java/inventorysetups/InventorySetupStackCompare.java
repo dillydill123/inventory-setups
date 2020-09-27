@@ -15,7 +15,7 @@ public enum InventorySetupStackCompare
 	// Only highlight if stack is less than what is in the setup
 	Less_Than(2),
 
-	// ONly highlight if stack is greater than what is in the setup
+	// Only highlight if stack is greater than what is in the setup
 	Greater_Than(3);
 
 	private final int type;

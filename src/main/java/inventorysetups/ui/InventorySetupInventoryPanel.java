@@ -139,23 +139,25 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 	private void doUnorderedHighlighting(final ArrayList<InventorySetupItem> currInventory, final InventorySetup inventorySetup)
 	{
-		HashMap<ImmutablePair<Integer, Integer>, Integer> currInvMap = new HashMap<>();
+		HashMap<Integer, ArrayList<Integer>> currInvMap = new HashMap<>();
 
 		boolean currInvHasRunePouch = false;
 		for (final InventorySetupItem item : currInventory)
 		{
 			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
 			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
-			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
-
 			if (ItemVariationMapping.map(item.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
 			}
 
-			ImmutablePair<Integer, Integer> key = new ImmutablePair<>(itemId, quantity);
-			int count = currInvMap.get(key) == null ? 0 : currInvMap.get(key);
-			currInvMap.put(key, count + 1);
+			ArrayList<Integer> currItemList = currInvMap.get(itemId);
+			if (currItemList == null)
+			{
+				currItemList = new ArrayList<>();
+				currInvMap.put(itemId, currItemList);
+			}
+			currItemList.add(item.getQuantity());
 		}
 
 		final ArrayList<InventorySetupItem> setupInv = inventorySetup.getInventory();
@@ -175,29 +177,26 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 
 			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
 			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
-			int quantity = inventorySetup.isStackDifference() ? item.getQuantity() : 1;
-
-			ImmutablePair<Integer, Integer> key = new ImmutablePair<>(itemId, quantity);
-			Integer currentCount = currInvMap.get(key);
-
-			// current inventory doesn't have this item, highlight
-			if (currentCount == null)
+			final ArrayList<Integer> itemList = currInvMap.get(itemId);
+			if (itemList == null || itemList.isEmpty())
 			{
 				inventorySlots.get(i).setBackground(inventorySetup.getHighlightColor());
 				continue;
 			}
 
-			if (currentCount == 1)
+			// This assumes the last item contains the correct quantity. This is done because
+			// in the actual game, you can't have two stacks of stackable items. This assumption
+			// is fine for stackable items as well.
+			Integer currInventoryItemQty = itemList.get(itemList.size() - 1);
+			itemList.remove(itemList.size() - 1);
+			if (this.highlightBasedOnStack(inventorySetup, item.getQuantity(), currInventoryItemQty))
 			{
-				currInvMap.remove(key);
+				inventorySlots.get(i).setBackground(inventorySetup.getHighlightColor());
 			}
 			else
 			{
-				currInvMap.put(key, currentCount - 1);
+				inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
 			}
-
-			inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
 		}
 
 		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;

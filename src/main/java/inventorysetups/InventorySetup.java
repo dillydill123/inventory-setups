@@ -57,7 +57,7 @@ public class InventorySetup
 
 	@Getter
 	@Setter
-	private boolean stackDifference;
+	private int stackDifference;
 
 	@Getter
 	@Setter

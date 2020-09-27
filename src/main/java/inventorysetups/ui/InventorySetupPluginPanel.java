@@ -30,7 +30,6 @@ import inventorysetups.InventorySetupSorting;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
-import net.runelite.api.vars.InputType;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;

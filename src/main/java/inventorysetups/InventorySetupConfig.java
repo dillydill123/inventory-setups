@@ -39,10 +39,10 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 public interface InventorySetupConfig extends Config
 {
 	@ConfigItem(
-		keyName = "bankFilter",
-		name = "Default Filter Bank",
-		description = "Configures the default setting for bank filtering in new setups",
-		position = 1
+			keyName = "bankFilter",
+			name = "Default Filter Bank",
+			description = "Configures the default setting for bank filtering in new setups",
+			position = 1
 	)
 	default boolean bankFilter()
 	{
@@ -50,21 +50,33 @@ public interface InventorySetupConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "highlightStackDifference",
-		name = "Default Highlight Stack Difference",
-		description = "Configures the default setting for highlighting stack differences in new setups",
-		position = 1
+			keyName = "highlightStackDifference",
+			name = "Default Highlight Stack Difference",
+			description = "Configures the default setting for highlighting stack differences in new setups",
+			position = 1,
+			hidden = true
 	)
-	default boolean highlightStackDifference()
+	default boolean highlightStackDifferenceOld()
 	{
 		return false;
 	}
 
 	@ConfigItem(
-		keyName = "highlightVarianceDifference",
-		name = "Default Highlight Variation Difference",
-		description = "Configures the default setting for highlighting variations in new setups",
-		position = 2
+			keyName = "highlightStackDifferenceEnum",
+			name = "Default Highlight Stack Difference",
+			description = "Configures the default setting for highlighting stack differences in new setups",
+			position = 1
+	)
+	default InventorySetupStackCompare highlightStackDifference()
+	{
+		return InventorySetupStackCompare.None;
+	}
+
+	@ConfigItem(
+			keyName = "highlightVarianceDifference",
+			name = "Default Highlight Variation Difference",
+			description = "Configures the default setting for highlighting variations in new setups",
+			position = 2
 	)
 	default boolean highlightVariationDifference()
 	{
@@ -83,10 +95,10 @@ public interface InventorySetupConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "highlightDifference",
-		name = "Default Highlight",
-		description = "Configures the default setting for highlighting differences in new setups",
-		position = 4
+			keyName = "highlightDifference",
+			name = "Default Highlight",
+			description = "Configures the default setting for highlighting differences in new setups",
+			position = 4
 	)
 	default boolean highlightDifference()
 	{
@@ -95,10 +107,10 @@ public interface InventorySetupConfig extends Config
 
 	@Alpha
 	@ConfigItem(
-		keyName = "highlightColor",
-		name = "Default Highlight Color",
-		description = "Configures the default highlighting color in new setups",
-		position = 5
+			keyName = "highlightColor",
+			name = "Default Highlight Color",
+			description = "Configures the default highlighting color in new setups",
+			position = 5
 	)
 	default Color highlightColor()
 	{

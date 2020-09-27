@@ -24,6 +24,7 @@
  */
 package inventorysetups.ui;
 
+import inventorysetups.InventorySetupStackCompare;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
@@ -38,6 +39,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public abstract class InventorySetupContainerPanel extends JPanel
 {
@@ -173,7 +175,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		// they are all empty to avoid clientThread usage when highlighting
 
 		// first check if stack differences are enabled and compare quantities
-		if (setup.isStackDifference() && currItem.getQuantity() != savedItem.getQuantity())
+		if (highlightBasedOnStack(setup, savedItem.getQuantity(), currItem.getQuantity()))
 		{
 			containerSlot.setBackground(setup.getHighlightColor());
 			return;
@@ -198,6 +200,15 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 		// set the color back to the original, because they match
 		containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+	}
+
+	protected boolean highlightBasedOnStack(final InventorySetup setup, final Integer savedItemQty, final Integer currItemQty)
+	{
+		final int stackRes = Integer.compare(currItemQty, savedItemQty);
+		final InventorySetupStackCompare stackCompareType = InventorySetupStackCompare.getValues().get(setup.getStackDifference());
+		return stackCompareType == InventorySetupStackCompare.Less_Than && stackRes < 0 ||
+				stackCompareType == InventorySetupStackCompare.Greater_Than && stackRes > 0 ||
+				stackCompareType == InventorySetupStackCompare.Standard && stackRes != 0;
 	}
 
 	abstract public void setupContainerPanel(final JPanel containerSlotsPanel);
