@@ -51,35 +51,46 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 
 		isHighlighted = true;
 
-		// Note, we don't care about order or stack size
-
 		final ArrayList<InventorySetupItem> setupRunePouch = inventorySetup.getRune_pouch();
 
-		Map<Integer, Long> currInvMap = currContainer.stream()
-											.map(InventorySetupItem::getId)
-											.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-		for (int i = setupRunePouch.size() - 1; i >= 0; i--)
+		for (int i = 0; i < setupRunePouch.size(); i++)
 		{
-			int itemID = setupRunePouch.get(i).getId();
-			Long currentCount = currInvMap.get(itemID);
-
-			if (currentCount == null)
+			boolean shouldHighlight = false;
+			boolean foundRune = false;
+			int currContainerIndex = -1;
+			for (int j = 0; j < currContainer.size(); j++)
 			{
-				runeSlots.get(i).setBackground(inventorySetup.getHighlightColor());
-				continue;
+				if (setupRunePouch.get(i).getId() == currContainer.get(j).getId())
+				{
+					foundRune = true;
+					currContainerIndex = j;
+					break;
+				}
 			}
 
-			if (currentCount == 1)
+			if (foundRune)
 			{
-				currInvMap.remove(itemID);
+				int savedQty = setupRunePouch.get(i).getQuantity();
+				int currQty = currContainer.get(currContainerIndex).getQuantity();
+				if (highlightBasedOnStack(inventorySetup, savedQty, currQty))
+				{
+					shouldHighlight = true;
+				}
 			}
 			else
 			{
-				currInvMap.put(itemID, currentCount - 1);
+				shouldHighlight = true;
 			}
 
-			runeSlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			if (shouldHighlight)
+			{
+				runeSlots.get(i).setBackground(inventorySetup.getHighlightColor());
+			}
+			else
+			{
+				runeSlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			}
+
 		}
 	}
 
