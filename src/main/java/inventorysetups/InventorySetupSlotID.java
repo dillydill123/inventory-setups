@@ -9,7 +9,9 @@ public enum InventorySetupSlotID
 
 	RUNE_POUCH(2),
 
-	SPELL_BOOK(3);
+	SPELL_BOOK(3),
+
+	ADDITIONAL_ITEMS(4);
 
 	private final int id;
 

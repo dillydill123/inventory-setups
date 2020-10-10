@@ -41,6 +41,7 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
+import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
@@ -96,6 +97,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -276,6 +278,27 @@ public class InventorySetupsPlugin extends Plugin
 
 			client.setMenuEntries(menuEntries);
 		}
+		// If shift is held and item is right clicked in the bank while a setup is active,
+		// add item to additional filtered items
+		else if (panel.getCurrentSelectedSetup() != null
+				&& event.getActionParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId()
+				&& client.isKeyPressed(KeyCode.KC_SHIFT)
+				&& event.getOption().equals("Examine"))
+		{
+			MenuEntry[] menuEntries = client.getMenuEntries();
+			final int oldMenuSize = menuEntries.length;
+			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + 1);
+
+			MenuEntry menuEntryAddToAdditionalFiltered = menuEntries[menuEntries.length - 1] = new MenuEntry();
+			menuEntryAddToAdditionalFiltered.setOption("Add to Additional Filtered Items");
+			menuEntryAddToAdditionalFiltered.setType(MenuAction.RUNELITE.getId());
+			menuEntryAddToAdditionalFiltered.setTarget("");
+			menuEntryAddToAdditionalFiltered.setIdentifier(0);
+
+			client.setMenuEntries(menuEntries);
+		}
+
+
 	}
 
 	@Subscribe
@@ -371,7 +394,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			int spellbook = getCurrentSpellbook();
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, name, "",
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, new HashSet<>(), name, "",
 													config.highlightColor(),
 													config.highlightStackDifference().ordinal(),
 													config.highlightVariationDifference(),
@@ -1082,6 +1105,10 @@ public class InventorySetupsPlugin extends Plugin
 						if (setup.getNotes() == null)
 						{
 							setup.updateNotes("");
+						}
+						if (setup.getAdditionalFilteredItems() == null)
+						{
+							setup.updateAdditionalItems(new HashSet<>());
 						}
 					}
 				});

@@ -26,6 +26,8 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupStackCompare;
 import inventorysetups.InventorySetupsPlugin;
+import lombok.AccessLevel;
+import lombok.Getter;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
@@ -50,6 +52,9 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	protected final InventorySetupsPlugin plugin;
 
+	@Getter(AccessLevel.PROTECTED)
+	private final JPanel containerSlotsPanel;
+
 	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
 	{
 		this.itemManager = itemManager;
@@ -57,7 +62,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		this.isHighlighted = false;
 		JPanel containerPanel = new JPanel();
 
-		final JPanel containerSlotsPanel = new JPanel();
+		this.containerSlotsPanel = new JPanel();
 
 		// sets up the custom container panel
 		setupContainerPanel(containerSlotsPanel);

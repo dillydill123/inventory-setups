@@ -30,6 +30,7 @@ import lombok.Setter;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 @AllArgsConstructor
 public class InventorySetup
@@ -42,6 +43,9 @@ public class InventorySetup
 
 	@Getter
 	private ArrayList<InventorySetupItem> rune_pouch;
+
+	@Getter
+	private HashSet<Integer> additionalFilteredItems;
 
 	@Getter
 	@Setter
@@ -100,6 +104,11 @@ public class InventorySetup
 	public void updateRunePouch(final ArrayList<InventorySetupItem> rp)
 	{
 		rune_pouch = rp;
+	}
+
+	public void updateAdditionalItems(final HashSet<Integer> ai)
+	{
+		additionalFilteredItems = ai;
 	}
 
 	public void updateSpellbook(final int sb)
