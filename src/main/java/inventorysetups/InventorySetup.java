@@ -30,6 +30,7 @@ import lombok.Setter;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 @AllArgsConstructor
@@ -45,7 +46,7 @@ public class InventorySetup
 	private ArrayList<InventorySetupItem> rune_pouch;
 
 	@Getter
-	private HashSet<Integer> additionalFilteredItems;
+	private HashMap<Integer, InventorySetupItem> additionalFilteredItems;
 
 	@Getter
 	@Setter
@@ -106,7 +107,7 @@ public class InventorySetup
 		rune_pouch = rp;
 	}
 
-	public void updateAdditionalItems(final HashSet<Integer> ai)
+	public void updateAdditionalItems(final HashMap<Integer, InventorySetupItem> ai)
 	{
 		additionalFilteredItems = ai;
 	}

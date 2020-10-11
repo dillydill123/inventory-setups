@@ -10,9 +10,6 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 {
@@ -102,7 +99,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 		{
 			for (int i = 0; i < runeSlots.size(); i++)
 			{
-				super.setContainerSlot(i, runeSlots.get(i), setup);
+				super.setContainerSlot(i, runeSlots.get(i), setup, setup.getRune_pouch().get(i));
 			}
 		}
 		else

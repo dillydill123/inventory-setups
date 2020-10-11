@@ -97,7 +97,7 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,6 +118,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String INV_SEARCH = "inv:";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
+	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final int SPELLBOOK_VARBIT = 4070;
@@ -290,10 +291,12 @@ public class InventorySetupsPlugin extends Plugin
 			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + 1);
 
 			MenuEntry menuEntryAddToAdditionalFiltered = menuEntries[menuEntries.length - 1] = new MenuEntry();
-			menuEntryAddToAdditionalFiltered.setOption("Add to Additional Filtered Items");
+			menuEntryAddToAdditionalFiltered.setOption(ADD_TO_ADDITIONAL_ENTRY);
 			menuEntryAddToAdditionalFiltered.setType(MenuAction.RUNELITE.getId());
 			menuEntryAddToAdditionalFiltered.setTarget("");
 			menuEntryAddToAdditionalFiltered.setIdentifier(0);
+			menuEntryAddToAdditionalFiltered.setParam0(event.getActionParam0());
+			menuEntryAddToAdditionalFiltered.setParam1(event.getActionParam1());
 
 			client.setMenuEntries(menuEntries);
 		}
@@ -394,7 +397,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			int spellbook = getCurrentSpellbook();
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, new HashSet<>(), name, "",
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, new HashMap<>(), name, "",
 													config.highlightColor(),
 													config.highlightStackDifference().ordinal(),
 													config.highlightVariationDifference(),
@@ -472,6 +475,52 @@ public class InventorySetupsPlugin extends Plugin
 				panel.returnToOverviewPanel(false);
 				return;
 			}
+
+			if (event.getMenuOption().equals(ADD_TO_ADDITIONAL_ENTRY))
+			{
+				// This should never be hit, as the option only appears when the panel isn't null
+				if (panel.getCurrentSelectedSetup() == null)
+				{
+					return;
+				}
+
+				int inventoryIndex = event.getActionParam();
+				ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
+				if (bankContainer == null)
+				{
+					return;
+				}
+				Item[] items = bankContainer.getItems();
+				if (inventoryIndex < 0 || inventoryIndex >= items.length)
+				{
+					return;
+				}
+				Item item = bankContainer.getItems()[inventoryIndex];
+				if (item == null)
+				{
+					return;
+				}
+
+				final int itemId = item.getId();
+				final InventorySetup currSetup = panel.getCurrentSelectedSetup();
+				// Item already exists, don't add it again
+				if (currSetup.getAdditionalFilteredItems().get(itemId) != null)
+				{
+					return;
+				}
+
+				clientThread.invokeLater(() ->
+				{
+					final String name = itemManager.getItemComposition(itemId).getName();
+					final InventorySetupItem setupItem = new InventorySetupItem(itemId, name, 1);
+
+					currSetup.getAdditionalFilteredItems().put(itemId, setupItem);
+					updateConfig();
+					panel.refreshCurrentSetup();
+				});
+
+			}
+
 		}
 
 		if (panel.getCurrentSelectedSetup() == null)
@@ -786,7 +835,7 @@ public class InventorySetupsPlugin extends Plugin
 			.build();
 	}
 
-	public void remoteItemFromSlot(final InventorySetupSlot slot)
+	public void removeItemFromSlot(final InventorySetupSlot slot)
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
@@ -1108,7 +1157,7 @@ public class InventorySetupsPlugin extends Plugin
 						}
 						if (setup.getAdditionalFilteredItems() == null)
 						{
-							setup.updateAdditionalItems(new HashSet<>());
+							setup.updateAdditionalItems(new HashMap<>());
 						}
 					}
 				});

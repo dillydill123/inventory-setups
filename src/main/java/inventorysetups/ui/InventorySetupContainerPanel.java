@@ -123,7 +123,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 		removeSlot.addActionListener(e ->
 		{
-			plugin.remoteItemFromSlot(slot);
+			plugin.removeItemFromSlot(slot);
 		});
 
 		// both the panel and image label need adapters
@@ -133,38 +133,19 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	}
 
-	protected void setContainerSlot(int index, final InventorySetupSlot containerSlot, final InventorySetup setup)
+	protected void setContainerSlot(int index, final InventorySetupSlot containerSlot, final InventorySetup setup, final InventorySetupItem item)
 	{
-		ArrayList<InventorySetupItem> items = null;
-		switch (containerSlot.getSlotID())
-		{
-			case INVENTORY:
-				items = setup.getInventory();
-				break;
-			case EQUIPMENT:
-				items = setup.getEquipment();
-				break;
-			case RUNE_POUCH:
-				items = setup.getRune_pouch();
-				break;
-			default:
-				assert false : "Wrong slot ID!";
-				break;
-		}
-
-		assert index < items.size() && index >= 0 : "Index Off Array";
-
 		containerSlot.setParentSetup(setup);
 
-		if (items.get(index).getId() == -1)
+		if (item.getId() == -1)
 		{
 			containerSlot.setImageLabel(null, null);
 			return;
 		}
 
-		int itemId = items.get(index).getId();
-		int quantity = items.get(index).getQuantity();
-		final String itemName = items.get(index).getName();
+		int itemId = item.getId();
+		int quantity = item.getQuantity();
+		final String itemName = item.getName();
 		AsyncBufferedImage itemImg = itemManager.getImage(itemId, quantity, quantity > 1);
 		String toolTip = itemName;
 		if (quantity > 1)

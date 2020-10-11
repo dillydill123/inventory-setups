@@ -77,7 +77,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	{
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
-			super.setContainerSlot(i, inventorySlots.get(i), setup);
+			super.setContainerSlot(i, inventorySlots.get(i), setup, setup.getInventory().get(i));
 		}
 
 		validate();

@@ -86,7 +86,7 @@ public class InventorySetupEquipmentPanel extends InventorySetupContainerPanel
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			int i = slot.getSlotIdx();
-			super.setContainerSlot(i, equipmentSlots.get(slot), setup);
+			super.setContainerSlot(i, equipmentSlots.get(slot), setup, setup.getEquipment().get(i));
 		}
 
 		validate();
