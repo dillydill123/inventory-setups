@@ -846,11 +846,18 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
-
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
 		{
+
+			if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
+			{
+				remoteAdditionalFilteredItem(slot);
+				return;
+			}
+
+			final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+
 			// update the rune pouch data
 			final InventorySetupItem dummyItem = new InventorySetupItem(-1, "", 0);
 			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), dummyItem))
@@ -862,6 +869,36 @@ public class InventorySetupsPlugin extends Plugin
 			updateConfig();
 			panel.refreshCurrentSetup();
 		});
+	}
+
+	private void remoteAdditionalFilteredItem(final InventorySetupSlot slot)
+	{
+
+		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
+
+		final int slotID = slot.getIndexInSlot();
+
+		// Empty slot was selected to be removed, don't do anything
+		if (slotID >= panel.getCurrentSelectedSetup().getAdditionalFilteredItems().size())
+		{
+			return;
+		}
+
+		int j = 0;
+		Integer keyToDelete = null;
+		for (final Integer key : panel.getCurrentSelectedSetup().getAdditionalFilteredItems().keySet())
+		{
+			if (slotID == j)
+			{
+				keyToDelete = key;
+				break;
+			}
+			j++;
+		}
+
+		panel.getCurrentSelectedSetup().getAdditionalFilteredItems().remove(keyToDelete);
+		updateConfig();
+		panel.refreshCurrentSetup();
 	}
 
 	public void updateSpellbookInSetup(int newSpellbook)

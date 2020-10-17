@@ -7,7 +7,9 @@ import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -59,33 +61,26 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 		final int finalSizeLambda = finalSize;
 		SwingUtilities.invokeLater(() ->
 		{
-			if (additionalFilteredSlots.size() < finalSizeLambda)
+
+			// add new slots if the final size is larger than the number of slots
+			for (int i = additionalFilteredSlots.size(); i < finalSizeLambda; i++)
 			{
-				// add new slots, new max will be achieved
-				for (int i = additionalFilteredSlots.size(); i < finalSizeLambda; i++)
-				{
-					additionalFilteredSlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.ADDITIONAL_ITEMS, i));
-
-					// TODO: add function for menu option for removing item
-					// TODO: use slot index to figure out which item needs to be removed from the additional filtered items
-					// TODO: Figure out highlighting/filtering based on the additional filtered items
-
-				}
+				final InventorySetupSlot newSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.ADDITIONAL_ITEMS, i);
+				addRemoveMenuToSlot(newSlot);
+				additionalFilteredSlots.add(newSlot);
 			}
-			else
-			{
-				// remove the extra slots from the layout so the panel fits as small as possible
-				for (int i = additionalFilteredSlots.size() - 1; i >= finalSizeLambda; i--)
-				{
-					containerSlotsPanel.remove(i);
-				}
 
-				// remove the images and tool tips for the inventory slots that are not part of this setup
-				for (int i = finalSizeLambda - 1; i >= setupAdditionalItems.size(); i--)
-				{
-					InventorySetupItem dummy = new InventorySetupItem(-1, null, 0);
-					this.setContainerSlot(i, additionalFilteredSlots.get(i), setup, dummy);
-				}
+			// remove the extra slots from the layout if needed so the panel fits as small as possible
+			for (int i = containerSlotsPanel.getComponentCount() - 1; i >= finalSizeLambda; i--)
+			{
+				containerSlotsPanel.remove(i);
+			}
+
+			// remove the images and tool tips for the inventory slots that are not part of this setup
+			for (int i = finalSizeLambda - 1; i >= setupAdditionalItems.size(); i--)
+			{
+				InventorySetupItem dummy = new InventorySetupItem(-1, null, 0);
+				this.setContainerSlot(i, additionalFilteredSlots.get(i), setup, dummy);
 			}
 
 			// add slots back to the layout if we need to
@@ -111,5 +106,26 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 	@Override
 	public void resetSlotColors()
 	{
+	}
+
+	private void addRemoveMenuToSlot(final InventorySetupSlot slot)
+	{
+		JPopupMenu popupMenu = new JPopupMenu();
+		JMenuItem removeSlot = new JMenuItem("Remove from Filtered Items");
+		popupMenu.add(removeSlot);
+
+		removeSlot.addActionListener(e ->
+		{
+			plugin.removeItemFromSlot(slot);
+		});
+
+		// both the panel and image label need popup menus
+		// because the image will cover the entire panel
+		slot.setComponentPopupMenu(popupMenu);
+		slot.getImageLabel().setComponentPopupMenu(popupMenu);
+
+		// plugin to update additional item filters
+		plugin.updateConfig();
+
 	}
 }
