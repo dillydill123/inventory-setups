@@ -501,7 +501,8 @@ public class InventorySetupsPlugin extends Plugin
 					return;
 				}
 
-				final int itemId = item.getId();
+				// un-noted, un-placeholdered ID
+				final int itemId = itemManager.canonicalize(item.getId());
 				final InventorySetup currSetup = panel.getCurrentSelectedSetup();
 				// Item already exists, don't add it again
 				if (currSetup.getAdditionalFilteredItems().get(itemId) != null)
@@ -1222,6 +1223,12 @@ public class InventorySetupsPlugin extends Plugin
 
 		// So place holders will show up in the bank.
 		itemID = itemManager.canonicalize(itemID);
+
+		// Check if this item (inc. placeholder) is in the additional filtered items
+		if (setup.getAdditionalFilteredItems().containsKey(itemID))
+		{
+			return true;
+		}
 
 		// don't variation map unless it's been selected
 		if (!setup.isVariationDifference())
