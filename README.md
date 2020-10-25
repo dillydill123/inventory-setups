@@ -88,7 +88,7 @@ You can enable highlighting to further assist in gearing up. Highlighting will c
 
 ##### Stack Difference
 
-Enabling this will cause a slot to become highlighted if the stack size of the item in the player's inventory or equipment does not match the corresponding slot in the setup being viewed. This might be useful if you are at the chaos altar training prayer, and you want to be sure you don't bring more gp than needed to unnote the bones.
+Enabling this will cause a slot to become highlighted if the stack size of the item in the player's inventory or equipment does not match the corresponding slot in the setup being viewed. This might be useful if you are at the chaos altar training prayer, and you want to be sure you don't bring more gp than needed to unnote the bones. Greater than or less than stack difference can also be selected. These highlight if the item stack in the inventory is greater than or less than the amount in the setup respectively.
 
 ![Stack Difference](readme_images_and_gifs/stack_difference.gif)
 
