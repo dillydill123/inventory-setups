@@ -85,6 +85,7 @@ public class InventorySetup
 		1 = Ancient
 		2 = Lunar
 		3 = Arceuus
+		4 = NONE
 
 		Avoiding Enum because won't work well with GSON (defaults to null)
 	*/

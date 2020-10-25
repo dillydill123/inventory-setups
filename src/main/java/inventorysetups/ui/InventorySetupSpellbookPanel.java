@@ -34,6 +34,7 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 			BufferedImage ancientsSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC_SPELLBOOK_ANCIENT_MAGICKS, 0);
 			BufferedImage lunarSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC_SPELLBOOK_LUNAR, 0);
 			BufferedImage arceuusSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC_SPELLBOOK_ARCEUUS, 0);
+			BufferedImage noneSpellbook = null;
 
 			// might be null depending on game state
 			if (standardSpellbook == null || ancientsSpellbook == null || lunarSpellbook == null || arceuusSpellbook == null)
@@ -45,6 +46,7 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 			spellbookImages.add(ancientsSpellbook);
 			spellbookImages.add(lunarSpellbook);
 			spellbookImages.add(arceuusSpellbook);
+			spellbookImages.add(noneSpellbook);
 
 			return true;
 		});
@@ -65,13 +67,15 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 		JMenuItem updateToAncient = new JMenuItem("Update Slot to Ancient");
 		JMenuItem updateToLunar = new JMenuItem("Update Slot to Lunar");
 		JMenuItem updateToArceuus = new JMenuItem("Update Slot to Arceuus");
+		JMenuItem updateToNone = new JMenuItem("Update Slot to None");
 
 		popupMenu.add(updateToStandard);
 		popupMenu.add(updateToAncient);
 		popupMenu.add(updateToLunar);
 		popupMenu.add(updateToArceuus);
+		popupMenu.add(updateToNone);
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			JMenuItem item = (JMenuItem)popupMenu.getComponent(i);
 			final int newSpellbook = i;
@@ -91,7 +95,7 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 	{
 		plugin.getClientThread().invokeLater(() ->
 		{
-			if (inventorySetup.getSpellBook() != plugin.getCurrentSpellbook())
+			if (inventorySetup.getSpellBook() != 4 && inventorySetup.getSpellBook() != plugin.getCurrentSpellbook())
 			{
 				spellbookSlot.setBackground(inventorySetup.getHighlightColor());
 			}
@@ -123,6 +127,9 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 				break;
 			case 3:
 				spellbookStr = "Arceuus";
+				break;
+			case 4:
+				spellbookStr = "None";
 				break;
 			default:
 				spellbookStr = "Incorrect";

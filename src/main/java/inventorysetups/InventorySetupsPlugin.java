@@ -905,7 +905,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void updateSpellbookInSetup(int newSpellbook)
 	{
 		assert panel.getCurrentSelectedSetup() != null : "Setup is null";
-		assert newSpellbook >= 0 && newSpellbook < 4 : "New spellbook out of range";
+		assert newSpellbook >= 0 && newSpellbook < 5 : "New spellbook out of range";
 
 		clientThread.invokeLater(() ->
 		{
