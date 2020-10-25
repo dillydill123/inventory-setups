@@ -104,6 +104,18 @@ Enabling this will cause highlighting to ignore order and only highlight items i
 
 ![Unordered Highlighting](readme_images_and_gifs/unordered_highlighting.gif)
 
+### Additional Filtered Items
+
+You can add additional filtered items to setups. These are items that will show up in the bank filter along with the rest of the setup. This is really useful for things such as pre-potting, where you need the item at the bank but not at the activity the filter is made for. Follow these steps to add an additional filtered item:
+
+* Select a setup
+* Break the bank filter and navigate to the item you want to add to the additional items filter
+* Hold SHIFT and RIGHT CLICK on the item and select "Add to Additional Filtered Items"
+* The item will now show in the bank filter and in the "Additional Filtered Items" section
+* You can remove an item from this list by right clicking and selecting "Remove from Filtered Items"
+
+![Additional Filtered Items](readme_images_and_gifs/additional_items_filter.gif)
+
 ### Exporting and Importing Setups
 
 It is possible to import and export inventory setups. This is useful if you would like to share your setups with your friends. To export an inventory setup, click on the export button next to the view setup button. This will copy the setup to your clipboard. You can then send this to your friends.
@@ -149,7 +161,7 @@ Plugin added
 Import and export feature added
 
 ##### 1.2
-Settings, bank filtering, unordered highlighting, and update individual slots added.
+Settings, bank filtering, unordered highlighting, and update individual slots added
 
 ##### 1.3
 Added Reset all button and rune pouch support.
@@ -161,7 +173,10 @@ Added search bar and hotkeys for returning to setups and filtering bank
 Added compact view and the ability to move setups up and down the list
 
 ##### 1.6
-Added ability to switch setups in game with "Show worn items" button. Added spellbook to setups. Added help button (which can be disabled in the config settings).
+Added ability to switch setups in game with "Show worn items" button. Added spellbook to setups. Added help button (which can be disabled in the config settings)
 
 ##### 1.7
 Added notes, alphabetical sorting mode, more options to move setups, and more options to update rune pouch slots
+
+##### 1.8
+Added additional filtered items, remove options for slots, updated stack button
