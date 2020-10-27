@@ -1164,10 +1164,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void loadConfig()
 	{
-		// serialize the internal data structure from the json in the configuration
-		final String json = fixOldJSONData(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY));
-
-		if (Strings.isNullOrEmpty(json))
+		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
+		if (Strings.isNullOrEmpty(storedSetups))
 		{
 			inventorySetups = new ArrayList<>();
 		}
@@ -1180,6 +1178,9 @@ public class InventorySetupsPlugin extends Plugin
 				{
 
 				}.getType();
+
+				// serialize the internal data structure from the json in the configuration
+				final String json = fixOldJSONData(storedSetups);
 				inventorySetups = gson.fromJson(json, type);
 				clientThread.invokeLater(() ->
 				{
