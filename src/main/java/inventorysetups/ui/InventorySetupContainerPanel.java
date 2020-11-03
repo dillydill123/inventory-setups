@@ -41,7 +41,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 public abstract class InventorySetupContainerPanel extends JPanel
 {
@@ -83,10 +82,10 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		add(containerPanel);
 	}
 
-	protected void addUpdateFromSetupAndSearchMouseListenersToSlot(final InventorySetupSlot slot)
+	protected void addUpdateFromContainerMouseListenerToSlot(final InventorySetupSlot slot)
 	{
-
-		JPopupMenu popupMenu = new JPopupMenu();
+		setComponentPopupMenuToSlot(slot);
+		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 
 		String updateContainerFrom = "";
 		switch (slot.getSlotID())
@@ -105,32 +104,47 @@ public abstract class InventorySetupContainerPanel extends JPanel
 				break;
 		}
 		JMenuItem updateFromContainer = new JMenuItem("Update Slot from " + updateContainerFrom);
-		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
-		JMenuItem removeSlot = new JMenuItem("Remove Item from Slot");
 		popupMenu.add(updateFromContainer);
-		popupMenu.add(updateFromSearch);
-		popupMenu.add(removeSlot);
-
 		updateFromContainer.addActionListener(e ->
 		{
 			plugin.updateSlotFromContainer(slot);
 		});
+	}
 
+	protected void addUpdateFromSearchMouseListenerToSlot(final InventorySetupSlot slot, boolean allowStackable)
+	{
+		setComponentPopupMenuToSlot(slot);
+		JPopupMenu popupMenu = slot.getComponentPopupMenu();
+		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
+		popupMenu.add(updateFromSearch);
 		updateFromSearch.addActionListener(e ->
 		{
-			plugin.updateSlotFromSearch(slot);
+			plugin.updateSlotFromSearch(slot, true);
 		});
+	}
 
+	protected void addRemoveMouseListenerToSlot(final InventorySetupSlot slot)
+	{
+		setComponentPopupMenuToSlot(slot);
+		JPopupMenu popupMenu = slot.getComponentPopupMenu();
+		JMenuItem removeSlot = new JMenuItem("Remove Item from Slot");
+		popupMenu.add(removeSlot);
 		removeSlot.addActionListener(e ->
 		{
 			plugin.removeItemFromSlot(slot);
 		});
+	}
 
-		// both the panel and image label need adapters
-		// because the image will cover the entire panel
-		slot.setComponentPopupMenu(popupMenu);
-		slot.getImageLabel().setComponentPopupMenu(popupMenu);
-
+	private void setComponentPopupMenuToSlot(final InventorySetupSlot slot)
+	{
+		if (slot.getComponentPopupMenu() == null)
+		{
+			// both the panel and image label need adapters
+			// because the image will cover the entire panel
+			JPopupMenu newMenu = new JPopupMenu();
+			slot.setComponentPopupMenu(newMenu);
+			slot.getImageLabel().setComponentPopupMenu(newMenu);
+		}
 	}
 
 	protected void setContainerSlot(int index, final InventorySetupSlot containerSlot, final InventorySetup setup, final InventorySetupItem item)

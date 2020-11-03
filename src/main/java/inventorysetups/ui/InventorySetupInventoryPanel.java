@@ -68,7 +68,9 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			containerSlotsPanel.add(inventorySlots.get(i));
-			super.addUpdateFromSetupAndSearchMouseListenersToSlot(inventorySlots.get(i));
+			super.addUpdateFromContainerMouseListenerToSlot(inventorySlots.get(i));
+			super.addUpdateFromSearchMouseListenerToSlot(inventorySlots.get(i), true);
+			super.addRemoveMouseListenerToSlot(inventorySlots.get(i));
 		}
 	}
 

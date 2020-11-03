@@ -501,24 +501,11 @@ public class InventorySetupsPlugin extends Plugin
 					return;
 				}
 
-				// un-noted, un-placeholdered ID
-				final int itemId = itemManager.canonicalize(item.getId());
-				final InventorySetup currSetup = panel.getCurrentSelectedSetup();
 				// Item already exists, don't add it again
-				if (currSetup.getAdditionalFilteredItems().get(itemId) != null)
+				if (!additionalFilteredItemsHasItem(item.getId()))
 				{
-					return;
+					addAdditionalFilteredItem(item.getId());
 				}
-
-				clientThread.invokeLater(() ->
-				{
-					final String name = itemManager.getItemComposition(itemId).getName();
-					final InventorySetupItem setupItem = new InventorySetupItem(itemId, name, 1);
-
-					currSetup.getAdditionalFilteredItems().put(itemId, setupItem);
-					updateConfig();
-					panel.refreshCurrentSetup();
-				});
 
 			}
 
@@ -556,6 +543,29 @@ public class InventorySetupsPlugin extends Plugin
 			// don't allow the bank to retry a filter if the search button is clicked
 			filteringIsAllowed = false;
 		}
+	}
+
+	private boolean additionalFilteredItemsHasItem(int itemId)
+	{
+		final int processedItemId = itemManager.canonicalize(itemId);
+		return panel.getCurrentSelectedSetup().getAdditionalFilteredItems().get(processedItemId) != null;
+	}
+
+	private void addAdditionalFilteredItem(int itemId)
+	{
+		// un-noted, un-placeholdered ID
+		final int processedItemId = itemManager.canonicalize(itemId);
+		final InventorySetup currSetup = panel.getCurrentSelectedSetup();
+
+		clientThread.invokeLater(() ->
+		{
+			final String name = itemManager.getItemComposition(processedItemId).getName();
+			final InventorySetupItem setupItem = new InventorySetupItem(processedItemId, name, 1);
+
+			currSetup.getAdditionalFilteredItems().put(processedItemId, setupItem);
+			updateConfig();
+			panel.refreshCurrentSetup();
+		});
 	}
 
 	@Subscribe
@@ -740,7 +750,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-	public void updateSlotFromSearch(final InventorySetupSlot slot)
+	public void updateSlotFromSearch(final InventorySetupSlot slot, boolean allowStackable)
 	{
 
 		if (client.getGameState() != GameState.LOGGED_IN)
@@ -752,8 +762,6 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
-
 		itemSearch
 			.tooltipText("Set slot to")
 			.onItemSelected((itemId) ->
@@ -762,24 +770,11 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int finalId = itemManager.canonicalize(itemId);
 
-					/*
-					 NOTE: the itemSearch shows items from skill guides which can be selected
-					 And it does not show equipment variants for worn items that reduce weight.
-					 Variation mapping would fix this issue for the inventory,
-					 but then it would cause rings, potions, etc to be the same when it may not be desired
-					 If a worn item is selected for the equipment, it will not be the correct itemID since
-					 only the inventory variant and the skill guide variants show up in the search
-					 If there is a way to figure out if and item is a skill guide item, then the inventory
-					 issue can be solved. For equipment, you would also need a way to get the equipment variant
-					 of a worn item that has weight reduction from the inventory counterpart
-
-					 For now, it's possible that the user will pick a skill guide item, and it will cause highlighting
-					 This only occurs if variation differences are turned on. Weight reducing equipment
-					 will also be highlighted if selected for equipment if variation differences are turned on.
-					*/
+					// NOTE: the itemSearch shows items from skill guides which can be selected, which may be highlighted
+					// if variation differences are on
 
 					// if the item is stackable, ask for a quantity
-					if (itemManager.getItemComposition(finalId).isStackable())
+					if (allowStackable && itemManager.getItemComposition(finalId).isStackable())
 					{
 						final int finalIdCopy = finalId;
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
@@ -801,6 +796,7 @@ public class InventorySetupsPlugin extends Plugin
 
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
 									final InventorySetupItem newItem = new InventorySetupItem(finalIdCopy, itemName, quantity);
+									final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
 
 									// update the rune pouch data
 									if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
@@ -817,16 +813,27 @@ public class InventorySetupsPlugin extends Plugin
 					}
 					else
 					{
-						final String itemName = itemManager.getItemComposition(finalId).getName();
-						final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1);
-
-						// update the rune pouch data
-						if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+						if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
 						{
-							return;
+							if (!additionalFilteredItemsHasItem(finalId))
+							{
+								removeAdditionalFilteredItem(slot);
+								addAdditionalFilteredItem(finalId);
+							}
+						}
+						else
+						{
+							final String itemName = itemManager.getItemComposition(finalId).getName();
+							final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1);
+							final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+							// update the rune pouch data
+							if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+							{
+								return;
+							}
+							container.set(slot.getIndexInSlot(), newItem);
 						}
 
-						container.set(slot.getIndexInSlot(), newItem);
 						updateConfig();
 						panel.refreshCurrentSetup();
 					}
@@ -853,7 +860,9 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
 			{
-				remoteAdditionalFilteredItem(slot);
+				removeAdditionalFilteredItem(slot);
+				updateConfig();
+				panel.refreshCurrentSetup();
 				return;
 			}
 
@@ -872,7 +881,7 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	private void remoteAdditionalFilteredItem(final InventorySetupSlot slot)
+	private void removeAdditionalFilteredItem(final InventorySetupSlot slot)
 	{
 
 		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
@@ -898,8 +907,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		panel.getCurrentSelectedSetup().getAdditionalFilteredItems().remove(keyToDelete);
-		updateConfig();
-		panel.refreshCurrentSetup();
+
 	}
 
 	public void updateSpellbookInSetup(int newSpellbook)

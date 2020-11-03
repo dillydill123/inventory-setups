@@ -66,7 +66,8 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 			for (int i = additionalFilteredSlots.size(); i < finalSizeLambda; i++)
 			{
 				final InventorySetupSlot newSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.ADDITIONAL_ITEMS, i);
-				addRemoveMenuToSlot(newSlot);
+				super.addUpdateFromSearchMouseListenerToSlot(newSlot, false);
+				super.addRemoveMouseListenerToSlot(newSlot);
 				additionalFilteredSlots.add(newSlot);
 			}
 
@@ -108,24 +109,4 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 	{
 	}
 
-	private void addRemoveMenuToSlot(final InventorySetupSlot slot)
-	{
-		JPopupMenu popupMenu = new JPopupMenu();
-		JMenuItem removeSlot = new JMenuItem("Remove from Filtered Items");
-		popupMenu.add(removeSlot);
-
-		removeSlot.addActionListener(e ->
-		{
-			plugin.removeItemFromSlot(slot);
-		});
-
-		// both the panel and image label need popup menus
-		// because the image will cover the entire panel
-		slot.setComponentPopupMenu(popupMenu);
-		slot.getImageLabel().setComponentPopupMenu(popupMenu);
-
-		// plugin to update additional item filters
-		plugin.updateConfig();
-
-	}
 }
