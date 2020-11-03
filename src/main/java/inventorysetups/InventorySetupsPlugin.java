@@ -545,7 +545,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		if (event.getMenuOption().equals("Search")
+		if (event.getMenuOption().equals("Search") && client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND) != null
 			&& client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND).getSpriteId() != SpriteID.EQUIPMENT_SLOT_SELECTED)
 		{
 			// This ensures that when clicking Search when tab is selected, the search input is opened rather
