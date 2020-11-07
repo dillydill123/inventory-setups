@@ -119,7 +119,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		popupMenu.add(updateFromSearch);
 		updateFromSearch.addActionListener(e ->
 		{
-			plugin.updateSlotFromSearch(slot, true);
+			plugin.updateSlotFromSearch(slot, allowStackable);
 		});
 	}
 
