@@ -1,4 +1,7 @@
 # Inventory Setups
+
+[![Active Installs](http://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/inventory-setups)](https://runelite.net/plugin-hub/dillydill123) [![Plugin Rank](http://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/inventory-setups)](https://runelite.net/plugin-hub)
+
 Save gear setups for specific activities.
 
 ### Creating a New Setup
@@ -154,29 +157,29 @@ If you need help, have any suggestions, or notice any bugs, you can comment them
 
 ### Changelog
 
-##### 1.0
-Plugin added
-
-##### 1.1
-Import and export feature added
-
-##### 1.2
-Settings, bank filtering, unordered highlighting, and update individual slots added
-
-##### 1.3
-Added Reset all button and rune pouch support.
-
-##### 1.4
-Added search bar and hotkeys for returning to setups and filtering bank
-
-##### 1.5
-Added compact view and the ability to move setups up and down the list
-
-##### 1.6
-Added ability to switch setups in game with "Show worn items" button. Added spellbook to setups. Added help button (which can be disabled in the config settings)
+##### 1.8
+Added additional filtered items, remove options for slots, updated stack button
 
 ##### 1.7
 Added notes, alphabetical sorting mode, more options to move setups, and more options to update rune pouch slots
 
-##### 1.8
-Added additional filtered items, remove options for slots, updated stack button
+##### 1.6
+Added ability to switch setups in game with "Show worn items" button. Added spellbook to setups. Added help button (which can be disabled in the config settings)
+
+##### 1.5
+Added compact view and the ability to move setups up and down the list
+
+##### 1.4
+Added search bar and hotkeys for returning to setups and filtering bank
+
+##### 1.3
+Added Reset all button and rune pouch support.
+
+##### 1.2
+Settings, bank filtering, unordered highlighting, and update individual slots added
+
+##### 1.1
+Import and export feature added
+
+##### 1.0
+Plugin added
