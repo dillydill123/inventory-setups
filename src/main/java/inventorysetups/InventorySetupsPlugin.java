@@ -537,8 +537,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// This ensures that when clicking Search when tab is selected, the search input is opened rather
 			// than client trying to close it first
-			client.setVar(VarClientStr.INPUT_TEXT, "");
-			client.setVar(VarClientInt.INPUT_TYPE, 0);
+			resetBankSearch();
 
 			// don't allow the bank to retry a filter if the search button is clicked
 			filteringIsAllowed = false;
@@ -660,14 +659,21 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
 		{
-			// Since we apply tag tab search filters even when the bank is not in search mode,
-			// bankkmain_build will reset the bank title to "The Bank of Gielinor". So apply our
+			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our
 			// own title.
 			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
 			{
 				Widget bankTitle = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
 			}
+		}
+		else if (event.getScriptId() == ScriptID.BANKMAIN_SEARCH_TOGGLE)
+		{
+			// cancel the current filtering if the search button is clicked
+			resetBankSearch();
+
+			// don't allow the bank to retry a filter if the search button is clicked
+			filteringIsAllowed = false;
 		}
 	}
 
@@ -676,7 +682,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getScriptId() == ScriptID.BANKMAIN_SEARCHING)
 		{
-			// The return value of bankmain_searching is on the stack. If we have a tag tab active
+			// The return value of bankmain_searching is on the stack. If we have a setup active
 			// make it return true to put the bank in a searching state.
 			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
 			{
