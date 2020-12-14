@@ -33,10 +33,13 @@ import net.runelite.client.util.AsyncBufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import java.awt.BorderLayout;
+//import javax.swing.SwingConstants;
+//import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.image.BufferedImage;
 
 public class InventorySetupSlot extends JPanel
@@ -54,49 +57,88 @@ public class InventorySetupSlot extends JPanel
 	@Getter
 	private int indexInSlot;
 
+	@Getter
+	private JLabel fuzzyLabel;
+
+//	public InventorySetupSlot(Color color, InventorySetupSlotID id, int indexInSlot)
+//	{
+//		this.slotID = id;
+//		this.imageLabel = new JLabel();
+//		this.parentSetup = null;
+//		this.fuzzyLabel = new JLabel("*");
+//		fuzzyLabel.setHorizontalAlignment(JLabel.RIGHT);
+//		this.indexInSlot = indexInSlot;
+//		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+//		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+//		setLayout(new BorderLayout());
+//		setPreferredSize(new Dimension(46, 42));
+//		setBackground(color);
+//		add(imageLabel, BorderLayout.CENTER);
+//		add(fuzzyLabel, BorderLayout.NORTH);
+//
+//	}
+
 	public InventorySetupSlot(Color color, InventorySetupSlotID id, int indexInSlot)
 	{
 		this.slotID = id;
 		this.imageLabel = new JLabel();
 		this.parentSetup = null;
+		this.fuzzyLabel = new JLabel();
 		this.indexInSlot = indexInSlot;
-		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
-		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		setLayout(new BorderLayout());
+
 		setPreferredSize(new Dimension(46, 42));
 		setBackground(color);
-		add(imageLabel, BorderLayout.CENTER);
+		setLayout(new GridBagLayout());
+		// Set constraints to put it in the north east (top right)
+		GridBagConstraints fuzzyConstraints = new GridBagConstraints(0, 0, 1, 1, 1, 1,
+																		GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
+																		new Insets(0, 0, 0, 0), 0, 0);
+		add(imageLabel);
+		add(fuzzyLabel, fuzzyConstraints);
 	}
 
-	public void setImageLabel(String toolTip, AsyncBufferedImage itemImage)
+//	public void setImageLabel(String toolTip, AsyncBufferedImage itemImage)
+//	{
+//		if (itemImage == null || toolTip == null)
+//		{
+//			imageLabel.setToolTipText("");
+//			imageLabel.setIcon(null);
+//			imageLabel.revalidate();
+//		}
+//		else
+//		{
+//			imageLabel.setToolTipText(toolTip);
+//			itemImage.addTo(imageLabel);
+//		}
+//
+//		validate();
+//		repaint();
+//	}
+
+	public void setImageLabel(String toolTip, BufferedImage itemImage, boolean fuzzy)
 	{
 		if (itemImage == null || toolTip == null)
 		{
 			imageLabel.setToolTipText("");
 			imageLabel.setIcon(null);
 			imageLabel.revalidate();
-			return;
 		}
-
-		imageLabel.setToolTipText(toolTip);
-		itemImage.addTo(imageLabel);
-
-		validate();
-		repaint();
-	}
-
-	public void setImageLabel(String toolTip, BufferedImage itemImage)
-	{
-		if (itemImage == null || toolTip == null)
+		else
 		{
-			imageLabel.setToolTipText("");
-			imageLabel.setIcon(null);
-			imageLabel.revalidate();
-			return;
+			imageLabel.setToolTipText(toolTip);
+			if (itemImage instanceof AsyncBufferedImage)
+			{
+				AsyncBufferedImage itemImageAsync = (AsyncBufferedImage)itemImage;
+				itemImageAsync.addTo(imageLabel);
+			}
+			else
+			{
+				imageLabel.setIcon(new ImageIcon(itemImage));
+			}
+
 		}
 
-		imageLabel.setToolTipText(toolTip);
-		imageLabel.setIcon(new ImageIcon(itemImage));
+		fuzzyLabel.setText(fuzzy ? "*" : "");
 
 		validate();
 		repaint();

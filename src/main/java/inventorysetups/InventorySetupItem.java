@@ -26,6 +26,7 @@ package inventorysetups;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 public class InventorySetupItem
@@ -36,4 +37,12 @@ public class InventorySetupItem
 	private final String name;
 	@Getter
 	private final int quantity;
+	@Getter
+	@Setter
+	private boolean fuzzy;
+
+	public void toggleIsFuzzy()
+	{
+		fuzzy = !fuzzy;
+	}
 }

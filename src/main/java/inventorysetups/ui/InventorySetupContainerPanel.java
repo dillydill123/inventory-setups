@@ -135,6 +135,18 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		});
 	}
 
+	protected void addFuzzyMouseListenerToSlot(final InventorySetupSlot slot)
+	{
+		setComponentPopupMenuToSlot(slot);
+		JPopupMenu popupMenu = slot.getComponentPopupMenu();
+		JMenuItem makeSlotFuzzy = new JMenuItem("Toggle Fuzzy");
+		popupMenu.add(makeSlotFuzzy);
+		makeSlotFuzzy.addActionListener(e ->
+		{
+			plugin.toggleFuzzyOnSlot(slot);
+		});
+	}
+
 	private void setComponentPopupMenuToSlot(final InventorySetupSlot slot)
 	{
 		if (slot.getComponentPopupMenu() == null)
@@ -153,7 +165,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 		if (item.getId() == -1)
 		{
-			containerSlot.setImageLabel(null, null);
+			containerSlot.setImageLabel(null, null, item.isFuzzy());
 			return;
 		}
 
@@ -166,7 +178,10 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		{
 			toolTip += " (" + quantity + ")";
 		}
-		containerSlot.setImageLabel(toolTip, itemImg);
+		containerSlot.setImageLabel(toolTip, itemImg, item.isFuzzy());
+
+
+
 	}
 
 	protected void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupItem savedItem, InventorySetupItem currItem, final InventorySetupSlot containerSlot)
@@ -181,11 +196,11 @@ public abstract class InventorySetupContainerPanel extends JPanel
 			return;
 		}
 
-		// obtain the correct item ids using the variation difference if applicable
+		// obtain the correct item ids using fuzzy mapping if applicable
 		int currId = currItem.getId();
 		int checkId = savedItem.getId();
 
-		if (!setup.isVariationDifference())
+		if (savedItem.isFuzzy())
 		{
 			currId = ItemVariationMapping.map(currId);
 			checkId = ItemVariationMapping.map(checkId);

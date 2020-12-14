@@ -390,7 +390,7 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			ArrayList<InventorySetupItem> runePouchData = null;
-			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false, true))
+			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
 			{
 				runePouchData = getRunePouchData();
 			}
@@ -560,7 +560,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			final String name = itemManager.getItemComposition(processedItemId).getName();
-			final InventorySetupItem setupItem = new InventorySetupItem(processedItemId, name, 1);
+			final InventorySetupItem setupItem = new InventorySetupItem(processedItemId, name, 1, false);
 
 			currSetup.getAdditionalFilteredItems().put(processedItemId, setupItem);
 			updateConfig();
@@ -600,7 +600,7 @@ public class InventorySetupsPlugin extends Plugin
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
-			runePouchData.add(new InventorySetupItem(runeItemId, runeName, runeAmount));
+			runePouchData.add(new InventorySetupItem(runeItemId, runeName, runeAmount, false));
 		}
 
 		return runePouchData;
@@ -703,8 +703,18 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
+			// copy over fuzzy attributes
+			for (int i = 0; i < inv.size(); i++)
+			{
+				inv.get(i).setFuzzy(setup.getInventory().get(i).isFuzzy());
+			}
+			for (int i = 0; i < eqp.size(); i++)
+			{
+				eqp.get(i).setFuzzy(setup.getEquipment().get(i).isFuzzy());
+			}
+
 			ArrayList<InventorySetupItem> runePouchData = null;
-			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv, false, true))
+			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
 			{
 				runePouchData = getRunePouchData();
 			}
@@ -730,12 +740,14 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+		final boolean isFuzzy = getContainerFromSlot(slot).get(slot.getIndexInSlot()).isFuzzy();
 
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
 		{
 			final ArrayList<InventorySetupItem> playerContainer = getNormalizedContainer(slot.getSlotID());
 			final InventorySetupItem newItem = playerContainer.get(slot.getIndexInSlot());
+			newItem.setFuzzy(isFuzzy);
 
 			// update the rune pouch data
 			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
@@ -771,7 +783,6 @@ public class InventorySetupsPlugin extends Plugin
 					int finalId = itemManager.canonicalize(itemId);
 
 					// NOTE: the itemSearch shows items from skill guides which can be selected, which may be highlighted
-					// if variation differences are on
 
 					// if the item is stackable, ask for a quantity
 					if (allowStackable && itemManager.getItemComposition(finalId).isStackable())
@@ -794,9 +805,9 @@ public class InventorySetupsPlugin extends Plugin
 									int quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
 									quantity = Math.max(quantity, 1);
 
-									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
-									final InventorySetupItem newItem = new InventorySetupItem(finalIdCopy, itemName, quantity);
 									final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
+									final InventorySetupItem newItem = new InventorySetupItem(finalIdCopy, itemName, quantity, container.get(slot.getIndexInSlot()).isFuzzy());
 
 									// update the rune pouch data
 									if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
@@ -819,13 +830,14 @@ public class InventorySetupsPlugin extends Plugin
 							{
 								removeAdditionalFilteredItem(slot);
 								addAdditionalFilteredItem(finalId);
+								// TODO duplicate update config and refresh setup being called?
 							}
 						}
 						else
 						{
-							final String itemName = itemManager.getItemComposition(finalId).getName();
-							final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1);
 							final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+							final String itemName = itemManager.getItemComposition(finalId).getName();
+							final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1, container.get(slot.getIndexInSlot()).isFuzzy());
 							// update the rune pouch data
 							if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
 							{
@@ -869,7 +881,7 @@ public class InventorySetupsPlugin extends Plugin
 			final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
 
 			// update the rune pouch data
-			final InventorySetupItem dummyItem = new InventorySetupItem(-1, "", 0);
+			final InventorySetupItem dummyItem = new InventorySetupItem(-1, "", 0, container.get(slot.getIndexInSlot()).isFuzzy());
 			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
@@ -879,6 +891,19 @@ public class InventorySetupsPlugin extends Plugin
 			updateConfig();
 			panel.refreshCurrentSetup();
 		});
+	}
+
+	public void toggleFuzzyOnSlot(final InventorySetupSlot slot)
+	{
+		if (panel.getCurrentSelectedSetup() == null)
+		{
+			return;
+		}
+
+		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+		container.get(slot.getIndexInSlot()).toggleIsFuzzy();
+		updateConfig();
+		panel.refreshCurrentSetup();
 	}
 
 	private void removeAdditionalFilteredItem(final InventorySetupSlot slot)
@@ -1063,7 +1088,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
-				newContainer.add(new InventorySetupItem(-1, "", 0));
+				newContainer.add(new InventorySetupItem(-1, "", 0, false));
 			}
 			else
 			{
@@ -1075,7 +1100,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					itemName = itemManager.getItemComposition(item.getId()).getName();
 				}
-				newContainer.add(new InventorySetupItem(item.getId(), itemName, item.getQuantity()));
+				newContainer.add(new InventorySetupItem(item.getId(), itemName, item.getQuantity(), false));
 			}
 		}
 
@@ -1119,7 +1144,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetup newSetup  = gson.fromJson(setup, type);
 			clientThread.invokeLater(() ->
 			{
-				if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory(), false, true))
+				if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
 				{
 					newSetup.updateRunePouch(getRunePouchData());
 				}
@@ -1153,21 +1178,20 @@ public class InventorySetupsPlugin extends Plugin
 
 	private ArrayList<InventorySetupItem> getContainerFromSlot(final InventorySetupSlot slot)
 	{
-		ArrayList<InventorySetupItem> container = slot.getParentSetup().getInventory();
-
-		if (slot.getSlotID() == InventorySetupSlotID.EQUIPMENT)
-		{
-			container = slot.getParentSetup().getEquipment();
-		}
-		else if (slot.getSlotID() == InventorySetupSlotID.RUNE_POUCH)
-		{
-			container = slot.getParentSetup().getRune_pouch();
-		}
-
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
-		assert slot.getIndexInSlot() < container.size() : "Index is greater than container size";
 
-		return container;
+		switch (slot.getSlotID())
+		{
+			case INVENTORY:
+				return slot.getParentSetup().getInventory();
+			case EQUIPMENT:
+				return slot.getParentSetup().getEquipment();
+			case RUNE_POUCH:
+				return slot.getParentSetup().getRune_pouch();
+			default:
+				assert false : "Invalid ID given";
+				return null;
+		}
 	}
 
 	private void loadConfig()
@@ -1194,7 +1218,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					for (final InventorySetup setup : inventorySetups)
 					{
-						if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory(), false, true))
+						if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory()))
 						{
 							setup.updateRunePouch(getRunePouchData());
 						}
@@ -1239,31 +1263,25 @@ public class InventorySetupsPlugin extends Plugin
 			return true;
 		}
 
-		// don't variation map unless it's been selected
-		if (!setup.isVariationDifference())
-		{
-			itemID = ItemVariationMapping.map(itemID);
-		}
-
 		// check the rune pouch to see if it has the item (runes in this case)
 		if (setup.getRune_pouch() != null)
 		{
-			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch(), false, true))
+			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch()))
 			{
 				return true;
 			}
 		}
 
 		// canonicalize is needed for equipment to deal with worn items like graceful.
-		return checkIfContainerContainsItem(itemID, setup.getInventory(), setup.isVariationDifference(), true) ||
-				checkIfContainerContainsItem(itemID, setup.getEquipment(), setup.isVariationDifference(), true);
+		return checkIfContainerContainsItem(itemID, setup.getInventory()) ||
+				checkIfContainerContainsItem(itemID, setup.getEquipment());
 	}
 
-	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> container, boolean isVariationDifference, boolean canonicalize)
+	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> setupContainer)
 	{
-		for (final InventorySetupItem item : container)
+		for (final InventorySetupItem item : setupContainer)
 		{
-			if (itemID == getCorrectID(isVariationDifference, canonicalize, item.getId()))
+			if (getProcessedID(item.isFuzzy(), itemID) == getProcessedID(item.isFuzzy(), item.getId()))
 			{
 				return true;
 			}
@@ -1272,16 +1290,10 @@ public class InventorySetupsPlugin extends Plugin
 		return false;
 	}
 
-	private int getCorrectID(boolean variationDifference, boolean canonicalize, int itemId)
+	private int getProcessedID(boolean isFuzzy, int itemId)
 	{
-
-		if (canonicalize)
-		{
-			itemId = itemManager.canonicalize(itemId);
-		}
-
-		// if variation difference isn't selected, get the mapped id
-		if (!variationDifference)
+		// use fuzzy mapping if needed
+		if (isFuzzy)
 		{
 			return ItemVariationMapping.map(itemId);
 		}

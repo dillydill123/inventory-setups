@@ -136,7 +136,7 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 				break;
 		}
 
-		spellbookSlot.setImageLabel(spellbookStr + " Spellbook", spellbookImages.get(setup.getSpellBook()));
+		spellbookSlot.setImageLabel(spellbookStr + " Spellbook", spellbookImages.get(setup.getSpellBook()), false);
 
 		validate();
 		repaint();

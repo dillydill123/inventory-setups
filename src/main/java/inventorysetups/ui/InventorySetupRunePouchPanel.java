@@ -106,9 +106,10 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 		}
 		else
 		{
-			for (final InventorySetupSlot slot : runeSlots)
+			for (int i = 0; i < runeSlots.size(); i++)
 			{
-				slot.setImageLabel(null, null);
+				super.setContainerSlot(i, runeSlots.get(i), setup,
+										new InventorySetupItem(-1, "", 0, false));
 			}
 		}
 

@@ -7,9 +7,7 @@ import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 			// remove the images and tool tips for the inventory slots that are not part of this setup
 			for (int i = finalSizeLambda - 1; i >= setupAdditionalItems.size(); i--)
 			{
-				InventorySetupItem dummy = new InventorySetupItem(-1, null, 0);
+				InventorySetupItem dummy = new InventorySetupItem(-1, null, 0, false);
 				this.setContainerSlot(i, additionalFilteredSlots.get(i), setup, dummy);
 			}
 

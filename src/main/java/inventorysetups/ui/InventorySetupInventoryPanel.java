@@ -27,7 +27,6 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetupSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.ItemID;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupItem;
@@ -37,6 +36,8 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
@@ -68,6 +69,7 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			containerSlotsPanel.add(inventorySlots.get(i));
+			super.addFuzzyMouseListenerToSlot(inventorySlots.get(i));
 			super.addUpdateFromContainerMouseListenerToSlot(inventorySlots.get(i));
 			super.addUpdateFromSearchMouseListenerToSlot(inventorySlots.get(i), true);
 			super.addRemoveMouseListenerToSlot(inventorySlots.get(i));
@@ -143,62 +145,69 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 	{
 		HashMap<Integer, ArrayList<Integer>> currInvMap = new HashMap<>();
 
+		// collect items in current inventory in the form of a HashMap -> ArrayList of stack sizes
 		boolean currInvHasRunePouch = false;
 		for (final InventorySetupItem item : currInventory)
 		{
-			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
-			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
+			// Use fuzzy mapping
 			if (ItemVariationMapping.map(item.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
 			}
 
-			ArrayList<Integer> currItemList = currInvMap.get(itemId);
+			ArrayList<Integer> currItemList = currInvMap.get(item.getId());
 			if (currItemList == null)
 			{
 				currItemList = new ArrayList<>();
-				currInvMap.put(itemId, currItemList);
+				currInvMap.put(item.getId(), currItemList);
 			}
 			currItemList.add(item.getQuantity());
 		}
 
 		final ArrayList<InventorySetupItem> setupInv = inventorySetup.getInventory();
+
+		ArrayList<Boolean> processedInvItems = new ArrayList<>(Arrays.asList(new Boolean[setupInv.size()]));
+		Collections.fill(processedInvItems, Boolean.FALSE);
+
+		// First process non fuzzy exact items, then fuzzy exact items
+		processExactItems(inventorySetup, currInvMap, processedInvItems, false);
+		processExactItems(inventorySetup, currInvMap, processedInvItems, true);
+
+		// now process any items left which may use fuzzy mappings
 		for (int i = 0; i < setupInv.size(); i++)
 		{
+			// the item was already processed above using exact match
+			if (processedInvItems.get(i))
+			{
+				continue;
+			}
+
 			final InventorySetupItem item = setupInv.get(i);
 
-			/*
-			 don't count empty spaces. We only want to show items that are missing, not "extra items"
-			 that would be indicated by highlighting empty slots.
-			*/
-			if (item.getId() == -1)
+			// Exact items have been handled, try to find fuzzy items
+			int itemId = item.getId();
+			ArrayList<Integer> itemList = currInvMap.get(itemId);
+			if (itemList == null && item.isFuzzy()) // item list should always return null, exact matches handled above
 			{
-				inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
-				continue;
+				// if the item is fuzzy, attempt to find a suitable item
+				for (final int idCurrInv : currInvMap.keySet())
+				{
+					if (ItemVariationMapping.map(idCurrInv) == ItemVariationMapping.map(itemId))
+					{
+						itemList = currInvMap.get(idCurrInv);
+						itemId = idCurrInv; // Needed to delete the correct list later
+						break;
+					}
+				}
 			}
 
-			// Use variation mapping if necessary and set the quantity to 1 if ignoring stacks
-			int itemId = inventorySetup.isVariationDifference() ? item.getId() : ItemVariationMapping.map(item.getId());
-			final ArrayList<Integer> itemList = currInvMap.get(itemId);
-			if (itemList == null || itemList.isEmpty())
+			if (itemList == null)
 			{
 				inventorySlots.get(i).setBackground(inventorySetup.getHighlightColor());
 				continue;
 			}
 
-			// This assumes the last item contains the correct quantity. This is done because
-			// in the actual game, you can't have two stacks of stackable items. This assumption
-			// is fine for stackable items as well.
-			Integer currInventoryItemQty = itemList.get(itemList.size() - 1);
-			itemList.remove(itemList.size() - 1);
-			if (this.highlightBasedOnStack(inventorySetup, item.getQuantity(), currInventoryItemQty))
-			{
-				inventorySlots.get(i).setBackground(inventorySetup.getHighlightColor());
-			}
-			else
-			{
-				inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			}
+			updateCurrentUnorderedSlot(itemId, inventorySetup, inventorySlots.get(i), item, itemList, currInvMap);
 		}
 
 		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
@@ -207,6 +216,73 @@ public class InventorySetupInventoryPanel extends InventorySetupContainerPanel
 			handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal);
 		});
 
+	}
+
+	private void processExactItems(final InventorySetup inventorySetup,
+									final HashMap<Integer, ArrayList<Integer>> currInvMap,
+									final ArrayList<Boolean> processedInvItems,
+									final boolean allowFuzzy)
+	{
+		ArrayList<InventorySetupItem> setupInv = inventorySetup.getInventory();
+
+		// Handle exact non fuzzy items first
+		// Exact items will be preferred first
+		for (int i = 0; i < setupInv.size(); i++)
+		{
+			if (processedInvItems.get(i))
+			{
+				continue;
+			}
+
+			final InventorySetupItem item = setupInv.get(i);
+
+			// don't count empty spaces. We only want to show items that are missing, not "extra items"
+			// that would be indicated by highlighting empty slots.
+			if (item.getId() == -1)
+			{
+				inventorySlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
+				processedInvItems.set(i, Boolean.TRUE);
+				continue;
+			}
+
+			// Only mark it as processed if the item exists. If it doesn't there may be a fuzzy variant available
+			ArrayList<Integer> itemList = currInvMap.get(item.getId());
+			if (itemList != null && (allowFuzzy || !item.isFuzzy()))
+			{
+				updateCurrentUnorderedSlot(item.getId(), inventorySetup, inventorySlots.get(i), item, itemList, currInvMap);
+				processedInvItems.set(i, Boolean.TRUE);
+			}
+
+		}
+	}
+
+
+	private void updateCurrentUnorderedSlot(int itemId, final InventorySetup inventorySetup,
+											final InventorySetupSlot slot,
+											final InventorySetupItem item,
+											final ArrayList<Integer> itemList,
+											final HashMap<Integer, ArrayList<Integer>> currInvMap)
+	{
+		// This assumes the last item contains the correct quantity. This is done because
+		// in the actual game, you can't have two stacks of stackable items. This assumption
+		// is fine for stackable items as well.
+		Integer currInventoryItemQty = itemList.get(itemList.size() - 1);
+
+		// delete the list if it's empty to simplify things
+		itemList.remove(itemList.size() - 1);
+		if (itemList.isEmpty())
+		{
+			currInvMap.remove(itemId);
+		}
+
+		if (this.highlightBasedOnStack(inventorySetup, item.getQuantity(), currInventoryItemQty))
+		{
+			slot.setBackground(inventorySetup.getHighlightColor());
+		}
+		else
+		{
+			slot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		}
 	}
 
 	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, boolean currInvHasRunePouch)
