@@ -97,7 +97,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,6 +117,10 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String INV_SEARCH = "inv:";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
+	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
+	private static final String FILTER_EQUIPMENT_ENTRY = "Filter equipment";
+	private static final String FILTER_INVENTORY_ENTRY = "Filter inventory";
+	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final int NUM_INVENTORY_ITEMS = 28;
 	private static final int NUM_EQUIPMENT_ITEMS = 14;
@@ -297,7 +300,13 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			final int oldMenuSize = menuEntries.length;
-			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + inventorySetups.size() + 1);
+			int newSize = oldMenuSize + inventorySetups.size();
+			// 1 for closing setup, 1 for filtering add items, 1 for filtering equip, and one for filtering inventory, 1 for filtering all
+			if (panel.getCurrentSelectedSetup() != null)
+			{
+				newSize += 5;
+			}
+			menuEntries = Arrays.copyOf(menuEntries, newSize);
 
 			for (int i = 0; i < inventorySetups.size(); i++)
 			{
@@ -310,12 +319,44 @@ public class InventorySetupsPlugin extends Plugin
 				menuEntry.setType(MenuAction.RUNELITE.getId());
 			}
 
-			// add menu entry to close setup
-			MenuEntry menuEntryCloseSetup = menuEntries[menuEntries.length - 1] = new MenuEntry();
-			menuEntryCloseSetup.setOption(RETURN_TO_OVERVIEW_ENTRY);
-			menuEntryCloseSetup.setType(MenuAction.RUNELITE.getId());
-			menuEntryCloseSetup.setTarget("");
-			menuEntryCloseSetup.setIdentifier(0);
+			if (panel.getCurrentSelectedSetup() != null)
+			{
+				// add menu entry to filter add items
+				MenuEntry menuEntryAddItemsFilter = menuEntries[menuEntries.length - 5] = new MenuEntry();
+				menuEntryAddItemsFilter.setOption(FILTER_ADD_ITEMS_ENTRY);
+				menuEntryAddItemsFilter.setType(MenuAction.RUNELITE.getId());
+				menuEntryAddItemsFilter.setTarget("");
+				menuEntryAddItemsFilter.setIdentifier(0);
+
+				// add menu entry to filter equipment
+				MenuEntry menuEntryEquipmentFilter = menuEntries[menuEntries.length - 4] = new MenuEntry();
+				menuEntryEquipmentFilter.setOption(FILTER_EQUIPMENT_ENTRY);
+				menuEntryEquipmentFilter.setType(MenuAction.RUNELITE.getId());
+				menuEntryEquipmentFilter.setTarget("");
+				menuEntryEquipmentFilter.setIdentifier(0);
+
+				// add menu entry to filter inventory
+				MenuEntry menuEntryInventoryFilter = menuEntries[menuEntries.length - 3] = new MenuEntry();
+				menuEntryInventoryFilter.setOption(FILTER_INVENTORY_ENTRY);
+				menuEntryInventoryFilter.setType(MenuAction.RUNELITE.getId());
+				menuEntryInventoryFilter.setTarget("");
+				menuEntryInventoryFilter.setIdentifier(0);
+
+				// add menu entry to filter all
+				MenuEntry menuEntryAllFilter = menuEntries[menuEntries.length - 2] = new MenuEntry();
+				menuEntryAllFilter.setOption(FILTER_ALL_ENTRY);
+				menuEntryAllFilter.setType(MenuAction.RUNELITE.getId());
+				menuEntryAllFilter.setTarget("");
+				menuEntryAllFilter.setIdentifier(0);
+
+				// add menu entry to close setup
+				MenuEntry menuEntryCloseSetup = menuEntries[menuEntries.length - 1] = new MenuEntry();
+				menuEntryCloseSetup.setOption(RETURN_TO_OVERVIEW_ENTRY);
+				menuEntryCloseSetup.setType(MenuAction.RUNELITE.getId());
+				menuEntryCloseSetup.setTarget("");
+				menuEntryCloseSetup.setIdentifier(0);
+			}
+
 
 			client.setMenuEntries(menuEntries);
 		}
@@ -521,6 +562,34 @@ public class InventorySetupsPlugin extends Plugin
 			if (event.getMenuOption().equals(RETURN_TO_OVERVIEW_ENTRY))
 			{
 				panel.returnToOverviewPanel(false);
+				return;
+			}
+
+			if (event.getMenuOption().equals(FILTER_ALL_ENTRY))
+			{
+				bankFilteringMode = InventorySetupFilteringMode.ALL;
+				doBankSearch();
+				return;
+			}
+
+			if (event.getMenuOption().equals(FILTER_INVENTORY_ENTRY))
+			{
+				bankFilteringMode = InventorySetupFilteringMode.INVENTORY;
+				doBankSearch();
+				return;
+			}
+
+			if (event.getMenuOption().equals(FILTER_EQUIPMENT_ENTRY))
+			{
+				bankFilteringMode = InventorySetupFilteringMode.EQUIPMENT;
+				doBankSearch();
+				return;
+			}
+
+			if (event.getMenuOption().equals(FILTER_ADD_ITEMS_ENTRY))
+			{
+				bankFilteringMode = InventorySetupFilteringMode.ADDITIONAL_FILTERED_ITEMS;
+				doBankSearch();
 				return;
 			}
 
