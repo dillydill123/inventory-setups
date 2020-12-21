@@ -29,6 +29,7 @@ import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Keybind;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
@@ -38,11 +39,27 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
 public interface InventorySetupConfig extends Config
 {
+
+	@ConfigSection(
+			name = "Default Options",
+			description = "Default options for new setups",
+			position = 0
+	)
+	String defaultSection = "defaultSection";
+
+	@ConfigSection(
+			name = "Hotkey Options",
+			description = "Options for hot keys",
+			position = 1
+	)
+	String hotkeySection = "hotkeysection";
+
 	@ConfigItem(
 			keyName = "bankFilter",
 			name = "Default Filter Bank",
 			description = "Configures the default setting for bank filtering in new setups",
-			position = 1
+			position = 1,
+			section = defaultSection
 	)
 	default boolean bankFilter()
 	{
@@ -54,7 +71,8 @@ public interface InventorySetupConfig extends Config
 			name = "Default Highlight Stack Difference",
 			description = "Configures the default setting for highlighting stack differences in new setups",
 			position = 1,
-			hidden = true
+			hidden = true,
+			section = defaultSection
 	)
 	default boolean highlightStackDifferenceOld()
 	{
@@ -65,7 +83,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "highlightStackDifferenceEnum",
 			name = "Default Highlight Stack Difference",
 			description = "Configures the default setting for highlighting stack differences in new setups",
-			position = 1
+			position = 1,
+			section = defaultSection
 	)
 	default InventorySetupStackCompare highlightStackDifference()
 	{
@@ -76,7 +95,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "highlightVarianceDifference",
 			name = "Default Highlight Variation Difference",
 			description = "Configures the default setting for highlighting variations in new setups",
-			position = 2
+			position = 2,
+			section = defaultSection
 	)
 	default boolean highlightVariationDifference()
 	{
@@ -87,7 +107,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "highlightUnorderedDifference",
 			name = "Default Highlight Unordered Difference",
 			description = "Configures the default setting for unordered highlighting in new setups",
-			position = 2
+			position = 2,
+			section = defaultSection
 	)
 	default boolean highlightUnorderedDifference()
 	{
@@ -98,7 +119,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "highlightDifference",
 			name = "Default Highlight",
 			description = "Configures the default setting for highlighting differences in new setups",
-			position = 4
+			position = 4,
+			section = defaultSection
 	)
 	default boolean highlightDifference()
 	{
@@ -110,7 +132,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "highlightColor",
 			name = "Default Highlight Color",
 			description = "Configures the default highlighting color in new setups",
-			position = 5
+			position = 5,
+			section = defaultSection
 	)
 	default Color highlightColor()
 	{
@@ -121,7 +144,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "returnToSetupsHotkey",
 			name = "Return To Setups Hotkey",
 			description = "Configures the hotkey for returning to setups",
-			position = 6
+			position = 6,
+			section = hotkeySection
 	)
 	default Keybind returnToSetupsHotkey()
 	{
@@ -132,7 +156,8 @@ public interface InventorySetupConfig extends Config
 			keyName = "filterBankHotkey",
 			name = "Filter Bank Hotkey",
 			description = "Configures the hotkey for filtering the bank",
-			position = 7
+			position = 7,
+			section = hotkeySection
 	)
 	default Keybind filterBankHotkey()
 	{
@@ -182,4 +207,16 @@ public interface InventorySetupConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "requireActivePanelFilter",
+			name = "Require Active Panel for Filtering",
+			description = "Only allow filtering if the Inventory Setups panel is active",
+			position = 12
+	)
+	default boolean requireActivePanelFilter()
+	{
+		return false;
+	}
+
 }
