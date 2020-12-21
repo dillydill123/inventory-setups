@@ -25,6 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
+import inventorysetups.InventorySetupFilteringMode;
 import inventorysetups.InventorySetupItem;
 import inventorysetups.InventorySetupSorting;
 import inventorysetups.InventorySetupsPlugin;
@@ -591,6 +592,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			setScrollBarPosition(0);
 		}
 
+		plugin.setBankFilteringMode(InventorySetupFilteringMode.ALL);
 		plugin.doBankSearch();
 
 		validate();

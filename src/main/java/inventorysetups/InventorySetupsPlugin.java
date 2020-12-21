@@ -34,6 +34,7 @@ import inventorysetups.ui.InventorySetupPluginPanel;
 import inventorysetups.ui.InventorySetupSlot;
 import joptsimple.internal.Strings;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
@@ -179,6 +180,8 @@ public class InventorySetupsPlugin extends Plugin
 	// global filtering is allowed for any setup
 	private boolean internalFilteringIsAllowed;
 
+	@Setter
+	@Getter
 	private InventorySetupFilteringMode bankFilteringMode;
 
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
@@ -206,24 +209,60 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			// you must wait at least one game tick otherwise
-			// the bank filter will work but then go back to the previous tab.
-			// For some reason this can still happen but it is very rare,
-			// and only when the user clicks a tab and the hot key extremely shortly after.
-			int gameTick = client.getTickCount();
-			clientThread.invokeLater(() ->
-			{
-				int gameTick2 = client.getTickCount();
-				if (gameTick2 <= gameTick)
-				{
-					return false;
-				}
-
-				doBankSearch();
-				return true;
-			});
+			bankFilteringMode = InventorySetupFilteringMode.ALL;
+			triggerBankSearchFromHotKey();
 		}
 	};
+
+	private final HotkeyListener filterInventoryHotkeyListener = new HotkeyListener(() -> config.filterInventoryHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			bankFilteringMode = InventorySetupFilteringMode.INVENTORY;
+			triggerBankSearchFromHotKey();
+		}
+	};
+
+	private final HotkeyListener filterEquipmentHotkeyListener = new HotkeyListener(() -> config.filterEquipmentHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			bankFilteringMode = InventorySetupFilteringMode.EQUIPMENT;
+			triggerBankSearchFromHotKey();
+		}
+	};
+
+	private final HotkeyListener filterAddItemsHotkeyListener = new HotkeyListener(() -> config.filterAddItemsHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			bankFilteringMode = InventorySetupFilteringMode.ADDITIONAL_FILTERED_ITEMS;
+			triggerBankSearchFromHotKey();
+		}
+	};
+
+	private void triggerBankSearchFromHotKey()
+	{
+		// you must wait at least one game tick otherwise
+		// the bank filter will work but then go back to the previous tab.
+		// For some reason this can still happen but it is very rare,
+		// and only when the user clicks a tab and the hot key extremely shortly after.
+		int gameTick = client.getTickCount();
+		clientThread.invokeLater(() ->
+		{
+			int gameTick2 = client.getTickCount();
+			if (gameTick2 <= gameTick)
+			{
+				return false;
+			}
+
+			doBankSearch();
+			return true;
+		});
+	}
 
 	@Provides
 	InventorySetupConfig getConfig(ConfigManager configManager)
@@ -352,6 +391,9 @@ public class InventorySetupsPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
 		keyManager.registerKeyListener(filterBankHotkeyListener);
+		keyManager.registerKeyListener(filterInventoryHotkeyListener);
+		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
+		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 
 		bankFilteringMode = InventorySetupFilteringMode.ALL;
 
@@ -682,12 +724,27 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
 		{
-			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our
-			// own title.
+			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
 			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
+				String postTitle = " - ";
+				switch (bankFilteringMode)
+				{
+					case ALL:
+						postTitle += "All Items";
+						break;
+					case INVENTORY:
+						postTitle += "Inventory";
+						break;
+					case EQUIPMENT:
+						postTitle += "Equipment";
+						break;
+					case ADDITIONAL_FILTERED_ITEMS:
+						postTitle += "Additional Items";
+						break;
+				}
 				Widget bankTitle = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
-				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
+				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + postTitle + "</col>");
 			}
 		}
 		else if (event.getScriptId() == ScriptID.BANKMAIN_SEARCH_TOGGLE)

@@ -155,7 +155,7 @@ public interface InventorySetupConfig extends Config
 	@ConfigItem(
 			keyName = "filterBankHotkey",
 			name = "Filter Bank Hotkey",
-			description = "Configures the hotkey for filtering the bank",
+			description = "Configures the hotkey for filtering all items in the bank",
 			position = 7,
 			section = hotkeySection
 	)
@@ -165,10 +165,46 @@ public interface InventorySetupConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "filterBankInventoryOnlyHotkey",
+			name = "Filter Inventory Hotkey",
+			description = "Configures the hotkey for filtering the inventory in the bank",
+			position = 8,
+			section = hotkeySection
+	)
+	default Keybind filterInventoryHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+			keyName = "filterBankEquipmentOnlyHotkey",
+			name = "Filter Equipment Hotkey",
+			description = "Configures the hotkey for filtering the equipment in the bank",
+			position = 9,
+			section = hotkeySection
+	)
+	default Keybind filterEquipmentHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+			keyName = "filterBankAddItemstOnlyHotkey",
+			name = "Filter Additional Items Hotkey",
+			description = "Configures the hotkey for filtering the additional items in the bank",
+			position = 10,
+			section = hotkeySection
+	)
+	default Keybind filterAddItemsHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_COMPACT_MODE,
 			name = "Compact Mode",
 			description = "Configures the setup panels to be compact",
-			position = 8
+			position = 11
 	)
 	default boolean compactMode()
 	{
@@ -179,7 +215,7 @@ public interface InventorySetupConfig extends Config
 			keyName = CONFIG_KEY_SORTING_MODE,
 			name = "Sorting Mode",
 			description = "Configures the sorting of setups",
-			position = 9
+			position = 12
 	)
 	default InventorySetupSorting sortingMode()
 	{
@@ -190,7 +226,7 @@ public interface InventorySetupConfig extends Config
 			keyName = CONFIG_KEY_HIDE_BUTTON,
 			name = "Hide Help Button",
 			description = "Hide the help button",
-			position = 10
+			position = 13
 	)
 	default boolean hideButton()
 	{
@@ -201,7 +237,7 @@ public interface InventorySetupConfig extends Config
 			keyName = "disableBankTabBar",
 			name = "Disable Bank Tab Bar",
 			description = "Stops the thin bank tab bar from removing the bank filter when clicked",
-			position = 11
+			position = 14
 	)
 	default boolean disableBankTabBar()
 	{
@@ -212,7 +248,7 @@ public interface InventorySetupConfig extends Config
 			keyName = "requireActivePanelFilter",
 			name = "Require Active Panel for Filtering",
 			description = "Only allow filtering if the Inventory Setups panel is active",
-			position = 12
+			position = 15
 	)
 	default boolean requireActivePanelFilter()
 	{
