@@ -796,21 +796,21 @@ public class InventorySetupsPlugin extends Plugin
 					{
 						final int finalIdCopy = finalId;
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
-							.addCharValidator(arg -> arg >= 48 && arg <= 57) // only allow numbers (ASCII)
+							// only allow numbers and k, m, b (if 1 value is available)
+							// stop once k, m, or b is seen
+							.addCharValidator(arg -> (arg >= 48 && arg <= 57) ||
+														((arg == 66 || arg == 98 ||
+														arg == 75 || arg == 107 ||
+														arg == 77 || arg == 109) &&
+														searchInput.getValue().length() > 0 &&
+														!searchInput.getValue().toLowerCase().contains("k") &&
+														!searchInput.getValue().toLowerCase().contains("m") &&
+														!searchInput.getValue().toLowerCase().contains("b")))
 							.onDone((input) ->
 							{
 								clientThread.invokeLater(() ->
 								{
-									String inputParsed = input;
-									if (inputParsed.length() > 10)
-									{
-										inputParsed = inputParsed.substring(0, 10);
-									}
-
-									// limit to max int value
-									long quantityLong = Long.parseLong(inputParsed);
-									int quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
-									quantity = Math.max(quantity, 1);
+									int quantity = parseTextInputAmount(input);
 
 									final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
@@ -837,7 +837,7 @@ public class InventorySetupsPlugin extends Plugin
 							{
 								removeAdditionalFilteredItem(slot);
 								addAdditionalFilteredItem(finalId);
-								// TODO duplicate update config and refresh setup being called?
+								// duplicate update config and refresh setup are being called here
 							}
 						}
 						else
@@ -1357,6 +1357,42 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		return true;
+	}
+
+	private int parseTextInputAmount(String input)
+	{
+		// only take the first 10 characters (max amount is 2.147B which is only 10 digits)
+		if (input.length() > 10)
+		{
+			input = input.substring(0, 10);
+		}
+		input = input.toLowerCase();
+
+		char finalChar = input.charAt(input.length() - 1);
+		int factor = 1;
+		if (Character.isLetter(finalChar))
+		{
+			input = input.substring(0, input.length() - 1);
+			switch (finalChar)
+			{
+				case 'k':
+					factor = 1000;
+					break;
+				case 'm':
+					factor = 1000000;
+					break;
+				case 'b':
+					factor = 1000000000;
+					break;
+			}
+		}
+
+		// limit to max int value
+		long quantityLong = Long.parseLong(input) * factor;
+		int quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
+		quantity = Math.max(quantity, 1);
+
+		return quantity;
 	}
 
 	private String fixOldJSONData(final String json)
