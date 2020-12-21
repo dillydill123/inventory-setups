@@ -46,8 +46,6 @@ import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
 import net.runelite.api.SpriteID;
-import net.runelite.api.VarClientInt;
-import net.runelite.api.VarClientStr;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
@@ -178,7 +176,7 @@ public class InventorySetupsPlugin extends Plugin
 	private ChatboxTextInput searchInput;
 
 	// global filtering is allowed for any setup
-	private boolean filteringIsAllowed;
+	private boolean internalFilteringIsAllowed;
 
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
 			{
@@ -311,9 +309,9 @@ public class InventorySetupsPlugin extends Plugin
 		// this is to make it so the bank will refilter if a tab was clicked and then the player exited the bank
 		if (event.getGroupId() == WidgetID.BANK_GROUP_ID)
 		{
-			filteringIsAllowed = true;
+			internalFilteringIsAllowed = true;
 
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
 				// start a bank search so the bank is filtered when it's opened
 				doBankSearch();
@@ -334,7 +332,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void startUp()
 	{
-		this.filteringIsAllowed = true;
+		this.internalFilteringIsAllowed = true;
 		this.panel = new InventorySetupPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
 
@@ -344,6 +342,9 @@ public class InventorySetupsPlugin extends Plugin
 				.priority(6)
 				.panel(panel)
 				.build();
+
+		// Clicking the nav button will do a bank search
+		navButton.setOnClick(this::doBankSearch);
 
 		clientToolbar.addNavigation(navButton);
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
@@ -433,7 +434,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void doBankSearch()
 	{
 		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
-		filteringIsAllowed = true;
+		internalFilteringIsAllowed = true;
 
 		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
 		{
@@ -528,7 +529,7 @@ public class InventorySetupsPlugin extends Plugin
 		else if (panel.getCurrentSelectedSetup() != null
 				&& (event.getMenuOption().startsWith("View tab") || event.getMenuOption().equals("View all items")))
 		{
-			filteringIsAllowed = false;
+			internalFilteringIsAllowed = false;
 			return;
 		}
 
@@ -540,7 +541,7 @@ public class InventorySetupsPlugin extends Plugin
 			resetBankSearch();
 
 			// don't allow the bank to retry a filter if the search button is clicked
-			filteringIsAllowed = false;
+			internalFilteringIsAllowed = false;
 		}
 	}
 
@@ -618,7 +619,7 @@ public class InventorySetupsPlugin extends Plugin
 			case "bankSearchFilter":
 			{
 				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
-				if (currentSetup != null && currentSetup.isFilterBank() && filteringIsAllowed)
+				if (currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
 				{
 					int itemId = intStack[intStackSize - 1];
 
@@ -640,7 +641,7 @@ public class InventorySetupsPlugin extends Plugin
 				// then clicking on "item" or "note" would cause the bank to show the tab
 				// and remove the filter. This stops this from happening.
 				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
-				if (currentSetup != null && currentSetup.isFilterBank() && filteringIsAllowed)
+				if (currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
 				{
 					intStack[intStackSize - 1] = 1;
 				}
@@ -661,7 +662,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our
 			// own title.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
 				Widget bankTitle = client.getWidget(WidgetInfo.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
@@ -673,7 +674,7 @@ public class InventorySetupsPlugin extends Plugin
 			resetBankSearch();
 
 			// don't allow the bank to retry a filter if the search button is clicked
-			filteringIsAllowed = false;
+			internalFilteringIsAllowed = false;
 		}
 	}
 
@@ -684,7 +685,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// The return value of bankmain_searching is on the stack. If we have a setup active
 			// make it return true to put the bank in a searching state.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && filteringIsAllowed)
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
 				client.getIntStack()[client.getIntStackSize() - 1] = 1; // true
 			}
@@ -1180,6 +1181,13 @@ public class InventorySetupsPlugin extends Plugin
 	public boolean isHighlightingAllowed()
 	{
 		return client.getGameState() == GameState.LOGGED_IN;
+	}
+
+	public boolean isFilteringAllowed()
+	{
+		boolean allowBasedOnActivePanel = navButton.isSelected() || !config.requireActivePanelFilter();
+
+		return internalFilteringIsAllowed && allowBasedOnActivePanel;
 	}
 
 	private ArrayList<InventorySetupItem> getContainerFromSlot(final InventorySetupSlot slot)
