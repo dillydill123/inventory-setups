@@ -96,6 +96,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -177,6 +178,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	// global filtering is allowed for any setup
 	private boolean internalFilteringIsAllowed;
+
+	private InventorySetupFilteringMode bankFilteringMode;
 
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
 			{
@@ -350,6 +353,8 @@ public class InventorySetupsPlugin extends Plugin
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
 		keyManager.registerKeyListener(filterBankHotkeyListener);
 
+		bankFilteringMode = InventorySetupFilteringMode.ALL;
+
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
 		{
@@ -502,10 +507,13 @@ public class InventorySetupsPlugin extends Plugin
 					return;
 				}
 
+				final HashMap<Integer, InventorySetupItem> additionalFilteredItems =
+						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+
 				// Item already exists, don't add it again
-				if (!additionalFilteredItemsHasItem(item.getId()))
+				if (!additionalFilteredItemsHasItem(item.getId(), additionalFilteredItems))
 				{
-					addAdditionalFilteredItem(item.getId());
+					addAdditionalFilteredItem(item.getId(), additionalFilteredItems);
 				}
 
 			}
@@ -545,24 +553,23 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	private boolean additionalFilteredItemsHasItem(int itemId)
+	private boolean additionalFilteredItemsHasItem(int itemId, final HashMap<Integer, InventorySetupItem> additionalFilteredItems)
 	{
 		final int processedItemId = itemManager.canonicalize(itemId);
-		return panel.getCurrentSelectedSetup().getAdditionalFilteredItems().get(processedItemId) != null;
+		return additionalFilteredItems.get(processedItemId) != null;
 	}
 
-	private void addAdditionalFilteredItem(int itemId)
+	private void addAdditionalFilteredItem(int itemId, final HashMap<Integer, InventorySetupItem> additionalFilteredItems)
 	{
 		// un-noted, un-placeholdered ID
 		final int processedItemId = itemManager.canonicalize(itemId);
-		final InventorySetup currSetup = panel.getCurrentSelectedSetup();
 
 		clientThread.invokeLater(() ->
 		{
 			final String name = itemManager.getItemComposition(processedItemId).getName();
 			final InventorySetupItem setupItem = new InventorySetupItem(processedItemId, name, 1, false);
 
-			currSetup.getAdditionalFilteredItems().put(processedItemId, setupItem);
+			additionalFilteredItems.put(processedItemId, setupItem);
 			updateConfig();
 			panel.refreshCurrentSetup();
 		});
@@ -622,8 +629,23 @@ public class InventorySetupsPlugin extends Plugin
 				if (currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
 				{
 					int itemId = intStack[intStackSize - 1];
-
-					if (setupContainsItem(currentSetup, itemId))
+					boolean containsItem = true;
+					switch (bankFilteringMode)
+					{
+						case ALL:
+							containsItem = setupContainsItem(currentSetup, itemId);
+							break;
+						case INVENTORY:
+							containsItem = checkIfContainerContainsItem(itemId, currentSetup.getInventory());
+							break;
+						case EQUIPMENT:
+							containsItem = checkIfContainerContainsItem(itemId, currentSetup.getEquipment());
+							break;
+						case ADDITIONAL_FILTERED_ITEMS:
+							containsItem = additionalFilteredItemsHasItem(itemId, currentSetup.getAdditionalFilteredItems());
+							break;
+					}
+					if (containsItem)
 					{
 						// return true
 						intStack[intStackSize - 2] = 1;
@@ -833,10 +855,12 @@ public class InventorySetupsPlugin extends Plugin
 					{
 						if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
 						{
-							if (!additionalFilteredItemsHasItem(finalId))
+							final HashMap<Integer, InventorySetupItem> additionalFilteredItems =
+									panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+							if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
 							{
-								removeAdditionalFilteredItem(slot);
-								addAdditionalFilteredItem(finalId);
+								removeAdditionalFilteredItem(slot, additionalFilteredItems);
+								addAdditionalFilteredItem(finalId, additionalFilteredItems);
 								// duplicate update config and refresh setup are being called here
 							}
 						}
@@ -879,7 +903,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
 			{
-				removeAdditionalFilteredItem(slot);
+				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
 				updateConfig();
 				panel.refreshCurrentSetup();
 				return;
@@ -913,7 +937,7 @@ public class InventorySetupsPlugin extends Plugin
 		panel.refreshCurrentSetup();
 	}
 
-	private void removeAdditionalFilteredItem(final InventorySetupSlot slot)
+	private void removeAdditionalFilteredItem(final InventorySetupSlot slot, final HashMap<Integer, InventorySetupItem> additionalFilteredItems)
 	{
 
 		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
@@ -921,14 +945,14 @@ public class InventorySetupsPlugin extends Plugin
 		final int slotID = slot.getIndexInSlot();
 
 		// Empty slot was selected to be removed, don't do anything
-		if (slotID >= panel.getCurrentSelectedSetup().getAdditionalFilteredItems().size())
+		if (slotID >= additionalFilteredItems.size())
 		{
 			return;
 		}
 
 		int j = 0;
 		Integer keyToDelete = null;
-		for (final Integer key : panel.getCurrentSelectedSetup().getAdditionalFilteredItems().keySet())
+		for (final Integer key : additionalFilteredItems.keySet())
 		{
 			if (slotID == j)
 			{
@@ -938,7 +962,7 @@ public class InventorySetupsPlugin extends Plugin
 			j++;
 		}
 
-		panel.getCurrentSelectedSetup().getAdditionalFilteredItems().remove(keyToDelete);
+		additionalFilteredItems.remove(keyToDelete);
 
 	}
 
@@ -1267,12 +1291,11 @@ public class InventorySetupsPlugin extends Plugin
 
 	private boolean setupContainsItem(final InventorySetup setup, int itemID)
 	{
-
 		// So place holders will show up in the bank.
 		itemID = itemManager.canonicalize(itemID);
 
 		// Check if this item (inc. placeholder) is in the additional filtered items
-		if (setup.getAdditionalFilteredItems().containsKey(itemID))
+		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems()))
 		{
 			return true;
 		}
@@ -1286,13 +1309,15 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
-		// canonicalize is needed for equipment to deal with worn items like graceful.
 		return checkIfContainerContainsItem(itemID, setup.getInventory()) ||
 				checkIfContainerContainsItem(itemID, setup.getEquipment());
 	}
 
 	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> setupContainer)
 	{
+		// So place holders will show up in the bank.
+		itemID = itemManager.canonicalize(itemID);
+
 		for (final InventorySetupItem item : setupContainer)
 		{
 			if (getProcessedID(item.isFuzzy(), itemID) == getProcessedID(item.isFuzzy(), item.getId()))
