@@ -94,11 +94,6 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 	private static final ImageIcon STACK_DIFFERENCE_GREATER_THAN_ICON;
 	private static final ImageIcon STACK_DIFFERENCE_GREATER_THAN_HOVER_ICON;
 
-	private static final ImageIcon VARIATION_DIFFERENCE_ICON;
-	private static final ImageIcon VARIATION_DIFFERENCE_HOVER_ICON;
-	private static final ImageIcon NO_VARIATION_DIFFERENCE_ICON;
-	private static final ImageIcon NO_VARIATION_DIFFERENCE_HOVER_ICON;
-
 	private static final ImageIcon VIEW_SETUP_ICON;
 	private static final ImageIcon VIEW_SETUP_HOVER_ICON;
 
@@ -110,9 +105,7 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 
 	private final JLabel bankFilterIndicator = new JLabel();
 	private final JLabel highlightColorIndicator = new JLabel();
-	private final JLabel stackDifferenceIndicator = new JLabel();
 	private final InventorySetupCycleButton<InventorySetupStackCompare> stackDifferenceIndicatorCycle;
-	private final JLabel variationDifferenceIndicator = new JLabel();
 	private final JLabel unorderedHighlightIndicator = new JLabel();
 	private final JLabel highlightIndicator = new JLabel();
 	private final JLabel viewSetupLabel = new JLabel();
@@ -151,14 +144,6 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 		final BufferedImage stackGreaterThanHover = ImageUtil.luminanceOffset(stackGreaterThanImg, -150);
 		STACK_DIFFERENCE_GREATER_THAN_ICON = new ImageIcon(stackGreaterThanImg);
 		STACK_DIFFERENCE_GREATER_THAN_HOVER_ICON = new ImageIcon(stackGreaterThanHover);
-
-		final BufferedImage variationImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/variation_icon.png");
-		final BufferedImage variationHover = ImageUtil.luminanceOffset(variationImg, -150);
-		VARIATION_DIFFERENCE_ICON = new ImageIcon(variationImg);
-		VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(variationHover);
-
-		NO_VARIATION_DIFFERENCE_ICON = new ImageIcon(variationHover);
-		NO_VARIATION_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(variationHover, -100));
 
 		final BufferedImage unorderedHighlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/unordered_highlight_icon.png");
 		final BufferedImage unorderedHighlightHover = ImageUtil.luminanceOffset(unorderedHighlightImg, -150);
@@ -353,35 +338,6 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			}
 		});
 
-		variationDifferenceIndicator.setToolTipText("Enable highlighting for variation differences");
-		variationDifferenceIndicator.setIcon(inventorySetup.isVariationDifference() ? VARIATION_DIFFERENCE_ICON : NO_VARIATION_DIFFERENCE_ICON);
-		variationDifferenceIndicator.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mousePressed(MouseEvent mouseEvent)
-			{
-				if (SwingUtilities.isLeftMouseButton(mouseEvent))
-				{
-					inventorySetup.setVariationDifference(!inventorySetup.isVariationDifference());
-					variationDifferenceIndicator.setToolTipText(inventorySetup.isVariationDifference() ? "Disable highlighting for variation differences" : "Enable highlighting for variation differences");
-					updateVariationDifferenceLabel();
-					plugin.updateConfig();
-				}
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent mouseEvent)
-			{
-				variationDifferenceIndicator.setIcon(inventorySetup.isVariationDifference() ? VARIATION_DIFFERENCE_HOVER_ICON : NO_VARIATION_DIFFERENCE_HOVER_ICON);
-			}
-
-			@Override
-			public void mouseExited(MouseEvent mouseEvent)
-			{
-				variationDifferenceIndicator.setIcon(inventorySetup.isVariationDifference() ? VARIATION_DIFFERENCE_ICON : NO_VARIATION_DIFFERENCE_ICON);
-			}
-		});
-
 		unorderedHighlightIndicator.setToolTipText("Only highlight items that are missing from the inventory and ignore order");
 		unorderedHighlightIndicator.setIcon(inventorySetup.isUnorderedHighlight() ? UNORDERED_HIGHLIGHT_ICON : NO_UNORDERED_HIGHLIGHT_ICON);
 		unorderedHighlightIndicator.addMouseListener(new MouseAdapter()
@@ -474,7 +430,6 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 
 		leftActions.add(bankFilterIndicator);
 		leftActions.add(stackDifferenceIndicatorCycle);
-		leftActions.add(variationDifferenceIndicator);
 		leftActions.add(unorderedHighlightIndicator);
 		leftActions.add(highlightIndicator);
 		leftActions.add(highlightColorIndicator);
@@ -572,7 +527,6 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 
 		updateHighlightColorLabel();
 		stackDifferenceIndicatorCycle.setCurrentState(InventorySetupStackCompare.getValues().get(invSetup.getStackDifference()));
-		updateVariationDifferenceLabel();
 		updateToggleHighlightLabel();
 
 	}
@@ -614,11 +568,6 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 	private void updateBankFilterLabel()
 	{
 		bankFilterIndicator.setIcon(inventorySetup.isFilterBank() ? BANK_FILTER_ICON : NO_BANK_FILTER_ICON);
-	}
-
-	private void updateVariationDifferenceLabel()
-	{
-		variationDifferenceIndicator.setIcon(inventorySetup.isVariationDifference() ? VARIATION_DIFFERENCE_ICON : NO_VARIATION_DIFFERENCE_ICON);
 	}
 
 	private void updateUnorderedHighlightIndicator()
