@@ -96,6 +96,7 @@ public interface InventorySetupConfig extends Config
 			name = "Default Highlight Variation Difference",
 			description = "Configures the default setting for highlighting variations in new setups",
 			position = 2,
+			hidden = true,
 			section = defaultSection
 	)
 	default boolean highlightVariationDifference()
