@@ -33,8 +33,6 @@ import net.runelite.client.util.AsyncBufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-//import javax.swing.SwingConstants;
-//import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -60,24 +58,6 @@ public class InventorySetupSlot extends JPanel
 	@Getter
 	private JLabel fuzzyLabel;
 
-//	public InventorySetupSlot(Color color, InventorySetupSlotID id, int indexInSlot)
-//	{
-//		this.slotID = id;
-//		this.imageLabel = new JLabel();
-//		this.parentSetup = null;
-//		this.fuzzyLabel = new JLabel("*");
-//		fuzzyLabel.setHorizontalAlignment(JLabel.RIGHT);
-//		this.indexInSlot = indexInSlot;
-//		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
-//		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-//		setLayout(new BorderLayout());
-//		setPreferredSize(new Dimension(46, 42));
-//		setBackground(color);
-//		add(imageLabel, BorderLayout.CENTER);
-//		add(fuzzyLabel, BorderLayout.NORTH);
-//
-//	}
-
 	public InventorySetupSlot(Color color, InventorySetupSlotID id, int indexInSlot)
 	{
 		this.slotID = id;
@@ -96,24 +76,6 @@ public class InventorySetupSlot extends JPanel
 		add(imageLabel);
 		add(fuzzyLabel, fuzzyConstraints);
 	}
-
-//	public void setImageLabel(String toolTip, AsyncBufferedImage itemImage)
-//	{
-//		if (itemImage == null || toolTip == null)
-//		{
-//			imageLabel.setToolTipText("");
-//			imageLabel.setIcon(null);
-//			imageLabel.revalidate();
-//		}
-//		else
-//		{
-//			imageLabel.setToolTipText(toolTip);
-//			itemImage.addTo(imageLabel);
-//		}
-//
-//		validate();
-//		repaint();
-//	}
 
 	public void setImageLabel(String toolTip, BufferedImage itemImage, boolean fuzzy)
 	{
