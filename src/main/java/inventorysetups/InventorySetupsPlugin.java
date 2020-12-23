@@ -740,14 +740,19 @@ public class InventorySetupsPlugin extends Plugin
 				if (currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
 				{
 					int itemId = intStack[intStackSize - 1];
-					boolean containsItem = true;
+					boolean containsItem = false;
 					switch (bankFilteringMode)
 					{
 						case ALL:
 							containsItem = setupContainsItem(currentSetup, itemId);
 							break;
 						case INVENTORY:
-							containsItem = checkIfContainerContainsItem(itemId, currentSetup.getInventory());
+							boolean runePouchContainsItem = false;
+							if (currentSetup.getRune_pouch() != null)
+							{
+								runePouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getRune_pouch());
+							}
+							containsItem = runePouchContainsItem || checkIfContainerContainsItem(itemId, currentSetup.getInventory());
 							break;
 						case EQUIPMENT:
 							containsItem = checkIfContainerContainsItem(itemId, currentSetup.getEquipment());
