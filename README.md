@@ -12,14 +12,14 @@ To start, turn on the plugin and click on the equipment panel icon on the sideba
 
 To create a new setup, gear up for the activity you would like to save, and then click on the green plus button in the top right. It will prompt for a name, and then will take your current inventory and equipment and create a new setup.
 
-![Green Plus Button](readme_images_and_gifs/green_plus_button.png)
+![Green Plus Button](readme_images_and_gifs/create_new_setup.gif)
 
 ### Overview Panel
 The overview panel contains all the setups and options to manipulate them.
 
 #### Viewing a Setup
 
-You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune pouch (if present), spellbook, and notes are saved in the setup. 
+You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune pouch (if present), spellbook, additional filtered items (explained later) and notes are saved in the setup. 
 
 ![View Setup](readme_images_and_gifs/view_setup_button.png)
 
@@ -27,7 +27,7 @@ You can view the setup by clicking on the view setups button (the eye icon). You
 
 It is also possible to view setups in game. You can do this by right clicking the "Show worn items" button in the top left of the bank, and clicking on one of your setups.
 
-![View Setups in Game](readme_images_and_gifs/show_worn_items.gif)
+![View Setups in Game](readme_images_and_gifs/show_worn_items_view_setup.gif)
 
 You can go back to the overview panel by clicking on the back arrow in the top right.
 
@@ -67,13 +67,21 @@ If you select from search, it will open a search menu where you can search for t
 
 ![Update Slot from Search](readme_images_and_gifs/update_slot_from_search.gif)
 
-These two options are only available when logged in.
+The Rune Pouch can also be updated with these options.
+
+![Update Slot from Rune Pouch](readme_images_and_gifs/update_slot_from_rune_pouch.gif)
+
+There is an option to remove items as well.
+
+![Remove Slot](readme_images_and_gifs/remove_slot.gif)
+
+These options are only available when logged in.
 
 You can also refresh an entire setup by using the refresh icon when viewing a setup.
 
 ![Refresh Button](readme_images_and_gifs/refresh_button.png)
 
-You can also update the spellbook by right clicking the slot and choosing the desired spellbook.
+You can update the spellbook by right clicking the slot and choosing the desired spellbook.
 
 ![Update Spellbook](readme_images_and_gifs/spellbook.png)
 
@@ -83,23 +91,47 @@ One of the many buttons on each inventory setup panel is a bank filtering option
 
 ![Bank Filtering](readme_images_and_gifs/bank_filtering.gif)
 
+You can also filter specific parts of the setup, like the inventory, equipment, and additional filtered items. You can use this to quickly gear up with equipment before filling up your inventory. To do this, right click on the "Show worn items" button when a setup is selected, and you'll see options to filter specific parts of the setup.
+
+![Bank Filtering Equipment Inventory](readme_images_and_gifs/bank_filtering_equip_invent.gif)
+
+When selecting a particular filtering mode, it will persist even when you leave the bank. In order to filter for all items again, you will need to select it from the "Show worn items" menu, or use the hotkey. Selecting a new setup will automatically automatically be set to filter all items.
+
 ### Highlighting
 
-You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup. They are represented by most of the buttons on the left side of the setup panel. These options do influence what items appear in the bank when filtering is active.
+You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup. They are represented by most of the buttons on the left side of the setup panel.
 
 ![Normal Highlighting](readme_images_and_gifs/normal_highlighting.gif)
 
 ##### Stack Difference
 
-Enabling this will cause a slot to become highlighted if the stack size of the item in the player's inventory or equipment does not match the corresponding slot in the setup being viewed. This might be useful if you are at the chaos altar training prayer, and you want to be sure you don't bring more gp than needed to unnote the bones. Greater than or less than stack difference can also be selected. These highlight if the item stack in the inventory is greater than or less than the amount in the setup respectively.
+Enabling this will cause a slot to become highlighted if the stack size of the item in the player's inventory or equipment does not match the corresponding slot in the setup being viewed. This might be useful if you are at the chaos altar training prayer, and you want to be sure you don't bring more gp than needed to unnote the bones.
 
-![Stack Difference](readme_images_and_gifs/stack_difference.gif)
+![Stack Difference](readme_images_and_gifs/normal_stack_difference.gif)
 
-##### Variation Difference
+Greater than or less than stack difference can also be selected. These highlight if the item stack in the inventory is greater than or less than the amount in the setup respectively.
 
-Enabling this will cause a slot to become highlighted if the item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed, even if it is very close. An example of this are rings of dueling. By default, a ring of dueling(8) will be considered the same as a ring of dueling(1). Enabling variation difference will make them distinct for the purposes of highlighting. This is useful if you are using bank filtering and you don't want all doses of potions to show up when gearing up.
+![Stack Difference Less Than](readme_images_and_gifs/less_than_stack_difference.gif)
 
-![Variation Difference](readme_images_and_gifs/variation_difference.gif)
+Note that you must have base highlighting enabled in order to use this feature.
+
+##### Fuzzy Difference
+
+Normally, Inventory Setups requires items to be **exactly** the same as those in the setup, else it will highlight the item, or not include it in the bank filter. This works for most items, but there are some cases where this is not desirable. Degradable items from Barrows are a great example. Ahrim's robetop 75 should be considered the same as Ahrim's robetop 100 for the purposes of highlighting and filtering.
+
+It is possible to configure Inventory Setups to fix this issue using the "Fuzzy" Difference indicator. You can do this by right clicking any slot in the inventory or equipment panels, and selecting "Toggle Fuzzy". A "*" will appear in the top right corner of the slot if it is marked as fuzzy. The fuzzy indicator will make it so "similar" items are treated as equal for highlighting and filtering purposes.
+
+![Fuzzy Difference Highlight](readme_images_and_gifs/fuzzy_difference_hightlighting.gif)
+
+As you can see, there are different types of items that the "fuzzy" indicator can be used on. Jewellery with different charges, degradable items like Barrows, and potions with different doses are a few examples.
+
+The fuzzy indicator will also impact bank filtering.
+
+![Fuzzy Difference Filtering](readme_images_and_gifs/fuzzy_filtering.gif)
+
+Note that you must have base highlighting enabled in order to use this feature.
+
+**NOTE:** Fuzzy filtering replaced the previous system of variation differences. Previously through variation differences, all items were considered "fuzzy" by default. This is the **opposite** of the Fuzzy filter. 
 
 ##### Unordered Highlighting
 
@@ -117,6 +149,8 @@ You can add additional filtered items to setups. These are items that will show 
 * The item will now show in the bank filter and in the "Additional Filtered Items" section
 * You can remove an item from this list by right clicking and selecting "Remove from Filtered Items"
 
+You can also add or update items by using the search option.
+
 ![Additional Filtered Items](readme_images_and_gifs/additional_items_filter.gif)
 
 ### Exporting and Importing Setups
@@ -129,23 +163,31 @@ To import a setup, click on the green import button in the top right. It will pr
 
 ![Import Setup](readme_images_and_gifs/import.png)
 
-### Rune Pouch
-
-Rune pouches are supported. If you have a old setup that contains a rune pouch, you will need to update the inventory setup as the rune pouch will only show empty runes. You can update the rune pouch individually by right clicking the slot with the rune pouch and updating from inventory.
-
-![Rune Pouch](readme_images_and_gifs/update_rune_pouch.gif)
-
-You can also update the slots individually.
-
-![Rune Pouch Individual](readme_images_and_gifs/update_from_rune_pouch.gif)
-
 ### Configuration Settings
 
-In the settings of Inventory Setups, you can change the default options of bank filtering and highlighting for any new setups you create. This is useful if you have a favorite highlight color and don't want to change every new setup to use that color. It also contains some key binds that you can set to return to the overview panel quickly, or filter the bank again if you accidentally clicked on a different tab. You can also enable compact mode here, hide the help button, and change the sorting method of setups.
+In the settings of Inventory Setups, you can change default setup options, key binds, and other miscellaneous settings.
 
-One config setting worth noting is "Disable Bank Tab Bar". Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items.
+![Configuration Settings](readme_images_and_gifs/config_settings.png)
+
+* Default Filter Bank - Enabling this will make it so all newly created setups will have bank filtering enabled
+* Default Highlight Stack Difference - The default stack difference option for all newly created setups
+* Default Highlight Unordered Difference - Enabling this will make it so all newly created setups will have unordered highlighting enabled
+* Default Highlight - Enabling this will make it so all newly created setups will have highlighting enabled
+* Default Highlight Color - The default highlighting color for newly created setups
+
+* Return To Setups Hotkey - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
+* Filter Bank Hotkey - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
+* Filter Inventory Hotkey - Pressing this will cause the bank to filter only the inventory of a setup if one is selected and filtering is enabled for that setup
+* Filter Equipment Hotkey - Pressing this will cause the bank to filter only the equipment of a setup if one is selected and filtering is enabled for that setup
+* Filter Additional Items Hotkey - Pressing this will cause the bank to filter only the additional filtered items of a setup if one is selected and filtering is enabled for that setup
+
+* Compact Mode - Enabling this will change the setups to compact mode. It is equivalent to pressing the Compact Mode button on the overview panel
+* Sorting Mode - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
+* Disable Bank Tab Bar - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
 
 ![Disable Bank Tab Bar](readme_images_and_gifs/disable_tab_bar.png)
+
+* Require Active Panel for Filtering - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
 
 ### Compatibility with Bank Tags
 
@@ -156,6 +198,9 @@ Currently there is one known compatibility issue with Bank Tags. If Bank Tags an
 If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
 
 ### Changelog
+
+##### 1.9
+Reworked Variation Differences into Fuzzy Filtering, added specific filtering, more config settings, and improved update by search input 
 
 ##### 1.8
 Added additional filtered items, remove options for slots, updated stack button
