@@ -91,15 +91,15 @@ One of the many buttons on each inventory setup panel is a bank filtering option
 
 ![Bank Filtering](readme_images_and_gifs/bank_filtering.gif)
 
-You can also filter specific parts of the setup, like the inventory, equipment, and additional filtered items. You can use this to quickly gear up with equipment before filling up your inventory. To do this, right click on the "Show worn items" button when a setup is selected, and you'll see options to filter specific parts of the setup.
+You can also filter specific parts of the setup, like the inventory, equipment, and additional filtered items. You can use this to quickly gear up with equipment before filling up your inventory. To do this, right click on the "Show worn items" button when a setup is selected, and you'll see options to filter specific parts of the setup. There are additional hotkeys that can be configured for these options as well.
 
 ![Bank Filtering Equipment Inventory](readme_images_and_gifs/bank_filtering_equip_invent.gif)
 
-When selecting a particular filtering mode, it will persist even when you leave the bank. In order to filter for all items again, you will need to select it from the "Show worn items" menu, or use the hotkey. Selecting a new setup will automatically automatically be set to filter all items.
+When selecting a particular filtering mode, it will persist even when you leave the bank. In order to filter for all items again, you will need to select it from the "Show worn items" menu, or use the hotkey. Selecting a new setup will automatically be set to filter all items.
 
 ### Highlighting
 
-You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup. They are represented by most of the buttons on the left side of the setup panel.
+You can enable highlighting to further assist in gearing up. Highlighting will cause slots to change color if an item in the player's inventory or equipment doesn't match the corresponding slot in the setup being viewed. To turn on highlighting, click on the button that looks like a highlighter. You can also change the highlight color with the next button over. There are also a few highlighting options for each setup.
 
 ![Normal Highlighting](readme_images_and_gifs/normal_highlighting.gif)
 
@@ -119,7 +119,7 @@ Note that you must have base highlighting enabled in order to use this feature.
 
 Normally, Inventory Setups requires items to be **exactly** the same as those in the setup, else it will highlight the item, or not include it in the bank filter. This works for most items, but there are some cases where this is not desirable. Degradable items from Barrows are a great example. Ahrim's robetop 75 should be considered the same as Ahrim's robetop 100 for the purposes of highlighting and filtering.
 
-It is possible to configure Inventory Setups to fix this issue using the "Fuzzy" Difference indicator. You can do this by right clicking any slot in the inventory or equipment panels, and selecting "Toggle Fuzzy". A "*" will appear in the top right corner of the slot if it is marked as fuzzy. The fuzzy indicator will make it so "similar" items are treated as equal for highlighting and filtering purposes.
+It is possible to configure Inventory Setups to fix this issue using the "fuzzy" difference indicator. You can do this by right clicking any slot in the inventory or equipment panels, and selecting "Toggle Fuzzy". A "*" will appear in the top right corner of the slot if it is marked as fuzzy. The fuzzy indicator will make it so "similar" items are treated as equal for highlighting and filtering purposes.
 
 ![Fuzzy Difference Highlight](readme_images_and_gifs/fuzzy_difference_hightlighting.gif)
 
@@ -131,7 +131,7 @@ The fuzzy indicator will also impact bank filtering.
 
 Note that you must have base highlighting enabled in order to use this feature.
 
-**NOTE:** Fuzzy filtering replaced the previous system of variation differences. Previously through variation differences, all items were considered "fuzzy" by default. This is the **opposite** of the Fuzzy filter. 
+**NOTE:** Fuzzy filtering replaced the previous system of variation differences. Previously through variation differences, all items were considered "fuzzy" by default. This is the **opposite** of the fuzzy filter. 
 
 ##### Unordered Highlighting
 
@@ -147,7 +147,7 @@ You can add additional filtered items to setups. These are items that will show 
 * Break the bank filter and navigate to the item you want to add to the additional items filter
 * Hold SHIFT and RIGHT CLICK on the item and select "Add to Additional Filtered Items"
 * The item will now show in the bank filter and in the "Additional Filtered Items" section
-* You can remove an item from this list by right clicking and selecting "Remove from Filtered Items"
+* You can remove an item from this list by right clicking and selecting "Remove Item from Slot"
 
 You can also add or update items by using the search option.
 
@@ -169,25 +169,25 @@ In the settings of Inventory Setups, you can change default setup options, key b
 
 ![Configuration Settings](readme_images_and_gifs/config_settings.png)
 
-* Default Filter Bank - Enabling this will make it so all newly created setups will have bank filtering enabled
-* Default Highlight Stack Difference - The default stack difference option for all newly created setups
-* Default Highlight Unordered Difference - Enabling this will make it so all newly created setups will have unordered highlighting enabled
-* Default Highlight - Enabling this will make it so all newly created setups will have highlighting enabled
-* Default Highlight Color - The default highlighting color for newly created setups
+* **Default Filter Bank** - Enabling this will make it so all newly created setups will have bank filtering enabled
+* **Default Highlight** Stack Difference - The default stack difference option for all newly created setups
+* **Default Highlight** Unordered Difference - Enabling this will make it so all newly created setups will have unordered highlighting enabled
+* **Default Highlight** - Enabling this will make it so all newly created setups will have highlighting enabled
+* **Default Highlight Color** - The default highlighting color for newly created setups
 
-* Return To Setups Hotkey - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
-* Filter Bank Hotkey - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
-* Filter Inventory Hotkey - Pressing this will cause the bank to filter only the inventory of a setup if one is selected and filtering is enabled for that setup
-* Filter Equipment Hotkey - Pressing this will cause the bank to filter only the equipment of a setup if one is selected and filtering is enabled for that setup
-* Filter Additional Items Hotkey - Pressing this will cause the bank to filter only the additional filtered items of a setup if one is selected and filtering is enabled for that setup
+* **Return To Setups Hotkey** - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
+* **Filter Bank Hotkey** - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
+* **Filter Inventory Hotkey** - Pressing this will cause the bank to filter only the inventory of a setup if one is selected and filtering is enabled for that setup
+* **Filter Equipment Hotkey** - Pressing this will cause the bank to filter only the equipment of a setup if one is selected and filtering is enabled for that setup
+* **Filter Additional Items Hotkey** - Pressing this will cause the bank to filter only the additional filtered items of a setup if one is selected and filtering is enabled for that setup
 
-* Compact Mode - Enabling this will change the setups to compact mode. It is equivalent to pressing the Compact Mode button on the overview panel
-* Sorting Mode - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
-* Disable Bank Tab Bar - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
+* **Compact Mode** - Enabling this will change the setups to compact mode. It is equivalent to pressing the Compact Mode button on the overview panel
+* **Sorting Mode** - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
+* **Disable Bank** Tab Bar - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
 
 ![Disable Bank Tab Bar](readme_images_and_gifs/disable_tab_bar.png)
 
-* Require Active Panel for Filtering - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
+* **Require Active Panel for Filtering** - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
 
 ### Compatibility with Bank Tags
 
