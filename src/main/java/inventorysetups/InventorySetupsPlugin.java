@@ -115,6 +115,8 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String INV_SEARCH = "inv:";
+	public static final int NUM_INVENTORY_ITEMS = 28;
+	public static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
 	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
@@ -122,8 +124,6 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String FILTER_INVENTORY_ENTRY = "Filter inventory";
 	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
-	private static final int NUM_INVENTORY_ITEMS = 28;
-	private static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final int SPELLBOOK_VARBIT = 4070;
 
 	@Inject
@@ -1420,7 +1420,7 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	private boolean setupContainsItem(final InventorySetup setup, int itemID)
+	public boolean setupContainsItem(final InventorySetup setup, int itemID)
 	{
 		// So place holders will show up in the bank.
 		itemID = itemManager.canonicalize(itemID);
@@ -1517,11 +1517,12 @@ public class InventorySetupsPlugin extends Plugin
 		return true;
 	}
 
-	private int parseTextInputAmount(String input)
+	public int parseTextInputAmount(String input)
 	{
 		// only take the first 10 characters (max amount is 2.147B which is only 10 digits)
 		if (input.length() > 10)
 		{
+			//TODO just return max value if greater than 10?
 			input = input.substring(0, 10);
 		}
 		input = input.toLowerCase();
