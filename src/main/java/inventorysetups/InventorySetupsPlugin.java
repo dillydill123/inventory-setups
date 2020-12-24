@@ -951,10 +951,10 @@ public class InventorySetupsPlugin extends Plugin
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
 							// only allow numbers and k, m, b (if 1 value is available)
 							// stop once k, m, or b is seen
-							.addCharValidator(arg -> (arg >= 48 && arg <= 57) ||
-														((arg == 66 || arg == 98 ||
-														arg == 75 || arg == 107 ||
-														arg == 77 || arg == 109) &&
+							.addCharValidator(arg -> (arg >= '0' && arg <= '9') ||
+														((arg == 'b' || arg == 'B' ||
+														arg == 'k' || arg == 'K' ||
+														arg == 'm' || arg == 'M') &&
 														searchInput.getValue().length() > 0 &&
 														!searchInput.getValue().toLowerCase().contains("k") &&
 														!searchInput.getValue().toLowerCase().contains("m") &&
@@ -1451,7 +1451,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (final InventorySetupItem item : setupContainer)
 		{
-			if (getProcessedID(item.isFuzzy(), itemID) == getProcessedID(item.isFuzzy(), item.getId()))
+			// For equipped weight reducing items or noted items in the inventory
+			int setupItemId = itemManager.canonicalize(item.getId());
+			if (getProcessedID(item.isFuzzy(), itemID) == getProcessedID(item.isFuzzy(), setupItemId))
 			{
 				return true;
 			}
