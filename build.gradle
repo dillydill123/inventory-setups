@@ -23,6 +23,8 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion, {
 		exclude group: 'ch.qos.logback', module: 'logback-classic'
 	}
+	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
+	testCompile group: 'com.google.inject.extensions', name: 'guice-testlib', version: '4.1.0'
 }
 
 group = 'inventorysetups'
