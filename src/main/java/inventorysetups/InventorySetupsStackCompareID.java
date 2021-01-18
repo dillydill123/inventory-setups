@@ -27,31 +27,31 @@ package inventorysetups;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public enum InventorySetupFilteringMode
+public enum InventorySetupsStackCompareID
 {
-	// All items
-	ALL(0),
+	// Don't highlight at all
+	None(0),
 
-	// Only Inventory
-	INVENTORY(1),
+	// Only highlight if stacks are equal
+	Standard(1),
 
-	// Only Equipment
-	EQUIPMENT(2),
+	// Only highlight if stack is less than what is in the setup
+	Less_Than(2),
 
-	// Only Additional Filtered Items
-	ADDITIONAL_FILTERED_ITEMS(3);
+	// Only highlight if stack is greater than what is in the setup
+	Greater_Than(3);
 
 	private final int type;
 
-	private static final ArrayList<InventorySetupFilteringMode> VALUES;
+	private static final ArrayList<InventorySetupsStackCompareID> VALUES;
 
 	static
 	{
 		VALUES = new ArrayList<>();
-		Collections.addAll(VALUES, InventorySetupFilteringMode.values());
+		Collections.addAll(VALUES, InventorySetupsStackCompareID.values());
 	}
 
-	InventorySetupFilteringMode(int type)
+	InventorySetupsStackCompareID(int type)
 	{
 		this.type = type;
 	}
@@ -61,7 +61,7 @@ public enum InventorySetupFilteringMode
 		return type;
 	}
 
-	public static ArrayList<InventorySetupFilteringMode> getValues()
+	public static ArrayList<InventorySetupsStackCompareID> getValues()
 	{
 		return VALUES;
 	}

@@ -25,8 +25,8 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupSlotID;
+import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -35,11 +35,11 @@ import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
-public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
+public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 {
-	private ArrayList<InventorySetupSlot> runeSlots;
+	private ArrayList<InventorySetupsSlot> runeSlots;
 
-	InventorySetupRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
+	InventorySetupsRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Rune Pouch");
 	}
@@ -50,13 +50,13 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 		runeSlots = new ArrayList<>();
 		for (int i = 0; i < 3; i++)
 		{
-			runeSlots.add(new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.RUNE_POUCH, i));
+			runeSlots.add(new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.RUNE_POUCH, i));
 		}
 
 		final GridLayout gridLayout = new GridLayout(1, 4, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
-		for (final InventorySetupSlot slot : runeSlots)
+		for (final InventorySetupsSlot slot : runeSlots)
 		{
 			containerSlotsPanel.add(slot);
 			super.addUpdateFromContainerMouseListenerToSlot(slot);
@@ -66,7 +66,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		assert inventorySetup.getRune_pouch() != null : "Rune Pouch container is null.";
 
@@ -74,7 +74,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 
 		isHighlighted = true;
 
-		final ArrayList<InventorySetupItem> setupRunePouch = inventorySetup.getRune_pouch();
+		final ArrayList<InventorySetupsItem> setupRunePouch = inventorySetup.getRune_pouch();
 
 		for (int i = 0; i < setupRunePouch.size(); i++)
 		{
@@ -133,7 +133,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 			for (int i = 0; i < runeSlots.size(); i++)
 			{
 				super.setContainerSlot(i, runeSlots.get(i), setup,
-										new InventorySetupItem(-1, "", 0, false));
+										new InventorySetupsItem(-1, "", 0, false));
 			}
 		}
 
@@ -148,7 +148,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 		{
 			return;
 		}
-		for (final InventorySetupSlot slot : runeSlots)
+		for (final InventorySetupsSlot slot : runeSlots)
 		{
 			slot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		}
@@ -158,7 +158,7 @@ public class InventorySetupRunePouchPanel extends InventorySetupContainerPanel
 
 	public void highlightAllSlots(final InventorySetup setup)
 	{
-		for (final InventorySetupSlot slot : runeSlots)
+		for (final InventorySetupsSlot slot : runeSlots)
 		{
 			slot.setBackground(setup.getHighlightColor());
 		}

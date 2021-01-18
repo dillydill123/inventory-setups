@@ -2,7 +2,6 @@ package inventorysetups;
 
 import com.google.inject.Guice;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
-import inventorysetups.ui.InventorySetupSpellbookPanel;
 import net.runelite.api.Client;
 import net.runelite.api.InventoryID;
 import net.runelite.api.ItemID;
@@ -11,7 +10,6 @@ import net.runelite.client.account.SessionManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.plugins.banktags.TagManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +22,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static net.runelite.api.ItemID.ABYSSAL_WHIP;
-import static net.runelite.api.ItemID.COAL;
 import static org.mockito.Mockito.when;
 
 import static org.junit.Assert.assertEquals;
@@ -48,7 +44,7 @@ public class InventorySetupsUnitTest
 
 	@Mock
 	@Bind
-	private InventorySetupConfig inventorySetupConfig;
+	private InventorySetupsConfig inventorySetupsConfig;
 
 	@Mock
 	@Bind
@@ -97,13 +93,13 @@ public class InventorySetupsUnitTest
 	@Test
 	public void testSetupContainsItem()
 	{
-		ArrayList<InventorySetupItem> inventory = inventorySetupsPlugin.getNormalizedContainer(InventoryID.INVENTORY);
-		ArrayList<InventorySetupItem> equipment = inventorySetupsPlugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-		ArrayList<InventorySetupItem> runePouch = null;
-		HashMap<Integer, InventorySetupItem> addItems = new HashMap<>();
+		ArrayList<InventorySetupsItem> inventory = inventorySetupsPlugin.getNormalizedContainer(InventoryID.INVENTORY);
+		ArrayList<InventorySetupsItem> equipment = inventorySetupsPlugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+		ArrayList<InventorySetupsItem> runePouch = null;
+		HashMap<Integer, InventorySetupsItem> addItems = new HashMap<>();
 		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, addItems, "Test",
-												"", inventorySetupConfig.highlightColor(),
-												InventorySetupStackCompare.None.ordinal(), false, false,
+												"", inventorySetupsConfig.highlightColor(),
+												InventorySetupsStackCompareID.None.ordinal(), false, false,
 										false,false, 0);
 
 		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL));

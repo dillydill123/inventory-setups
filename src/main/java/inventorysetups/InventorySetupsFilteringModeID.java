@@ -24,22 +24,45 @@
  */
 package inventorysetups;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.Collections;
 
-@Getter
-@RequiredArgsConstructor
-public enum InventorySetupSorting
+public enum InventorySetupsFilteringModeID
 {
-	DEFAULT("Default", 0),
-	ALPHABETICAL("Alphabetical", 1);
+	// All items
+	ALL(0),
 
-	@Override
-	public String toString()
+	// Only Inventory
+	INVENTORY(1),
+
+	// Only Equipment
+	EQUIPMENT(2),
+
+	// Only Additional Filtered Items
+	ADDITIONAL_FILTERED_ITEMS(3);
+
+	private final int type;
+
+	private static final ArrayList<InventorySetupsFilteringModeID> VALUES;
+
+	static
 	{
-		return name;
+		VALUES = new ArrayList<>();
+		Collections.addAll(VALUES, InventorySetupsFilteringModeID.values());
 	}
 
-	private final String name;
-	private final int identifier;
+	InventorySetupsFilteringModeID(int type)
+	{
+		this.type = type;
+	}
+
+	public int getType()
+	{
+		return type;
+	}
+
+	public static ArrayList<InventorySetupsFilteringModeID> getValues()
+	{
+		return VALUES;
+	}
 }

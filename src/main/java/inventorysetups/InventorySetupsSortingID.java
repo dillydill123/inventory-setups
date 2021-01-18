@@ -24,29 +24,22 @@
  */
 package inventorysetups;
 
-public enum InventorySetupSlotID
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
+public enum InventorySetupsSortingID
 {
+	DEFAULT("Default", 0),
+	ALPHABETICAL("Alphabetical", 1);
 
-	INVENTORY(0),
-
-	EQUIPMENT(1),
-
-	RUNE_POUCH(2),
-
-	SPELL_BOOK(3),
-
-	ADDITIONAL_ITEMS(4);
-
-	private final int id;
-
-	InventorySetupSlotID(int id)
+	@Override
+	public String toString()
 	{
-		this.id = id;
+		return name;
 	}
 
-	public int getId()
-	{
-		return id;
-	}
-
+	private final String name;
+	private final int identifier;
 }

@@ -36,16 +36,16 @@ import java.util.HashMap;
 public class InventorySetup
 {
 	@Getter
-	private ArrayList<InventorySetupItem> inventory;
+	private ArrayList<InventorySetupsItem> inventory;
 
 	@Getter
-	private ArrayList<InventorySetupItem> equipment;
+	private ArrayList<InventorySetupsItem> equipment;
 
 	@Getter
-	private ArrayList<InventorySetupItem> rune_pouch;
+	private ArrayList<InventorySetupsItem> rune_pouch;
 
 	@Getter
-	private HashMap<Integer, InventorySetupItem> additionalFilteredItems;
+	private HashMap<Integer, InventorySetupsItem> additionalFilteredItems;
 
 	@Getter
 	@Setter
@@ -92,22 +92,22 @@ public class InventorySetup
 	@Setter
 	private int spellBook;
 
-	public void updateInventory(final ArrayList<InventorySetupItem> inv)
+	public void updateInventory(final ArrayList<InventorySetupsItem> inv)
 	{
 		inventory = inv;
 	}
 
-	public void updateEquipment(final ArrayList<InventorySetupItem> eqp)
+	public void updateEquipment(final ArrayList<InventorySetupsItem> eqp)
 	{
 		equipment = eqp;
 	}
 
-	public void updateRunePouch(final ArrayList<InventorySetupItem> rp)
+	public void updateRunePouch(final ArrayList<InventorySetupsItem> rp)
 	{
 		rune_pouch = rp;
 	}
 
-	public void updateAdditionalItems(final HashMap<Integer, InventorySetupItem> ai)
+	public void updateAdditionalItems(final HashMap<Integer, InventorySetupsItem> ai)
 	{
 		additionalFilteredItems = ai;
 	}

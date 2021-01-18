@@ -30,8 +30,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
-import inventorysetups.ui.InventorySetupPluginPanel;
-import inventorysetups.ui.InventorySetupSlot;
+import inventorysetups.ui.InventorySetupsPluginPanel;
+import inventorysetups.ui.InventorySetupsSlot;
 import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.Setter;
@@ -152,13 +152,13 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Inject
 	@Getter
-	private InventorySetupConfig config;
+	private InventorySetupsConfig config;
 
 	@Inject
 	@Getter
 	private ColorPickerManager colorPickerManager;
 
-	private InventorySetupPluginPanel panel;
+	private InventorySetupsPluginPanel panel;
 
 	@Getter
 	private ArrayList<InventorySetup> inventorySetups;
@@ -185,7 +185,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Setter
 	@Getter
-	private InventorySetupFilteringMode bankFilteringMode;
+	private InventorySetupsFilteringModeID bankFilteringMode;
 
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
 			{
@@ -212,7 +212,7 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			bankFilteringMode = InventorySetupFilteringMode.ALL;
+			bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 			triggerBankSearchFromHotKey();
 		}
 	};
@@ -222,7 +222,7 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			bankFilteringMode = InventorySetupFilteringMode.INVENTORY;
+			bankFilteringMode = InventorySetupsFilteringModeID.INVENTORY;
 			triggerBankSearchFromHotKey();
 		}
 	};
@@ -232,7 +232,7 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			bankFilteringMode = InventorySetupFilteringMode.EQUIPMENT;
+			bankFilteringMode = InventorySetupsFilteringModeID.EQUIPMENT;
 			triggerBankSearchFromHotKey();
 		}
 	};
@@ -242,7 +242,7 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			bankFilteringMode = InventorySetupFilteringMode.ADDITIONAL_FILTERED_ITEMS;
+			bankFilteringMode = InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS;
 			triggerBankSearchFromHotKey();
 		}
 	};
@@ -268,9 +268,9 @@ public class InventorySetupsPlugin extends Plugin
 	}
 
 	@Provides
-	InventorySetupConfig getConfig(ConfigManager configManager)
+	InventorySetupsConfig getConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(InventorySetupConfig.class);
+		return configManager.getConfig(InventorySetupsConfig.class);
 	}
 
 	@Subscribe
@@ -407,7 +407,7 @@ public class InventorySetupsPlugin extends Plugin
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_COMPACT_MODE, compactMode);
 	}
 
-	public void toggleAlphabeticalMode(InventorySetupSorting mode)
+	public void toggleAlphabeticalMode(InventorySetupsSortingID mode)
 	{
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SORTING_MODE, mode);
 	}
@@ -416,7 +416,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void startUp()
 	{
 		this.internalFilteringIsAllowed = true;
-		this.panel = new InventorySetupPluginPanel(this, itemManager);
+		this.panel = new InventorySetupsPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
 
 		navButton = NavigationButton.builder()
@@ -436,7 +436,7 @@ public class InventorySetupsPlugin extends Plugin
 		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
 		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 
-		bankFilteringMode = InventorySetupFilteringMode.ALL;
+		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -475,10 +475,10 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientThread.invokeLater(() ->
 		{
-			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
-			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+			ArrayList<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
+			ArrayList<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			ArrayList<InventorySetupItem> runePouchData = null;
+			ArrayList<InventorySetupsItem> runePouchData = null;
 			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
 			{
 				runePouchData = getRunePouchData();
@@ -567,28 +567,28 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (event.getMenuOption().equals(FILTER_ALL_ENTRY))
 			{
-				bankFilteringMode = InventorySetupFilteringMode.ALL;
+				bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 				doBankSearch();
 				return;
 			}
 
 			if (event.getMenuOption().equals(FILTER_INVENTORY_ENTRY))
 			{
-				bankFilteringMode = InventorySetupFilteringMode.INVENTORY;
+				bankFilteringMode = InventorySetupsFilteringModeID.INVENTORY;
 				doBankSearch();
 				return;
 			}
 
 			if (event.getMenuOption().equals(FILTER_EQUIPMENT_ENTRY))
 			{
-				bankFilteringMode = InventorySetupFilteringMode.EQUIPMENT;
+				bankFilteringMode = InventorySetupsFilteringModeID.EQUIPMENT;
 				doBankSearch();
 				return;
 			}
 
 			if (event.getMenuOption().equals(FILTER_ADD_ITEMS_ENTRY))
 			{
-				bankFilteringMode = InventorySetupFilteringMode.ADDITIONAL_FILTERED_ITEMS;
+				bankFilteringMode = InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS;
 				doBankSearch();
 				return;
 			}
@@ -618,7 +618,7 @@ public class InventorySetupsPlugin extends Plugin
 					return;
 				}
 
-				final HashMap<Integer, InventorySetupItem> additionalFilteredItems =
+				final HashMap<Integer, InventorySetupsItem> additionalFilteredItems =
 						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
 
 				// Item already exists, don't add it again
@@ -664,13 +664,13 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	private boolean additionalFilteredItemsHasItem(int itemId, final HashMap<Integer, InventorySetupItem> additionalFilteredItems)
+	private boolean additionalFilteredItemsHasItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 		final int processedItemId = itemManager.canonicalize(itemId);
 		return additionalFilteredItems.get(processedItemId) != null;
 	}
 
-	private void addAdditionalFilteredItem(int itemId, final HashMap<Integer, InventorySetupItem> additionalFilteredItems)
+	private void addAdditionalFilteredItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 		// un-noted, un-placeholdered ID
 		final int processedItemId = itemManager.canonicalize(itemId);
@@ -678,7 +678,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			final String name = itemManager.getItemComposition(processedItemId).getName();
-			final InventorySetupItem setupItem = new InventorySetupItem(processedItemId, name, 1, false);
+			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, false);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
 			updateConfig();
@@ -706,9 +706,9 @@ public class InventorySetupsPlugin extends Plugin
 		bankSearch.reset(true);
 	}
 
-	public ArrayList<InventorySetupItem> getRunePouchData()
+	public ArrayList<InventorySetupsItem> getRunePouchData()
 	{
-		ArrayList<InventorySetupItem> runePouchData = new ArrayList<>();
+		ArrayList<InventorySetupsItem> runePouchData = new ArrayList<>();
 
 		for (int i = 0; i < RUNE_POUCH_RUNE_VARBITS.length; i++)
 		{
@@ -718,7 +718,7 @@ public class InventorySetupsPlugin extends Plugin
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
-			runePouchData.add(new InventorySetupItem(runeItemId, runeName, runeAmount, false));
+			runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false));
 		}
 
 		return runePouchData;
@@ -860,8 +860,8 @@ public class InventorySetupsPlugin extends Plugin
 		// must be on client thread to get names
 		clientThread.invokeLater(() ->
 		{
-			ArrayList<InventorySetupItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
-			ArrayList<InventorySetupItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+			ArrayList<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
+			ArrayList<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			// copy over fuzzy attributes
 			for (int i = 0; i < inv.size(); i++)
@@ -873,7 +873,7 @@ public class InventorySetupsPlugin extends Plugin
 				eqp.get(i).setFuzzy(setup.getEquipment().get(i).isFuzzy());
 			}
 
-			ArrayList<InventorySetupItem> runePouchData = null;
+			ArrayList<InventorySetupsItem> runePouchData = null;
 			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
 			{
 				runePouchData = getRunePouchData();
@@ -888,7 +888,7 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	public void updateSlotFromContainer(final InventorySetupSlot slot)
+	public void updateSlotFromContainer(final InventorySetupsSlot slot)
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
@@ -899,14 +899,14 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 		final boolean isFuzzy = getContainerFromSlot(slot).get(slot.getIndexInSlot()).isFuzzy();
 
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
 		{
-			final ArrayList<InventorySetupItem> playerContainer = getNormalizedContainer(slot.getSlotID());
-			final InventorySetupItem newItem = playerContainer.get(slot.getIndexInSlot());
+			final ArrayList<InventorySetupsItem> playerContainer = getNormalizedContainer(slot.getSlotID());
+			final InventorySetupsItem newItem = playerContainer.get(slot.getIndexInSlot());
 			newItem.setFuzzy(isFuzzy);
 
 			// update the rune pouch data
@@ -922,7 +922,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-	public void updateSlotFromSearch(final InventorySetupSlot slot, boolean allowStackable)
+	public void updateSlotFromSearch(final InventorySetupsSlot slot, boolean allowStackable)
 	{
 
 		if (client.getGameState() != GameState.LOGGED_IN)
@@ -965,9 +965,9 @@ public class InventorySetupsPlugin extends Plugin
 								{
 									int quantity = parseTextInputAmount(input);
 
-									final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+									final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
-									final InventorySetupItem newItem = new InventorySetupItem(finalIdCopy, itemName, quantity, container.get(slot.getIndexInSlot()).isFuzzy());
+									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, container.get(slot.getIndexInSlot()).isFuzzy());
 
 									// update the rune pouch data
 									if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
@@ -984,9 +984,9 @@ public class InventorySetupsPlugin extends Plugin
 					}
 					else
 					{
-						if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
+						if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 						{
-							final HashMap<Integer, InventorySetupItem> additionalFilteredItems =
+							final HashMap<Integer, InventorySetupsItem> additionalFilteredItems =
 									panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
 							if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
 							{
@@ -997,9 +997,9 @@ public class InventorySetupsPlugin extends Plugin
 						}
 						else
 						{
-							final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+							final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 							final String itemName = itemManager.getItemComposition(finalId).getName();
-							final InventorySetupItem newItem = new InventorySetupItem(finalId, itemName, 1, container.get(slot.getIndexInSlot()).isFuzzy());
+							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, container.get(slot.getIndexInSlot()).isFuzzy());
 							// update the rune pouch data
 							if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
 							{
@@ -1017,7 +1017,7 @@ public class InventorySetupsPlugin extends Plugin
 			.build();
 	}
 
-	public void removeItemFromSlot(final InventorySetupSlot slot)
+	public void removeItemFromSlot(final InventorySetupsSlot slot)
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
@@ -1032,7 +1032,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 
-			if (slot.getSlotID() == InventorySetupSlotID.ADDITIONAL_ITEMS)
+			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
 				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
 				updateConfig();
@@ -1040,10 +1040,10 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+			final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 
 			// update the rune pouch data
-			final InventorySetupItem dummyItem = new InventorySetupItem(-1, "", 0, container.get(slot.getIndexInSlot()).isFuzzy());
+			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, container.get(slot.getIndexInSlot()).isFuzzy());
 			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
@@ -1055,20 +1055,20 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	public void toggleFuzzyOnSlot(final InventorySetupSlot slot)
+	public void toggleFuzzyOnSlot(final InventorySetupsSlot slot)
 	{
 		if (panel.getCurrentSelectedSetup() == null)
 		{
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> container = getContainerFromSlot(slot);
+		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 		container.get(slot.getIndexInSlot()).toggleIsFuzzy();
 		updateConfig();
 		panel.refreshCurrentSetup();
 	}
 
-	private void removeAdditionalFilteredItem(final InventorySetupSlot slot, final HashMap<Integer, InventorySetupItem> additionalFilteredItems)
+	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 
 		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
@@ -1212,7 +1212,7 @@ public class InventorySetupsPlugin extends Plugin
 		return client.getVarbitValue(SPELLBOOK_VARBIT);
 	}
 
-	public ArrayList<InventorySetupItem> getNormalizedContainer(final InventorySetupSlotID id)
+	public ArrayList<InventorySetupsItem> getNormalizedContainer(final InventorySetupsSlotID id)
 	{
 		switch (id)
 		{
@@ -1228,13 +1228,13 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public ArrayList<InventorySetupItem> getNormalizedContainer(final InventoryID id)
+	public ArrayList<InventorySetupsItem> getNormalizedContainer(final InventoryID id)
 	{
 		assert id == InventoryID.INVENTORY || id == InventoryID.EQUIPMENT : "invalid inventory ID";
 
 		final ItemContainer container = client.getItemContainer(id);
 
-		ArrayList<InventorySetupItem> newContainer = new ArrayList<>();
+		ArrayList<InventorySetupsItem> newContainer = new ArrayList<>();
 
 		Item[] items = null;
 		if (container != null)
@@ -1250,7 +1250,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
-				newContainer.add(new InventorySetupItem(-1, "", 0, false));
+				newContainer.add(new InventorySetupsItem(-1, "", 0, false));
 			}
 			else
 			{
@@ -1262,7 +1262,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					itemName = itemManager.getItemComposition(item.getId()).getName();
 				}
-				newContainer.add(new InventorySetupItem(item.getId(), itemName, item.getQuantity(), false));
+				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), false));
 			}
 		}
 
@@ -1345,7 +1345,7 @@ public class InventorySetupsPlugin extends Plugin
 		return internalFilteringIsAllowed && allowBasedOnActivePanel;
 	}
 
-	private ArrayList<InventorySetupItem> getContainerFromSlot(final InventorySetupSlot slot)
+	private ArrayList<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
 	{
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
 
@@ -1444,12 +1444,12 @@ public class InventorySetupsPlugin extends Plugin
 				checkIfContainerContainsItem(itemID, setup.getEquipment());
 	}
 
-	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupItem> setupContainer)
+	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupsItem> setupContainer)
 	{
 		// So place holders will show up in the bank.
 		itemID = itemManager.canonicalize(itemID);
 
-		for (final InventorySetupItem item : setupContainer)
+		for (final InventorySetupsItem item : setupContainer)
 		{
 			// For equipped weight reducing items or noted items in the inventory
 			int setupItemId = itemManager.canonicalize(item.getId());
@@ -1473,13 +1473,13 @@ public class InventorySetupsPlugin extends Plugin
 		return itemId;
 	}
 
-	private boolean updateIfRunePouch(final InventorySetupSlot slot, final InventorySetupItem oldItem, final InventorySetupItem newItem)
+	private boolean updateIfRunePouch(final InventorySetupsSlot slot, final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
 	{
 
 		if (ItemVariationMapping.map(newItem.getId()) == ItemID.RUNE_POUCH)
 		{
 
-			if (slot.getSlotID() != InventorySetupSlotID.INVENTORY)
+			if (slot.getSlotID() != InventorySetupsSlotID.INVENTORY)
 			{
 
 				SwingUtilities.invokeLater(() ->

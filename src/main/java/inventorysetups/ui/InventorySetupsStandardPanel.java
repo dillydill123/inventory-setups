@@ -25,7 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupStackCompare;
+import inventorysetups.InventorySetupsStackCompareID;
 import inventorysetups.InventorySetupsPlugin;
 
 import net.runelite.client.ui.ColorScheme;
@@ -55,7 +55,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class InventorySetupStandardPanel extends InventorySetupPanel
+public class InventorySetupsStandardPanel extends InventorySetupsPanel
 {
 
 	private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
@@ -104,7 +104,7 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 
 	private final JLabel bankFilterIndicator = new JLabel();
 	private final JLabel highlightColorIndicator = new JLabel();
-	private final InventorySetupCycleButton<InventorySetupStackCompare> stackDifferenceIndicatorCycle;
+	private final InventorySetupsCycleButton<InventorySetupsStackCompareID> stackDifferenceIndicatorCycle;
 	private final JLabel unorderedHighlightIndicator = new JLabel();
 	private final JLabel highlightIndicator = new JLabel();
 	private final JLabel viewSetupLabel = new JLabel();
@@ -183,7 +183,7 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 		DELETE_HOVER_ICON = new ImageIcon(ImageUtil.luminanceOffset(deleteImg, -100));
 	}
 
-	InventorySetupStandardPanel(InventorySetupsPlugin plugin, InventorySetupPluginPanel panel, InventorySetup invSetup)
+	InventorySetupsStandardPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
 	{
 		super(plugin, panel, invSetup);
 
@@ -525,14 +525,14 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 		add(bottomContainer, BorderLayout.CENTER);
 
 		updateHighlightColorLabel();
-		stackDifferenceIndicatorCycle.setCurrentState(InventorySetupStackCompare.getValues().get(invSetup.getStackDifference()));
+		stackDifferenceIndicatorCycle.setCurrentState(InventorySetupsStackCompareID.getValues().get(invSetup.getStackDifference()));
 		updateToggleHighlightLabel();
 
 	}
 
-	private InventorySetupCycleButton<InventorySetupStackCompare> createStackIndicatorButton()
+	private InventorySetupsCycleButton<InventorySetupsStackCompareID> createStackIndicatorButton()
 	{
-		final ArrayList<InventorySetupStackCompare> stackDifferenceStates = InventorySetupStackCompare.getValues();
+		final ArrayList<InventorySetupsStackCompareID> stackDifferenceStates = InventorySetupsStackCompareID.getValues();
 		final ArrayList<ImageIcon> stackDifferenceIcons = new ArrayList<>(Arrays.asList(NO_STACK_DIFFERENCE_ICON, STACK_DIFFERENCE_ICON, STACK_DIFFERENCE_LESS_THAN_ICON, STACK_DIFFERENCE_GREATER_THAN_ICON));
 		final ArrayList<ImageIcon> stackDifferenceHoverIcons = new ArrayList<>(Arrays.asList(NO_STACK_DIFFERENCE_HOVER_ICON, STACK_DIFFERENCE_HOVER_ICON, STACK_DIFFERENCE_LESS_THAN_HOVER_ICON, STACK_DIFFERENCE_GREATER_THAN_HOVER_ICON));
 		final ArrayList<String> stackDifferenceToolTips = new ArrayList<>(Arrays.asList("No Stack Difference", "Standard Stack Difference", "Stack Difference Less Than", "Stack Difference Greater Than"));
@@ -541,7 +541,7 @@ public class InventorySetupStandardPanel extends InventorySetupPanel
 			// Example runnable
 			inventorySetup.setStackDifference(stackDifferenceIndicatorCycle.getCurrentState().ordinal());
 		};
-		return new InventorySetupCycleButton<>(plugin, stackDifferenceStates, stackDifferenceIcons, stackDifferenceHoverIcons, stackDifferenceToolTips, updateStackInInventorySetupFunc);
+		return new InventorySetupsCycleButton<>(plugin, stackDifferenceStates, stackDifferenceIcons, stackDifferenceHoverIcons, stackDifferenceToolTips, updateStackInInventorySetupFunc);
 	}
 
 	private void updateNameActions(boolean saveAndCancel)

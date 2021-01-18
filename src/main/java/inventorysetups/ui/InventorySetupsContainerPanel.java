@@ -24,7 +24,7 @@
  */
 package inventorysetups.ui;
 
-import inventorysetups.InventorySetupStackCompare;
+import inventorysetups.InventorySetupsStackCompareID;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,7 +32,7 @@ import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupItem;
+import inventorysetups.InventorySetupsItem;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JLabel;
@@ -42,7 +42,7 @@ import javax.swing.JPopupMenu;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 
-public abstract class InventorySetupContainerPanel extends JPanel
+public abstract class InventorySetupsContainerPanel extends JPanel
 {
 
 	protected ItemManager itemManager;
@@ -54,7 +54,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 	@Getter(AccessLevel.PROTECTED)
 	private final JPanel containerSlotsPanel;
 
-	InventorySetupContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
+	InventorySetupsContainerPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, String captionText)
 	{
 		this.itemManager = itemManager;
 		this.plugin = plugin;
@@ -82,7 +82,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		add(containerPanel);
 	}
 
-	protected void addUpdateFromContainerMouseListenerToSlot(final InventorySetupSlot slot)
+	protected void addUpdateFromContainerMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
 		setComponentPopupMenuToSlot(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
@@ -111,7 +111,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		});
 	}
 
-	protected void addUpdateFromSearchMouseListenerToSlot(final InventorySetupSlot slot, boolean allowStackable)
+	protected void addUpdateFromSearchMouseListenerToSlot(final InventorySetupsSlot slot, boolean allowStackable)
 	{
 		setComponentPopupMenuToSlot(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
@@ -123,7 +123,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		});
 	}
 
-	protected void addRemoveMouseListenerToSlot(final InventorySetupSlot slot)
+	protected void addRemoveMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
 		setComponentPopupMenuToSlot(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
@@ -135,7 +135,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		});
 	}
 
-	protected void addFuzzyMouseListenerToSlot(final InventorySetupSlot slot)
+	protected void addFuzzyMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
 		setComponentPopupMenuToSlot(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
@@ -147,7 +147,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		});
 	}
 
-	private void setComponentPopupMenuToSlot(final InventorySetupSlot slot)
+	private void setComponentPopupMenuToSlot(final InventorySetupsSlot slot)
 	{
 		if (slot.getComponentPopupMenu() == null)
 		{
@@ -159,7 +159,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 		}
 	}
 
-	protected void setContainerSlot(int index, final InventorySetupSlot containerSlot, final InventorySetup setup, final InventorySetupItem item)
+	protected void setContainerSlot(int index, final InventorySetupsSlot containerSlot, final InventorySetup setup, final InventorySetupsItem item)
 	{
 		containerSlot.setParentSetup(setup);
 
@@ -184,7 +184,7 @@ public abstract class InventorySetupContainerPanel extends JPanel
 
 	}
 
-	protected void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupItem savedItem, InventorySetupItem currItem, final InventorySetupSlot containerSlot)
+	protected void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupsItem savedItem, InventorySetupsItem currItem, final InventorySetupsSlot containerSlot)
 	{
 		// important note: do not use item names for comparisons
 		// they are all empty to avoid clientThread usage when highlighting
@@ -220,15 +220,15 @@ public abstract class InventorySetupContainerPanel extends JPanel
 	protected boolean highlightBasedOnStack(final InventorySetup setup, final Integer savedItemQty, final Integer currItemQty)
 	{
 		final int stackRes = Integer.compare(currItemQty, savedItemQty);
-		final InventorySetupStackCompare stackCompareType = InventorySetupStackCompare.getValues().get(setup.getStackDifference());
-		return stackCompareType == InventorySetupStackCompare.Less_Than && stackRes < 0 ||
-				stackCompareType == InventorySetupStackCompare.Greater_Than && stackRes > 0 ||
-				stackCompareType == InventorySetupStackCompare.Standard && stackRes != 0;
+		final InventorySetupsStackCompareID stackCompareType = InventorySetupsStackCompareID.getValues().get(setup.getStackDifference());
+		return stackCompareType == InventorySetupsStackCompareID.Less_Than && stackRes < 0 ||
+				stackCompareType == InventorySetupsStackCompareID.Greater_Than && stackRes > 0 ||
+				stackCompareType == InventorySetupsStackCompareID.Standard && stackRes != 0;
 	}
 
 	abstract public void setupContainerPanel(final JPanel containerSlotsPanel);
 
-	abstract public void highlightSlotDifferences(final ArrayList<InventorySetupItem> currContainer, final InventorySetup inventorySetup);
+	abstract public void highlightSlotDifferences(final ArrayList<InventorySetupsItem> currContainer, final InventorySetup inventorySetup);
 
 	abstract public void setSlots(final InventorySetup setup);
 

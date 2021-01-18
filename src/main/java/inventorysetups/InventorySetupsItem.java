@@ -29,7 +29,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
-public class InventorySetupItem
+public class InventorySetupsItem
 {
 	@Getter
 	private final int id;

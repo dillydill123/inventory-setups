@@ -25,22 +25,22 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupSorting;
+import inventorysetups.InventorySetupsSortingID;
 import inventorysetups.InventorySetupsPlugin;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-public class InventorySetupPanel extends JPanel
+public class InventorySetupsPanel extends JPanel
 {
 
 	protected final InventorySetupsPlugin plugin;
-	protected final InventorySetupPluginPanel panel;
+	protected final InventorySetupsPluginPanel panel;
 	protected final InventorySetup inventorySetup;
 	protected final JPopupMenu moveSetupPopupMenu;
 
-	InventorySetupPanel(InventorySetupsPlugin plugin, InventorySetupPluginPanel panel, InventorySetup invSetup)
+	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
@@ -144,7 +144,7 @@ public class InventorySetupPanel extends JPanel
 
 	private boolean checkSortingMode()
 	{
-		if (plugin.getConfig().sortingMode() != InventorySetupSorting.DEFAULT)
+		if (plugin.getConfig().sortingMode() != InventorySetupsSortingID.DEFAULT)
 		{
 			JOptionPane.showMessageDialog(panel,
 					"You cannot move setups while a sorting mode is enabled.",

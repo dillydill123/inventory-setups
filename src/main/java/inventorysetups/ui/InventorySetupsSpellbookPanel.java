@@ -25,8 +25,8 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupSlotID;
+import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.api.SpriteID;
 import net.runelite.client.game.ItemManager;
@@ -40,13 +40,13 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 
-public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
+public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 {
 
-	private InventorySetupSlot spellbookSlot;
+	private InventorySetupsSlot spellbookSlot;
 	private ArrayList<BufferedImage> spellbookImages;
 
-	InventorySetupSpellbookPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
+	InventorySetupsSpellbookPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Spellbook");
 		spellbookImages = new ArrayList<>();
@@ -83,7 +83,7 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 		final GridLayout gridLayout = new GridLayout(1, 2, 3, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
-		spellbookSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.SPELL_BOOK, 0);
+		spellbookSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.SPELL_BOOK, 0);
 
 		// add options to easily change spellbook without having to do it manually in game
 		JPopupMenu popupMenu = new JPopupMenu();
@@ -115,7 +115,7 @@ public class InventorySetupSpellbookPanel extends InventorySetupContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		plugin.getClientThread().invokeLater(() ->
 		{

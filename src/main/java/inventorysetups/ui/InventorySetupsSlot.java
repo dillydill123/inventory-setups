@@ -25,7 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupSlotID;
+import inventorysetups.InventorySetupsSlotID;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.client.util.AsyncBufferedImage;
@@ -40,13 +40,13 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 
-public class InventorySetupSlot extends JPanel
+public class InventorySetupsSlot extends JPanel
 {
 	@Getter
 	private final JLabel imageLabel;
 
 	@Getter
-	private final InventorySetupSlotID slotID;
+	private final InventorySetupsSlotID slotID;
 
 	@Getter
 	@Setter
@@ -58,7 +58,7 @@ public class InventorySetupSlot extends JPanel
 	@Getter
 	private JLabel fuzzyLabel;
 
-	public InventorySetupSlot(Color color, InventorySetupSlotID id, int indexInSlot)
+	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot)
 	{
 		this.slotID = id;
 		this.imageLabel = new JLabel();

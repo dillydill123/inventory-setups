@@ -37,7 +37,7 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
-public interface InventorySetupConfig extends Config
+public interface InventorySetupsConfig extends Config
 {
 
 	@ConfigSection(
@@ -86,9 +86,9 @@ public interface InventorySetupConfig extends Config
 			position = 1,
 			section = defaultSection
 	)
-	default InventorySetupStackCompare highlightStackDifference()
+	default InventorySetupsStackCompareID highlightStackDifference()
 	{
-		return InventorySetupStackCompare.None;
+		return InventorySetupsStackCompareID.None;
 	}
 
 	@ConfigItem(
@@ -218,9 +218,9 @@ public interface InventorySetupConfig extends Config
 			description = "Configures the sorting of setups",
 			position = 12
 	)
-	default InventorySetupSorting sortingMode()
+	default InventorySetupsSortingID sortingMode()
 	{
-		return InventorySetupSorting.DEFAULT;
+		return InventorySetupsSortingID.DEFAULT;
 	}
 
 	@ConfigItem(

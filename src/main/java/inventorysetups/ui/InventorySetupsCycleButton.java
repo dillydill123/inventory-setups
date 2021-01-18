@@ -33,7 +33,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class InventorySetupCycleButton<T> extends JLabel
+public class InventorySetupsCycleButton<T> extends JLabel
 {
 	private final InventorySetupsPlugin plugin;
 	private final ArrayList<T> states;
@@ -43,14 +43,14 @@ public class InventorySetupCycleButton<T> extends JLabel
 	private final Runnable runnable;
 	private int currentIndex;
 
-	InventorySetupCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips)
+	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips)
 	{
 		this(plugin, states, icons, hoverIcons, tooltips, () ->
 		{
 		});
 	}
 
-	InventorySetupCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips, final Runnable runnable)
+	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips, final Runnable runnable)
 	{
 		super();
 		this.plugin = plugin;

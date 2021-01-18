@@ -38,11 +38,11 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class InventorySetupCompactPanel extends InventorySetupPanel
+public class InventorySetupsCompactPanel extends InventorySetupsPanel
 {
 
 
-	InventorySetupCompactPanel(InventorySetupsPlugin plugin, InventorySetupPluginPanel panel, InventorySetup invSetup)
+	InventorySetupsCompactPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
 	{
 		super(plugin, panel, invSetup);
 

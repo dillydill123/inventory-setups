@@ -25,9 +25,9 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupFilteringMode;
-import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupSorting;
+import inventorysetups.InventorySetupsFilteringModeID;
+import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsSortingID;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
@@ -62,7 +62,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class InventorySetupPluginPanel extends PluginPanel
+public class InventorySetupsPluginPanel extends PluginPanel
 {
 
 	private static ImageIcon HELP_ICON;
@@ -105,12 +105,12 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	private final IconTextField searchBar;
 
-	private final InventorySetupInventoryPanel invPanel;
-	private final InventorySetupEquipmentPanel eqpPanel;
-	private final InventorySetupRunePouchPanel rpPanel;
-	private final InventorySetupSpellbookPanel sbPanel;
-	private final InventorySetupAdditionalItemsPanel aiPanel;
-	private final InventorySetupNotesPanel notesPanel;
+	private final InventorySetupsInventoryPanel invPanel;
+	private final InventorySetupsEquipmentPanel eqpPanel;
+	private final InventorySetupsRunePouchPanel rpPanel;
+	private final InventorySetupsSpellbookPanel sbPanel;
+	private final InventorySetupsAdditionalItemsPanel aiPanel;
+	private final InventorySetupsNotesPanel notesPanel;
 
 	@Getter
 	private InventorySetup currentSelectedSetup;
@@ -160,17 +160,17 @@ public class InventorySetupPluginPanel extends PluginPanel
 		MAIN_TITLE = "Inventory Setups";
 	}
 
-	public InventorySetupPluginPanel(final InventorySetupsPlugin plugin, final ItemManager itemManager)
+	public InventorySetupsPluginPanel(final InventorySetupsPlugin plugin, final ItemManager itemManager)
 	{
 		super(false);
 		this.currentSelectedSetup = null;
 		this.plugin = plugin;
-		this.rpPanel = new InventorySetupRunePouchPanel(itemManager, plugin);
-		this.invPanel = new InventorySetupInventoryPanel(itemManager, plugin, rpPanel);
-		this.eqpPanel = new InventorySetupEquipmentPanel(itemManager, plugin);
-		this.sbPanel = new InventorySetupSpellbookPanel(itemManager, plugin);
-		this.aiPanel = new InventorySetupAdditionalItemsPanel(itemManager, plugin);
-		this.notesPanel = new InventorySetupNotesPanel(itemManager, plugin);
+		this.rpPanel = new InventorySetupsRunePouchPanel(itemManager, plugin);
+		this.invPanel = new InventorySetupsInventoryPanel(itemManager, plugin, rpPanel);
+		this.eqpPanel = new InventorySetupsEquipmentPanel(itemManager, plugin);
+		this.sbPanel = new InventorySetupsSpellbookPanel(itemManager, plugin);
+		this.aiPanel = new InventorySetupsAdditionalItemsPanel(itemManager, plugin);
+		this.notesPanel = new InventorySetupsNotesPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
@@ -215,8 +215,8 @@ public class InventorySetupPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupSorting.ALPHABETICAL;
-					plugin.toggleAlphabeticalMode(isAlphabeticalMode ? InventorySetupSorting.DEFAULT : InventorySetupSorting.ALPHABETICAL);
+					boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL;
+					plugin.toggleAlphabeticalMode(isAlphabeticalMode ? InventorySetupsSortingID.DEFAULT : InventorySetupsSortingID.ALPHABETICAL);
 					updateSortingMarker();
 				}
 			}
@@ -224,14 +224,14 @@ public class InventorySetupPluginPanel extends PluginPanel
 			@Override
 			public void mouseEntered(MouseEvent e)
 			{
-				boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupSorting.ALPHABETICAL;
+				boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL;
 				sortingMarker.setIcon(isAlphabeticalMode ? ALPHABETICAL_HOVER_ICON : NO_ALPHABETICAL_HOVER_ICON);
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e)
 			{
-				boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupSorting.ALPHABETICAL;
+				boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL;
 				sortingMarker.setIcon(isAlphabeticalMode ? ALPHABETICAL_ICON : NO_ALPHABETICAL_ICON);
 			}
 		});
@@ -499,14 +499,14 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 		for (final InventorySetup setup : setups)
 		{
-			InventorySetupPanel newPanel = null;
+			InventorySetupsPanel newPanel = null;
 			if (plugin.getConfig().compactMode())
 			{
-				newPanel = new InventorySetupCompactPanel(plugin, this, setup);
+				newPanel = new InventorySetupsCompactPanel(plugin, this, setup);
 			}
 			else
 			{
-				newPanel = new InventorySetupStandardPanel(plugin, this, setup);
+				newPanel = new InventorySetupsStandardPanel(plugin, this, setup);
 			}
 			overviewPanel.add(newPanel, constraints);
 			constraints.gridy++;
@@ -538,7 +538,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			setupsToAdd = new ArrayList<>(plugin.getInventorySetups());
 		}
 
-		if (plugin.getConfig().sortingMode() == InventorySetupSorting.ALPHABETICAL)
+		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL)
 		{
 			setupsToAdd.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
@@ -592,7 +592,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			setScrollBarPosition(0);
 		}
 
-		plugin.setBankFilteringMode(InventorySetupFilteringMode.ALL);
+		plugin.setBankFilteringMode(InventorySetupsFilteringModeID.ALL);
 		plugin.doBankSearch();
 
 		validate();
@@ -616,7 +616,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
+		final ArrayList<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
 		invPanel.highlightSlotDifferences(inv, currentSelectedSetup);
 	}
 
@@ -636,7 +636,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 			return;
 		}
 
-		final ArrayList<InventorySetupItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+		final ArrayList<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
 		eqpPanel.highlightSlotDifferences(eqp, currentSelectedSetup);
 	}
 
@@ -655,7 +655,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 		}
 
 		// pass it a dummy container because it only needs the current selected setup
-		sbPanel.highlightSlotDifferences(new ArrayList<InventorySetupItem>(), currentSelectedSetup);
+		sbPanel.highlightSlotDifferences(new ArrayList<InventorySetupsItem>(), currentSelectedSetup);
 
 	}
 
@@ -692,7 +692,7 @@ public class InventorySetupPluginPanel extends PluginPanel
 
 	private void updateSortingMarker()
 	{
-		boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupSorting.ALPHABETICAL;
+		boolean isAlphabeticalMode = plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL;
 		sortingMarker.setIcon(isAlphabeticalMode ? ALPHABETICAL_ICON : NO_ALPHABETICAL_ICON);
 		sortingMarker.setToolTipText(isAlphabeticalMode ? "Remove alphabetical sorting" : "Alphabetically sort setups");
 	}

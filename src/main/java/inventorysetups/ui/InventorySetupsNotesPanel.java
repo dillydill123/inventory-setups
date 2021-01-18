@@ -25,7 +25,7 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupItem;
+import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.Setter;
 import net.runelite.client.game.ItemManager;
@@ -48,7 +48,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.ArrayList;
 
-public class InventorySetupNotesPanel extends InventorySetupContainerPanel
+public class InventorySetupsNotesPanel extends InventorySetupsContainerPanel
 {
 
 	private JTextArea notesEditor;
@@ -57,7 +57,7 @@ public class InventorySetupNotesPanel extends InventorySetupContainerPanel
 	@Setter
 	private InventorySetup currentInventorySetup;
 
-	InventorySetupNotesPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
+	InventorySetupsNotesPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Notes");
 	}
@@ -148,7 +148,7 @@ public class InventorySetupNotesPanel extends InventorySetupContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 	}
 

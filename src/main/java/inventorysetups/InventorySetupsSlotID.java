@@ -24,45 +24,29 @@
  */
 package inventorysetups;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-public enum InventorySetupStackCompare
+public enum InventorySetupsSlotID
 {
-	// Don't highlight at all
-	None(0),
 
-	// Only highlight if stacks are equal
-	Standard(1),
+	INVENTORY(0),
 
-	// Only highlight if stack is less than what is in the setup
-	Less_Than(2),
+	EQUIPMENT(1),
 
-	// Only highlight if stack is greater than what is in the setup
-	Greater_Than(3);
+	RUNE_POUCH(2),
 
-	private final int type;
+	SPELL_BOOK(3),
 
-	private static final ArrayList<InventorySetupStackCompare> VALUES;
+	ADDITIONAL_ITEMS(4);
 
-	static
+	private final int id;
+
+	InventorySetupsSlotID(int id)
 	{
-		VALUES = new ArrayList<>();
-		Collections.addAll(VALUES, InventorySetupStackCompare.values());
+		this.id = id;
 	}
 
-	InventorySetupStackCompare(int type)
+	public int getId()
 	{
-		this.type = type;
+		return id;
 	}
 
-	public int getType()
-	{
-		return type;
-	}
-
-	public static ArrayList<InventorySetupStackCompare> getValues()
-	{
-		return VALUES;
-	}
 }

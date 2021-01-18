@@ -25,8 +25,8 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupItem;
-import inventorysetups.InventorySetupSlotID;
+import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -37,11 +37,11 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerPanel
+public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContainerPanel
 {
-	private final ArrayList<InventorySetupSlot> additionalFilteredSlots;
+	private final ArrayList<InventorySetupsSlot> additionalFilteredSlots;
 
-	InventorySetupAdditionalItemsPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
+	InventorySetupsAdditionalItemsPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Additional Filtered Items");
 		additionalFilteredSlots = new ArrayList<>();
@@ -54,7 +54,7 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		// No highlighting for this panel
 	}
@@ -62,7 +62,7 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 	@Override
 	public void setSlots(InventorySetup setup)
 	{
-		final HashMap<Integer, InventorySetupItem> setupAdditionalItems = setup.getAdditionalFilteredItems();
+		final HashMap<Integer, InventorySetupsItem> setupAdditionalItems = setup.getAdditionalFilteredItems();
 		final JPanel containerSlotsPanel = this.getContainerSlotsPanel();
 
 		// Make final size a multiple of 4
@@ -87,7 +87,7 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 			// add new slots if the final size is larger than the number of slots
 			for (int i = additionalFilteredSlots.size(); i < finalSizeLambda; i++)
 			{
-				final InventorySetupSlot newSlot = new InventorySetupSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupSlotID.ADDITIONAL_ITEMS, i);
+				final InventorySetupsSlot newSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.ADDITIONAL_ITEMS, i);
 				super.addUpdateFromSearchMouseListenerToSlot(newSlot, false);
 				super.addRemoveMouseListenerToSlot(newSlot);
 				additionalFilteredSlots.add(newSlot);
@@ -102,7 +102,7 @@ public class InventorySetupAdditionalItemsPanel extends InventorySetupContainerP
 			// remove the images and tool tips for the inventory slots that are not part of this setup
 			for (int i = finalSizeLambda - 1; i >= setupAdditionalItems.size(); i--)
 			{
-				InventorySetupItem dummy = new InventorySetupItem(-1, null, 0, false);
+				InventorySetupsItem dummy = new InventorySetupsItem(-1, null, 0, false);
 				this.setContainerSlot(i, additionalFilteredSlots.get(i), setup, dummy);
 			}
 
