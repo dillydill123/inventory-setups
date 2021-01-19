@@ -62,6 +62,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
+
 public class InventorySetupsPluginPanel extends PluginPanel
 {
 
@@ -87,8 +89,10 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private static String MAIN_TITLE;
 
 	private final JPanel noSetupsPanel;
+	private final JPanel updateNewsPanel;
 	private final JPanel invEqPanel;
 	private final JPanel overviewPanel;
+	private JPanel northAnchoredPanel;
 	private final JScrollPane contentWrapperPane;
 
 	private final JPanel overviewTopRightButtonsPanel;
@@ -172,6 +176,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		this.aiPanel = new InventorySetupsAdditionalItemsPanel(itemManager, plugin);
 		this.notesPanel = new InventorySetupsNotesPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
+		this.updateNewsPanel = new InventorySetupsUpdateNewsPanel(plugin, this);
 		this.invEqPanel = new JPanel();
 		this.overviewPanel = new JPanel();
 		this.overviewPanelScrollPosition = 0;
@@ -190,7 +195,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					LinkBrowser.browse("https://github.com/dillydill123/inventory-setups#inventory-setups");
+					LinkBrowser.browse(TUTORIAL_LINK);
 				}
 			}
 
@@ -429,7 +434,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		// the panel that stays at the top and doesn't scroll
 		// contains the title and buttons
-		final JPanel northAnchoredPanel = new JPanel();
+		this.northAnchoredPanel = new JPanel();
 		northAnchoredPanel.setLayout(new BoxLayout(northAnchoredPanel, BoxLayout.Y_AXIS));
 		northAnchoredPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
 		northAnchoredPanel.add(titleAndMarkersPanel);
@@ -463,6 +468,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		contentPanel.setLayout(contentLayout);
 		contentPanel.add(invEqPanel);
 		contentPanel.add(noSetupsPanel);
+		contentPanel.add(updateNewsPanel);
 		contentPanel.add(overviewPanel);
 
 		// wrapper for the main content panel to keep it from stretching
@@ -517,8 +523,21 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		invEqPanel.setVisible(false);
 
-		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
-		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
+		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
+		{
+			northAnchoredPanel.setVisible(false);
+			updateNewsPanel.setVisible(true);
+			overviewPanel.setVisible(false);
+			noSetupsPanel.setVisible(false);
+		}
+		else
+		{
+			northAnchoredPanel.setVisible(true);
+			updateNewsPanel.setVisible(false);
+			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
+			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
+		}
+
 
 	}
 
@@ -661,9 +680,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	public void returnToOverviewPanel(boolean resetScrollBar)
 	{
-		noSetupsPanel.setVisible(plugin.getInventorySetups().size() == 0);
+		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
+		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
 		invEqPanel.setVisible(false);
-		overviewPanel.setVisible(plugin.getInventorySetups().size() > 0);
 		overviewTopRightButtonsPanel.setVisible(true);
 		setupTopRightButtonsPanel.setVisible(false);
 		title.setText(MAIN_TITLE);
