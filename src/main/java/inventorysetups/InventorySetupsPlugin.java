@@ -68,7 +68,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
-import net.runelite.client.externalplugins.ExternalPluginManifest;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.game.SpriteManager;
@@ -987,14 +986,18 @@ public class InventorySetupsPlugin extends Plugin
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
 							// only allow numbers and k, m, b (if 1 value is available)
 							// stop once k, m, or b is seen
-							.addCharValidator(arg -> (arg >= '0' && arg <= '9') ||
+							.addCharValidator(arg -> ((arg >= '0' && arg <= '9' &&
+														!searchInput.getValue().toLowerCase().contains("k") &&
+														!searchInput.getValue().toLowerCase().contains("m") &&
+														!searchInput.getValue().toLowerCase().contains("b"))
+														||
 														((arg == 'b' || arg == 'B' ||
 														arg == 'k' || arg == 'K' ||
 														arg == 'm' || arg == 'M') &&
 														searchInput.getValue().length() > 0 &&
 														!searchInput.getValue().toLowerCase().contains("k") &&
 														!searchInput.getValue().toLowerCase().contains("m") &&
-														!searchInput.getValue().toLowerCase().contains("b")))
+														!searchInput.getValue().toLowerCase().contains("b"))))
 							.onDone((input) ->
 							{
 								clientThread.invokeLater(() ->
@@ -1558,8 +1561,7 @@ public class InventorySetupsPlugin extends Plugin
 		// only take the first 10 characters (max amount is 2.147B which is only 10 digits)
 		if (input.length() > 10)
 		{
-			//TODO just return max value if greater than 10?
-			input = input.substring(0, 10);
+			return Integer.MAX_VALUE;
 		}
 		input = input.toLowerCase();
 
