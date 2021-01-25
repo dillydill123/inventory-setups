@@ -88,6 +88,7 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 			for (int i = additionalFilteredSlots.size(); i < finalSizeLambda; i++)
 			{
 				final InventorySetupsSlot newSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.ADDITIONAL_ITEMS, i);
+				super.addFuzzyMouseListenerToSlot(newSlot);
 				super.addUpdateFromSearchMouseListenerToSlot(newSlot, false);
 				super.addRemoveMouseListenerToSlot(newSlot);
 				additionalFilteredSlots.add(newSlot);

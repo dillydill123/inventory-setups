@@ -701,8 +701,18 @@ public class InventorySetupsPlugin extends Plugin
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
-		final int processedItemId = itemManager.canonicalize(itemId);
-		return additionalFilteredItems.get(processedItemId) != null;
+		final int canonicalizedId = itemManager.canonicalize(itemId);
+		for (final Integer additionalItemKey : additionalFilteredItems.keySet())
+		{
+			boolean isFuzzy = additionalFilteredItems.get(additionalItemKey).isFuzzy();
+			int addItemId = getProcessedID(isFuzzy, additionalFilteredItems.get(additionalItemKey).getId());
+			int finalItemId = getProcessedID(isFuzzy, canonicalizedId);
+			if (addItemId == finalItemId)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void addAdditionalFilteredItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
@@ -1101,8 +1111,29 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
-		container.get(slot.getIndexInSlot()).toggleIsFuzzy();
+		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
+		{
+			final HashMap<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
+			final int slotID = slot.getIndexInSlot();
+			int j = 0;
+			Integer keyToMakeFuzzy = null;
+			for (final Integer key : additionalFilteredItems.keySet())
+			{
+				if (slotID == j)
+				{
+					keyToMakeFuzzy = key;
+					break;
+				}
+				j++;
+			}
+			additionalFilteredItems.get(keyToMakeFuzzy).toggleIsFuzzy();
+		}
+		else
+		{
+			final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+			container.get(slot.getIndexInSlot()).toggleIsFuzzy();
+		}
+
 		updateConfig();
 		panel.refreshCurrentSetup();
 	}

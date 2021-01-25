@@ -179,9 +179,6 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 			toolTip += " (" + quantity + ")";
 		}
 		containerSlot.setImageLabel(toolTip, itemImg, item.isFuzzy());
-
-
-
 	}
 
 	protected void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupsItem savedItem, InventorySetupsItem currItem, final InventorySetupsSlot containerSlot)
