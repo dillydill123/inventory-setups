@@ -142,6 +142,18 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "fuzzy",
+			name = "Default Fuzzy",
+			description = "Configures the default setting for fuzziness in new setups",
+			position = 6,
+			section = defaultSection
+	)
+	default boolean fuzzy()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "returnToSetupsHotkey",
 			name = "Return To Setups Hotkey",
 			description = "Configures the hotkey for returning to setups",

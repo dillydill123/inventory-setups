@@ -713,7 +713,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			final String name = itemManager.getItemComposition(processedItemId).getName();
-			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, false);
+			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy());
 
 			additionalFilteredItems.put(processedItemId, setupItem);
 			updateConfig();
@@ -1289,7 +1289,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
-				newContainer.add(new InventorySetupsItem(-1, "", 0, false));
+				newContainer.add(new InventorySetupsItem(-1, "", 0, config.fuzzy()));
 			}
 			else
 			{
@@ -1301,7 +1301,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					itemName = itemManager.getItemComposition(item.getId()).getName();
 				}
-				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), false));
+				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), config.fuzzy()));
 			}
 		}
 
