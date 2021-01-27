@@ -38,6 +38,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// The panel that contains the equipment slots
 public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 {
 	private HashMap<EquipmentInventorySlot, InventorySetupsSlot> equipmentSlots;
@@ -51,7 +52,7 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 	public void setupContainerPanel(final JPanel containerSlotsPanel)
 	{
 		this.equipmentSlots = new HashMap<>();
-		for (EquipmentInventorySlot slot : EquipmentInventorySlot.values())
+		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			final InventorySetupsSlot setupSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, slot.getSlotIdx());
 			super.addFuzzyMouseListenerToSlot(setupSlot);
@@ -84,12 +85,12 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void setSlots(final InventorySetup setup)
+	public void updatePanelWithSetupInformation(final InventorySetup setup)
 	{
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			int i = slot.getSlotIdx();
-			super.setContainerSlot(i, equipmentSlots.get(slot), setup, setup.getEquipment().get(i));
+			super.setSlotImageAndText(equipmentSlots.get(slot), setup, setup.getEquipment().get(i));
 		}
 
 		validate();
@@ -97,18 +98,18 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(final ArrayList<InventorySetupsItem> currEquipment, final InventorySetup inventorySetup)
+	public void highlightSlots(final ArrayList<InventorySetupsItem> currentEquipment, final InventorySetup inventorySetup)
 	{
-		final ArrayList<InventorySetupsItem> equipToCheck = inventorySetup.getEquipment();
+		final ArrayList<InventorySetupsItem> savedEquipmentFromSetup = inventorySetup.getEquipment();
 
-		assert currEquipment.size() == equipToCheck.size() : "size mismatch";
+		assert currentEquipment.size() == savedEquipmentFromSetup.size() : "size mismatch";
 
 		isHighlighted = true;
 
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			int slotIdx = slot.getSlotIdx();
-			super.highlightDifferentSlotColor(inventorySetup, equipToCheck.get(slotIdx), currEquipment.get(slotIdx), equipmentSlots.get(slot));
+			super.highlightSlot(inventorySetup, savedEquipmentFromSetup.get(slotIdx), currentEquipment.get(slotIdx), equipmentSlots.get(slot));
 		}
 	}
 

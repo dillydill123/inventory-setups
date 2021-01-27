@@ -64,6 +64,7 @@ import java.util.List;
 
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 
+// The main panel of the plugin
 public class InventorySetupsPluginPanel extends PluginPanel
 {
 
@@ -490,63 +491,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		updateSortingMarker();
 	}
 
-	public void init(List<InventorySetup> setups)
-	{
-		overviewPanel.setLayout(new GridBagLayout());
-		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		updateCompactViewMarker();
-		updateSortingMarker();
-
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.weightx = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-
-		for (final InventorySetup setup : setups)
-		{
-			InventorySetupsPanel newPanel = null;
-			if (plugin.getConfig().compactMode())
-			{
-				newPanel = new InventorySetupsCompactPanel(plugin, this, setup);
-			}
-			else
-			{
-				newPanel = new InventorySetupsStandardPanel(plugin, this, setup);
-			}
-			overviewPanel.add(newPanel, constraints);
-			constraints.gridy++;
-
-			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-			constraints.gridy++;
-		}
-
-		invEqPanel.setVisible(false);
-
-		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
-		{
-			northAnchoredPanel.setVisible(false);
-			updateNewsPanel.setVisible(true);
-			overviewPanel.setVisible(false);
-			noSetupsPanel.setVisible(false);
-		}
-		else
-		{
-			northAnchoredPanel.setVisible(true);
-			updateNewsPanel.setVisible(false);
-			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
-			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
-		}
-
-
-	}
-
+	// Redraw the entire overview panel, considering the text in the search bar
 	public void rebuild(boolean resetScrollBar)
 	{
 		returnToOverviewPanel(resetScrollBar);
 		overviewPanel.removeAll();
 
-		final String text = searchBar.getText();
 		List<InventorySetup> setupsToAdd = null;
 		if (!searchBar.getText().isEmpty())
 		{
@@ -580,12 +530,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		overviewPanelScrollPosition = contentWrapperPane.getVerticalScrollBar().getValue();
 		currentSelectedSetup = inventorySetup;
-		invPanel.setSlots(inventorySetup);
-		rpPanel.setSlots(inventorySetup);
-		eqpPanel.setSlots(inventorySetup);
-		sbPanel.setSlots(inventorySetup);
-		aiPanel.setSlots(inventorySetup);
-		notesPanel.setSlots(inventorySetup);
+		invPanel.updatePanelWithSetupInformation(inventorySetup);
+		rpPanel.updatePanelWithSetupInformation(inventorySetup);
+		eqpPanel.updatePanelWithSetupInformation(inventorySetup);
+		sbPanel.updatePanelWithSetupInformation(inventorySetup);
+		aiPanel.updatePanelWithSetupInformation(inventorySetup);
+		notesPanel.updatePanelWithSetupInformation(inventorySetup);
 
 		overviewTopRightButtonsPanel.setVisible(false);
 		setupTopRightButtonsPanel.setVisible(true);
@@ -636,7 +586,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		final ArrayList<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
-		invPanel.highlightSlotDifferences(inv, currentSelectedSetup);
+		invPanel.highlightSlots(inv, currentSelectedSetup);
 	}
 
 	public void highlightEquipment()
@@ -656,7 +606,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		final ArrayList<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-		eqpPanel.highlightSlotDifferences(eqp, currentSelectedSetup);
+		eqpPanel.highlightSlots(eqp, currentSelectedSetup);
 	}
 
 	public void highlightSpellbook()
@@ -674,11 +624,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		// pass it a dummy container because it only needs the current selected setup
-		sbPanel.highlightSlotDifferences(new ArrayList<InventorySetupsItem>(), currentSelectedSetup);
+		sbPanel.highlightSlots(new ArrayList<InventorySetupsItem>(), currentSelectedSetup);
 
 	}
 
-	public void returnToOverviewPanel(boolean resetScrollBar)
+	// returns to the overview panel
+	public void returnToOverviewPanel(boolean shouldResetScrollBar)
 	{
 		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
 		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
@@ -689,7 +640,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		helpButton.setVisible(!plugin.getConfig().hideButton());
 		searchBar.setVisible(true);
 
-		if (resetScrollBar)
+		if (shouldResetScrollBar)
 		{
 			overviewPanelScrollPosition = 0;
 			setScrollBarPosition(overviewPanelScrollPosition);
@@ -722,4 +673,55 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		repaint();
 		contentWrapperPane.getVerticalScrollBar().setValue(scrollbarValue);
 	}
+
+	// Redraw the entire panel given the list of setups
+	private void init(List<InventorySetup> setups)
+	{
+		overviewPanel.setLayout(new GridBagLayout());
+		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		updateCompactViewMarker();
+		updateSortingMarker();
+
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.weightx = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+
+		for (final InventorySetup setup : setups)
+		{
+			InventorySetupsPanel newPanel = null;
+			if (plugin.getConfig().compactMode())
+			{
+				newPanel = new InventorySetupsCompactPanel(plugin, this, setup);
+			}
+			else
+			{
+				newPanel = new InventorySetupsStandardPanel(plugin, this, setup);
+			}
+			overviewPanel.add(newPanel, constraints);
+			constraints.gridy++;
+
+			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+			constraints.gridy++;
+		}
+
+		invEqPanel.setVisible(false);
+
+		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
+		{
+			northAnchoredPanel.setVisible(false);
+			updateNewsPanel.setVisible(true);
+			overviewPanel.setVisible(false);
+			noSetupsPanel.setVisible(false);
+		}
+		else
+		{
+			northAnchoredPanel.setVisible(true);
+			updateNewsPanel.setVisible(false);
+			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
+			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
+		}
+	}
+
 }

@@ -38,9 +38,9 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+// The compact setup panel that only contains the name of the setup
 public class InventorySetupsCompactPanel extends InventorySetupsPanel
 {
-
 
 	InventorySetupsCompactPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
 	{

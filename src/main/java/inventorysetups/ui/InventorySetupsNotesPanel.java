@@ -148,12 +148,12 @@ public class InventorySetupsNotesPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 	}
 
 	@Override
-	public void setSlots(InventorySetup setup)
+	public void updatePanelWithSetupInformation(InventorySetup setup)
 	{
 		// Set the caret to not update right before setting the text
 		// this stops it from scrolling down the parent scroll pane

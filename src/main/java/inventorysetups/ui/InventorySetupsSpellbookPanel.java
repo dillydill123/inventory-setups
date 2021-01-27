@@ -115,7 +115,7 @@ public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		plugin.getClientThread().invokeLater(() ->
 		{
@@ -131,7 +131,7 @@ public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void setSlots(InventorySetup setup)
+	public void updatePanelWithSetupInformation(InventorySetup setup)
 	{
 		/* 0 = Standard
 		   1 = Ancient

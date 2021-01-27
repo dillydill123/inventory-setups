@@ -55,6 +55,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+//
 public class InventorySetupsStandardPanel extends InventorySetupsPanel
 {
 

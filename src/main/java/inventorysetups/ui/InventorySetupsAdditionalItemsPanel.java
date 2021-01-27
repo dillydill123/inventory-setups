@@ -37,6 +37,7 @@ import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// The additional filtered items panel that contains the additional filtered items list
 public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContainerPanel
 {
 	private final ArrayList<InventorySetupsSlot> additionalFilteredSlots;
@@ -54,38 +55,38 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		// No highlighting for this panel
 	}
 
 	@Override
-	public void setSlots(InventorySetup setup)
+	public void updatePanelWithSetupInformation(InventorySetup setup)
 	{
 		final HashMap<Integer, InventorySetupsItem> setupAdditionalItems = setup.getAdditionalFilteredItems();
 		final JPanel containerSlotsPanel = this.getContainerSlotsPanel();
 
 		// Make final size a multiple of 4
-		int finalSize = setupAdditionalItems.size();
-		int remainder = finalSize % 4;
-		if (finalSize % 4 != 0)
+		int totalNumberOfSlots = setupAdditionalItems.size();
+		int remainder = totalNumberOfSlots % 4;
+		if (totalNumberOfSlots % 4 != 0)
 		{
-			finalSize = finalSize + 4 - remainder;
+			totalNumberOfSlots = totalNumberOfSlots + 4 - remainder;
 		}
 
 		// saturated the row, increase it now
-		if (finalSize == setupAdditionalItems.size())
+		if (totalNumberOfSlots == setupAdditionalItems.size())
 		{
-			finalSize += 4;
+			totalNumberOfSlots += 4;
 		}
 
 		// new component creation must be on event dispatch thread, hence invoke later
-		final int finalSizeLambda = finalSize;
+		final int totalNumberOfSlotsLambda = totalNumberOfSlots;
 		SwingUtilities.invokeLater(() ->
 		{
 
 			// add new slots if the final size is larger than the number of slots
-			for (int i = additionalFilteredSlots.size(); i < finalSizeLambda; i++)
+			for (int i = additionalFilteredSlots.size(); i < totalNumberOfSlotsLambda; i++)
 			{
 				final InventorySetupsSlot newSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.ADDITIONAL_ITEMS, i);
 				super.addFuzzyMouseListenerToSlot(newSlot);
@@ -95,29 +96,29 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 			}
 
 			// remove the extra slots from the layout if needed so the panel fits as small as possible
-			for (int i = containerSlotsPanel.getComponentCount() - 1; i >= finalSizeLambda; i--)
+			for (int i = containerSlotsPanel.getComponentCount() - 1; i >= totalNumberOfSlotsLambda; i--)
 			{
 				containerSlotsPanel.remove(i);
 			}
 
 			// remove the images and tool tips for the inventory slots that are not part of this setup
-			for (int i = finalSizeLambda - 1; i >= setupAdditionalItems.size(); i--)
+			for (int i = totalNumberOfSlotsLambda - 1; i >= setupAdditionalItems.size(); i--)
 			{
 				InventorySetupsItem dummy = new InventorySetupsItem(-1, null, 0, false);
-				this.setContainerSlot(i, additionalFilteredSlots.get(i), setup, dummy);
+				this.setSlotImageAndText(additionalFilteredSlots.get(i), setup, dummy);
 			}
 
 			// add slots back to the layout if we need to
-			for (int i = containerSlotsPanel.getComponentCount(); i < finalSizeLambda; i++)
+			for (int i = containerSlotsPanel.getComponentCount(); i < totalNumberOfSlotsLambda; i++)
 			{
 				containerSlotsPanel.add(additionalFilteredSlots.get(i));
 			}
 
 			// finally set the slots with the items and tool tips
 			int j = 0;
-			for (final Integer key : setupAdditionalItems.keySet())
+			for (final Integer itemId : setupAdditionalItems.keySet())
 			{
-				this.setContainerSlot(j, additionalFilteredSlots.get(j), setup, setupAdditionalItems.get(key));
+				this.setSlotImageAndText(additionalFilteredSlots.get(j), setup, setupAdditionalItems.get(itemId));
 				j++;
 			}
 

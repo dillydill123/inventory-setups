@@ -33,6 +33,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+// Implementation of a cycle button which provides a way to cycle through multiple states in one button (JLabel)
+// When clicked, the cycle button will properly set the icons, tooltips, and execute the provided runnable for any necessary logic
 public class InventorySetupsCycleButton<T> extends JLabel
 {
 	private final InventorySetupsPlugin plugin;
@@ -42,13 +44,6 @@ public class InventorySetupsCycleButton<T> extends JLabel
 	private final ArrayList<String> tooltips;
 	private final Runnable runnable;
 	private int currentIndex;
-
-	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips)
-	{
-		this(plugin, states, icons, hoverIcons, tooltips, () ->
-		{
-		});
-	}
 
 	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips, final Runnable runnable)
 	{

@@ -28,6 +28,7 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsSlotID;
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
 import javax.swing.ImageIcon;
@@ -56,14 +57,20 @@ public class InventorySetupsSlot extends JPanel
 	private int indexInSlot;
 
 	@Getter
-	private JLabel fuzzyLabel;
+	private JLabel fuzzyIndicator;
+
+	@Getter
+	private JLabel stackIndicator;
 
 	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot)
 	{
 		this.slotID = id;
 		this.imageLabel = new JLabel();
 		this.parentSetup = null;
-		this.fuzzyLabel = new JLabel();
+		this.fuzzyIndicator = new JLabel();
+		this.stackIndicator = new JLabel();
+		fuzzyIndicator.setFont(FontManager.getRunescapeSmallFont());
+		stackIndicator.setFont(FontManager.getRunescapeSmallFont());
 		this.indexInSlot = indexInSlot;
 
 		setPreferredSize(new Dimension(46, 42));
@@ -73,8 +80,12 @@ public class InventorySetupsSlot extends JPanel
 		GridBagConstraints fuzzyConstraints = new GridBagConstraints(0, 0, 1, 1, 1, 1,
 																		GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
 																		new Insets(0, 0, 0, 0), 0, 0);
+		GridBagConstraints stackConstraints = new GridBagConstraints(0, 0, 1, 1, 1, 1,
+																		GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE,
+																		new Insets(0, 0, 0, 0), 0, 0);
 		add(imageLabel);
-		add(fuzzyLabel, fuzzyConstraints);
+		add(fuzzyIndicator, fuzzyConstraints);
+		add(stackIndicator, stackConstraints);
 	}
 
 	public void setImageLabel(String toolTip, BufferedImage itemImage, boolean fuzzy)
@@ -100,7 +111,8 @@ public class InventorySetupsSlot extends JPanel
 
 		}
 
-		fuzzyLabel.setText(fuzzy ? "*" : "");
+		fuzzyIndicator.setText(fuzzy ? "*" : "");
+		stackIndicator.setText("!="); // TODO actually check type
 
 		validate();
 		repaint();

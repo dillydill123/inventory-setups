@@ -32,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
+// The base class for panels that each display a setup
 public class InventorySetupsPanel extends JPanel
 {
 

@@ -36,6 +36,7 @@ import inventorysetups.InventorySetupsItem;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -82,9 +83,10 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		add(containerPanel);
 	}
 
+	// adds the menu option to update a slot from the container it presides in
 	protected void addUpdateFromContainerMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setComponentPopupMenuToSlot(slot);
+		setSlotComponentPopupMenu(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 
 		String updateContainerFrom = "";
@@ -111,9 +113,10 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		});
 	}
 
+	// adds the menu option to update a slot from item search
 	protected void addUpdateFromSearchMouseListenerToSlot(final InventorySetupsSlot slot, boolean allowStackable)
 	{
-		setComponentPopupMenuToSlot(slot);
+		setSlotComponentPopupMenu(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
 		popupMenu.add(updateFromSearch);
@@ -123,9 +126,10 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		});
 	}
 
+	// adds the menu option to clear a slot
 	protected void addRemoveMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setComponentPopupMenuToSlot(slot);
+		setSlotComponentPopupMenu(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 		JMenuItem removeSlot = new JMenuItem("Remove Item from Slot");
 		popupMenu.add(removeSlot);
@@ -135,9 +139,10 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		});
 	}
 
+	// adds the menu option to update set a slot to fuzzy
 	protected void addFuzzyMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setComponentPopupMenuToSlot(slot);
+		setSlotComponentPopupMenu(slot);
 		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 		JMenuItem makeSlotFuzzy = new JMenuItem("Toggle Fuzzy");
 		popupMenu.add(makeSlotFuzzy);
@@ -147,7 +152,46 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		});
 	}
 
-	private void setComponentPopupMenuToSlot(final InventorySetupsSlot slot)
+	// adds the menu option to update set a slot to fuzzy
+	protected void addStackMouseListenerToSlot(final InventorySetupsSlot slot)
+	{
+		setSlotComponentPopupMenu(slot);
+		JPopupMenu popupMenu = slot.getComponentPopupMenu();
+
+		JMenuItem stackIndicatorNone = new JMenuItem("Stack Difference None");
+		stackIndicatorNone.addActionListener(e ->
+		{
+			System.out.println("None");
+		});
+
+		JMenuItem stackIndicatorStandard = new JMenuItem("Stack Difference Standard");
+		stackIndicatorStandard.addActionListener(e ->
+		{
+			System.out.println("Standard");
+		});
+
+		JMenuItem stackIndicatorGreaterThan = new JMenuItem("Stack Difference Greater Than");
+		stackIndicatorGreaterThan.addActionListener(e ->
+		{
+			System.out.println("Greater Than");
+		});
+
+		JMenuItem stackIndicatorLessThan = new JMenuItem("Stack Difference Less Than");
+		stackIndicatorLessThan.addActionListener(e ->
+		{
+			System.out.println("Less Than");
+		});
+
+		JMenu stackIndicatorMainMenu = new JMenu("Stack Indicator");
+		stackIndicatorMainMenu.add(stackIndicatorNone);
+		stackIndicatorMainMenu.add(stackIndicatorStandard);
+		stackIndicatorMainMenu.add(stackIndicatorLessThan);
+		stackIndicatorMainMenu.add(stackIndicatorGreaterThan);
+		popupMenu.add(stackIndicatorMainMenu);
+	}
+
+	// creates a new component slot menu if the slot does not have one already
+	private void setSlotComponentPopupMenu(final InventorySetupsSlot slot)
 	{
 		if (slot.getComponentPopupMenu() == null)
 		{
@@ -159,7 +203,8 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		}
 	}
 
-	protected void setContainerSlot(int index, final InventorySetupsSlot containerSlot, final InventorySetup setup, final InventorySetupsItem item)
+	// Sets the image and tooltip text for a slot
+	protected void setSlotImageAndText(final InventorySetupsSlot containerSlot, final InventorySetup setup, final InventorySetupsItem item)
 	{
 		containerSlot.setParentSetup(setup);
 
@@ -181,30 +226,31 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		containerSlot.setImageLabel(toolTip, itemImg, item.isFuzzy());
 	}
 
-	protected void highlightDifferentSlotColor(final InventorySetup setup, InventorySetupsItem savedItem, InventorySetupsItem currItem, final InventorySetupsSlot containerSlot)
+	// highlights the slot based on the configuration and the saved item vs item in the slot
+	protected void highlightSlot(final InventorySetup setup, InventorySetupsItem savedItemFromSetup, InventorySetupsItem currentItemFromContainer, final InventorySetupsSlot containerSlot)
 	{
 		// important note: do not use item names for comparisons
 		// they are all empty to avoid clientThread usage when highlighting
 
 		// first check if stack differences are enabled and compare quantities
-		if (highlightBasedOnStack(setup, savedItem.getQuantity(), currItem.getQuantity()))
+		if (shouldHighlightSlotBasedOnStack(setup, savedItemFromSetup.getQuantity(), currentItemFromContainer.getQuantity()))
 		{
 			containerSlot.setBackground(setup.getHighlightColor());
 			return;
 		}
 
 		// obtain the correct item ids using fuzzy mapping if applicable
-		int currId = currItem.getId();
-		int checkId = savedItem.getId();
+		int currentItemId = currentItemFromContainer.getId();
+		int savedItemId = savedItemFromSetup.getId();
 
-		if (savedItem.isFuzzy())
+		if (savedItemFromSetup.isFuzzy())
 		{
-			currId = ItemVariationMapping.map(currId);
-			checkId = ItemVariationMapping.map(checkId);
+			currentItemId = ItemVariationMapping.map(currentItemId);
+			savedItemId = ItemVariationMapping.map(savedItemId);
 		}
 
 		// if the ids don't match, highlight the container slot
-		if (currId != checkId)
+		if (currentItemId != savedItemId)
 		{
 			containerSlot.setBackground(setup.getHighlightColor());
 			return;
@@ -214,20 +260,20 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 	}
 
-	protected boolean highlightBasedOnStack(final InventorySetup setup, final Integer savedItemQty, final Integer currItemQty)
+	protected boolean shouldHighlightSlotBasedOnStack(final InventorySetup setup, final Integer savedItemQty, final Integer currItemQty)
 	{
-		final int stackRes = Integer.compare(currItemQty, savedItemQty);
+		final int stackCompareResult = Integer.compare(currItemQty, savedItemQty);
 		final InventorySetupsStackCompareID stackCompareType = InventorySetupsStackCompareID.getValues().get(setup.getStackDifference());
-		return stackCompareType == InventorySetupsStackCompareID.Less_Than && stackRes < 0 ||
-				stackCompareType == InventorySetupsStackCompareID.Greater_Than && stackRes > 0 ||
-				stackCompareType == InventorySetupsStackCompareID.Standard && stackRes != 0;
+		return stackCompareType == InventorySetupsStackCompareID.Less_Than && stackCompareResult < 0 ||
+				stackCompareType == InventorySetupsStackCompareID.Greater_Than && stackCompareResult > 0 ||
+				stackCompareType == InventorySetupsStackCompareID.Standard && stackCompareResult != 0;
 	}
 
 	abstract public void setupContainerPanel(final JPanel containerSlotsPanel);
 
-	abstract public void highlightSlotDifferences(final ArrayList<InventorySetupsItem> currContainer, final InventorySetup inventorySetup);
+	abstract public void highlightSlots(final ArrayList<InventorySetupsItem> currContainer, final InventorySetup inventorySetup);
 
-	abstract public void setSlots(final InventorySetup setup);
+	abstract public void updatePanelWithSetupInformation(final InventorySetup setup);
 
 	abstract public void resetSlotColors();
 }

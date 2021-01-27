@@ -66,11 +66,11 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(ArrayList<InventorySetupsItem> currentContainer, InventorySetup inventorySetup)
 	{
 		assert inventorySetup.getRune_pouch() != null : "Rune Pouch container is null.";
 
-		assert currContainer.size() == 3 : "Incorrect size";
+		assert currentContainer.size() == 3 : "Incorrect size";
 
 		isHighlighted = true;
 
@@ -78,34 +78,34 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 
 		for (int i = 0; i < setupRunePouch.size(); i++)
 		{
-			boolean shouldHighlight = false;
+			boolean shouldHighlightSlot = false;
 			boolean foundRune = false;
-			int currContainerIndex = -1;
-			for (int j = 0; j < currContainer.size(); j++)
+			int currentContainerIndex = -1;
+			for (int j = 0; j < currentContainer.size(); j++)
 			{
-				if (setupRunePouch.get(i).getId() == currContainer.get(j).getId())
+				if (setupRunePouch.get(i).getId() == currentContainer.get(j).getId())
 				{
 					foundRune = true;
-					currContainerIndex = j;
+					currentContainerIndex = j;
 					break;
 				}
 			}
 
 			if (foundRune)
 			{
-				int savedQty = setupRunePouch.get(i).getQuantity();
-				int currQty = currContainer.get(currContainerIndex).getQuantity();
-				if (highlightBasedOnStack(inventorySetup, savedQty, currQty))
+				int savedQuantity = setupRunePouch.get(i).getQuantity();
+				int currentQuantity = currentContainer.get(currentContainerIndex).getQuantity();
+				if (shouldHighlightSlotBasedOnStack(inventorySetup, savedQuantity, currentQuantity))
 				{
-					shouldHighlight = true;
+					shouldHighlightSlot = true;
 				}
 			}
 			else
 			{
-				shouldHighlight = true;
+				shouldHighlightSlot = true;
 			}
 
-			if (shouldHighlight)
+			if (shouldHighlightSlot)
 			{
 				runeSlots.get(i).setBackground(inventorySetup.getHighlightColor());
 			}
@@ -118,21 +118,21 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void setSlots(InventorySetup setup)
+	public void updatePanelWithSetupInformation(InventorySetup setup)
 	{
 
 		if (setup.getRune_pouch() != null)
 		{
 			for (int i = 0; i < runeSlots.size(); i++)
 			{
-				super.setContainerSlot(i, runeSlots.get(i), setup, setup.getRune_pouch().get(i));
+				super.setSlotImageAndText(runeSlots.get(i), setup, setup.getRune_pouch().get(i));
 			}
 		}
 		else
 		{
 			for (int i = 0; i < runeSlots.size(); i++)
 			{
-				super.setContainerSlot(i, runeSlots.get(i), setup,
+				super.setSlotImageAndText(runeSlots.get(i), setup,
 										new InventorySetupsItem(-1, "", 0, false));
 			}
 		}

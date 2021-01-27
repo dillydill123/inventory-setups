@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 
+// The panel that contains the inventory slots
 public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 {
 
@@ -70,6 +71,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		{
 			containerSlotsPanel.add(inventorySlots.get(i));
 			super.addFuzzyMouseListenerToSlot(inventorySlots.get(i));
+			super.addStackMouseListenerToSlot(inventorySlots.get(i));
 			super.addUpdateFromContainerMouseListenerToSlot(inventorySlots.get(i));
 			super.addUpdateFromSearchMouseListenerToSlot(inventorySlots.get(i), true);
 			super.addRemoveMouseListenerToSlot(inventorySlots.get(i));
@@ -77,11 +79,11 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void setSlots(final InventorySetup setup)
+	public void updatePanelWithSetupInformation(final InventorySetup setup)
 	{
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
-			super.setContainerSlot(i, inventorySlots.get(i), setup, setup.getInventory().get(i));
+			super.setSlotImageAndText(inventorySlots.get(i), setup, setup.getInventory().get(i));
 		}
 
 		validate();
@@ -89,7 +91,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlotDifferences(final ArrayList<InventorySetupsItem> currInventory, final InventorySetup inventorySetup)
+	public void highlightSlots(final ArrayList<InventorySetupsItem> currInventory, final InventorySetup inventorySetup)
 	{
 		final ArrayList<InventorySetupsItem> inventoryToCheck = inventorySetup.getInventory();
 
@@ -111,7 +113,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			{
 				currInvHasRunePouch = true;
 			}
-			super.highlightDifferentSlotColor(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
+			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
 
 		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
@@ -275,7 +277,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			currInvMap.remove(itemId);
 		}
 
-		if (this.highlightBasedOnStack(inventorySetup, item.getQuantity(), currInventoryItemQty))
+		if (this.shouldHighlightSlotBasedOnStack(inventorySetup, item.getQuantity(), currInventoryItemQty))
 		{
 			slot.setBackground(inventorySetup.getHighlightColor());
 		}
@@ -294,7 +296,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			if (currInvHasRunePouch)
 			{
 				ArrayList<InventorySetupsItem> runePouchToCheck = plugin.getRunePouchData();
-				rpPanel.highlightSlotDifferences(runePouchToCheck, inventorySetup);
+				rpPanel.highlightSlots(runePouchToCheck, inventorySetup);
 			}
 			else // if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
 			{
