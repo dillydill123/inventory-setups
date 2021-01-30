@@ -104,8 +104,7 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 			// remove the images and tool tips for the inventory slots that are not part of this setup
 			for (int i = totalNumberOfSlotsLambda - 1; i >= setupAdditionalItems.size(); i--)
 			{
-				InventorySetupsItem dummy = new InventorySetupsItem(-1, null, 0, false);
-				this.setSlotImageAndText(additionalFilteredSlots.get(i), setup, dummy);
+				this.setSlotImageAndText(additionalFilteredSlots.get(i), setup, InventorySetupsItem.getDummyItem());
 			}
 
 			// add slots back to the layout if we need to

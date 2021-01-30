@@ -84,6 +84,7 @@ public interface InventorySetupsConfig extends Config
 			name = "Default Highlight Stack Difference",
 			description = "Configures the default setting for highlighting stack differences in new setups",
 			position = 1,
+			hidden = true,
 			section = defaultSection
 	)
 	default InventorySetupsStackCompareID highlightStackDifference()
@@ -151,6 +152,18 @@ public interface InventorySetupsConfig extends Config
 	default boolean fuzzy()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+			keyName = "stackCompare",
+			name = "Default Stack Compare",
+			description = "Configures the default setting for stack compare in new setups",
+			position = 7,
+			section = defaultSection
+	)
+	default InventorySetupsStackCompareID stackCompareType()
+	{
+		return InventorySetupsStackCompareID.None;
 	}
 
 	@ConfigItem(

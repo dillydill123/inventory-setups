@@ -26,6 +26,7 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsSlotID;
+import inventorysetups.InventorySetupsStackCompareID;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.client.ui.FontManager;
@@ -80,6 +81,7 @@ public class InventorySetupsSlot extends JPanel
 		GridBagConstraints fuzzyConstraints = new GridBagConstraints(0, 0, 1, 1, 1, 1,
 																		GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
 																		new Insets(0, 0, 0, 0), 0, 0);
+		// Set constraints for the bottom right
 		GridBagConstraints stackConstraints = new GridBagConstraints(0, 0, 1, 1, 1, 1,
 																		GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE,
 																		new Insets(0, 0, 0, 0), 0, 0);
@@ -88,7 +90,7 @@ public class InventorySetupsSlot extends JPanel
 		add(stackIndicator, stackConstraints);
 	}
 
-	public void setImageLabel(String toolTip, BufferedImage itemImage, boolean fuzzy)
+	public void setImageLabel(String toolTip, BufferedImage itemImage, boolean isFuzzy, InventorySetupsStackCompareID stackCompare)
 	{
 		if (itemImage == null || toolTip == null)
 		{
@@ -99,7 +101,7 @@ public class InventorySetupsSlot extends JPanel
 		else
 		{
 			imageLabel.setToolTipText(toolTip);
-			if (itemImage instanceof AsyncBufferedImage)
+			if (itemImage instanceof AsyncBufferedImage) // if the slot is a spellbook, use these
 			{
 				AsyncBufferedImage itemImageAsync = (AsyncBufferedImage)itemImage;
 				itemImageAsync.addTo(imageLabel);
@@ -111,11 +113,16 @@ public class InventorySetupsSlot extends JPanel
 
 		}
 
-		fuzzyIndicator.setText(fuzzy ? "*" : "");
-		stackIndicator.setText("!="); // TODO actually check type
+		fuzzyIndicator.setText(isFuzzy ? "*" : "");
+		stackIndicator.setText(InventorySetupsStackCompareID.getStringFromValue(stackCompare));
 
 		validate();
 		repaint();
+	}
+
+	public void setImageLabel(String toolTip, BufferedImage itemImage)
+	{
+		setImageLabel(toolTip, itemImage, false, InventorySetupsStackCompareID.None);
 	}
 
 }

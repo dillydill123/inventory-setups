@@ -28,6 +28,7 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsStackCompareID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 
@@ -60,6 +61,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 		{
 			containerSlotsPanel.add(slot);
 			super.addUpdateFromContainerMouseListenerToSlot(slot);
+			super.addStackMouseListenerToSlot(slot);
 			super.addUpdateFromSearchMouseListenerToSlot(slot, true);
 			super.addRemoveMouseListenerToSlot(slot);
 		}
@@ -132,8 +134,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 		{
 			for (int i = 0; i < runeSlots.size(); i++)
 			{
-				super.setSlotImageAndText(runeSlots.get(i), setup,
-										new InventorySetupsItem(-1, "", 0, false));
+				super.setSlotImageAndText(runeSlots.get(i), setup, InventorySetupsItem.getDummyItem());
 			}
 		}
 

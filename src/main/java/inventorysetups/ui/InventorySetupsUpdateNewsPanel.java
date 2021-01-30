@@ -60,13 +60,13 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 			panel.rebuild(true);
 		});
 		final JLabel clickButtonToLeave = new JLabel("Click here to hide this window");
-		final JLabel clickButtontoLeave2 = new JLabel("until the next update");
+		final JLabel clickButtonToLeave2 = new JLabel("until the next update");
 		clickButtonToLeave.setFont(FontManager.getRunescapeSmallFont());
-		clickButtontoLeave2.setFont(FontManager.getRunescapeSmallFont());
+		clickButtonToLeave2.setFont(FontManager.getRunescapeSmallFont());
 		clickButtonToLeave.setHorizontalAlignment(JLabel.CENTER);
-		clickButtontoLeave2.setHorizontalAlignment(JLabel.CENTER);
+		clickButtonToLeave2.setHorizontalAlignment(JLabel.CENTER);
 		closePanel.add(clickButtonToLeave, BorderLayout.NORTH);
-		closePanel.add(clickButtontoLeave2, BorderLayout.CENTER);
+		closePanel.add(clickButtonToLeave2, BorderLayout.CENTER);
 		closePanel.add(returnToSetups, BorderLayout.SOUTH);
 
 		final JPanel contentPanel = new JPanel();

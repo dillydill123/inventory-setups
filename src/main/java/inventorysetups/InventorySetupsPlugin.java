@@ -723,7 +723,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			final String name = itemManager.getItemComposition(processedItemId).getName();
-			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy());
+			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), InventorySetupsStackCompareID.None);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
 			updateConfig();
@@ -763,7 +763,7 @@ public class InventorySetupsPlugin extends Plugin
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
-			runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false));
+			runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false, InventorySetupsStackCompareID.None));
 		}
 
 		return runePouchData;
@@ -1016,7 +1016,8 @@ public class InventorySetupsPlugin extends Plugin
 
 									final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
-									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, container.get(slot.getIndexInSlot()).isFuzzy());
+									final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
+									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 
 									// update the rune pouch data
 									if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
@@ -1048,7 +1049,8 @@ public class InventorySetupsPlugin extends Plugin
 						{
 							final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 							final String itemName = itemManager.getItemComposition(finalId).getName();
-							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, container.get(slot.getIndexInSlot()).isFuzzy());
+							final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
+							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 							// update the rune pouch data
 							if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
 							{
@@ -1092,7 +1094,8 @@ public class InventorySetupsPlugin extends Plugin
 			final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 
 			// update the rune pouch data
-			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, container.get(slot.getIndexInSlot()).isFuzzy());
+			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
+			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
@@ -1133,6 +1136,20 @@ public class InventorySetupsPlugin extends Plugin
 			final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 			container.get(slot.getIndexInSlot()).toggleIsFuzzy();
 		}
+
+		updateConfig();
+		panel.refreshCurrentSetup();
+	}
+
+	public void setStackCompareOnSlot(final InventorySetupsSlot slot, final InventorySetupsStackCompareID newStackCompare)
+	{
+		if (panel.getCurrentSelectedSetup() == null)
+		{
+			return;
+		}
+
+		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+		container.get(slot.getIndexInSlot()).setStackCompare(newStackCompare);
 
 		updateConfig();
 		panel.refreshCurrentSetup();
@@ -1320,7 +1337,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
-				newContainer.add(new InventorySetupsItem(-1, "", 0, config.fuzzy()));
+				newContainer.add(new InventorySetupsItem(-1, "", 0, config.fuzzy(), config.stackCompareType()));
 			}
 			else
 			{
@@ -1332,7 +1349,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					itemName = itemManager.getItemComposition(item.getId()).getName();
 				}
-				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), config.fuzzy()));
+				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), config.fuzzy(), config.stackCompareType()));
 			}
 		}
 

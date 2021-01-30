@@ -65,4 +65,22 @@ public enum InventorySetupsStackCompareID
 	{
 		return VALUES;
 	}
+
+	public static String getStringFromValue(final InventorySetupsStackCompareID stackCompare)
+	{
+		switch (stackCompare)
+		{
+			case None:
+				return "";
+			case Standard:
+				return "!=";
+			case Less_Than:
+				return "<";
+			case Greater_Than:
+				return ">";
+		}
+
+		return "";
+	}
+
 }

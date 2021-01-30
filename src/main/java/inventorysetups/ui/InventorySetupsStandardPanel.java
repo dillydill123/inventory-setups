@@ -52,10 +52,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-//
+// Standard panel for inventory setups, which contains all the configuration buttons
 public class InventorySetupsStandardPanel extends InventorySetupsPanel
 {
 
@@ -85,15 +83,6 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private static final ImageIcon NO_UNORDERED_HIGHLIGHT_ICON;
 	private static final ImageIcon NO_UNORDERED_HIGHLIGHT_HOVER_ICON;
 
-	private static final ImageIcon STACK_DIFFERENCE_ICON;
-	private static final ImageIcon STACK_DIFFERENCE_HOVER_ICON;
-	private static final ImageIcon NO_STACK_DIFFERENCE_ICON;
-	private static final ImageIcon NO_STACK_DIFFERENCE_HOVER_ICON;
-	private static final ImageIcon STACK_DIFFERENCE_LESS_THAN_ICON;
-	private static final ImageIcon STACK_DIFFERENCE_LESS_THAN_HOVER_ICON;
-	private static final ImageIcon STACK_DIFFERENCE_GREATER_THAN_ICON;
-	private static final ImageIcon STACK_DIFFERENCE_GREATER_THAN_HOVER_ICON;
-
 	private static final ImageIcon VIEW_SETUP_ICON;
 	private static final ImageIcon VIEW_SETUP_HOVER_ICON;
 
@@ -105,7 +94,6 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 
 	private final JLabel bankFilterIndicator = new JLabel();
 	private final JLabel highlightColorIndicator = new JLabel();
-	private final InventorySetupsCycleButton<InventorySetupsStackCompareID> stackDifferenceIndicatorCycle;
 	private final JLabel unorderedHighlightIndicator = new JLabel();
 	private final JLabel highlightIndicator = new JLabel();
 	private final JLabel viewSetupLabel = new JLabel();
@@ -126,24 +114,6 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 
 		NO_BANK_FILTER_ICON = new ImageIcon(bankFilterHover);
 		NO_BANK_FILTER_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(bankFilterHover, -100));
-
-		final BufferedImage stackImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/stack_icon.png");
-		final BufferedImage stackHover = ImageUtil.luminanceOffset(stackImg, -150);
-		STACK_DIFFERENCE_ICON = new ImageIcon(stackImg);
-		STACK_DIFFERENCE_HOVER_ICON = new ImageIcon(stackHover);
-
-		NO_STACK_DIFFERENCE_ICON = new ImageIcon(stackHover);
-		NO_STACK_DIFFERENCE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(stackHover, -100));
-
-		final BufferedImage stackLessThanImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/stack_icon_less_than.png");
-		final BufferedImage stackLessThanHover = ImageUtil.luminanceOffset(stackLessThanImg, -150);
-		STACK_DIFFERENCE_LESS_THAN_ICON = new ImageIcon(stackLessThanImg);
-		STACK_DIFFERENCE_LESS_THAN_HOVER_ICON = new ImageIcon(stackLessThanHover);
-
-		final BufferedImage stackGreaterThanImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/stack_icon_greater_than.png");
-		final BufferedImage stackGreaterThanHover = ImageUtil.luminanceOffset(stackGreaterThanImg, -150);
-		STACK_DIFFERENCE_GREATER_THAN_ICON = new ImageIcon(stackGreaterThanImg);
-		STACK_DIFFERENCE_GREATER_THAN_HOVER_ICON = new ImageIcon(stackGreaterThanHover);
 
 		final BufferedImage unorderedHighlightImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/unordered_highlight_icon.png");
 		final BufferedImage unorderedHighlightHover = ImageUtil.luminanceOffset(unorderedHighlightImg, -150);
@@ -426,10 +396,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, H_GAP_BTN, 0));
 		leftActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		this.stackDifferenceIndicatorCycle = createStackIndicatorButton();
-
 		leftActions.add(bankFilterIndicator);
-		leftActions.add(stackDifferenceIndicatorCycle);
 		leftActions.add(unorderedHighlightIndicator);
 		leftActions.add(highlightIndicator);
 		leftActions.add(highlightColorIndicator);
@@ -526,23 +493,8 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		add(bottomContainer, BorderLayout.CENTER);
 
 		updateHighlightColorLabel();
-		stackDifferenceIndicatorCycle.setCurrentState(InventorySetupsStackCompareID.getValues().get(invSetup.getStackDifference()));
 		updateToggleHighlightLabel();
 
-	}
-
-	private InventorySetupsCycleButton<InventorySetupsStackCompareID> createStackIndicatorButton()
-	{
-		final ArrayList<InventorySetupsStackCompareID> stackDifferenceStates = InventorySetupsStackCompareID.getValues();
-		final ArrayList<ImageIcon> stackDifferenceIcons = new ArrayList<>(Arrays.asList(NO_STACK_DIFFERENCE_ICON, STACK_DIFFERENCE_ICON, STACK_DIFFERENCE_LESS_THAN_ICON, STACK_DIFFERENCE_GREATER_THAN_ICON));
-		final ArrayList<ImageIcon> stackDifferenceHoverIcons = new ArrayList<>(Arrays.asList(NO_STACK_DIFFERENCE_HOVER_ICON, STACK_DIFFERENCE_HOVER_ICON, STACK_DIFFERENCE_LESS_THAN_HOVER_ICON, STACK_DIFFERENCE_GREATER_THAN_HOVER_ICON));
-		final ArrayList<String> stackDifferenceToolTips = new ArrayList<>(Arrays.asList("No Stack Difference", "Standard Stack Difference", "Stack Difference Less Than", "Stack Difference Greater Than"));
-		final Runnable updateStackInInventorySetupFunc = () ->
-		{
-			// Example runnable
-			inventorySetup.setStackDifference(stackDifferenceIndicatorCycle.getCurrentState().ordinal());
-		};
-		return new InventorySetupsCycleButton<>(plugin, stackDifferenceStates, stackDifferenceIcons, stackDifferenceHoverIcons, stackDifferenceToolTips, updateStackInInventorySetupFunc);
 	}
 
 	private void updateNameActions(boolean saveAndCancel)

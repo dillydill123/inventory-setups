@@ -161,25 +161,25 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		JMenuItem stackIndicatorNone = new JMenuItem("Stack Difference None");
 		stackIndicatorNone.addActionListener(e ->
 		{
-			System.out.println("None");
+			plugin.setStackCompareOnSlot(slot, InventorySetupsStackCompareID.None);
 		});
 
 		JMenuItem stackIndicatorStandard = new JMenuItem("Stack Difference Standard");
 		stackIndicatorStandard.addActionListener(e ->
 		{
-			System.out.println("Standard");
+			plugin.setStackCompareOnSlot(slot, InventorySetupsStackCompareID.Standard);
 		});
 
 		JMenuItem stackIndicatorGreaterThan = new JMenuItem("Stack Difference Greater Than");
 		stackIndicatorGreaterThan.addActionListener(e ->
 		{
-			System.out.println("Greater Than");
+			plugin.setStackCompareOnSlot(slot, InventorySetupsStackCompareID.Greater_Than);
 		});
 
 		JMenuItem stackIndicatorLessThan = new JMenuItem("Stack Difference Less Than");
 		stackIndicatorLessThan.addActionListener(e ->
 		{
-			System.out.println("Less Than");
+			plugin.setStackCompareOnSlot(slot, InventorySetupsStackCompareID.Less_Than);
 		});
 
 		JMenu stackIndicatorMainMenu = new JMenu("Stack Indicator");
@@ -210,7 +210,7 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 
 		if (item.getId() == -1)
 		{
-			containerSlot.setImageLabel(null, null, item.isFuzzy());
+			containerSlot.setImageLabel(null, null, item.isFuzzy(), item.getStackCompare());
 			return;
 		}
 
@@ -223,7 +223,7 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		{
 			toolTip += " (" + quantity + ")";
 		}
-		containerSlot.setImageLabel(toolTip, itemImg, item.isFuzzy());
+		containerSlot.setImageLabel(toolTip, itemImg, item.isFuzzy(), item.getStackCompare());
 	}
 
 	// highlights the slot based on the configuration and the saved item vs item in the slot
