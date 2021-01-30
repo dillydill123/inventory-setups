@@ -172,4 +172,9 @@ public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 		spellbookSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 	}
 
+	public boolean isStackCompareForSlotAllowed(final int id)
+	{
+		return false;
+	}
+
 }

@@ -523,8 +523,6 @@ public class InventorySetupsPlugin extends Plugin
 
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, new HashMap<>(), name, "",
 													config.highlightColor(),
-													config.highlightStackDifference().ordinal(),
-													config.highlightVariationDifference(),
 													config.highlightDifference(),
 													config.bankFilter(),
 													config.highlightUnorderedDifference(),
@@ -723,7 +721,8 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			final String name = itemManager.getItemComposition(processedItemId).getName();
-			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), InventorySetupsStackCompareID.None);
+			InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.ADDITIONAL_ITEMS, 0) ? config.stackCompareType() : InventorySetupsStackCompareID.None;
+			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), stackCompareType);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
 			updateConfig();
@@ -763,7 +762,8 @@ public class InventorySetupsPlugin extends Plugin
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
-			runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false, InventorySetupsStackCompareID.None));
+			InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.RUNE_POUCH, i) ? config.stackCompareType() : InventorySetupsStackCompareID.None;
+			runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false, stackCompareType));
 		}
 
 		return runePouchData;
@@ -946,6 +946,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
 		final boolean isFuzzy = getContainerFromSlot(slot).get(slot.getIndexInSlot()).isFuzzy();
+		final InventorySetupsStackCompareID stackCompareType = getContainerFromSlot(slot).get(slot.getIndexInSlot()).getStackCompare();
 
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
@@ -953,6 +954,7 @@ public class InventorySetupsPlugin extends Plugin
 			final ArrayList<InventorySetupsItem> playerContainer = getNormalizedContainer(slot.getSlotID());
 			final InventorySetupsItem newItem = playerContainer.get(slot.getIndexInSlot());
 			newItem.setFuzzy(isFuzzy);
+			newItem.setStackCompare(stackCompareType);
 
 			// update the rune pouch data
 			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
@@ -1333,11 +1335,14 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (int i = 0; i < size; i++)
 		{
+
+			final InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.fromInventoryID(id), i) ?
+																	config.stackCompareType() : InventorySetupsStackCompareID.None;
 			if (items == null || i >= items.length)
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
-				newContainer.add(new InventorySetupsItem(-1, "", 0, config.fuzzy(), config.stackCompareType()));
+				newContainer.add(new InventorySetupsItem(-1, "", 0, config.fuzzy(), stackCompareType));
 			}
 			else
 			{
@@ -1349,7 +1354,7 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					itemName = itemManager.getItemComposition(item.getId()).getName();
 				}
-				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), config.fuzzy(), config.stackCompareType()));
+				newContainer.add(new InventorySetupsItem(item.getId(), itemName, item.getQuantity(), config.fuzzy(), stackCompareType));
 			}
 		}
 
@@ -1468,8 +1473,8 @@ public class InventorySetupsPlugin extends Plugin
 				}.getType();
 
 				// serialize the internal data structure from the json in the configuration
-				final String json = fixOldJSONData(storedSetups);
-				inventorySetups = gson.fromJson(json, type);
+				//final String json = fixOldJSONData(storedSetups);
+				inventorySetups = gson.fromJson(storedSetups, type);
 				clientThread.invokeLater(() ->
 				{
 					for (final InventorySetup setup : inventorySetups)

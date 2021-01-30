@@ -183,4 +183,9 @@ public class InventorySetupsNotesPanel extends InventorySetupsContainerPanel
 
 		return "getNotes() Failed";
 	}
+
+	public boolean isStackCompareForSlotAllowed(final int id)
+	{
+		return false;
+	}
 }

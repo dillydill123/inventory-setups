@@ -61,14 +61,6 @@ public class InventorySetup
 
 	@Getter
 	@Setter
-	private int stackDifference;
-
-	@Getter
-	@Setter
-	private boolean variationDifference;
-
-	@Getter
-	@Setter
 	private boolean highlightDifference;
 
 	@Getter

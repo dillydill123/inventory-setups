@@ -132,4 +132,9 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 	{
 	}
 
+	public boolean isStackCompareForSlotAllowed(final int id)
+	{
+		return false;
+	}
+
 }

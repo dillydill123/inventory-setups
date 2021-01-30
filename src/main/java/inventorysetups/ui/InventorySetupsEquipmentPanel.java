@@ -56,11 +56,20 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		{
 			final InventorySetupsSlot setupSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, slot.getSlotIdx());
 			super.addFuzzyMouseListenerToSlot(setupSlot);
+
+			// add stackable configurations for ammo and weapon slots
+			if (slot == EquipmentInventorySlot.AMMO || slot == EquipmentInventorySlot.WEAPON)
+			{
+				super.addStackMouseListenerToSlot(setupSlot);
+			}
+
 			super.addUpdateFromContainerMouseListenerToSlot(setupSlot);
 			super.addUpdateFromSearchMouseListenerToSlot(setupSlot, true);
 			super.addRemoveMouseListenerToSlot(setupSlot);
 			equipmentSlots.put(slot, setupSlot);
 		}
+
+
 
 		final GridLayout gridLayout = new GridLayout(5, 3, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
@@ -128,5 +137,10 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		}
 
 		isHighlighted = false;
+	}
+
+	public boolean isStackCompareForSlotAllowed(final int id)
+	{
+		return id == EquipmentInventorySlot.AMMO.getSlotIdx() || id == EquipmentInventorySlot.WEAPON.getSlotIdx();
 	}
 }

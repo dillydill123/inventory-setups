@@ -85,9 +85,7 @@ public class InventorySetupsUnitTest
 		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1B"), 1000000000);
 		assertEquals(inventorySetupsPlugin.parseTextInputAmount("10b"), 2147483647);
 		assertEquals(inventorySetupsPlugin.parseTextInputAmount("10000M"), 2147483647);
-
-		// TODO failing
-		// assertEquals(inventorySetupsPlugin.parseTextInputAmount("102391273213291"), 2147483647);
+		assertEquals(inventorySetupsPlugin.parseTextInputAmount("102391273213291"), 2147483647);
 	}
 
 	@Test
@@ -98,8 +96,7 @@ public class InventorySetupsUnitTest
 		ArrayList<InventorySetupsItem> runePouch = null;
 		HashMap<Integer, InventorySetupsItem> addItems = new HashMap<>();
 		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, addItems, "Test",
-												"", inventorySetupsConfig.highlightColor(),
-												InventorySetupsStackCompareID.None.ordinal(), false, false,
+												"", inventorySetupsConfig.highlightColor(), false,
 										false,false, 0);
 
 		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL));

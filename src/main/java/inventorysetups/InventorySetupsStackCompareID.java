@@ -68,6 +68,11 @@ public enum InventorySetupsStackCompareID
 
 	public static String getStringFromValue(final InventorySetupsStackCompareID stackCompare)
 	{
+		if (stackCompare == null)
+		{
+			return "";
+		}
+
 		switch (stackCompare)
 		{
 			case None:

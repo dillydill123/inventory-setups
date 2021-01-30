@@ -97,7 +97,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 			{
 				int savedQuantity = setupRunePouch.get(i).getQuantity();
 				int currentQuantity = currentContainer.get(currentContainerIndex).getQuantity();
-				if (shouldHighlightSlotBasedOnStack(inventorySetup, savedQuantity, currentQuantity))
+				if (shouldHighlightSlotBasedOnStack(setupRunePouch.get(i).getStackCompare(), savedQuantity, currentQuantity))
 				{
 					shouldHighlightSlot = true;
 				}
@@ -164,5 +164,10 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 			slot.setBackground(setup.getHighlightColor());
 		}
 		isHighlighted = true;
+	}
+
+	public boolean isStackCompareForSlotAllowed(final int id)
+	{
+		return true;
 	}
 }

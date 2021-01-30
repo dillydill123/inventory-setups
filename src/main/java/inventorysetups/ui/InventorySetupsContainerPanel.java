@@ -28,6 +28,7 @@ import inventorysetups.InventorySetupsStackCompareID;
 import inventorysetups.InventorySetupsPlugin;
 import lombok.AccessLevel;
 import lombok.Getter;
+import net.runelite.api.InventoryID;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
@@ -233,7 +234,7 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		// they are all empty to avoid clientThread usage when highlighting
 
 		// first check if stack differences are enabled and compare quantities
-		if (shouldHighlightSlotBasedOnStack(setup, savedItemFromSetup.getQuantity(), currentItemFromContainer.getQuantity()))
+		if (shouldHighlightSlotBasedOnStack(savedItemFromSetup.getStackCompare(), savedItemFromSetup.getQuantity(), currentItemFromContainer.getQuantity()))
 		{
 			containerSlot.setBackground(setup.getHighlightColor());
 			return;
@@ -260,14 +261,15 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 	}
 
-	protected boolean shouldHighlightSlotBasedOnStack(final InventorySetup setup, final Integer savedItemQty, final Integer currItemQty)
+	protected boolean shouldHighlightSlotBasedOnStack(final InventorySetupsStackCompareID stackCompareType, final Integer savedItemQty, final Integer currItemQty)
 	{
 		final int stackCompareResult = Integer.compare(currItemQty, savedItemQty);
-		final InventorySetupsStackCompareID stackCompareType = InventorySetupsStackCompareID.getValues().get(setup.getStackDifference());
 		return stackCompareType == InventorySetupsStackCompareID.Less_Than && stackCompareResult < 0 ||
 				stackCompareType == InventorySetupsStackCompareID.Greater_Than && stackCompareResult > 0 ||
 				stackCompareType == InventorySetupsStackCompareID.Standard && stackCompareResult != 0;
 	}
+
+	abstract public boolean isStackCompareForSlotAllowed(final int id);
 
 	abstract public void setupContainerPanel(final JPanel containerSlotsPanel);
 

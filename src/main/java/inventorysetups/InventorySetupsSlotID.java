@@ -24,6 +24,8 @@
  */
 package inventorysetups;
 
+import net.runelite.api.InventoryID;
+
 public enum InventorySetupsSlotID
 {
 
@@ -47,6 +49,24 @@ public enum InventorySetupsSlotID
 	public int getId()
 	{
 		return id;
+	}
+
+	public static InventorySetupsSlotID fromInventoryID(final InventoryID inventoryId)
+	{
+		if (inventoryId == null)
+		{
+			return null;
+		}
+
+		switch (inventoryId)
+		{
+			case INVENTORY:
+				return INVENTORY;
+			case EQUIPMENT:
+				return EQUIPMENT;
+		}
+
+		return null;
 	}
 
 }

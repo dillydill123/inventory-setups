@@ -27,8 +27,10 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
 import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsStackCompareID;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
@@ -64,7 +66,7 @@ import java.util.List;
 
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 
-// The main panel of the plugin
+// The main panel of the plugin that contains all viewing components
 public class InventorySetupsPluginPanel extends PluginPanel
 {
 
@@ -89,12 +91,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private static String MAIN_TITLE;
 
-	private final JPanel noSetupsPanel;
-	private final JPanel updateNewsPanel;
-	private final JPanel invEqPanel;
-	private final JPanel overviewPanel;
-	private JPanel northAnchoredPanel;
-	private final JScrollPane contentWrapperPane;
+	private final JPanel noSetupsPanel; // Panel that is displayed when there are no setups
+	private final JPanel updateNewsPanel; // Panel that is displayed for plugin update/news
+	private final JPanel setupDisplayPanel; // Panel that is displayed when a setup is selected
+	private final JPanel overviewPanel; // Panel that is displayed during overview, contains all setups
+	private JPanel northAnchoredPanel; // Anchored panel in the north that won't scroll
+	private final JScrollPane contentWrapperPane; // Panel for wrapping any content so it can scroll
 
 	private final JPanel overviewTopRightButtonsPanel;
 	private final JPanel setupTopRightButtonsPanel;
@@ -110,11 +112,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private final IconTextField searchBar;
 
-	private final InventorySetupsInventoryPanel invPanel;
-	private final InventorySetupsEquipmentPanel eqpPanel;
-	private final InventorySetupsRunePouchPanel rpPanel;
-	private final InventorySetupsSpellbookPanel sbPanel;
-	private final InventorySetupsAdditionalItemsPanel aiPanel;
+	private final InventorySetupsInventoryPanel inventoryPanel;
+	private final InventorySetupsEquipmentPanel equipmentPanel;
+	private final InventorySetupsRunePouchPanel runePouchPanel;
+	private final InventorySetupsSpellbookPanel spellbookPanel;
+	private final InventorySetupsAdditionalItemsPanel additionalFilteredItemsPanel;
 	private final InventorySetupsNotesPanel notesPanel;
 
 	@Getter
@@ -170,15 +172,15 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		super(false);
 		this.currentSelectedSetup = null;
 		this.plugin = plugin;
-		this.rpPanel = new InventorySetupsRunePouchPanel(itemManager, plugin);
-		this.invPanel = new InventorySetupsInventoryPanel(itemManager, plugin, rpPanel);
-		this.eqpPanel = new InventorySetupsEquipmentPanel(itemManager, plugin);
-		this.sbPanel = new InventorySetupsSpellbookPanel(itemManager, plugin);
-		this.aiPanel = new InventorySetupsAdditionalItemsPanel(itemManager, plugin);
+		this.runePouchPanel = new InventorySetupsRunePouchPanel(itemManager, plugin);
+		this.inventoryPanel = new InventorySetupsInventoryPanel(itemManager, plugin, runePouchPanel);
+		this.equipmentPanel = new InventorySetupsEquipmentPanel(itemManager, plugin);
+		this.spellbookPanel = new InventorySetupsSpellbookPanel(itemManager, plugin);
+		this.additionalFilteredItemsPanel = new InventorySetupsAdditionalItemsPanel(itemManager, plugin);
 		this.notesPanel = new InventorySetupsNotesPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.updateNewsPanel = new InventorySetupsUpdateNewsPanel(plugin, this);
-		this.invEqPanel = new JPanel();
+		this.setupDisplayPanel = new JPanel();
 		this.overviewPanel = new JPanel();
 		this.overviewPanelScrollPosition = 0;
 
@@ -443,19 +445,19 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		northAnchoredPanel.add(searchBar);
 
 		// the panel that holds the inventory and equipment panels
-		final BoxLayout invEqLayout = new BoxLayout(invEqPanel, BoxLayout.Y_AXIS);
-		invEqPanel.setLayout(invEqLayout);
-		invEqPanel.add(invPanel);
-		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-		invEqPanel.add(rpPanel);
-		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-		invEqPanel.add(eqpPanel);
-		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-		invEqPanel.add(sbPanel);
-		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-		invEqPanel.add(aiPanel);
-		invEqPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-		invEqPanel.add(notesPanel);
+		final BoxLayout invEqLayout = new BoxLayout(setupDisplayPanel, BoxLayout.Y_AXIS);
+		setupDisplayPanel.setLayout(invEqLayout);
+		setupDisplayPanel.add(inventoryPanel);
+		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		setupDisplayPanel.add(runePouchPanel);
+		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		setupDisplayPanel.add(equipmentPanel);
+		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		setupDisplayPanel.add(spellbookPanel);
+		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		setupDisplayPanel.add(additionalFilteredItemsPanel);
+		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		setupDisplayPanel.add(notesPanel);
 
 		// setup the error panel. It's wrapped around a normal panel
 		// so it doesn't stretch to fill the parent panel
@@ -467,7 +469,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		final JPanel contentPanel = new JPanel();
 		final BoxLayout contentLayout = new BoxLayout(contentPanel, BoxLayout.Y_AXIS);
 		contentPanel.setLayout(contentLayout);
-		contentPanel.add(invEqPanel);
+		contentPanel.add(setupDisplayPanel);
 		contentPanel.add(noSetupsPanel);
 		contentPanel.add(updateNewsPanel);
 		contentPanel.add(overviewPanel);
@@ -485,7 +487,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		add(this.contentWrapperPane, BorderLayout.CENTER);
 
 		// make sure the invEq panel isn't visible upon startup
-		invEqPanel.setVisible(false);
+		setupDisplayPanel.setVisible(false);
 		helpButton.setVisible(!plugin.getConfig().hideButton());
 		updateCompactViewMarker();
 		updateSortingMarker();
@@ -530,17 +532,17 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		overviewPanelScrollPosition = contentWrapperPane.getVerticalScrollBar().getValue();
 		currentSelectedSetup = inventorySetup;
-		invPanel.updatePanelWithSetupInformation(inventorySetup);
-		rpPanel.updatePanelWithSetupInformation(inventorySetup);
-		eqpPanel.updatePanelWithSetupInformation(inventorySetup);
-		sbPanel.updatePanelWithSetupInformation(inventorySetup);
-		aiPanel.updatePanelWithSetupInformation(inventorySetup);
+		inventoryPanel.updatePanelWithSetupInformation(inventorySetup);
+		runePouchPanel.updatePanelWithSetupInformation(inventorySetup);
+		equipmentPanel.updatePanelWithSetupInformation(inventorySetup);
+		spellbookPanel.updatePanelWithSetupInformation(inventorySetup);
+		additionalFilteredItemsPanel.updatePanelWithSetupInformation(inventorySetup);
 		notesPanel.updatePanelWithSetupInformation(inventorySetup);
 
 		overviewTopRightButtonsPanel.setVisible(false);
 		setupTopRightButtonsPanel.setVisible(true);
 
-		invEqPanel.setVisible(true);
+		setupDisplayPanel.setVisible(true);
 		noSetupsPanel.setVisible(false);
 		overviewPanel.setVisible(false);
 
@@ -549,7 +551,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		searchBar.setVisible(false);
 
 		// only show the rune pouch if the setup has a rune pouch
-		rpPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
+		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 
 		highlightInventory();
 		highlightEquipment();
@@ -572,7 +574,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	public void highlightInventory()
 	{
 		// if the panel itself isn't visible, don't waste time doing any highlighting logic
-		if (!invEqPanel.isVisible())
+		if (!setupDisplayPanel.isVisible())
 		{
 			return;
 		}
@@ -581,18 +583,18 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		// if any of the two, reset the slots so they aren't highlighted
 		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
 		{
-			invPanel.resetSlotColors();
+			inventoryPanel.resetSlotColors();
 			return;
 		}
 
 		final ArrayList<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
-		invPanel.highlightSlots(inv, currentSelectedSetup);
+		inventoryPanel.highlightSlots(inv, currentSelectedSetup);
 	}
 
 	public void highlightEquipment()
 	{
 		// if the panel itself isn't visible, don't waste time doing any highlighting logic
-		if (!invEqPanel.isVisible())
+		if (!setupDisplayPanel.isVisible())
 		{
 			return;
 		}
@@ -601,30 +603,30 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		// if any of the two, reset the slots so they aren't highlighted
 		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
 		{
-			eqpPanel.resetSlotColors();
+			equipmentPanel.resetSlotColors();
 			return;
 		}
 
 		final ArrayList<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-		eqpPanel.highlightSlots(eqp, currentSelectedSetup);
+		equipmentPanel.highlightSlots(eqp, currentSelectedSetup);
 	}
 
 	public void highlightSpellbook()
 	{
 		// if the panel itself isn't visible, don't waste time doing any highlighting logic
-		if (!invEqPanel.isVisible())
+		if (!setupDisplayPanel.isVisible())
 		{
 			return;
 		}
 
 		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
 		{
-			sbPanel.resetSlotColors();
+			spellbookPanel.resetSlotColors();
 			return;
 		}
 
 		// pass it a dummy container because it only needs the current selected setup
-		sbPanel.highlightSlots(new ArrayList<InventorySetupsItem>(), currentSelectedSetup);
+		spellbookPanel.highlightSlots(new ArrayList<InventorySetupsItem>(), currentSelectedSetup);
 
 	}
 
@@ -633,7 +635,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
 		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
-		invEqPanel.setVisible(false);
+		setupDisplayPanel.setVisible(false);
 		overviewTopRightButtonsPanel.setVisible(true);
 		setupTopRightButtonsPanel.setVisible(false);
 		title.setText(MAIN_TITLE);
@@ -652,6 +654,25 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		currentSelectedSetup = null;
 		plugin.resetBankSearch();
+	}
+
+	public boolean isStackCompareForSlotAllowed(final InventorySetupsSlotID inventoryID, final int slotId)
+	{
+		switch (inventoryID)
+		{
+			case INVENTORY:
+				return inventoryPanel.isStackCompareForSlotAllowed(slotId);
+			case EQUIPMENT:
+				return equipmentPanel.isStackCompareForSlotAllowed(slotId);
+			case RUNE_POUCH:
+				return runePouchPanel.isStackCompareForSlotAllowed(slotId);
+			case ADDITIONAL_ITEMS:
+				return additionalFilteredItemsPanel.isStackCompareForSlotAllowed(slotId);
+			case SPELL_BOOK:
+				return spellbookPanel.isStackCompareForSlotAllowed(slotId);
+			default:
+				return false;
+		}
 	}
 
 	private void updateCompactViewMarker()
@@ -706,7 +727,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			constraints.gridy++;
 		}
 
-		invEqPanel.setVisible(false);
+		setupDisplayPanel.setVisible(false);
 
 		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
 		{
