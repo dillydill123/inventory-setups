@@ -17,6 +17,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import static inventorysetups.InventorySetupsPlugin.SUGGESTION_LINK;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 
 public class InventorySetupsUpdateNewsPanel extends JPanel
@@ -32,7 +33,6 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		welcomePanel.add(welcomeText, BorderLayout.NORTH);
 
 		final JPanel latestUpdatePanelInfo = getLatestUpdateInfoPanel();
-
 
 		final JLabel newUser = new JLabel("Are you a new user?");
 		final JLabel newUser2 = new JLabel("For help and support, click here");
@@ -51,6 +51,24 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		newUserPanelInfo.add(newUser, BorderLayout.NORTH);
 		newUserPanelInfo.add(newUser2, BorderLayout.CENTER);
 		newUserPanelInfo.add(linkToHelp, BorderLayout.SOUTH);
+
+		final JLabel suggestions = new JLabel("Have a suggestion? Found a bug?");
+		final JLabel suggestions2 = new JLabel("Click here to create an issue");
+		final JButton linkToSuggestion = new JButton("Make a Suggestion");
+		linkToSuggestion.addActionListener(e ->
+		{
+			LinkBrowser.browse(SUGGESTION_LINK);
+		});
+		suggestions.setFont(FontManager.getRunescapeSmallFont());
+		suggestions2.setFont(FontManager.getRunescapeSmallFont());
+		suggestions.setHorizontalAlignment(JLabel.CENTER);
+		suggestions2.setHorizontalAlignment(JLabel.CENTER);
+
+		final JPanel suggestionPanelInfo = new JPanel();
+		suggestionPanelInfo.setLayout(new BorderLayout());
+		suggestionPanelInfo.add(suggestions, BorderLayout.NORTH);
+		suggestionPanelInfo.add(suggestions2, BorderLayout.CENTER);
+		suggestionPanelInfo.add(linkToSuggestion, BorderLayout.SOUTH);
 
 		final JPanel closePanel = new JPanel(new BorderLayout());
 		final JButton returnToSetups = new JButton("Return to Setups");
@@ -76,6 +94,8 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		contentPanel.add(latestUpdatePanelInfo);
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 		contentPanel.add(newUserPanelInfo);
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+		contentPanel.add(suggestionPanelInfo);
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 		contentPanel.add(closePanel);
 

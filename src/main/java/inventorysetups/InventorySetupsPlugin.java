@@ -118,6 +118,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String CONFIG_KEY_VERSION_STR = "version";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
+	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
 	public static final int NUM_EQUIPMENT_ITEMS = 14;
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
@@ -1653,13 +1654,14 @@ public class InventorySetupsPlugin extends Plugin
 		for (JsonElement elem : ja)
 		{
 			JsonObject setup = elem.getAsJsonObject();
-			// Fix old configs that had stackDifference as a boolean (before it had more options)
-			if (setup.getAsJsonPrimitive("stackDifference").isBoolean())
-			{
-				int stackDiff = setup.get("stackDifference").getAsBoolean() ? 1 : 0;
-				setup.remove("stackDifference");
-				setup.addProperty("stackDifference", stackDiff);
-			}
+
+			// Example if needed in the future
+//			if (setup.getAsJsonPrimitive("stackDifference").isBoolean())
+//			{
+//				int stackDiff = setup.get("stackDifference").getAsBoolean() ? 1 : 0;
+//				setup.remove("stackDifference");
+//				setup.addProperty("stackDifference", stackDiff);
+//			}
 		}
 		return je.toString();
 	}
