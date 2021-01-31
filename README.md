@@ -81,7 +81,7 @@ You can also refresh an entire setup by using the refresh icon when viewing a se
 
 ![Refresh Button](readme_images_and_gifs/refresh_button.png)
 
-You can update the spellbook by right clicking the slot and choosing the desired spellbook.
+You can update the spellbook by right clicking the slot and choosing the desired spellbook. There is also an option for none if you do not care about the spellbook for a particular setup.
 
 ![Update Spellbook](readme_images_and_gifs/spellbook.png)
 
@@ -116,7 +116,6 @@ Greater than or less than stack difference can also be selected. These highlight
 Note that you must have base highlighting enabled in order to use this feature. There is a configuration option to set the default stack compare type for each slot when creating new setups.
 
 **NOTE:** Previously, stack differences was configured per inventory setup. It is now per item slot. This means you will need to update your setups.
-
 
 ##### Fuzzy Difference
 
@@ -203,6 +202,9 @@ Currently there is one known compatibility issue with Bank Tags. If Bank Tags an
 If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
 
 ### Changelog
+
+##### 1.10
+Added update window for patch notes and helpful links. Added configuration option to make all slots fuzzy in new setups. Added fuzzy options for additional filtered items. Made stack comparison slot specific.
 
 ##### 1.9
 Reworked Variation Differences into Fuzzy Filtering, added specific filtering, more config settings, and improved update by search input 
