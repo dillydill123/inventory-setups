@@ -109,11 +109,14 @@ Enabling this will cause a slot to become highlighted if the stack size of the i
 
 ![Stack Difference](readme_images_and_gifs/normal_stack_difference.gif)
 
-Greater than or less than stack difference can also be selected. These highlight if the item stack in the inventory is greater than or less than the amount in the setup respectively.
+Greater than or less than stack difference can also be selected. These highlight if the item stack in the inventory is greater than or less than the amount in the setup respectively. This can be useful if you want a reminder that a stack is too low or too high.
 
 ![Stack Difference Less Than](readme_images_and_gifs/less_than_stack_difference.gif)
 
-Note that you must have base highlighting enabled in order to use this feature.
+Note that you must have base highlighting enabled in order to use this feature. There is a configuration option to set the default stack compare type for each slot when creating new setups.
+
+**NOTE:** Previously, stack differences was configured per inventory setup. It is now per item slot. This means you will need to update your setups.
+
 
 ##### Fuzzy Difference
 
@@ -121,7 +124,7 @@ Normally, Inventory Setups requires items to be **exactly** the same as those in
 
 It is possible to configure Inventory Setups to fix this issue using the "fuzzy" difference indicator. You can do this by right clicking any slot in the inventory or equipment panels, and selecting "Toggle Fuzzy". A "*" will appear in the top right corner of the slot if it is marked as fuzzy. The fuzzy indicator will make it so "similar" items are treated as equal for highlighting and filtering purposes.
 
-![Fuzzy Difference Highlight](readme_images_and_gifs/fuzzy_difference_hightlighting.gif)
+![Fuzzy Difference Highlight](readme_images_and_gifs/fuzzy_difference_highlighting.gif)
 
 As you can see, there are different types of items that the "fuzzy" indicator can be used on. Jewellery with different charges, degradable items like Barrows, and potions with different doses are a few examples.
 
@@ -129,7 +132,7 @@ The fuzzy indicator will also impact bank filtering.
 
 ![Fuzzy Difference Filtering](readme_images_and_gifs/fuzzy_filtering.gif)
 
-Note that you must have base highlighting enabled in order to use this feature.
+There is a configuration option to set all slots to fuzzy when creating new setups.
 
 **NOTE:** Fuzzy filtering replaced the previous system of variation differences. Previously through variation differences, all items were considered "fuzzy" by default. This is the **opposite** of the fuzzy filter. 
 
@@ -149,7 +152,7 @@ You can add additional filtered items to setups. These are items that will show 
 * The item will now show in the bank filter and in the "Additional Filtered Items" section
 * You can remove an item from this list by right clicking and selecting "Remove Item from Slot"
 
-You can also add or update items by using the search option.
+You can also add or update items by using the search option. The fuzzy indicator can also be added to additional filtered items.
 
 ![Additional Filtered Items](readme_images_and_gifs/additional_items_filter.gif)
 
@@ -170,10 +173,12 @@ In the settings of Inventory Setups, you can change default setup options, key b
 ![Configuration Settings](readme_images_and_gifs/config_settings.png)
 
 * **Default Filter Bank** - Enabling this will make it so all newly created setups will have bank filtering enabled
-* **Default Highlight** Stack Difference - The default stack difference option for all newly created setups
-* **Default Highlight** Unordered Difference - Enabling this will make it so all newly created setups will have unordered highlighting enabled
+* **Default Highlight Stack Difference** - The default stack difference option for all newly created setups
+* **Default Highlight Unordered Difference** - Enabling this will make it so all newly created setups will have unordered highlighting enabled
 * **Default Highlight** - Enabling this will make it so all newly created setups will have highlighting enabled
 * **Default Highlight Color** - The default highlighting color for newly created setups
+* **Default Fuzzy** - Enabling this will make all slots fuzzy for newly created setups
+* **Default Stack Compare** - The default stack comparison type for all slots in newly created setups
 
 * **Return To Setups Hotkey** - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
 * **Filter Bank Hotkey** - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
