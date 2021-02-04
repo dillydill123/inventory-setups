@@ -515,7 +515,9 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			ArrayList<InventorySetupsItem> runePouchData = null;
-			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
+			final boolean inventoryHasRunePouch = checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv) ||
+													checkIfContainerContainsItem(ItemID.RUNE_POUCH_L, inv);
+			if (inventoryHasRunePouch)
 			{
 				runePouchData = getRunePouchData();
 			}
@@ -958,7 +960,7 @@ public class InventorySetupsPlugin extends Plugin
 			newItem.setStackCompare(stackCompareType);
 
 			// update the rune pouch data
-			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
 			{
 				return;
 			}
@@ -1023,7 +1025,7 @@ public class InventorySetupsPlugin extends Plugin
 									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 
 									// update the rune pouch data
-									if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+									if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
 									{
 										return;
 									}
@@ -1055,7 +1057,7 @@ public class InventorySetupsPlugin extends Plugin
 							final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 							// update the rune pouch data
-							if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), newItem))
+							if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
 							{
 								return;
 							}
@@ -1099,7 +1101,7 @@ public class InventorySetupsPlugin extends Plugin
 			// update the rune pouch data
 			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
-			if (!updateIfRunePouch(slot, container.get(slot.getIndexInSlot()), dummyItem))
+			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
 			}
@@ -1566,10 +1568,10 @@ public class InventorySetupsPlugin extends Plugin
 		return itemId;
 	}
 
-	private boolean updateIfRunePouch(final InventorySetupsSlot slot, final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
+	private boolean checkAndUpdateSlotIfRunePouchWasSelected(final InventorySetupsSlot slot, final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
 	{
 
-		if (ItemVariationMapping.map(newItem.getId()) == ItemID.RUNE_POUCH)
+		if (isItemRunePouch(newItem.getId()))
 		{
 
 			if (slot.getSlotID() != InventorySetupsSlotID.INVENTORY)
@@ -1587,7 +1589,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			// only display this message if we aren't replacing a rune pouch with a new rune pouch
-			if (slot.getParentSetup().getRune_pouch() != null && ItemVariationMapping.map(oldItem.getId()) != ItemID.RUNE_POUCH)
+			if (slot.getParentSetup().getRune_pouch() != null && isItemRunePouch(oldItem.getId()))
 			{
 				SwingUtilities.invokeLater(() ->
 				{
@@ -1601,13 +1603,18 @@ public class InventorySetupsPlugin extends Plugin
 
 			slot.getParentSetup().updateRunePouch(getRunePouchData());
 		}
-		else if (ItemVariationMapping.map(oldItem.getId()) == ItemID.RUNE_POUCH)
+		else if (isItemRunePouch(oldItem.getId()))
 		{
 			// if the old item is a rune pouch, need to update it to null 
 			slot.getParentSetup().updateRunePouch(null);
 		}
 
 		return true;
+	}
+
+	private boolean isItemRunePouch(final int itemId)
+	{
+		return itemId == ItemID.RUNE_POUCH || itemId == ItemID.RUNE_POUCH_L;
 	}
 
 	public int parseTextInputAmount(String input)
