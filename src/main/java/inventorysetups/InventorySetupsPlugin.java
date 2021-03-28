@@ -1589,7 +1589,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			// only display this message if we aren't replacing a rune pouch with a new rune pouch
-			if (slot.getParentSetup().getRune_pouch() != null && isItemRunePouch(oldItem.getId()))
+			if (slot.getParentSetup().getRune_pouch() != null && !isItemRunePouch(oldItem.getId()))
 			{
 				SwingUtilities.invokeLater(() ->
 				{
