@@ -114,11 +114,8 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText = "Fixed update window so it will stay hidden till next update for logged in RuneLite accounts.\n\n" +
-								"Added update window to provide information about new updates.\n\n" +
-								"Added configuration option to make all slots fuzzy in new setups. Check the plugin settings to enable this.\n\n" +
-								"Added fuzzy toggle for additional filtered items. You can now right click additional filtered item slots and set them to fuzzy.\n\n" +
-								"Changed stack differences to be slot specific. You can now right click inventory, equipment, and rune pouch slots to individually set the stack difference mode. You will need to update your setups if you used this feature previously. There is a configuration option for setting a default as well.";
+		String updateText = "Fixed a bug where setups with locked rune pouches wouldn't show rune pouch information. It is recommended to mark locked rune pouch slots as fuzzy so the empty placeholder will show up in the bank.\n\n" +
+								"Moved stack menu indicator above update from slot and search menus in the rune pouch slots.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
