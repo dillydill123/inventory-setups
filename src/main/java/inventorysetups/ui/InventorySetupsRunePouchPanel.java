@@ -60,8 +60,8 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 		for (final InventorySetupsSlot slot : runeSlots)
 		{
 			containerSlotsPanel.add(slot);
-			super.addUpdateFromContainerMouseListenerToSlot(slot);
 			super.addStackMouseListenerToSlot(slot);
+			super.addUpdateFromContainerMouseListenerToSlot(slot);
 			super.addUpdateFromSearchMouseListenerToSlot(slot, true);
 			super.addRemoveMouseListenerToSlot(slot);
 		}
