@@ -84,6 +84,10 @@ public class InventorySetup
 	@Setter
 	private int spellBook;
 
+	@Getter
+	@Setter
+	private long Id;
+
 	public void updateInventory(final ArrayList<InventorySetupsItem> inv)
 	{
 		inventory = inv;

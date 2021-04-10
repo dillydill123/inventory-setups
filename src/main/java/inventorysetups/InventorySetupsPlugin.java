@@ -112,7 +112,7 @@ public class InventorySetupsPlugin extends Plugin
 {
 
 	public static final String CONFIG_GROUP = "inventorysetups";
-	public static final String CONFIG_KEY = "setups";
+	public static final String CONFIG_KEY_SETUPS = "setups";
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
@@ -189,6 +189,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	// current version of the plugin
 	private String currentVersion;
+
+	// Id of the next inventory setup that will be created.
+	private long nextInventorySetupId;
 
 	@Setter
 	@Getter
@@ -515,8 +518,8 @@ public class InventorySetupsPlugin extends Plugin
 			ArrayList<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			ArrayList<InventorySetupsItem> runePouchData = null;
-			final boolean inventoryHasRunePouch = checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv) ||
-													checkIfContainerContainsItem(ItemID.RUNE_POUCH_L, inv);
+			final boolean inventoryHasRunePouch = containerContainsRunePouch(inv);
+
 			if (inventoryHasRunePouch)
 			{
 				runePouchData = getRunePouchData();
@@ -529,7 +532,7 @@ public class InventorySetupsPlugin extends Plugin
 													config.highlightDifference(),
 													config.bankFilter(),
 													config.highlightUnorderedDifference(),
-													spellbook);
+													spellbook, nextInventorySetupId++); // TODO check for overflow of nextInvnetorySetupId?
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -921,6 +924,8 @@ public class InventorySetupsPlugin extends Plugin
 				eqp.get(i).setFuzzy(setup.getEquipment().get(i).isFuzzy());
 			}
 
+			// TODO copy over stack information
+
 			ArrayList<InventorySetupsItem> runePouchData = null;
 			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
 			{
@@ -1230,9 +1235,10 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void updateConfig()
 	{
+		// update setups
 		final Gson gson = new Gson();
-		final String json = gson.toJson(inventorySetups);
-		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY, json);
+		final String jsonSetups = gson.toJson(inventorySetups);
+		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS, jsonSetups);
 	}
 
 	@Subscribe
@@ -1399,6 +1405,8 @@ public class InventorySetupsPlugin extends Plugin
 			}.getType();
 
 			final InventorySetup newSetup  = gson.fromJson(setup, type);
+			// override the ID with our own
+			newSetup.setId(nextInventorySetupId++); // TODO handle overflow of nextInventorySetupId?
 			clientThread.invokeLater(() ->
 			{
 				if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
@@ -1460,42 +1468,26 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void loadConfig()
 	{
-		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY);
+		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
 			inventorySetups = new ArrayList<>();
+			nextInventorySetupId = 0L;
 		}
 		else
 		{
 			try
 			{
 				final Gson gson = new Gson();
-				Type type = new TypeToken<ArrayList<InventorySetup>>()
+				Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
 				{
 
 				}.getType();
 
 				// serialize the internal data structure from the json in the configuration
-				//final String json = fixOldJSONData(storedSetups);
-				inventorySetups = gson.fromJson(storedSetups, type);
-				clientThread.invokeLater(() ->
-				{
-					for (final InventorySetup setup : inventorySetups)
-					{
-						if (setup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, setup.getInventory()))
-						{
-							setup.updateRunePouch(getRunePouchData());
-						}
-						if (setup.getNotes() == null)
-						{
-							setup.updateNotes("");
-						}
-						if (setup.getAdditionalFilteredItems() == null)
-						{
-							setup.updateAdditionalItems(new HashMap<>());
-						}
-					}
-				});
+				inventorySetups = gson.fromJson(storedSetups, typeSetups);
+
+				clientThread.invokeLater(this::updateOldSetupsAndComputeNextId);
 			}
 			catch (Exception e)
 			{
@@ -1617,6 +1609,12 @@ public class InventorySetupsPlugin extends Plugin
 		return itemId == ItemID.RUNE_POUCH || itemId == ItemID.RUNE_POUCH_L;
 	}
 
+	private boolean containerContainsRunePouch(final ArrayList<InventorySetupsItem> container)
+	{
+		return checkIfContainerContainsItem(ItemID.RUNE_POUCH, container) ||
+				checkIfContainerContainsItem(ItemID.RUNE_POUCH_L, container);
+	}
+
 	public int parseTextInputAmount(String input)
 	{
 		// only take the first 10 characters (max amount is 2.147B which is only 10 digits)
@@ -1651,6 +1649,41 @@ public class InventorySetupsPlugin extends Plugin
 		quantity = Math.max(quantity, 1);
 
 		return quantity;
+	}
+
+	private void updateOldSetupsAndComputeNextId()
+	{
+		long highestId = -1;
+		for (final InventorySetup setup : inventorySetups)
+		{
+			// figure out what the id of the next setup should be
+			long setupId = setup.getId();
+			highestId = Long.max(highestId, setupId);
+
+			if (setup.getRune_pouch() == null && containerContainsRunePouch(setup.getInventory()))
+			{
+				setup.updateRunePouch(getRunePouchData());
+			}
+			if (setup.getNotes() == null)
+			{
+				setup.updateNotes("");
+			}
+			if (setup.getAdditionalFilteredItems() == null)
+			{
+				setup.updateAdditionalItems(new HashMap<>());
+			}
+		}
+		nextInventorySetupId = highestId + 1; // TODO check for overflow?
+
+		for (final InventorySetup setup : inventorySetups)
+		{
+			// fix old setups that didn't have an Id (start at 1)
+			long setupId = setup.getId();
+			if (setupId == 0)
+			{
+				setup.setId(nextInventorySetupId++); // TODO check for overflow?
+			}
+		}
 	}
 
 	private String fixOldJSONData(final String json)
