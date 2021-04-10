@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id "com.github.johnrengelman.shadow" version "5.2.0"
+	//id "com.github.johnrengelman.shadow" version "5.2.0"
 }
 
 repositories {
@@ -12,7 +12,7 @@ repositories {
 }
 
 
-def runeLiteVersion = '1.7.3.1'
+def runeLiteVersion = '1.7.4'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
@@ -50,10 +50,10 @@ classes {
 	dependsOn createProperties
 }
 
-shadowJar {
-	from sourceSets.test.output
-	configurations = [project.configurations.testRuntimeClasspath]
-	manifest {
-		attributes "Main-Class": "inventorysetups.InventorySetupsPluginTest"
-	}
-}
+//shadowJar {
+//	from sourceSets.test.output
+//	configurations = [project.configurations.testRuntimeClasspath]
+//	manifest {
+//		attributes "Main-Class": "inventorysetups.InventorySetupsPluginTest"
+//	}
+//}
