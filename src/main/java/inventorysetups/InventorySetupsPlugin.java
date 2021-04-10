@@ -1472,7 +1472,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
 			inventorySetups = new ArrayList<>();
-			nextInventorySetupId = 0L;
+			nextInventorySetupId = 1L;
 		}
 		else
 		{
@@ -1677,9 +1677,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (final InventorySetup setup : inventorySetups)
 		{
-			// fix old setups that didn't have an Id (start at 1)
+			// fix old setups that didn't have an Id. Start with 1 higher than the highest ID found.
 			long setupId = setup.getId();
-			if (setupId == 0)
+			if (setupId == 0L)
 			{
 				setup.setId(nextInventorySetupId++); // TODO check for overflow?
 			}
