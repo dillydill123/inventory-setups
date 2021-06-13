@@ -25,6 +25,7 @@
 package inventorysetups;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -527,12 +528,14 @@ public class InventorySetupsPlugin extends Plugin
 
 			int spellbook = getCurrentSpellbook();
 
+			updateNextSetupId();
+
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, new HashMap<>(), name, "",
 													config.highlightColor(),
 													config.highlightDifference(),
 													config.bankFilter(),
 													config.highlightUnorderedDifference(),
-													spellbook, nextInventorySetupId++); // TODO check for overflow of nextInvnetorySetupId?
+													spellbook, nextInventorySetupId);
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -918,13 +921,13 @@ public class InventorySetupsPlugin extends Plugin
 			for (int i = 0; i < inv.size(); i++)
 			{
 				inv.get(i).setFuzzy(setup.getInventory().get(i).isFuzzy());
+				inv.get(i).setStackCompare(setup.getInventory().get(i).getStackCompare());
 			}
 			for (int i = 0; i < eqp.size(); i++)
 			{
 				eqp.get(i).setFuzzy(setup.getEquipment().get(i).isFuzzy());
+				eqp.get(i).setStackCompare(setup.getEquipment().get(i).getStackCompare());
 			}
-
-			// TODO copy over stack information
 
 			ArrayList<InventorySetupsItem> runePouchData = null;
 			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
@@ -1406,7 +1409,8 @@ public class InventorySetupsPlugin extends Plugin
 
 			final InventorySetup newSetup  = gson.fromJson(setup, type);
 			// override the ID with our own
-			newSetup.setId(nextInventorySetupId++); // TODO handle overflow of nextInventorySetupId?
+			updateNextSetupId();
+			newSetup.setId(nextInventorySetupId);
 			clientThread.invokeLater(() ->
 			{
 				if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
@@ -1448,6 +1452,27 @@ public class InventorySetupsPlugin extends Plugin
 		return internalFilteringIsAllowed && allowBasedOnActivePanel;
 	}
 
+	private void updateNextSetupId()
+	{
+		// If the nextInventorySetupId is max value (somehow...) reset all Ids starting from one
+		if (nextInventorySetupId == Long.MAX_VALUE)
+		{
+			nextInventorySetupId = 1;
+			for (final InventorySetup inventorySetup : inventorySetups)
+			{
+				inventorySetup.setId(nextInventorySetupId++);
+			}
+
+			// TODO: Update section Id pointers here
+
+			// Should the config be updated? this could be called from loadConfig function...
+		}
+		else
+		{
+			nextInventorySetupId++;
+		}
+	}
+
 	private ArrayList<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
 	{
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
@@ -1478,7 +1503,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			try
 			{
-				final Gson gson = new Gson();
+				final Gson gson = new GsonBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 				Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
 				{
 
@@ -1653,12 +1678,11 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void updateOldSetupsAndComputeNextId()
 	{
-		long highestId = -1;
 		for (final InventorySetup setup : inventorySetups)
 		{
 			// figure out what the id of the next setup should be
 			long setupId = setup.getId();
-			highestId = Long.max(highestId, setupId);
+			nextInventorySetupId = Long.max(nextInventorySetupId, setupId);
 
 			if (setup.getRune_pouch() == null && containerContainsRunePouch(setup.getInventory()))
 			{
@@ -1673,7 +1697,6 @@ public class InventorySetupsPlugin extends Plugin
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 		}
-		nextInventorySetupId = highestId + 1; // TODO check for overflow?
 
 		for (final InventorySetup setup : inventorySetups)
 		{
@@ -1681,7 +1704,8 @@ public class InventorySetupsPlugin extends Plugin
 			long setupId = setup.getId();
 			if (setupId == 0L)
 			{
-				setup.setId(nextInventorySetupId++); // TODO check for overflow?
+				updateNextSetupId(); // if nextInventorySetupId overflows, this function will set the Id's starting from 1
+				setup.setId(nextInventorySetupId);
 			}
 		}
 	}
