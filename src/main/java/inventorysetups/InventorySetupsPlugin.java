@@ -596,7 +596,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				assert event.getId() >= 0 && event.getId() < inventorySetups.size() : "Action param out of range";
 
-				resetBankSearch();
+				resetBankSearch(true);
 				panel.setCurrentInventorySetup(inventorySetups.get(event.getId()), true);
 				return;
 			}
@@ -693,17 +693,6 @@ public class InventorySetupsPlugin extends Plugin
 			internalFilteringIsAllowed = false;
 			return;
 		}
-
-		if (event.getMenuOption().equals("Search") && client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND) != null
-			&& client.getWidget(WidgetInfo.BANK_SEARCH_BUTTON_BACKGROUND).getSpriteId() != SpriteID.EQUIPMENT_SLOT_SELECTED)
-		{
-			// This ensures that when clicking Search when tab is selected, the search input is opened rather
-			// than client trying to close it first
-			resetBankSearch();
-
-			// don't allow the bank to retry a filter if the search button is clicked
-			internalFilteringIsAllowed = false;
-		}
 	}
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
@@ -754,9 +743,14 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-	public void resetBankSearch()
+	public void resetBankSearch(boolean closeChat)
 	{
-		bankSearch.reset(true);
+		// Only reset the bank automatically if filtering is allowed
+		// This makes it so that you click the search button again to cancel a filter
+		if (isFilteringAllowed())
+		{
+			bankSearch.reset(closeChat);
+		}
 	}
 
 	public ArrayList<InventorySetupsItem> getRunePouchData()
@@ -878,7 +872,7 @@ public class InventorySetupsPlugin extends Plugin
 		else if (event.getScriptId() == ScriptID.BANKMAIN_SEARCH_TOGGLE)
 		{
 			// cancel the current filtering if the search button is clicked
-			resetBankSearch();
+			resetBankSearch(true);
 
 			// don't allow the bank to retry a filter if the search button is clicked
 			internalFilteringIsAllowed = false;
@@ -1436,7 +1430,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void shutDown()
 	{
-		resetBankSearch();
+		resetBankSearch(true);
 		clientToolbar.removeNavigation(navButton);
 	}
 
