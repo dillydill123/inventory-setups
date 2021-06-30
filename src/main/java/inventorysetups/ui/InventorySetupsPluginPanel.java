@@ -748,22 +748,30 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
-		for (final InventorySetup setup : setups)
+		// TODO adjust in case sections are selected instead
+		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.SECTION)
 		{
-			InventorySetupsPanel newPanel = null;
-			if (plugin.getConfig().compactMode())
+			// If a search occurs, only show sections that have a matching search
+		}
+		else
+		{
+			for (final InventorySetup setup : setups)
 			{
-				newPanel = new InventorySetupsCompactPanel(plugin, this, setup);
-			}
-			else
-			{
-				newPanel = new InventorySetupsStandardPanel(plugin, this, setup);
-			}
-			overviewPanel.add(newPanel, constraints);
-			constraints.gridy++;
+				InventorySetupsPanel newPanel = null;
+				if (plugin.getConfig().compactMode())
+				{
+					newPanel = new InventorySetupsCompactPanel(plugin, this, setup);
+				}
+				else
+				{
+					newPanel = new InventorySetupsStandardPanel(plugin, this, setup);
+				}
+				overviewPanel.add(newPanel, constraints);
+				constraints.gridy++;
 
-			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-			constraints.gridy++;
+				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+				constraints.gridy++;
+			}
 		}
 
 		setupDisplayPanel.setVisible(false);
