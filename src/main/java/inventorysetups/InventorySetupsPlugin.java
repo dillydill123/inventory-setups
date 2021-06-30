@@ -1454,12 +1454,16 @@ public class InventorySetupsPlugin extends Plugin
 			nextInventorySetupId = 1;
 			for (final InventorySetup inventorySetup : inventorySetups)
 			{
+				// TODO mapping from old->new here
 				inventorySetup.setId(nextInventorySetupId++);
 			}
 
 			// TODO: Update section Id pointers here
 
-			// Should the config be updated? this could be called from loadConfig function...
+			// We could save the config here, but it's not necessary. This function could
+			// be called from loadConfig, so it's better to wait for a change in a setup
+			// to provoke saving the config.
+
 		}
 		else
 		{
