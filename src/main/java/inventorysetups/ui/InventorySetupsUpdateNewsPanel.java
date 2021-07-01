@@ -114,8 +114,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText = "Fixed a bug where setups with locked rune pouches wouldn't show rune pouch information. It is recommended to mark locked rune pouch slots as fuzzy so the empty placeholder will show up in the bank.\n\n" +
-								"Moved stack menu indicator above update from slot and search menus in the rune pouch slots.";
+		String updateText =     "Updated the plugin for the latest RuneLite version.\n\n" +
+								"Clicking the search button in the bank while in a normal bank search will now properly close the search.\n\n" +
+								"Toggle fuzzy now supports more items like God capes, twisted ancestral, and skilling outfits.\n\n" +
+								"Setups now have a unique internal ID which will be used for other features in the future.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
