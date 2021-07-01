@@ -26,12 +26,11 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsStackCompareID;
 import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsVariationMapping;
 import lombok.AccessLevel;
 import lombok.Getter;
-import net.runelite.api.InventoryID;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemVariationMapping;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import net.runelite.client.ui.ColorScheme;
@@ -246,8 +245,8 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 
 		if (savedItemFromSetup.isFuzzy())
 		{
-			currentItemId = ItemVariationMapping.map(currentItemId);
-			savedItemId = ItemVariationMapping.map(savedItemId);
+			currentItemId = InventorySetupsVariationMapping.map(currentItemId);
+			savedItemId = InventorySetupsVariationMapping.map(savedItemId);
 		}
 
 		// if the ids don't match, highlight the container slot

@@ -26,12 +26,11 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
-import inventorysetups.InventorySetupsStackCompareID;
+import inventorysetups.InventorySetupsVariationMapping;
 import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
-import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.JPanel;
@@ -110,7 +109,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			InventorySetupsItem currInvItem = currInventory.get(i);
-			if (!currInvHasRunePouch && ItemVariationMapping.map(currInvItem.getId()) == ItemID.RUNE_POUCH)
+			if (!currInvHasRunePouch && InventorySetupsVariationMapping.map(currInvItem.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
 			}
@@ -158,7 +157,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		for (final InventorySetupsItem item : currInventory)
 		{
 			// Use fuzzy mapping
-			if (ItemVariationMapping.map(item.getId()) == ItemID.RUNE_POUCH)
+			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.RUNE_POUCH)
 			{
 				currInvHasRunePouch = true;
 			}
@@ -200,7 +199,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 				// if the item is fuzzy, attempt to find a suitable item
 				for (final int currentItemIdFromMapping : currentInventoryMapping.keySet())
 				{
-					if (ItemVariationMapping.map(currentItemIdFromMapping) == ItemVariationMapping.map(savedItemId))
+					if (InventorySetupsVariationMapping.map(currentItemIdFromMapping) == InventorySetupsVariationMapping.map(savedItemId))
 					{
 						currentItemListForSpecificId = currentInventoryMapping.get(currentItemIdFromMapping);
 						savedItemId = currentItemIdFromMapping; // Needed to delete the correct list later

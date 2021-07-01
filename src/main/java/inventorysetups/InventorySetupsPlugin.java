@@ -70,7 +70,6 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.game.chatbox.ChatboxItemSearch;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
@@ -1577,7 +1576,7 @@ public class InventorySetupsPlugin extends Plugin
 		// use fuzzy mapping if needed
 		if (isFuzzy)
 		{
-			return ItemVariationMapping.map(itemId);
+			return InventorySetupsVariationMapping.map(itemId);
 		}
 
 		return itemId;
