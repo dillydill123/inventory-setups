@@ -18,7 +18,7 @@ public class InventorySetupsVariationMapping
 		int mappedId = ItemVariationMapping.map(id);
 
 		// if the mapped ID is equal to the original id
-		// this means there was no mapping for this id, the extra custom mappings
+		// this means there was no mapping for this id. Try the extra custom mappings
 		if (mappedId == id)
 		{
 			mappedId = mappings.getOrDefault(id, id);
@@ -43,6 +43,14 @@ public class InventorySetupsVariationMapping
 		mappings.put(ItemID.IMBUED_SARADOMIN_CAPE, itemIDImbuedGodCape);
 		mappings.put(ItemID.IMBUED_GUTHIX_CAPE, itemIDImbuedGodCape);
 		mappings.put(ItemID.IMBUED_ZAMORAK_CAPE, itemIDImbuedGodCape);
+		final int itemIDGodMaxCape = 1000000003;
+		mappings.put(ItemID.SARADOMIN_MAX_CAPE, itemIDGodMaxCape);
+		mappings.put(ItemID.GUTHIX_MAX_CAPE, itemIDGodMaxCape);
+		mappings.put(ItemID.ZAMORAK_MAX_CAPE, itemIDGodMaxCape);
+		final int itemIDImbuedGodMaxCape = 1000000004;
+		mappings.put(ItemID.IMBUED_SARADOMIN_MAX_CAPE, itemIDImbuedGodMaxCape);
+		mappings.put(ItemID.IMBUED_GUTHIX_MAX_CAPE, itemIDImbuedGodMaxCape);
+		mappings.put(ItemID.IMBUED_ZAMORAK_MAX_CAPE, itemIDImbuedGodMaxCape);
 
 		// Twisted Ancestral -> Regular Ancestral
 		mappings.put(ItemID.TWISTED_ANCESTRAL_HAT, ItemID.ANCESTRAL_HAT);
