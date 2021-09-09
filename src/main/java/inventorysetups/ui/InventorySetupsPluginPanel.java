@@ -63,6 +63,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 
@@ -507,6 +508,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		else
 		{
 			setupsToAdd = new ArrayList<>(plugin.getInventorySetups());
+			moveFavoriteSetupsToTopOfList(setupsToAdd);
 		}
 
 		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL)
@@ -518,6 +520,16 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		revalidate();
 		repaint();
+	}
+
+	public void moveFavoriteSetupsToTopOfList(final List<InventorySetup> setupsToAdd)
+	{
+		List<InventorySetup> favSetups = setupsToAdd.stream().filter(InventorySetup::isFavorite).collect(Collectors.toList());
+		setupsToAdd.removeAll(favSetups);
+		for (final InventorySetup favoritedInvSetup : favSetups)
+		{
+			setupsToAdd.add(0, favoritedInvSetup);
+		}
 	}
 
 	public void refreshCurrentSetup()
