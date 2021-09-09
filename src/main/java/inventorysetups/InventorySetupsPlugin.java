@@ -534,7 +534,7 @@ public class InventorySetupsPlugin extends Plugin
 													config.highlightDifference(),
 													config.bankFilter(),
 													config.highlightUnorderedDifference(),
-													spellbook, nextInventorySetupId);
+													spellbook, nextInventorySetupId, false);
 			addInventorySetupClientThread(invSetup);
 		});
 	}

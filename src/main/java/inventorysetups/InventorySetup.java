@@ -88,6 +88,10 @@ public class InventorySetup
 	@Setter
 	private long Id;
 
+	@Getter
+	@Setter
+	private boolean favorite;
+
 	public void updateInventory(final ArrayList<InventorySetupsItem> inv)
 	{
 		inventory = inv;

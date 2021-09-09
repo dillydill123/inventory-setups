@@ -83,6 +83,11 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private static final ImageIcon NO_UNORDERED_HIGHLIGHT_ICON;
 	private static final ImageIcon NO_UNORDERED_HIGHLIGHT_HOVER_ICON;
 
+	private static final ImageIcon FAVORITE_ICON;
+	private static final ImageIcon FAVORITE_HOVER_ICON;
+	private static final ImageIcon NO_FAVORITE_ICON;
+	private static final ImageIcon NO_FAVORITE_HOVER_ICON;
+
 	private static final ImageIcon VIEW_SETUP_ICON;
 	private static final ImageIcon VIEW_SETUP_HOVER_ICON;
 
@@ -95,6 +100,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private final JLabel bankFilterIndicator = new JLabel();
 	private final JLabel highlightColorIndicator = new JLabel();
 	private final JLabel unorderedHighlightIndicator = new JLabel();
+	private final JLabel favoriteIndicator = new JLabel();
 	private final JLabel highlightIndicator = new JLabel();
 	private final JLabel viewSetupLabel = new JLabel();
 	private final JLabel exportLabel = new JLabel();
@@ -122,6 +128,14 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 
 		NO_UNORDERED_HIGHLIGHT_ICON = new ImageIcon(unorderedHighlightHover);
 		NO_UNORDERED_HIGHLIGHT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(unorderedHighlightHover, -100));
+
+		final BufferedImage favoriteImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/favorite_icon.png");
+		final BufferedImage favoriteHover = ImageUtil.luminanceOffset(favoriteImg, -150);
+		FAVORITE_ICON = new ImageIcon(favoriteImg);
+		FAVORITE_HOVER_ICON = new ImageIcon(favoriteHover);
+
+		NO_FAVORITE_ICON = new ImageIcon(favoriteHover);
+		NO_FAVORITE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(favoriteHover, -100));
 
 		final BufferedImage highlightToggleImg = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/highlight_icon.png");
 		final BufferedImage highlightToggleHover = ImageUtil.luminanceOffset(highlightToggleImg, -150);
@@ -337,6 +351,37 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			}
 		});
 
+		favoriteIndicator.setToolTipText(inventorySetup.isFavorite() ? "Remove this setup from the list of favorites" : "Favorite this setup so it appears at the top of the list");
+		favoriteIndicator.setIcon(inventorySetup.isFavorite() ? FAVORITE_ICON : NO_FAVORITE_ICON);
+		favoriteIndicator.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					inventorySetup.setFavorite(!inventorySetup.isFavorite());
+					favoriteIndicator.setToolTipText(inventorySetup.isFavorite() ? "Remove this setup from the list of favorites" : "Favorite this setup so it appears at the top of the list");
+					updateFavoriteIndicator();
+					plugin.updateConfig();
+					// rebuild the panel so this panel will move positions from being favorited/unfavorited
+					panel.rebuild(false);
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				favoriteIndicator.setIcon(inventorySetup.isFavorite() ? FAVORITE_HOVER_ICON : NO_FAVORITE_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				favoriteIndicator.setIcon(inventorySetup.isFavorite() ? FAVORITE_ICON : NO_FAVORITE_ICON);
+			}
+		});
+
 		highlightIndicator.setToolTipText("Enable highlighting");
 		highlightIndicator.setIcon(inventorySetup.isHighlightDifference() ? TOGGLE_HIGHLIGHT_ICON : NO_TOGGLE_HIGHLIGHT_ICON);
 		highlightIndicator.addMouseListener(new MouseAdapter()
@@ -400,6 +445,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		leftActions.add(unorderedHighlightIndicator);
 		leftActions.add(highlightIndicator);
 		leftActions.add(highlightColorIndicator);
+		leftActions.add(favoriteIndicator);
 
 		viewSetupLabel.setToolTipText("View setup");
 		viewSetupLabel.setIcon(VIEW_SETUP_ICON);
@@ -494,6 +540,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 
 		updateHighlightColorLabel();
 		updateToggleHighlightLabel();
+		updateFavoriteIndicator();
 
 	}
 
@@ -525,6 +572,11 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private void updateUnorderedHighlightIndicator()
 	{
 		unorderedHighlightIndicator.setIcon(inventorySetup.isUnorderedHighlight() ? UNORDERED_HIGHLIGHT_ICON : NO_UNORDERED_HIGHLIGHT_ICON);
+	}
+
+	private void updateFavoriteIndicator()
+	{
+		favoriteIndicator.setIcon(inventorySetup.isFavorite() ? FAVORITE_ICON : NO_FAVORITE_ICON);
 	}
 
 	private void updateToggleHighlightLabel()
