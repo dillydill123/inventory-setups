@@ -33,6 +33,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
+import javafx.util.Pair;
 import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.Setter;
@@ -100,7 +101,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @PluginDescriptor(
 		name = "Inventory Setups",
@@ -296,6 +299,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
+	@SuppressWarnings("checkstyle:RegexpSinglelineJava")
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
@@ -308,9 +312,36 @@ public class InventorySetupsPlugin extends Plugin
 		// Adds menu entries to show worn items button
 		if (event.getOption().equals("Show worn items"))
 		{
+
+			// 0 = all, 1 = bank filter, 2 = favorited
+			int filterType = 2;
+
+
+			List<Pair<InventorySetup, Integer>> setupsToShowOnWornItemsList;
+			switch (filterType)
+			{
+				case 1:
+					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
+													.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+													.filter(i -> inventorySetups.get(i.getValue()).isFilterBank())
+													.collect(Collectors.toList());
+					break;
+				case 2:
+					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
+													.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+													.filter(i -> inventorySetups.get(i.getValue()).isFavorite())
+													.collect(Collectors.toList());
+					break;
+				default:
+					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
+												.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+												.collect(Collectors.toList());
+					break;
+			}
+
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			final int oldMenuSize = menuEntries.length;
-			int newSize = oldMenuSize + inventorySetups.size();
+			int newSize = oldMenuSize + setupsToShowOnWornItemsList.size();
 			// 1 for closing setup, 1 for filtering add items, 1 for filtering equip, and one for filtering inventory, 1 for filtering all
 			if (panel.getCurrentSelectedSetup() != null)
 			{
@@ -318,14 +349,15 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			menuEntries = Arrays.copyOf(menuEntries, newSize);
 
-			for (int i = 0; i < inventorySetups.size(); i++)
+			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
 			{
 				MenuEntry menuEntry = menuEntries[oldMenuSize + i] = new MenuEntry();
 				menuEntry.setOption(OPEN_SETUP_MENU_ENTRY);
-				menuEntry.setTarget(ColorUtil.prependColorTag(inventorySetups.get(inventorySetups.size() - 1 - i).getName(), JagexColors.MENU_TARGET));
+				final Pair<InventorySetup, Integer> setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+				menuEntry.setTarget(ColorUtil.prependColorTag(setupIndexPair.getKey().getName(), JagexColors.MENU_TARGET));
 
 				// The param will used to find the correct setup if a menu entry is clicked
-				menuEntry.setIdentifier(inventorySetups.size() - 1 - i);
+				menuEntry.setIdentifier(setupIndexPair.getValue());
 				menuEntry.setType(MenuAction.RUNELITE.getId());
 			}
 
@@ -391,8 +423,6 @@ public class InventorySetupsPlugin extends Plugin
 
 			client.setMenuEntries(menuEntries);
 		}
-
-
 	}
 
 	@Subscribe
