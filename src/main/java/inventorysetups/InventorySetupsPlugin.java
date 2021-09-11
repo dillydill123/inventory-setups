@@ -120,6 +120,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String CONFIG_KEY_VERSION_STR = "version";
+	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -296,6 +297,10 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				panel.rebuild(true);
 			}
+			else if (event.getKey().equals(CONFIG_KEY_MANUAL_BANK_FILTER))
+			{
+				navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
+			}
 		}
 	}
 
@@ -427,7 +432,11 @@ public class InventorySetupsPlugin extends Plugin
 		// this is to make it so the bank will refilter if a tab was clicked and then the player exited the bank
 		if (event.getGroupId() == WidgetID.BANK_GROUP_ID)
 		{
-			internalFilteringIsAllowed = true;
+
+			// If manual bank filter is selected, don't allow filtering when the bank is opened
+			// filtering will only occur if the user selects a setup or uses a filtering hotkey
+			// while the bank is already open
+			internalFilteringIsAllowed = !config.manualBankFilter();
 
 			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
@@ -491,7 +500,7 @@ public class InventorySetupsPlugin extends Plugin
 				.build();
 
 		// Clicking the nav button will do a bank search
-		navButton.setOnClick(this::doBankSearch);
+		navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
 
 		clientToolbar.addNavigation(navButton);
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);

@@ -34,6 +34,7 @@ import net.runelite.client.config.Keybind;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
@@ -290,6 +291,17 @@ public interface InventorySetupsConfig extends Config
 	default InventorySetupsShowWornItemsFilterID showWornItemsFilter()
 	{
 		return InventorySetupsShowWornItemsFilterID.All;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_MANUAL_BANK_FILTER,
+			name = "Manual Bank Filter",
+			description = "Disable automatic bank filtering when opening the bank",
+			position = 17
+	)
+	default boolean manualBankFilter()
+	{
+		return false;
 	}
 
 }
