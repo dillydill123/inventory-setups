@@ -481,7 +481,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		this.internalFilteringIsAllowed = true;
 		this.panel = new InventorySetupsPluginPanel(this, itemManager);
-		final BufferedImage icon = ImageUtil.getResourceStreamFromClass(getClass(), "/inventorysetups_icon.png");
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/inventorysetups_icon.png");
 
 		navButton = NavigationButton.builder()
 				.tooltip("Inventory Setups")
@@ -667,7 +667,7 @@ public class InventorySetupsPlugin extends Plugin
 					return;
 				}
 
-				int inventoryIndex = event.getActionParam();
+				int inventoryIndex = event.getParam0();
 				ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
 				if (bankContainer == null)
 				{
@@ -702,7 +702,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		if (event.getWidgetId() == WidgetInfo.BANK_ITEM_CONTAINER.getId() && event.getMenuOption().startsWith("View tab"))
+		if (event.getParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId() && event.getMenuOption().startsWith("View tab"))
 		{
 			if (config.disableBankTabBar())
 			{

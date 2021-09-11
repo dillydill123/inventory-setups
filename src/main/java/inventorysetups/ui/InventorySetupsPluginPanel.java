@@ -129,11 +129,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	static
 	{
-		final BufferedImage helpIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/help_button.png");
+		final BufferedImage helpIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/help_button.png");
 		HELP_ICON = new ImageIcon(helpIcon);
 		HELP_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(helpIcon, 0.53f));
 
-		final BufferedImage compactIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/compact_mode_icon.png");
+		final BufferedImage compactIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/compact_mode_icon.png");
 		final BufferedImage compactIconHover = ImageUtil.luminanceOffset(compactIcon, -150);
 		COMPACT_VIEW_ICON = new ImageIcon(compactIcon);
 		COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIcon, 0.53f));
@@ -141,7 +141,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		NO_COMPACT_VIEW_ICON = new ImageIcon(compactIconHover);
 		NO_COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIconHover, -100));
 
-		final BufferedImage alphabeticalIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/alphabetical_icon.png");
+		final BufferedImage alphabeticalIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/alphabetical_icon.png");
 		final BufferedImage alphabeticalIconHover = ImageUtil.luminanceOffset(alphabeticalIcon, -150);
 		ALPHABETICAL_ICON = new ImageIcon(alphabeticalIcon);
 		ALPHABETICAL_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(alphabeticalIcon, 0.53f));
@@ -149,19 +149,19 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		NO_ALPHABETICAL_ICON = new ImageIcon(alphabeticalIconHover);
 		NO_ALPHABETICAL_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(alphabeticalIconHover, -100));
 
-		final BufferedImage addIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/add_icon.png");
+		final BufferedImage addIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/add_icon.png");
 		ADD_ICON = new ImageIcon(addIcon);
 		ADD_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
 
-		final BufferedImage importIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/import_icon.png");
+		final BufferedImage importIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/import_icon.png");
 		IMPORT_ICON = new ImageIcon(importIcon);
 		IMPORT_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(importIcon, 0.53f));
 
-		final BufferedImage updateIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/update_icon.png");
+		final BufferedImage updateIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/update_icon.png");
 		UPDATE_ICON = new ImageIcon(updateIcon);
 		UPDATE_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(updateIcon, 0.53f));
 
-		final BufferedImage backIcon = ImageUtil.getResourceStreamFromClass(InventorySetupsPlugin.class, "/back_arrow_icon.png");
+		final BufferedImage backIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/back_arrow_icon.png");
 		BACK_ICON = new ImageIcon(backIcon);
 		BACK_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(backIcon, 0.53f));
 
