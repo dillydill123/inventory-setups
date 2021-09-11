@@ -312,21 +312,16 @@ public class InventorySetupsPlugin extends Plugin
 		// Adds menu entries to show worn items button
 		if (event.getOption().equals("Show worn items"))
 		{
-
-			// 0 = all, 1 = bank filter, 2 = favorited
-			int filterType = 2;
-
-
 			List<Pair<InventorySetup, Integer>> setupsToShowOnWornItemsList;
-			switch (filterType)
+			switch (config.showWornItemsFilter())
 			{
-				case 1:
+				case BANK_FILTERED:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
 													.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
 													.filter(i -> inventorySetups.get(i.getValue()).isFilterBank())
 													.collect(Collectors.toList());
 					break;
-				case 2:
+				case FAVORITED:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
 													.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
 													.filter(i -> inventorySetups.get(i.getValue()).isFavorite())

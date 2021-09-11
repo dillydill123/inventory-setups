@@ -281,4 +281,15 @@ public interface InventorySetupsConfig extends Config
 		return false;
 	}
 
+	@ConfigItem(
+			keyName = "showWornItemsFilter",
+			name = "Show Worn Items Filter",
+			description = "Determines which setups show up when right clicking the show worn items menu",
+			position = 16
+	)
+	default InventorySetupsShowWornItemsFilterID showWornItemsFilter()
+	{
+		return InventorySetupsShowWornItemsFilterID.All;
+	}
+
 }
