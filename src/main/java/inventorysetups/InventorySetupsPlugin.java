@@ -103,6 +103,13 @@ import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import java.io.File;
+import java.io.FileOutputStream;
+
+
 @PluginDescriptor(
 	name = "Inventory Setups",
 	description = "Save gear setups for specific activities"
@@ -159,6 +166,8 @@ public class InventorySetupsPlugin extends Plugin
 	@Inject
 	@Getter
 	private InventorySetupsConfig config;
+
+	private Gson gson;
 
 	@Inject
 	@Getter
@@ -318,7 +327,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	@SuppressWarnings("checkstyle:RegexpSinglelineJava")
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
@@ -537,13 +545,12 @@ public class InventorySetupsPlugin extends Plugin
 
 			loadConfig();
 
-			SwingUtilities.invokeLater(() ->
-			{
-				panel.rebuild(true);
-			});
+			SwingUtilities.invokeLater(() -> panel.rebuild(true));
 
 			return true;
 		});
+
+		this.gson = new GsonBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 
 	}
 
@@ -1345,7 +1352,6 @@ public class InventorySetupsPlugin extends Plugin
 	public void updateConfig()
 	{
 		// update setups
-		final Gson gson = new Gson();
 		final String jsonSetups = gson.toJson(inventorySetups);
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS, jsonSetups);
 	}
@@ -1483,7 +1489,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void exportSetup(final InventorySetup setup)
 	{
-		final Gson gson = new Gson();
 		final String json = gson.toJson(setup);
 		final StringSelection contents = new StringSelection(json);
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
@@ -1492,6 +1497,47 @@ public class InventorySetupsPlugin extends Plugin
 			"Setup data was copied to clipboard.",
 			"Export Setup Succeeded",
 			JOptionPane.PLAIN_MESSAGE);
+	}
+
+	public void massExportSetups()
+	{
+		final String json = gson.toJson(inventorySetups);
+		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fileChooser.setDialogTitle("Choose Directory to Export Setups");
+		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+
+		int returnValue = fileChooser.showSaveDialog(panel);
+		if (returnValue == JFileChooser.APPROVE_OPTION)
+		{
+			final File directory = fileChooser.getSelectedFile();
+			String login_name = client.getLocalPlayer() != null ? "_" + client.getLocalPlayer().getName() : "";
+			login_name = login_name.replace(" ", "_");
+			String newFileName = directory.getAbsolutePath() + "/inventory_setups" + login_name + ".json";
+			newFileName = newFileName.replace("\\", "/");
+			try
+			{
+				FileOutputStream outputStream = new FileOutputStream(newFileName);
+				outputStream.write(json.getBytes());
+				outputStream.close();
+			}
+			catch (Exception e)
+			{
+				JOptionPane.showMessageDialog(panel,
+						"Failed to export setups.",
+						"Mass Export Failed",
+						JOptionPane.PLAIN_MESSAGE);
+				return;
+			}
+
+			JLabel messageLabel = new JLabel("<html><center>All setups were exported successfully to<br>" + newFileName);
+			messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+			JOptionPane.showMessageDialog(panel,
+					messageLabel,
+					"Mass Export Succeeded",
+					JOptionPane.PLAIN_MESSAGE);
+		}
+
 	}
 
 	public void importSetup()
@@ -1509,7 +1555,6 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			final Gson gson = new Gson();
 			Type type = new TypeToken<InventorySetup>()
 			{
 
@@ -1543,6 +1588,11 @@ public class InventorySetupsPlugin extends Plugin
 				"Import Setup Failed",
 				JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	public void massImportSetups()
+	{
+
 	}
 
 	@Override
@@ -1621,7 +1671,6 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			try
 			{
-				final Gson gson = new GsonBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 				Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
 				{
 

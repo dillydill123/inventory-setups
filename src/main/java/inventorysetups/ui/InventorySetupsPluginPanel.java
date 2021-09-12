@@ -31,6 +31,27 @@ import inventorysetups.InventorySetupsPlugin;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
+
+import lombok.Getter;
+import net.runelite.api.InventoryID;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.ui.components.IconTextField;
+import net.runelite.client.ui.components.PluginErrorPanel;
+import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -46,23 +67,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
-import lombok.Getter;
-import net.runelite.api.InventoryID;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.ui.components.IconTextField;
-import net.runelite.client.ui.components.PluginErrorPanel;
-import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.LinkBrowser;
 
 // The main panel of the plugin that contains all viewing components
 public class InventorySetupsPluginPanel extends PluginPanel
@@ -270,7 +274,14 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
+		JPopupMenu massImportExportMenu = new JPopupMenu();
+		JMenuItem massImportMenu = new JMenuItem("Mass Import");
+		JMenuItem massExportMenu = new JMenuItem("Mass Export");
+		massImportExportMenu.add(massImportMenu);
+		massImportExportMenu.add(massExportMenu);
+
 		this.importMarker = new JLabel(IMPORT_ICON);
+		importMarker.setComponentPopupMenu(massImportExportMenu);
 		importMarker.setToolTipText("Import a new inventory setup");
 		importMarker.addMouseListener(new MouseAdapter()
 		{
@@ -295,6 +306,17 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				importMarker.setIcon(IMPORT_ICON);
 			}
 		});
+
+		// set mass export/import options
+		massImportMenu.addActionListener(e ->
+		{
+			plugin.massImportSetups();
+		});
+		massExportMenu.addActionListener(e ->
+		{
+			plugin.massExportSetups();
+		});
+
 
 		// setup the add marker (+ sign in the top right)
 		this.addMarker = new JLabel(ADD_ICON);
