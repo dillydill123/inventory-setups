@@ -38,6 +38,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -106,6 +110,8 @@ import net.runelite.client.util.ImageUtil;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -1561,25 +1567,8 @@ public class InventorySetupsPlugin extends Plugin
 			}.getType();
 
 			final InventorySetup newSetup = gson.fromJson(setup, type);
-			// override the ID with our own
-			updateNextSetupId();
-			newSetup.setId(nextInventorySetupId);
-			clientThread.invokeLater(() ->
-			{
-				if (newSetup.getRunePouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
-				{
-					newSetup.updateRunePouch(getRunePouchData());
-				}
-				if (newSetup.getBoltPouch() == null && checkIfContainerContainsItem(ItemID.BOLT_POUCH, newSetup.getInventory()))
-				{
-					newSetup.updateBoltPouch(getBoltPouchData());
-				}
-				if (newSetup.getNotes() == null)
-				{
-					newSetup.updateNotes("");
-				}
-				addInventorySetupClientThread(newSetup);
-			});
+			addSetupFromImport(newSetup);
+
 		}
 		catch (Exception e)
 		{
@@ -1590,9 +1579,84 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
+	private void addSetupFromImport(final InventorySetup newSetup)
+	{
+		// override the ID with our own
+		updateNextSetupId();
+		newSetup.setId(nextInventorySetupId);
+		clientThread.invokeLater(() ->
+		{
+			updateNullFieldsOfSetup(newSetup);
+			addInventorySetupClientThread(newSetup);
+		});
+	}
+
 	public void massImportSetups()
 	{
+		final JFileChooser fileChooser = new JFileChooser();
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setDialogTitle("Choose Import File");
+		FileFilter jsonFilter = new FileNameExtensionFilter("JSON files", "json");
+		fileChooser.setFileFilter(jsonFilter);
+		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
+		int returnValue = fileChooser.showOpenDialog(panel);
+		if (returnValue == JFileChooser.APPROVE_OPTION)
+		{
+			final File file = fileChooser.getSelectedFile();
+			try
+			{
+				final Path path = Paths.get(file.getAbsolutePath());
+				final String json = new String(Files.readAllBytes(path));
+
+				Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
+				{
+
+				}.getType();
+
+				final ArrayList<InventorySetup> newSetups = gson.fromJson(json, typeSetups);
+				addSetupFromImport(newSetups);
+			}
+			catch (Exception e)
+			{
+				JOptionPane.showMessageDialog(panel,
+						"Invalid setup data.",
+						"Mass Import Setup Failed",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	private void addSetupFromImport(final List<InventorySetup> newSetups)
+	{
+		// override the ID with our own
+		for (final InventorySetup inventorySetup : newSetups)
+		{
+			updateNextSetupId();
+			inventorySetup.setId(nextInventorySetupId);
+			clientThread.invokeLater(() ->
+			{
+				updateNullFieldsOfSetup(inventorySetup);
+			});
+		}
+		addInventorySetupClientThread(newSetups);
+	}
+
+	private void updateNullFieldsOfSetup(final InventorySetup newSetup)
+	{
+		// Must be called from client thread!
+		if (newSetup.getRunePouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
+		{
+			newSetup.updateRunePouch(getRunePouchData());
+		}
+		if (newSetup.getBoltPouch() == null && checkIfContainerContainsItem(ItemID.BOLT_POUCH, newSetup.getInventory()))
+		{
+			newSetup.updateBoltPouch(getBoltPouchData());
+		}
+		if (newSetup.getNotes() == null)
+		{
+			newSetup.updateNotes("");
+		}
 	}
 
 	@Override
@@ -1695,6 +1759,16 @@ public class InventorySetupsPlugin extends Plugin
 			inventorySetups.add(newSetup);
 			panel.rebuild(true);
 
+			updateConfig();
+		});
+	}
+
+	private void addInventorySetupClientThread(final List<InventorySetup> newSetups)
+	{
+		SwingUtilities.invokeLater(() ->
+		{
+			inventorySetups.addAll(newSetups);
+			panel.rebuild(true);
 			updateConfig();
 		});
 	}
