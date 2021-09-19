@@ -1111,18 +1111,7 @@ public class InventorySetupsPlugin extends Plugin
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
 							// only allow numbers and k, m, b (if 1 value is available)
 							// stop once k, m, or b is seen
-							.addCharValidator(arg -> ((arg >= '0' && arg <= '9' &&
-								!searchInput.getValue().toLowerCase().contains("k") &&
-								!searchInput.getValue().toLowerCase().contains("m") &&
-								!searchInput.getValue().toLowerCase().contains("b"))
-								||
-								((arg == 'b' || arg == 'B' ||
-									arg == 'k' || arg == 'K' ||
-									arg == 'm' || arg == 'M') &&
-									searchInput.getValue().length() > 0 &&
-									!searchInput.getValue().toLowerCase().contains("k") &&
-									!searchInput.getValue().toLowerCase().contains("m") &&
-									!searchInput.getValue().toLowerCase().contains("b"))))
+							.addCharValidator(this::validateCharFromItemSearch)
 							.onDone((input) ->
 							{
 								clientThread.invokeLater(() ->
@@ -1192,6 +1181,26 @@ public class InventorySetupsPlugin extends Plugin
 				});
 			})
 			.build();
+	}
+
+	private boolean validateCharFromItemSearch(int arg)
+	{
+		// allow more numbers to be put in if a letter hasn't been detected
+		boolean stillInputtingNumbers = arg >= '0' && arg <= '9' &&
+			!searchInput.getValue().toLowerCase().contains("k") &&
+			!searchInput.getValue().toLowerCase().contains("m") &&
+			!searchInput.getValue().toLowerCase().contains("b");
+
+		// if a letter is input, check if there isn't one already and the length is not 0
+		boolean letterIsInput = (arg == 'b' || arg == 'B' ||
+				arg == 'k' || arg == 'K' ||
+				arg == 'm' || arg == 'M') &&
+				searchInput.getValue().length() > 0 &&
+				!searchInput.getValue().toLowerCase().contains("k") &&
+				!searchInput.getValue().toLowerCase().contains("m") &&
+				!searchInput.getValue().toLowerCase().contains("b");
+
+		return stillInputtingNumbers || letterIsInput;
 	}
 
 	public void removeItemFromSlot(final InventorySetupsSlot slot)
