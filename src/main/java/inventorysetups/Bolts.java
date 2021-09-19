@@ -1,4 +1,4 @@
-package inventorysetups.ui;
+package inventorysetups;
 
 import com.google.common.collect.ImmutableMap;
 import java.awt.image.BufferedImage;

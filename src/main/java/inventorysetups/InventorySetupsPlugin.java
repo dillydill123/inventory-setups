@@ -31,7 +31,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
-import inventorysetups.ui.Bolts;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Toolkit;
@@ -1757,9 +1756,7 @@ public class InventorySetupsPlugin extends Plugin
 		return true;
 	}
 
-	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetupsSlot slot,
-															 final InventorySetupsItem oldItem,
-															 final InventorySetupsItem newItem)
+	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetupsSlot slot, final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
 	{
 
 		if (isItemBoltPouch(newItem.getId()))
