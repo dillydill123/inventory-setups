@@ -26,26 +26,26 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsPlugin;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.util.List;
 
 // Implementation of a cycle button which provides a way to cycle through multiple states in one button (JLabel)
 // When clicked, the cycle button will properly set the icons, tooltips, and execute the provided runnable for any necessary logic
 public class InventorySetupsCycleButton<T> extends JLabel
 {
 	private final InventorySetupsPlugin plugin;
-	private final ArrayList<T> states;
-	private final ArrayList<ImageIcon> icons;
-	private final ArrayList<ImageIcon> hoverIcons;
-	private final ArrayList<String> tooltips;
+	private final List<T> states;
+	private final List<ImageIcon> icons;
+	private final List<ImageIcon> hoverIcons;
+	private final List<String> tooltips;
 	private final Runnable runnable;
 	private int currentIndex;
 
-	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final ArrayList<T> states, final ArrayList<ImageIcon> icons, final ArrayList<ImageIcon> hoverIcons, final ArrayList<String> tooltips, final Runnable runnable)
+	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final List<T> states,
+														 final List<ImageIcon> icons, final List<ImageIcon> hoverIcons,
+														 final List<String> tooltips, final Runnable runnable)
 	{
 		super();
 		this.plugin = plugin;

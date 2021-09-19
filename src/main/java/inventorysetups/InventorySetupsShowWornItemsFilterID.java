@@ -2,6 +2,7 @@ package inventorysetups;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /*
 * Enum that determines which setups show up when the "show worn items" button is right clicked
@@ -19,7 +20,7 @@ public enum InventorySetupsShowWornItemsFilterID
 
 	private final int type;
 
-	private static final ArrayList<InventorySetupsShowWornItemsFilterID> VALUES;
+	private static final List<InventorySetupsShowWornItemsFilterID> VALUES;
 
 	static
 	{
@@ -37,7 +38,7 @@ public enum InventorySetupsShowWornItemsFilterID
 		return type;
 	}
 
-	public static ArrayList<InventorySetupsShowWornItemsFilterID> getValues()
+	public static List<InventorySetupsShowWornItemsFilterID> getValues()
 	{
 		return VALUES;
 	}

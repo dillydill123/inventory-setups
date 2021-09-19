@@ -26,21 +26,21 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
-import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
-
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import inventorysetups.InventorySetupsSlotID;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
 
 // The additional filtered items panel that contains the additional filtered items list
 public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContainerPanel
 {
-	private final ArrayList<InventorySetupsSlot> additionalFilteredSlots;
+	private final List<InventorySetupsSlot> additionalFilteredSlots;
 
 	InventorySetupsAdditionalItemsPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
@@ -55,7 +55,7 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 	}
 
 	@Override
-	public void highlightSlots(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(List<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		// No highlighting for this panel
 	}
@@ -63,7 +63,7 @@ public class InventorySetupsAdditionalItemsPanel extends InventorySetupsContaine
 	@Override
 	public void updatePanelWithSetupInformation(InventorySetup setup)
 	{
-		final HashMap<Integer, InventorySetupsItem> setupAdditionalItems = setup.getAdditionalFilteredItems();
+		final Map<Integer, InventorySetupsItem> setupAdditionalItems = setup.getAdditionalFilteredItems();
 		final JPanel containerSlotsPanel = this.getContainerSlotsPanel();
 
 		// Make final size a multiple of 4

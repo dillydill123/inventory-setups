@@ -27,28 +27,10 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsPlugin;
+import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
-import inventorysetups.InventorySetupsPlugin;
-import inventorysetups.InventorySetupsStackCompareID;
-import lombok.Getter;
-import net.runelite.api.InventoryID;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.ui.components.IconTextField;
-import net.runelite.client.ui.components.PluginErrorPanel;
-import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.LinkBrowser;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -64,8 +46,23 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import lombok.Getter;
+import net.runelite.api.InventoryID;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.ui.components.IconTextField;
+import net.runelite.client.ui.components.PluginErrorPanel;
+import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
 
 // The main panel of the plugin that contains all viewing components
 public class InventorySetupsPluginPanel extends PluginPanel
@@ -116,6 +113,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private final InventorySetupsInventoryPanel inventoryPanel;
 	private final InventorySetupsEquipmentPanel equipmentPanel;
 	private final InventorySetupsRunePouchPanel runePouchPanel;
+	private final InventorySetupsBoltPouchPanel boltPouchPanel;
 	private final InventorySetupsSpellbookPanel spellbookPanel;
 	private final InventorySetupsAdditionalItemsPanel additionalFilteredItemsPanel;
 	private final InventorySetupsNotesPanel notesPanel;
@@ -174,7 +172,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		this.currentSelectedSetup = null;
 		this.plugin = plugin;
 		this.runePouchPanel = new InventorySetupsRunePouchPanel(itemManager, plugin);
-		this.inventoryPanel = new InventorySetupsInventoryPanel(itemManager, plugin, runePouchPanel);
+		this.boltPouchPanel = new InventorySetupsBoltPouchPanel(itemManager, plugin);
+		this.inventoryPanel = new InventorySetupsInventoryPanel(itemManager, plugin, runePouchPanel, boltPouchPanel);
 		this.equipmentPanel = new InventorySetupsEquipmentPanel(itemManager, plugin);
 		this.spellbookPanel = new InventorySetupsSpellbookPanel(itemManager, plugin);
 		this.additionalFilteredItemsPanel = new InventorySetupsAdditionalItemsPanel(itemManager, plugin);
@@ -452,6 +451,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		setupDisplayPanel.add(runePouchPanel);
 		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+		setupDisplayPanel.add(boltPouchPanel);
+		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		setupDisplayPanel.add(equipmentPanel);
 		setupDisplayPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		setupDisplayPanel.add(spellbookPanel);
@@ -546,6 +547,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		currentSelectedSetup = inventorySetup;
 		inventoryPanel.updatePanelWithSetupInformation(inventorySetup);
 		runePouchPanel.updatePanelWithSetupInformation(inventorySetup);
+		boltPouchPanel.updatePanelWithSetupInformation(inventorySetup);
 		equipmentPanel.updatePanelWithSetupInformation(inventorySetup);
 		spellbookPanel.updatePanelWithSetupInformation(inventorySetup);
 		additionalFilteredItemsPanel.updatePanelWithSetupInformation(inventorySetup);
@@ -563,7 +565,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		searchBar.setVisible(false);
 
 		// only show the rune pouch if the setup has a rune pouch
-		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
+		runePouchPanel.setVisible(currentSelectedSetup.getRunePouch() != null);
+		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
 		highlightInventory();
 		highlightEquipment();
@@ -599,7 +602,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			return;
 		}
 
-		final ArrayList<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
+		final List<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
 		inventoryPanel.highlightSlots(inv, currentSelectedSetup);
 	}
 
@@ -619,7 +622,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			return;
 		}
 
-		final ArrayList<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+		final List<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
 		equipmentPanel.highlightSlots(eqp, currentSelectedSetup);
 	}
 
@@ -678,6 +681,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				return equipmentPanel.isStackCompareForSlotAllowed(slotId);
 			case RUNE_POUCH:
 				return runePouchPanel.isStackCompareForSlotAllowed(slotId);
+			case BOLT_POUCH:
+				return boltPouchPanel.isStackCompareForSlotAllowed(slotId);
 			case ADDITIONAL_ITEMS:
 				return additionalFilteredItemsPanel.isStackCompareForSlotAllowed(slotId);
 			case SPELL_BOOK:

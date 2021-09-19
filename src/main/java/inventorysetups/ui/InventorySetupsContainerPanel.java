@@ -24,24 +24,23 @@
  */
 package inventorysetups.ui;
 
-import inventorysetups.InventorySetupsStackCompareID;
-import inventorysetups.InventorySetupsPlugin;
-import inventorysetups.InventorySetupsVariationMapping;
-import lombok.AccessLevel;
-import lombok.Getter;
-import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
-import net.runelite.client.ui.ColorScheme;
-
+import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsStackCompareID;
+import inventorysetups.InventorySetupsVariationMapping;
+import java.awt.BorderLayout;
+import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import java.awt.BorderLayout;
-import java.util.ArrayList;
+import lombok.AccessLevel;
+import lombok.Getter;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.util.AsyncBufferedImage;
 
 public abstract class InventorySetupsContainerPanel extends JPanel
 {
@@ -100,6 +99,9 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 				break;
 			case RUNE_POUCH:
 				updateContainerFrom = "Rune Pouch";
+				break;
+			case BOLT_POUCH:
+				updateContainerFrom = "Bolt Pouch";
 				break;
 			default:
 				assert false : "Wrong slot ID!";
@@ -272,7 +274,7 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 
 	abstract public void setupContainerPanel(final JPanel containerSlotsPanel);
 
-	abstract public void highlightSlots(final ArrayList<InventorySetupsItem> currContainer, final InventorySetup inventorySetup);
+	abstract public void highlightSlots(final List<InventorySetupsItem> currContainer, final InventorySetup inventorySetup);
 
 	abstract public void updatePanelWithSetupInformation(final InventorySetup setup);
 

@@ -26,6 +26,7 @@ package inventorysetups;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public enum InventorySetupsStackCompareID
 {
@@ -43,7 +44,7 @@ public enum InventorySetupsStackCompareID
 
 	private final int type;
 
-	private static final ArrayList<InventorySetupsStackCompareID> VALUES;
+	private static final List<InventorySetupsStackCompareID> VALUES;
 
 	static
 	{
@@ -61,7 +62,7 @@ public enum InventorySetupsStackCompareID
 		return type;
 	}
 
-	public static ArrayList<InventorySetupsStackCompareID> getValues()
+	public static List<InventorySetupsStackCompareID> getValues()
 	{
 		return VALUES;
 	}

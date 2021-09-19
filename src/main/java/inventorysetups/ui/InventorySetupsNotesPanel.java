@@ -27,10 +27,12 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
-import lombok.Setter;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
-
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -41,12 +43,9 @@ import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.util.ArrayList;
+import lombok.Setter;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
 
 public class InventorySetupsNotesPanel extends InventorySetupsContainerPanel
 {
@@ -148,7 +147,7 @@ public class InventorySetupsNotesPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlots(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(List<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 	}
 

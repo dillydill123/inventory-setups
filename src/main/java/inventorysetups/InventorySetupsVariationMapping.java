@@ -1,13 +1,13 @@
 package inventorysetups;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemVariationMapping;
 
-import java.util.HashMap;
-
 public class InventorySetupsVariationMapping
 {
-	private static final HashMap<Integer, Integer> mappings;
+	private static final Map<Integer, Integer> mappings;
 
 	public InventorySetupsVariationMapping()
 	{

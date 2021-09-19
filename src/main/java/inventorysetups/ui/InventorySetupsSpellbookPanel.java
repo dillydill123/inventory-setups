@@ -26,25 +26,25 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
-import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsPlugin;
-import net.runelite.api.SpriteID;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
+import inventorysetups.InventorySetupsSlotID;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import net.runelite.api.SpriteID;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
 
 
 public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 {
 
 	private InventorySetupsSlot spellbookSlot;
-	private ArrayList<BufferedImage> spellbookImages;
+	private List<BufferedImage> spellbookImages;
 
 	InventorySetupsSpellbookPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
@@ -115,7 +115,7 @@ public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlots(ArrayList<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
+	public void highlightSlots(List<InventorySetupsItem> currContainer, InventorySetup inventorySetup)
 	{
 		plugin.getClientThread().invokeLater(() ->
 		{

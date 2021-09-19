@@ -1,7 +1,12 @@
 package inventorysetups;
 
 import com.google.inject.Guice;
+import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.InventoryID;
 import net.runelite.api.ItemID;
@@ -10,22 +15,14 @@ import net.runelite.client.account.SessionManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import com.google.inject.testing.fieldbinder.Bind;
-
-import javax.inject.Inject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import static org.mockito.Mockito.when;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InventorySetupsUnitTest
@@ -91,11 +88,12 @@ public class InventorySetupsUnitTest
 	@Test
 	public void testSetupContainsItem()
 	{
-		ArrayList<InventorySetupsItem> inventory = inventorySetupsPlugin.getNormalizedContainer(InventoryID.INVENTORY);
-		ArrayList<InventorySetupsItem> equipment = inventorySetupsPlugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-		ArrayList<InventorySetupsItem> runePouch = null;
-		HashMap<Integer, InventorySetupsItem> addItems = new HashMap<>();
-		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, addItems, "Test",
+		List<InventorySetupsItem> inventory = inventorySetupsPlugin.getNormalizedContainer(InventoryID.INVENTORY);
+		List<InventorySetupsItem> equipment = inventorySetupsPlugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+		List<InventorySetupsItem> runePouch = null;
+		List<InventorySetupsItem> boltPouch = null;
+		Map<Integer, InventorySetupsItem> addItems = new HashMap<>();
+		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, boltPouch, addItems, "Test",
 												"", inventorySetupsConfig.highlightColor(), false,
 										false,false, 0, 0L, false);
 
