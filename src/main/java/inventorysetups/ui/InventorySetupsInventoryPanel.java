@@ -24,21 +24,22 @@
  */
 package inventorysetups.ui;
 
-import inventorysetups.InventorySetupsSlotID;
-import inventorysetups.InventorySetupsPlugin;
-import inventorysetups.InventorySetupsVariationMapping;
-import net.runelite.api.ItemID;
-import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
-import net.runelite.client.ui.ColorScheme;
-
-import javax.swing.JPanel;
+import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsSlotID;
+import inventorysetups.InventorySetupsVariationMapping;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JPanel;
+import net.runelite.api.ItemID;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
 
 // The panel that contains the inventory slots
 public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
@@ -47,13 +48,17 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	private static final int ITEMS_PER_ROW = 4;
 	private static final int NUM_INVENTORY_ITEMS = 28;
 
-	private ArrayList<InventorySetupsSlot> inventorySlots;
-	private InventorySetupsRunePouchPanel runePouchPanel;
+	private List<InventorySetupsSlot> inventorySlots;
+	private final InventorySetupsRunePouchPanel runePouchPanel;
+	private final InventorySetupsBoltPouchPanel boltPouchPanel;
 
-	InventorySetupsInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin, final InventorySetupsRunePouchPanel runePouchPanel)
+	InventorySetupsInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin,
+								  final InventorySetupsRunePouchPanel runePouchPanel,
+								  final InventorySetupsBoltPouchPanel boltPouchPanel)
 	{
 		super(itemManager, plugin, "Inventory");
 		this.runePouchPanel = runePouchPanel;
+		this.boltPouchPanel = boltPouchPanel;
 	}
 
 	@Override
@@ -91,9 +96,9 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlots(final ArrayList<InventorySetupsItem> currInventory, final InventorySetup inventorySetup)
+	public void highlightSlots(final List<InventorySetupsItem> currInventory, final InventorySetup inventorySetup)
 	{
-		final ArrayList<InventorySetupsItem> inventoryToCheck = inventorySetup.getInventory();
+		final List<InventorySetupsItem> inventoryToCheck = inventorySetup.getInventory();
 
 		assert currInventory.size() == inventoryToCheck.size() : "size mismatch";
 
@@ -117,11 +122,21 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		}
 
 		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
-		plugin.getClientThread().invokeLater(() ->
-		{
-			handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal);
-		});
+		plugin.getClientThread().invokeLater(() -> handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal));
 
+		boolean currInvHasBoltPouch = false;
+		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
+		{
+			InventorySetupsItem currInvItem = currInventory.get(i);
+			if (!currInvHasBoltPouch && InventorySetupsVariationMapping.map(currInvItem.getId()) == ItemID.BOLT_POUCH)
+			{
+				currInvHasBoltPouch = true;
+			}
+			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
+		}
+
+		final boolean currInvHasBoltPouchFinal = currInvHasBoltPouch;
+		plugin.getClientThread().invokeLater(() -> handleBoltPouchHighlighting(inventorySetup, currInvHasBoltPouchFinal));
 	}
 
 	@Override
@@ -139,6 +154,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		}
 
 		runePouchPanel.resetSlotColors();
+		boltPouchPanel.resetSlotColors();
 
 		isHighlighted = false;
 	}
@@ -148,12 +164,13 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		return true;
 	}
 
-	private void doUnorderedHighlighting(final ArrayList<InventorySetupsItem> currInventory, final InventorySetup inventorySetup)
+	private void doUnorderedHighlighting(final List<InventorySetupsItem> currInventory, final InventorySetup inventorySetup)
 	{
-		HashMap<Integer, ArrayList<Integer>> currentInventoryMapping = new HashMap<>();
+		Map<Integer, List<Integer>> currentInventoryMapping = new HashMap<>();
 
-		// collect items in current inventory in the form of a HashMap -> ArrayList of stack sizes
+		// collect items in current inventory in the form of a Map -> List of stack sizes
 		boolean currInvHasRunePouch = false;
+		boolean currInvHasBoltPouch = false;
 		for (final InventorySetupsItem item : currInventory)
 		{
 			// Use fuzzy mapping
@@ -162,7 +179,12 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 				currInvHasRunePouch = true;
 			}
 
-			ArrayList<Integer> currentItemList = currentInventoryMapping.get(item.getId());
+			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.BOLT_POUCH)
+			{
+				currInvHasBoltPouch = true;
+			}
+
+			List<Integer> currentItemList = currentInventoryMapping.get(item.getId());
 			if (currentItemList == null)
 			{
 				currentItemList = new ArrayList<>();
@@ -171,9 +193,9 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			currentItemList.add(item.getQuantity());
 		}
 
-		final ArrayList<InventorySetupsItem> setupInventory = inventorySetup.getInventory();
+		final List<InventorySetupsItem> setupInventory = inventorySetup.getInventory();
 
-		ArrayList<Boolean> processedInventoryItems = new ArrayList<>(Arrays.asList(new Boolean[setupInventory.size()]));
+		List<Boolean> processedInventoryItems = new ArrayList<>(Arrays.asList(new Boolean[setupInventory.size()]));
 		Collections.fill(processedInventoryItems, Boolean.FALSE);
 
 		// First process non fuzzy exact items, then fuzzy exact items
@@ -193,7 +215,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 
 			// Exact items have been handled, try to find fuzzy items
 			int savedItemId = savedItemFromInventory.getId();
-			ArrayList<Integer> currentItemListForSpecificId = currentInventoryMapping.get(savedItemId);
+			List<Integer> currentItemListForSpecificId = currentInventoryMapping.get(savedItemId);
 			if (currentItemListForSpecificId == null && savedItemFromInventory.isFuzzy()) // item list should always return null, exact matches handled above
 			{
 				// if the item is fuzzy, attempt to find a suitable item
@@ -224,14 +246,19 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal);
 		});
 
+		final boolean currInvHasBoltPouchFinal = currInvHasBoltPouch;
+		plugin.getClientThread().invokeLater(() ->
+		{
+			handleBoltPouchHighlighting(inventorySetup, currInvHasBoltPouchFinal);
+		});
 	}
 
 	private void processExactItems(final InventorySetup inventorySetup,
-									final HashMap<Integer, ArrayList<Integer>> currentInventoryMapping,
-									final ArrayList<Boolean> processedInvItems,
-									final boolean allowFuzzy)
+								   final Map<Integer, List<Integer>> currentInventoryMapping,
+								   final List<Boolean> processedInvItems,
+								   final boolean allowFuzzy)
 	{
-		ArrayList<InventorySetupsItem> setupInventory = inventorySetup.getInventory();
+		List<InventorySetupsItem> setupInventory = inventorySetup.getInventory();
 
 		// Handle exact non fuzzy items first
 		// Exact items will be preferred first
@@ -254,7 +281,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			}
 
 			// Only mark it as processed if the item exists. If it doesn't there may be a fuzzy variant available
-			ArrayList<Integer> currentItemListForSpecificId = currentInventoryMapping.get(savedItemFromInventory.getId());
+			List<Integer> currentItemListForSpecificId = currentInventoryMapping.get(savedItemFromInventory.getId());
 			if (currentItemListForSpecificId != null && (allowFuzzy || !savedItemFromInventory.isFuzzy()))
 			{
 				updateCurrentUnorderedSlot(savedItemFromInventory.getId(), inventorySetup, inventorySlots.get(i), savedItemFromInventory, currentItemListForSpecificId, currentInventoryMapping);
@@ -268,8 +295,8 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	private void updateCurrentUnorderedSlot(int itemId, final InventorySetup inventorySetup,
 											final InventorySetupsSlot currentSlot,
 											final InventorySetupsItem savedItemFromInventory,
-											final ArrayList<Integer> currentItemListForSpecificId,
-											final HashMap<Integer, ArrayList<Integer>> currentInventoryMapping)
+											final List<Integer> currentItemListForSpecificId,
+											final Map<Integer, List<Integer>> currentInventoryMapping)
 	{
 		// This assumes the last item contains the correct quantity. This is done because
 		// in the actual game, you can't have two stacks of stackable items. This assumption
@@ -293,15 +320,15 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		}
 	}
 
-	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, boolean doesCurrentInventoryHasRunePouch)
+	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, boolean doesCurrentInventoryHaveRunePouch)
 	{
-		if (inventorySetup.getRune_pouch() != null)
+		if (inventorySetup.getRunePouch() != null)
 		{
 
 			// attempt to highlight if rune pouch is available
-			if (doesCurrentInventoryHasRunePouch)
+			if (doesCurrentInventoryHaveRunePouch)
 			{
-				ArrayList<InventorySetupsItem> runePouchToCheck = plugin.getRunePouchData();
+				List<InventorySetupsItem> runePouchToCheck = plugin.getRunePouchData();
 				runePouchPanel.highlightSlots(runePouchToCheck, inventorySetup);
 			}
 			else // if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
@@ -312,6 +339,28 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		else
 		{
 			runePouchPanel.resetSlotColors();
+		}
+	}
+
+	private void handleBoltPouchHighlighting(final InventorySetup inventorySetup, boolean doesCurrentInventoryHaveBoltPouch)
+	{
+		if (inventorySetup.getBoltPouch() != null)
+		{
+
+			// attempt to highlight if bolt pouch is available
+			if (doesCurrentInventoryHaveBoltPouch)
+			{
+				List<InventorySetupsItem> boltPouchToCheck = plugin.getBoltPouchData();
+				boltPouchPanel.highlightSlots(boltPouchToCheck, inventorySetup);
+			}
+			else // if the current inventory doesn't have a bolt pouch but the setup does, highlight the pouch
+			{
+				boltPouchPanel.highlightAllSlots(inventorySetup);
+			}
+		}
+		else
+		{
+			boltPouchPanel.resetSlotColors();
 		}
 	}
 }

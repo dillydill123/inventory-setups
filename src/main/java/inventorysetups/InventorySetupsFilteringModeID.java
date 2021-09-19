@@ -26,6 +26,7 @@ package inventorysetups;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public enum InventorySetupsFilteringModeID
 {
@@ -43,7 +44,7 @@ public enum InventorySetupsFilteringModeID
 
 	private final int type;
 
-	private static final ArrayList<InventorySetupsFilteringModeID> VALUES;
+	private static final List<InventorySetupsFilteringModeID> VALUES;
 
 	static
 	{
@@ -61,7 +62,7 @@ public enum InventorySetupsFilteringModeID
 		return type;
 	}
 
-	public static ArrayList<InventorySetupsFilteringModeID> getValues()
+	public static List<InventorySetupsFilteringModeID> getValues()
 	{
 		return VALUES;
 	}

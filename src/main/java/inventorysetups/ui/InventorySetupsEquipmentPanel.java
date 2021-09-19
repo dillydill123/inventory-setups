@@ -24,24 +24,23 @@
  */
 package inventorysetups.ui;
 
-import inventorysetups.InventorySetupsSlotID;
-import inventorysetups.InventorySetupsPlugin;
-import net.runelite.api.EquipmentInventorySlot;
-
-import net.runelite.client.game.ItemManager;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
-import net.runelite.client.ui.ColorScheme;
-
-import javax.swing.JPanel;
+import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsSlotID;
 import java.awt.GridLayout;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JPanel;
+import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.ui.ColorScheme;
 
 // The panel that contains the equipment slots
 public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 {
-	private HashMap<EquipmentInventorySlot, InventorySetupsSlot> equipmentSlots;
+	private Map<EquipmentInventorySlot, InventorySetupsSlot> equipmentSlots;
 
 	InventorySetupsEquipmentPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
@@ -107,9 +106,9 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 	}
 
 	@Override
-	public void highlightSlots(final ArrayList<InventorySetupsItem> currentEquipment, final InventorySetup inventorySetup)
+	public void highlightSlots(final List<InventorySetupsItem> currentEquipment, final InventorySetup inventorySetup)
 	{
-		final ArrayList<InventorySetupsItem> savedEquipmentFromSetup = inventorySetup.getEquipment();
+		final List<InventorySetupsItem> savedEquipmentFromSetup = inventorySetup.getEquipment();
 
 		assert currentEquipment.size() == savedEquipmentFromSetup.size() : "size mismatch";
 

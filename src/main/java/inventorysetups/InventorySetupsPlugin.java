@@ -31,9 +31,26 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.ui.Bolts;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javafx.util.Pair;
+import javax.inject.Inject;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.Setter;
@@ -87,27 +104,9 @@ import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 
-
-import javax.inject.Inject;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
-import java.awt.Toolkit;
-import java.awt.datatransfer.StringSelection;
-import java.awt.image.BufferedImage;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 @PluginDescriptor(
-		name = "Inventory Setups",
-		description = "Save gear setups for specific activities"
+	name = "Inventory Setups",
+	description = "Save gear setups for specific activities"
 )
 
 @Slf4j
@@ -169,7 +168,7 @@ public class InventorySetupsPlugin extends Plugin
 	private InventorySetupsPluginPanel panel;
 
 	@Getter
-	private ArrayList<InventorySetup> inventorySetups;
+	private List<InventorySetup> inventorySetups;
 
 	private NavigationButton navButton;
 
@@ -202,15 +201,31 @@ public class InventorySetupsPlugin extends Plugin
 	private InventorySetupsFilteringModeID bankFilteringMode;
 
 	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
-			{
-					Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3
-			};
+		{
+			Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3
+		};
 	private static final Varbits[] RUNE_POUCH_RUNE_VARBITS =
-			{
-					Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
-			};
+		{
+			Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
+		};
 
+	private static final int BOLT_POUCH_AMOUNT1 = 2469;
+	private static final int BOLT_POUCH_AMOUNT2 = 2470;
+	private static final int BOLT_POUCH_AMOUNT3 = 2471;
+	private static final int BOLT_POUCH_EXTRA_AMMO_AMOUNT = 2472;
+	private static final int BOLT_POUCH_BOLT1 = 2473;
+	private static final int BOLT_POUCH_BOLT2 = 2474;
+	private static final int BOLT_POUCH_BOLT3 = 2475;
+	private static final int BOLT_POUCH_EXTRA_AMMO = 2476;
 
+	private static final int[] BOLT_POUCH_AMOUNT_VARBIT_IDS =
+		{
+			BOLT_POUCH_AMOUNT1, BOLT_POUCH_AMOUNT2, BOLT_POUCH_AMOUNT3, BOLT_POUCH_EXTRA_AMMO_AMOUNT
+		};
+	private static final int[] BOLT_POUCH_BOLT_VARBIT_IDS =
+		{
+			BOLT_POUCH_BOLT1, BOLT_POUCH_BOLT2, BOLT_POUCH_BOLT3, BOLT_POUCH_EXTRA_AMMO
+		};
 
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
@@ -322,20 +337,20 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				case BANK_FILTERED:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-													.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
-													.filter(i -> inventorySetups.get(i.getValue()).isFilterBank())
-													.collect(Collectors.toList());
+						.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+						.filter(i -> inventorySetups.get(i.getValue()).isFilterBank())
+						.collect(Collectors.toList());
 					break;
 				case FAVORITED:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-													.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
-													.filter(i -> inventorySetups.get(i.getValue()).isFavorite())
-													.collect(Collectors.toList());
+						.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+						.filter(i -> inventorySetups.get(i.getValue()).isFavorite())
+						.collect(Collectors.toList());
 					break;
 				default:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-												.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
-												.collect(Collectors.toList());
+						.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+						.collect(Collectors.toList());
 					break;
 			}
 
@@ -405,9 +420,9 @@ public class InventorySetupsPlugin extends Plugin
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
 		else if (panel.getCurrentSelectedSetup() != null
-				&& event.getActionParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId()
-				&& client.isKeyPressed(KeyCode.KC_SHIFT)
-				&& event.getOption().equals("Examine"))
+			&& event.getActionParam1() == WidgetInfo.BANK_ITEM_CONTAINER.getId()
+			&& client.isKeyPressed(KeyCode.KC_SHIFT)
+			&& event.getOption().equals("Examine"))
 		{
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			final int oldMenuSize = menuEntries.length;
@@ -479,7 +494,7 @@ public class InventorySetupsPlugin extends Plugin
 		try
 		{
 			final Properties props = new Properties();
-			InputStream is = InventorySetupsPlugin.class.getResourceAsStream( "/version.properties");
+			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/version.properties");
 			props.load(is);
 			this.currentVersion = props.getProperty("version");
 		}
@@ -493,11 +508,11 @@ public class InventorySetupsPlugin extends Plugin
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/inventorysetups_icon.png");
 
 		navButton = NavigationButton.builder()
-				.tooltip("Inventory Setups")
-				.icon(icon)
-				.priority(6)
-				.panel(panel)
-				.build();
+			.tooltip("Inventory Setups")
+			.icon(icon)
+			.priority(6)
+			.panel(panel)
+			.build();
 
 		// Clicking the nav button will do a bank search
 		navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
@@ -536,9 +551,9 @@ public class InventorySetupsPlugin extends Plugin
 	public void addInventorySetup()
 	{
 		final String name = JOptionPane.showInputDialog(panel,
-				"Enter the name of this setup.",
-				"Add New Setup",
-				JOptionPane.PLAIN_MESSAGE);
+			"Enter the name of this setup.",
+			"Add New Setup",
+			JOptionPane.PLAIN_MESSAGE);
 
 		// cancel button was clicked
 		if (name == null)
@@ -548,27 +563,34 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientThread.invokeLater(() ->
 		{
-			ArrayList<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
-			ArrayList<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
+			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			ArrayList<InventorySetupsItem> runePouchData = null;
+			List<InventorySetupsItem> runePouchData = null;
 			final boolean inventoryHasRunePouch = containerContainsRunePouch(inv);
+			List<InventorySetupsItem> boltPouchData = null;
+			final boolean inventoryHasBoltPouch = containerContainsBoltPouch(inv);
 
 			if (inventoryHasRunePouch)
 			{
 				runePouchData = getRunePouchData();
 			}
 
+			if (inventoryHasBoltPouch)
+			{
+				boltPouchData = getBoltPouchData();
+			}
+
 			int spellbook = getCurrentSpellbook();
 
 			updateNextSetupId();
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, new HashMap<>(), name, "",
-													config.highlightColor(),
-													config.highlightDifference(),
-													config.bankFilter(),
-													config.highlightUnorderedDifference(),
-													spellbook, nextInventorySetupId, false);
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), name, "",
+				config.highlightColor(),
+				config.highlightDifference(),
+				config.bankFilter(),
+				config.highlightUnorderedDifference(),
+				spellbook, nextInventorySetupId, false);
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -590,8 +612,8 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		final String textToFilterLower = textToFilter.toLowerCase();
 		return inventorySetups.stream()
-				.filter(i -> i.getName().toLowerCase().contains(textToFilterLower))
-				.collect(Collectors.toList());
+			.filter(i -> i.getName().toLowerCase().contains(textToFilterLower))
+			.collect(Collectors.toList());
 	}
 
 	public void doBankSearch()
@@ -693,8 +715,8 @@ public class InventorySetupsPlugin extends Plugin
 					return;
 				}
 
-				final HashMap<Integer, InventorySetupsItem> additionalFilteredItems =
-						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+				final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+					panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
 
 				// Item already exists, don't add it again
 				if (!additionalFilteredItemsHasItem(item.getId(), additionalFilteredItems))
@@ -721,14 +743,14 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		else if (panel.getCurrentSelectedSetup() != null
-				&& (event.getMenuOption().startsWith("View tab") || event.getMenuOption().equals("View all items")))
+			&& (event.getMenuOption().startsWith("View tab") || event.getMenuOption().equals("View all items")))
 		{
 			internalFilteringIsAllowed = false;
 			return;
 		}
 	}
 
-	private boolean additionalFilteredItemsHasItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
+	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 		final int canonicalizedId = itemManager.canonicalize(itemId);
 		for (final Integer additionalItemKey : additionalFilteredItems.keySet())
@@ -744,7 +766,7 @@ public class InventorySetupsPlugin extends Plugin
 		return false;
 	}
 
-	private void addAdditionalFilteredItem(int itemId, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
+	private void addAdditionalFilteredItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 		// un-noted, un-placeholdered ID
 		final int processedItemId = itemManager.canonicalize(itemId);
@@ -786,9 +808,9 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public ArrayList<InventorySetupsItem> getRunePouchData()
+	public List<InventorySetupsItem> getRunePouchData()
 	{
-		ArrayList<InventorySetupsItem> runePouchData = new ArrayList<>();
+		List<InventorySetupsItem> runePouchData = new ArrayList<>();
 
 		for (int i = 0; i < RUNE_POUCH_RUNE_VARBITS.length; i++)
 		{
@@ -803,6 +825,28 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		return runePouchData;
+	}
+
+	public List<InventorySetupsItem> getBoltPouchData()
+	{
+		List<InventorySetupsItem> boltPouchData = new ArrayList<>();
+
+		for (int i = 0; i < BOLT_POUCH_BOLT_VARBIT_IDS.length; i++)
+		{
+			int boltVarbitId = client.getVarbitValue(BOLT_POUCH_BOLT_VARBIT_IDS[i]);
+			Bolts bolt = Bolts.getBolt(boltVarbitId);
+			boolean boltNotFound = bolt == null;
+			int boltAmount = boltNotFound ? 0 : client.getVarbitValue(BOLT_POUCH_AMOUNT_VARBIT_IDS[i]);
+			String boltName = boltNotFound ? "" : itemManager.getItemComposition(bolt.getItemId()).getName();
+			int boltItemId = boltNotFound ? -1 : bolt.getItemId();
+
+			InventorySetupsStackCompareID stackCompareType =
+				panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.BOLT_POUCH, i)
+					? config.stackCompareType() : InventorySetupsStackCompareID.None;
+			boltPouchData.add(new InventorySetupsItem(boltItemId, boltName, boltAmount, false, stackCompareType));
+		}
+
+		return boltPouchData;
 	}
 
 	@Subscribe
@@ -829,11 +873,17 @@ public class InventorySetupsPlugin extends Plugin
 							break;
 						case INVENTORY:
 							boolean runePouchContainsItem = false;
-							if (currentSetup.getRune_pouch() != null)
+							if (currentSetup.getRunePouch() != null)
 							{
-								runePouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getRune_pouch());
+								runePouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getRunePouch());
 							}
-							containsItem = runePouchContainsItem || checkIfContainerContainsItem(itemId, currentSetup.getInventory());
+							boolean boltPouchContainsItem = false;
+							if (currentSetup.getBoltPouch() != null)
+							{
+								boltPouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getBoltPouch());
+							}
+							containsItem = runePouchContainsItem || boltPouchContainsItem ||
+								checkIfContainerContainsItem(itemId, currentSetup.getInventory());
 							break;
 						case EQUIPMENT:
 							containsItem = checkIfContainerContainsItem(itemId, currentSetup.getEquipment());
@@ -929,8 +979,8 @@ public class InventorySetupsPlugin extends Plugin
 	public void updateCurrentSetup(InventorySetup setup)
 	{
 		int confirm = JOptionPane.showConfirmDialog(panel,
-				"Are you sure you want update this inventory setup?",
-				"Warning", JOptionPane.OK_CANCEL_OPTION);
+			"Are you sure you want update this inventory setup?",
+			"Warning", JOptionPane.OK_CANCEL_OPTION);
 
 		// cancel button was clicked
 		if (confirm != JOptionPane.YES_OPTION)
@@ -941,8 +991,8 @@ public class InventorySetupsPlugin extends Plugin
 		// must be on client thread to get names
 		clientThread.invokeLater(() ->
 		{
-			ArrayList<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
-			ArrayList<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
+			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			// copy over fuzzy attributes
 			for (int i = 0; i < inv.size(); i++)
@@ -956,13 +1006,20 @@ public class InventorySetupsPlugin extends Plugin
 				eqp.get(i).setStackCompare(setup.getEquipment().get(i).getStackCompare());
 			}
 
-			ArrayList<InventorySetupsItem> runePouchData = null;
+			List<InventorySetupsItem> runePouchData = null;
 			if (checkIfContainerContainsItem(ItemID.RUNE_POUCH, inv))
 			{
 				runePouchData = getRunePouchData();
 			}
 
+			List<InventorySetupsItem> boltPouchData = null;
+			if (checkIfContainerContainsItem(ItemID.BOLT_POUCH, inv))
+			{
+				boltPouchData = getBoltPouchData();
+			}
+
 			setup.updateRunePouch(runePouchData);
+			setup.updateBoltPouch(boltPouchData);
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
@@ -976,26 +1033,32 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You must be logged in to update from " + (slot.getSlotID().toString().toLowerCase() + "."),
-					"Cannot Update Item",
-					JOptionPane.ERROR_MESSAGE);
+				"You must be logged in to update from " + (slot.getSlotID().toString().toLowerCase() + "."),
+				"Cannot Update Item",
+				JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 		final boolean isFuzzy = getContainerFromSlot(slot).get(slot.getIndexInSlot()).isFuzzy();
 		final InventorySetupsStackCompareID stackCompareType = getContainerFromSlot(slot).get(slot.getIndexInSlot()).getStackCompare();
 
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
 		{
-			final ArrayList<InventorySetupsItem> playerContainer = getNormalizedContainer(slot.getSlotID());
+			final List<InventorySetupsItem> playerContainer = getNormalizedContainer(slot.getSlotID());
 			final InventorySetupsItem newItem = playerContainer.get(slot.getIndexInSlot());
 			newItem.setFuzzy(isFuzzy);
 			newItem.setStackCompare(stackCompareType);
 
 			// update the rune pouch data
 			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+			{
+				return;
+			}
+
+			// update the bolt pouch data
+			if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
 			{
 				return;
 			}
@@ -1013,9 +1076,9 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You must be logged in to search.",
-					"Cannot Search for Item",
-					JOptionPane.ERROR_MESSAGE);
+				"You must be logged in to search.",
+				"Cannot Search for Item",
+				JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
@@ -1037,30 +1100,36 @@ public class InventorySetupsPlugin extends Plugin
 							// only allow numbers and k, m, b (if 1 value is available)
 							// stop once k, m, or b is seen
 							.addCharValidator(arg -> ((arg >= '0' && arg <= '9' &&
-														!searchInput.getValue().toLowerCase().contains("k") &&
-														!searchInput.getValue().toLowerCase().contains("m") &&
-														!searchInput.getValue().toLowerCase().contains("b"))
-														||
-														((arg == 'b' || arg == 'B' ||
-														arg == 'k' || arg == 'K' ||
-														arg == 'm' || arg == 'M') &&
-														searchInput.getValue().length() > 0 &&
-														!searchInput.getValue().toLowerCase().contains("k") &&
-														!searchInput.getValue().toLowerCase().contains("m") &&
-														!searchInput.getValue().toLowerCase().contains("b"))))
+								!searchInput.getValue().toLowerCase().contains("k") &&
+								!searchInput.getValue().toLowerCase().contains("m") &&
+								!searchInput.getValue().toLowerCase().contains("b"))
+								||
+								((arg == 'b' || arg == 'B' ||
+									arg == 'k' || arg == 'K' ||
+									arg == 'm' || arg == 'M') &&
+									searchInput.getValue().length() > 0 &&
+									!searchInput.getValue().toLowerCase().contains("k") &&
+									!searchInput.getValue().toLowerCase().contains("m") &&
+									!searchInput.getValue().toLowerCase().contains("b"))))
 							.onDone((input) ->
 							{
 								clientThread.invokeLater(() ->
 								{
 									int quantity = parseTextInputAmount(input);
 
-									final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+									final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
 									final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 
 									// update the rune pouch data
 									if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+									{
+										return;
+									}
+
+									// update the bolt pouch data
+									if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
 									{
 										return;
 									}
@@ -1076,8 +1145,8 @@ public class InventorySetupsPlugin extends Plugin
 					{
 						if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 						{
-							final HashMap<Integer, InventorySetupsItem> additionalFilteredItems =
-									panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+							final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
 							if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
 							{
 								removeAdditionalFilteredItem(slot, additionalFilteredItems);
@@ -1087,12 +1156,17 @@ public class InventorySetupsPlugin extends Plugin
 						}
 						else
 						{
-							final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+							final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 							final String itemName = itemManager.getItemComposition(finalId).getName();
 							final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 							// update the rune pouch data
 							if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+							{
+								return;
+							}
+							// update the bolt pouch data
+							if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
 							{
 								return;
 							}
@@ -1113,9 +1187,9 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You must be logged in to remove item from the slot.",
-					"Cannot Remove Item",
-					JOptionPane.ERROR_MESSAGE);
+				"You must be logged in to remove item from the slot.",
+				"Cannot Remove Item",
+				JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
@@ -1131,12 +1205,18 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 
 			// update the rune pouch data
 			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), dummyItem))
+			{
+				return;
+			}
+
+			// update the bolt pouch data
+			if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
 			}
@@ -1156,7 +1236,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 		{
-			final HashMap<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
+			final Map<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
 			final int slotID = slot.getIndexInSlot();
 			int j = 0;
 			Integer keyToMakeFuzzy = null;
@@ -1173,7 +1253,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		else
 		{
-			final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 			container.get(slot.getIndexInSlot()).toggleIsFuzzy();
 		}
 
@@ -1188,14 +1268,14 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final ArrayList<InventorySetupsItem> container = getContainerFromSlot(slot);
+		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 		container.get(slot.getIndexInSlot()).setStackCompare(newStackCompare);
 
 		updateConfig();
 		panel.refreshCurrentSetup();
 	}
 
-	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final HashMap<Integer, InventorySetupsItem> additionalFilteredItems)
+	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 
 		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
@@ -1250,8 +1330,8 @@ public class InventorySetupsPlugin extends Plugin
 	public void removeInventorySetup(final InventorySetup setup)
 	{
 		int confirm = JOptionPane.showConfirmDialog(panel,
-				"Are you sure you want to permanently delete this inventory setup?",
-				"Warning", JOptionPane.OK_CANCEL_OPTION);
+			"Are you sure you want to permanently delete this inventory setup?",
+			"Warning", JOptionPane.OK_CANCEL_OPTION);
 
 		if (confirm != JOptionPane.YES_OPTION)
 		{
@@ -1340,7 +1420,7 @@ public class InventorySetupsPlugin extends Plugin
 		return client.getVarbitValue(SPELLBOOK_VARBIT);
 	}
 
-	public ArrayList<InventorySetupsItem> getNormalizedContainer(final InventorySetupsSlotID id)
+	public List<InventorySetupsItem> getNormalizedContainer(final InventorySetupsSlotID id)
 	{
 		switch (id)
 		{
@@ -1350,19 +1430,21 @@ public class InventorySetupsPlugin extends Plugin
 				return getNormalizedContainer(InventoryID.EQUIPMENT);
 			case RUNE_POUCH:
 				return getRunePouchData();
+			case BOLT_POUCH:
+				return getBoltPouchData();
 			default:
 				assert false : "Wrong slot ID!";
 				return null;
 		}
 	}
 
-	public ArrayList<InventorySetupsItem> getNormalizedContainer(final InventoryID id)
+	public List<InventorySetupsItem> getNormalizedContainer(final InventoryID id)
 	{
 		assert id == InventoryID.INVENTORY || id == InventoryID.EQUIPMENT : "invalid inventory ID";
 
 		final ItemContainer container = client.getItemContainer(id);
 
-		ArrayList<InventorySetupsItem> newContainer = new ArrayList<>();
+		List<InventorySetupsItem> newContainer = new ArrayList<>();
 
 		Item[] items = null;
 		if (container != null)
@@ -1376,7 +1458,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 
 			final InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.fromInventoryID(id), i) ?
-																	config.stackCompareType() : InventorySetupsStackCompareID.None;
+				config.stackCompareType() : InventorySetupsStackCompareID.None;
 			if (items == null || i >= items.length)
 			{
 				// add a "dummy" item to fill the normalized container to the right size
@@ -1408,9 +1490,9 @@ public class InventorySetupsPlugin extends Plugin
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
 
 		JOptionPane.showMessageDialog(panel,
-				"Setup data was copied to clipboard.",
-				"Export Setup Succeeded",
-				JOptionPane.PLAIN_MESSAGE);
+			"Setup data was copied to clipboard.",
+			"Export Setup Succeeded",
+			JOptionPane.PLAIN_MESSAGE);
 	}
 
 	public void importSetup()
@@ -1418,9 +1500,9 @@ public class InventorySetupsPlugin extends Plugin
 		try
 		{
 			final String setup = JOptionPane.showInputDialog(panel,
-					"Enter setup data",
-					"Import New Setup",
-					JOptionPane.PLAIN_MESSAGE);
+				"Enter setup data",
+				"Import New Setup",
+				JOptionPane.PLAIN_MESSAGE);
 
 			// cancel button was clicked
 			if (setup == null)
@@ -1434,15 +1516,19 @@ public class InventorySetupsPlugin extends Plugin
 
 			}.getType();
 
-			final InventorySetup newSetup  = gson.fromJson(setup, type);
+			final InventorySetup newSetup = gson.fromJson(setup, type);
 			// override the ID with our own
 			updateNextSetupId();
 			newSetup.setId(nextInventorySetupId);
 			clientThread.invokeLater(() ->
 			{
-				if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
+				if (newSetup.getRunePouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
 				{
 					newSetup.updateRunePouch(getRunePouchData());
+				}
+				if (newSetup.getBoltPouch() == null && checkIfContainerContainsItem(ItemID.BOLT_POUCH, newSetup.getInventory()))
+				{
+					newSetup.updateBoltPouch(getBoltPouchData());
 				}
 				if (newSetup.getNotes() == null)
 				{
@@ -1454,9 +1540,9 @@ public class InventorySetupsPlugin extends Plugin
 		catch (Exception e)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"Invalid setup data.",
-					"Import Setup Failed",
-					JOptionPane.ERROR_MESSAGE);
+				"Invalid setup data.",
+				"Import Setup Failed",
+				JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -1504,7 +1590,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	private ArrayList<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
+	private List<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
 	{
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
 
@@ -1515,7 +1601,9 @@ public class InventorySetupsPlugin extends Plugin
 			case EQUIPMENT:
 				return slot.getParentSetup().getEquipment();
 			case RUNE_POUCH:
-				return slot.getParentSetup().getRune_pouch();
+				return slot.getParentSetup().getRunePouch();
+			case BOLT_POUCH:
+				return slot.getParentSetup().getBoltPouch();
 			default:
 				assert false : "Invalid ID given";
 				return null;
@@ -1575,19 +1663,28 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		// check the rune pouch to see if it has the item (runes in this case)
-		if (setup.getRune_pouch() != null)
+		if (setup.getRunePouch() != null)
 		{
-			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch()))
+			if (checkIfContainerContainsItem(itemID, setup.getRunePouch()))
+			{
+				return true;
+			}
+		}
+
+		// check the bolt pouch to see if it has the item (bolts in this case)
+		if (setup.getBoltPouch() != null)
+		{
+			if (checkIfContainerContainsItem(itemID, setup.getBoltPouch()))
 			{
 				return true;
 			}
 		}
 
 		return checkIfContainerContainsItem(itemID, setup.getInventory()) ||
-				checkIfContainerContainsItem(itemID, setup.getEquipment());
+			checkIfContainerContainsItem(itemID, setup.getEquipment());
 	}
 
-	private boolean checkIfContainerContainsItem(int itemID, final ArrayList<InventorySetupsItem> setupContainer)
+	private boolean checkIfContainerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
 	{
 		// So place holders will show up in the bank.
 		itemID = itemManager.canonicalize(itemID);
@@ -1628,23 +1725,23 @@ public class InventorySetupsPlugin extends Plugin
 				SwingUtilities.invokeLater(() ->
 				{
 					JOptionPane.showMessageDialog(panel,
-							"You can't have a Rune Pouch there.",
-							"Invalid Item",
-							JOptionPane.ERROR_MESSAGE);
+						"You can't have a Rune Pouch there.",
+						"Invalid Item",
+						JOptionPane.ERROR_MESSAGE);
 				});
 
 				return false;
 			}
 
 			// only display this message if we aren't replacing a rune pouch with a new rune pouch
-			if (slot.getParentSetup().getRune_pouch() != null && !isItemRunePouch(oldItem.getId()))
+			if (slot.getParentSetup().getRunePouch() != null && !isItemRunePouch(oldItem.getId()))
 			{
 				SwingUtilities.invokeLater(() ->
 				{
 					JOptionPane.showMessageDialog(panel,
-							"You can't have two Rune Pouches.",
-							"Invalid Item",
-							JOptionPane.ERROR_MESSAGE);
+						"You can't have two Rune Pouches.",
+						"Invalid Item",
+						JOptionPane.ERROR_MESSAGE);
 				});
 				return false;
 			}
@@ -1660,15 +1757,71 @@ public class InventorySetupsPlugin extends Plugin
 		return true;
 	}
 
+	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetupsSlot slot,
+															 final InventorySetupsItem oldItem,
+															 final InventorySetupsItem newItem)
+	{
+
+		if (isItemBoltPouch(newItem.getId()))
+		{
+
+			if (slot.getSlotID() != InventorySetupsSlotID.INVENTORY)
+			{
+
+				SwingUtilities.invokeLater(() ->
+				{
+					JOptionPane.showMessageDialog(panel,
+						"You can't have a Bolt Pouch there.",
+						"Invalid Item",
+						JOptionPane.ERROR_MESSAGE);
+				});
+
+				return false;
+			}
+
+			// only display this message if we aren't replacing a bolt pouch with a new bolt pouch
+			if (slot.getParentSetup().getBoltPouch() != null && !isItemBoltPouch(oldItem.getId()))
+			{
+				SwingUtilities.invokeLater(() ->
+				{
+					JOptionPane.showMessageDialog(panel,
+						"You can't have two Bolt Pouches.",
+						"Invalid Item",
+						JOptionPane.ERROR_MESSAGE);
+				});
+				return false;
+			}
+
+			slot.getParentSetup().updateBoltPouch(getBoltPouchData());
+		}
+		else if (isItemBoltPouch(oldItem.getId()))
+		{
+			// if the old item is a bolt pouch, need to update it to null
+			slot.getParentSetup().updateBoltPouch(null);
+		}
+
+		return true;
+	}
+
 	private boolean isItemRunePouch(final int itemId)
 	{
 		return itemId == ItemID.RUNE_POUCH || itemId == ItemID.RUNE_POUCH_L;
 	}
 
-	private boolean containerContainsRunePouch(final ArrayList<InventorySetupsItem> container)
+	private boolean isItemBoltPouch(final int itemId)
+	{
+		return itemId == ItemID.BOLT_POUCH;
+	}
+
+	private boolean containerContainsRunePouch(final List<InventorySetupsItem> container)
 	{
 		return checkIfContainerContainsItem(ItemID.RUNE_POUCH, container) ||
-				checkIfContainerContainsItem(ItemID.RUNE_POUCH_L, container);
+			checkIfContainerContainsItem(ItemID.RUNE_POUCH_L, container);
+	}
+
+	private boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
+	{
+		return checkIfContainerContainsItem(ItemID.BOLT_POUCH, container);
 	}
 
 	public int parseTextInputAmount(String input)
@@ -1715,9 +1868,13 @@ public class InventorySetupsPlugin extends Plugin
 			long setupId = setup.getId();
 			nextInventorySetupId = Long.max(nextInventorySetupId, setupId);
 
-			if (setup.getRune_pouch() == null && containerContainsRunePouch(setup.getInventory()))
+			if (setup.getRunePouch() == null && containerContainsRunePouch(setup.getInventory()))
 			{
 				setup.updateRunePouch(getRunePouchData());
+			}
+			if (setup.getBoltPouch() == null && containerContainsBoltPouch(setup.getInventory()))
+			{
+				setup.updateBoltPouch(getBoltPouchData());
 			}
 			if (setup.getNotes() == null)
 			{

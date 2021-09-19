@@ -35,29 +35,29 @@ import javax.swing.JPanel;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 
-public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
+public class InventorySetupsBoltPouchPanel extends InventorySetupsContainerPanel
 {
-	private static final int RUNE_POUCH_SLOTS_COUNT = 3;
-	private List<InventorySetupsSlot> runeSlots;
+	private static final int BOLT_POUCH_SLOTS_COUNT = 4;
+	private List<InventorySetupsSlot> boltSlots;
 
-	InventorySetupsRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
+	InventorySetupsBoltPouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
-		super(itemManager, plugin, "Rune Pouch");
+		super(itemManager, plugin, "Bolt Pouch");
 	}
 
 	@Override
 	public void setupContainerPanel(JPanel containerSlotsPanel)
 	{
-		runeSlots = new ArrayList<>();
-		for (int i = 0; i < RUNE_POUCH_SLOTS_COUNT; i++)
+		boltSlots = new ArrayList<>();
+		for (int i = 0; i < BOLT_POUCH_SLOTS_COUNT; i++)
 		{
-			runeSlots.add(new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.RUNE_POUCH, i));
+			boltSlots.add(new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.BOLT_POUCH, i));
 		}
 
 		final GridLayout gridLayout = new GridLayout(1, 4, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
-		for (final InventorySetupsSlot slot : runeSlots)
+		for (final InventorySetupsSlot slot : boltSlots)
 		{
 			containerSlotsPanel.add(slot);
 			super.addStackMouseListenerToSlot(slot);
@@ -70,34 +70,34 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 	@Override
 	public void highlightSlots(List<InventorySetupsItem> currentContainer, InventorySetup inventorySetup)
 	{
-		assert inventorySetup.getRunePouch() != null : "Rune Pouch container is null.";
+		assert inventorySetup.getBoltPouch() != null : "Bolt Pouch container is null.";
 
-		assert currentContainer.size() == RUNE_POUCH_SLOTS_COUNT: "Incorrect size";
+		assert currentContainer.size() == BOLT_POUCH_SLOTS_COUNT : "Incorrect size";
 
 		isHighlighted = true;
 
-		final List<InventorySetupsItem> setupRunePouch = inventorySetup.getRunePouch();
+		final List<InventorySetupsItem> setupBoltPouch = inventorySetup.getBoltPouch();
 
-		for (int i = 0; i < setupRunePouch.size(); i++)
+		for (int i = 0; i < setupBoltPouch.size(); i++)
 		{
 			boolean shouldHighlightSlot = false;
-			boolean foundRune = false;
+			boolean foundBolt = false;
 			int currentContainerIndex = -1;
 			for (int j = 0; j < currentContainer.size(); j++)
 			{
-				if (setupRunePouch.get(i).getId() == currentContainer.get(j).getId())
+				if (setupBoltPouch.get(i).getId() == currentContainer.get(j).getId())
 				{
-					foundRune = true;
+					foundBolt = true;
 					currentContainerIndex = j;
 					break;
 				}
 			}
 
-			if (foundRune)
+			if (foundBolt)
 			{
-				int savedQuantity = setupRunePouch.get(i).getQuantity();
+				int savedQuantity = setupBoltPouch.get(i).getQuantity();
 				int currentQuantity = currentContainer.get(currentContainerIndex).getQuantity();
-				if (shouldHighlightSlotBasedOnStack(setupRunePouch.get(i).getStackCompare(), savedQuantity, currentQuantity))
+				if (shouldHighlightSlotBasedOnStack(setupBoltPouch.get(i).getStackCompare(), savedQuantity, currentQuantity))
 				{
 					shouldHighlightSlot = true;
 				}
@@ -109,11 +109,11 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 
 			if (shouldHighlightSlot)
 			{
-				runeSlots.get(i).setBackground(inventorySetup.getHighlightColor());
+				boltSlots.get(i).setBackground(inventorySetup.getHighlightColor());
 			}
 			else
 			{
-				runeSlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
+				boltSlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
 			}
 
 		}
@@ -123,18 +123,18 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 	public void updatePanelWithSetupInformation(InventorySetup setup)
 	{
 
-		if (setup.getRunePouch() != null)
+		if (setup.getBoltPouch() != null)
 		{
-			for (int i = 0; i < runeSlots.size(); i++)
+			for (int i = 0; i < boltSlots.size(); i++)
 			{
-				super.setSlotImageAndText(runeSlots.get(i), setup, setup.getRunePouch().get(i));
+				super.setSlotImageAndText(boltSlots.get(i), setup, setup.getBoltPouch().get(i));
 			}
 		}
 		else
 		{
-			for (int i = 0; i < runeSlots.size(); i++)
+			for (int i = 0; i < boltSlots.size(); i++)
 			{
-				super.setSlotImageAndText(runeSlots.get(i), setup, InventorySetupsItem.getDummyItem());
+				super.setSlotImageAndText(boltSlots.get(i), setup, InventorySetupsItem.getDummyItem());
 			}
 		}
 
@@ -149,7 +149,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 		{
 			return;
 		}
-		for (final InventorySetupsSlot slot : runeSlots)
+		for (final InventorySetupsSlot slot : boltSlots)
 		{
 			slot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		}
@@ -159,7 +159,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
 
 	public void highlightAllSlots(final InventorySetup setup)
 	{
-		for (final InventorySetupsSlot slot : runeSlots)
+		for (final InventorySetupsSlot slot : boltSlots)
 		{
 			slot.setBackground(setup.getHighlightColor());
 		}
