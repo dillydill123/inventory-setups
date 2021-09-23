@@ -28,146 +28,31 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSlotID;
-import java.awt.GridLayout;
-import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JPanel;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
 
-public class InventorySetupsRunePouchPanel extends InventorySetupsContainerPanel
+public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPanel
 {
-	private static final int RUNE_POUCH_SLOTS_COUNT = 3;
-	private List<InventorySetupsSlot> runeSlots;
-
 	InventorySetupsRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Rune Pouch");
 	}
 
 	@Override
-	public void setupContainerPanel(JPanel containerSlotsPanel)
+	protected InventorySetupsSlotID getSlotId()
 	{
-		runeSlots = new ArrayList<>();
-		for (int i = 0; i < RUNE_POUCH_SLOTS_COUNT; i++)
-		{
-			runeSlots.add(new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.RUNE_POUCH, i));
-		}
-
-		final GridLayout gridLayout = new GridLayout(1, 4, 1, 1);
-		containerSlotsPanel.setLayout(gridLayout);
-
-		for (final InventorySetupsSlot slot : runeSlots)
-		{
-			containerSlotsPanel.add(slot);
-			super.addStackMouseListenerToSlot(slot);
-			super.addUpdateFromContainerMouseListenerToSlot(slot);
-			super.addUpdateFromSearchMouseListenerToSlot(slot, true);
-			super.addRemoveMouseListenerToSlot(slot);
-		}
+		return InventorySetupsSlotID.RUNE_POUCH;
 	}
 
 	@Override
-	public void highlightSlots(List<InventorySetupsItem> currentContainer, InventorySetup inventorySetup)
+	protected int getSlotsCount()
 	{
-		assert inventorySetup.getRunePouch() != null : "Rune Pouch container is null.";
-
-		assert currentContainer.size() == RUNE_POUCH_SLOTS_COUNT: "Incorrect size";
-
-		isHighlighted = true;
-
-		final List<InventorySetupsItem> setupRunePouch = inventorySetup.getRunePouch();
-
-		for (int i = 0; i < setupRunePouch.size(); i++)
-		{
-			boolean shouldHighlightSlot = false;
-			boolean foundRune = false;
-			int currentContainerIndex = -1;
-			for (int j = 0; j < currentContainer.size(); j++)
-			{
-				if (setupRunePouch.get(i).getId() == currentContainer.get(j).getId())
-				{
-					foundRune = true;
-					currentContainerIndex = j;
-					break;
-				}
-			}
-
-			if (foundRune)
-			{
-				int savedQuantity = setupRunePouch.get(i).getQuantity();
-				int currentQuantity = currentContainer.get(currentContainerIndex).getQuantity();
-				if (shouldHighlightSlotBasedOnStack(setupRunePouch.get(i).getStackCompare(), savedQuantity, currentQuantity))
-				{
-					shouldHighlightSlot = true;
-				}
-			}
-			else
-			{
-				shouldHighlightSlot = true;
-			}
-
-			if (shouldHighlightSlot)
-			{
-				runeSlots.get(i).setBackground(inventorySetup.getHighlightColor());
-			}
-			else
-			{
-				runeSlots.get(i).setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			}
-
-		}
+		return 3;
 	}
 
 	@Override
-	public void updatePanelWithSetupInformation(InventorySetup setup)
+	protected List<InventorySetupsItem> getContainer(InventorySetup inventorySetup)
 	{
-
-		if (setup.getRunePouch() != null)
-		{
-			for (int i = 0; i < runeSlots.size(); i++)
-			{
-				super.setSlotImageAndText(runeSlots.get(i), setup, setup.getRunePouch().get(i));
-			}
-		}
-		else
-		{
-			for (int i = 0; i < runeSlots.size(); i++)
-			{
-				super.setSlotImageAndText(runeSlots.get(i), setup, InventorySetupsItem.getDummyItem());
-			}
-		}
-
-		validate();
-		repaint();
-	}
-
-	@Override
-	public void resetSlotColors()
-	{
-		if (!isHighlighted)
-		{
-			return;
-		}
-		for (final InventorySetupsSlot slot : runeSlots)
-		{
-			slot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		}
-		isHighlighted = false;
-
-	}
-
-	public void highlightAllSlots(final InventorySetup setup)
-	{
-		for (final InventorySetupsSlot slot : runeSlots)
-		{
-			slot.setBackground(setup.getHighlightColor());
-		}
-		isHighlighted = true;
-	}
-
-	public boolean isStackCompareForSlotAllowed(final int id)
-	{
-		return true;
+		return inventorySetup.getRunePouch();
 	}
 }
