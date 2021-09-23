@@ -262,8 +262,8 @@ public interface InventorySetupsConfig extends Config
 
 	@ConfigItem(
 			keyName = "disableBankTabBar",
-			name = "Disable Bank Tab Bar",
-			description = "Stops the thin bank tab bar from removing the bank filter when clicked",
+			name = "Disable Bank Tab Separator",
+			description = "Stops the thin bank tab separator from removing the bank filter when clicked",
 			position = 14
 	)
 	default boolean disableBankTabBar()
@@ -272,10 +272,21 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "removeBankTabSeparator",
+			name = "Remove Bank Tab Separator",
+			description = "Removes the thin bank tab separators from the bank filter",
+			position = 15
+	)
+	default boolean removeBankTabSeparator()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "requireActivePanelFilter",
 			name = "Require Active Panel for Filtering",
 			description = "Only allow filtering if the Inventory Setups panel is active",
-			position = 15
+			position = 16
 	)
 	default boolean requireActivePanelFilter()
 	{
@@ -286,7 +297,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "showWornItemsFilter",
 			name = "Show Worn Items Filter",
 			description = "Determines which setups show up when right clicking the show worn items menu",
-			position = 16
+			position = 17
 	)
 	default InventorySetupsShowWornItemsFilterID showWornItemsFilter()
 	{
@@ -297,7 +308,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_MANUAL_BANK_FILTER,
 			name = "Manual Bank Filter",
 			description = "Disable automatic bank filtering when opening the bank",
-			position = 17
+			position = 18
 	)
 	default boolean manualBankFilter()
 	{

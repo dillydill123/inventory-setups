@@ -38,12 +38,12 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +144,10 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final int SPELLBOOK_VARBIT = 4070;
+	private static final int ITEMS_PER_ROW = 8;
+	private static final int ITEM_VERTICAL_SPACING = 36;
+	private static final int ITEM_HORIZONTAL_SPACING = 48;
+	private static final int ITEM_ROW_START = 51;
 
 	@Inject
 	@Getter
@@ -986,6 +990,58 @@ public class InventorySetupsPlugin extends Plugin
 				client.getIntStack()[client.getIntStackSize() - 1] = 1; // true
 			}
 		}
+
+		if (event.getScriptId() != ScriptID.BANKMAIN_BUILD)
+		{
+			return;
+		}
+
+		int items = 0;
+
+		Widget itemContainer = client.getWidget(WidgetInfo.BANK_ITEM_CONTAINER);
+		if (itemContainer == null)
+		{
+			return;
+		}
+
+		if (panel.getCurrentSelectedSetup() != null && config.removeBankTabSeparator())
+		{
+			Widget[] containerChildren = itemContainer.getDynamicChildren();
+
+			// sort the child array as the items are not in the displayed order
+			Arrays.sort(containerChildren, Comparator.comparing(Widget::getOriginalY).thenComparing(Widget::getOriginalX));
+
+			for (Widget child : containerChildren)
+			{
+				if (child.getItemId() != -1 && !child.isHidden())
+				{
+					// calculate correct item position as if this was a normal tab
+					int adjYOffset = (items / ITEMS_PER_ROW) * ITEM_VERTICAL_SPACING;
+					int adjXOffset = (items % ITEMS_PER_ROW) * ITEM_HORIZONTAL_SPACING + ITEM_ROW_START;
+
+					if (child.getOriginalY() != adjYOffset)
+					{
+						child.setOriginalY(adjYOffset);
+						child.revalidate();
+					}
+
+					if (child.getOriginalX() != adjXOffset)
+					{
+						child.setOriginalX(adjXOffset);
+						child.revalidate();
+					}
+
+					items++;
+				}
+
+				// separator line or tab text
+				if (child.getSpriteId() == SpriteID.RESIZEABLE_MODE_SIDE_PANEL_BACKGROUND || child.getText().contains("Tab"))
+				{
+					child.setHidden(true);
+				}
+			}
+		}
+
 	}
 
 	public void updateCurrentSetup(InventorySetup setup)
