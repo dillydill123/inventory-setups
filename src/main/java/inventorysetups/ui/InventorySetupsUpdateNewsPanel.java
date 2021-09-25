@@ -113,11 +113,12 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-
-		String updateText =     "Updated the plugin for the latest RuneLite version.\n\n" +
-								"Clicking the search button in the bank while in a normal bank search will now properly close the search.\n\n" +
-								"Toggle fuzzy now supports more items like God capes, twisted ancestral, and skilling outfits.\n\n" +
-								"Setups now have a unique internal ID which will be used for other features in the future.";
+		String updateText =     "Added ability to filter which setups are listed on \"show worn items\" in the config.\n\n" +
+								"Added favorites.\n\n" +
+								"Added ability to remove the bank tab separators in the config.\n\n" +
+								"Added config option for manual bank filtering.\n\n" +
+								"Added mass import and export of setups.\n\n" +
+								"Added support for bolt pouch.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);

@@ -15,11 +15,12 @@ To create a new setup, gear up for the activity you would like to save, and then
 ![Green Plus Button](readme_images_and_gifs/create_new_setup.gif)
 
 ### Overview Panel
+
 The overview panel contains all the setups and options to manipulate them.
 
 #### Viewing a Setup
 
-You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune pouch (if present), spellbook, additional filtered items (explained later) and notes are saved in the setup. 
+You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune and bolt pouch (if present), spellbook, additional filtered items (explained later) and notes are saved in the setup. 
 
 ![View Setup](readme_images_and_gifs/view_setup_button.png)
 
@@ -28,6 +29,8 @@ You can view the setup by clicking on the view setups button (the eye icon). You
 It is also possible to view setups in game. You can do this by right clicking the "Show worn items" button in the top left of the bank, and clicking on one of your setups.
 
 ![View Setups in Game](readme_images_and_gifs/show_worn_items_view_setup.gif)
+
+In the config there are options to change which setups show up on the "show worn items" menu.
 
 You can go back to the overview panel by clicking on the back arrow in the top right.
 
@@ -57,6 +60,12 @@ Is it possible to move a setup up and down the list by right clicking near the s
 
 You cannot move setups if a sorting mode is enabled.
 
+#### Favorites
+
+You can favorite your setups so they always appear at the top of the list unless you are searching for a setup.
+
+![Favorites](readme_images_and_gifs/favorites.gif)
+
 ### Editing a Setup
 
 When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot.
@@ -67,7 +76,7 @@ If you select from search, it will open a search menu where you can search for t
 
 ![Update Slot from Search](readme_images_and_gifs/update_slot_from_search.gif)
 
-The Rune Pouch can also be updated with these options.
+The Rune and Bolt Pouch can also be updated with these options.
 
 ![Update Slot from Rune Pouch](readme_images_and_gifs/update_slot_from_rune_pouch.gif)
 
@@ -115,8 +124,6 @@ Greater than or less than stack difference can also be selected. These highlight
 
 Note that you must have base highlighting enabled in order to use this feature. There is a configuration option to set the default stack compare type for each slot when creating new setups.
 
-**NOTE:** Previously, stack differences was configured per inventory setup. It is now per item slot. This means you will need to update your setups.
-
 ##### Fuzzy Difference
 
 Normally, Inventory Setups requires items to be **exactly** the same as those in the setup, else it will highlight the item, or not include it in the bank filter. This works for most items, but there are some cases where this is not desirable. Degradable items from Barrows are a great example. Ahrim's robetop 75 should be considered the same as Ahrim's robetop 100 for the purposes of highlighting and filtering.
@@ -132,8 +139,6 @@ The fuzzy indicator will also impact bank filtering.
 ![Fuzzy Difference Filtering](readme_images_and_gifs/fuzzy_filtering.gif)
 
 There is a configuration option to set all slots to fuzzy when creating new setups.
-
-**NOTE:** Fuzzy filtering replaced the previous system of variation differences. Previously through variation differences, all items were considered "fuzzy" by default. This is the **opposite** of the fuzzy filter. 
 
 ##### Unordered Highlighting
 
@@ -165,6 +170,10 @@ To import a setup, click on the green import button in the top right. It will pr
 
 ![Import Setup](readme_images_and_gifs/import.png)
 
+You can also mass import or export by right clicking the import button and following the instructions.
+
+![Mass Import Export](readme_images_and_gifs/mass_import_export.png)
+
 ### Configuration Settings
 
 In the settings of Inventory Setups, you can change default setup options, key binds, and other miscellaneous settings.
@@ -187,11 +196,25 @@ In the settings of Inventory Setups, you can change default setup options, key b
 
 * **Compact Mode** - Enabling this will change the setups to compact mode. It is equivalent to pressing the Compact Mode button on the overview panel
 * **Sorting Mode** - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
-* **Disable Bank** Tab Bar - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
+* **Disable Bank Tab Separator** - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
 
 ![Disable Bank Tab Bar](readme_images_and_gifs/disable_tab_bar.png)
 
+* **Remove Bank Tab Separator** - Enabling this causes the bank tab separators to be removed when the bank is filtered. This is just like the bank tags option.
+
+![Disable Bank Tab Bar](readme_images_and_gifs/remote_tab_separator.png)
+
 * **Require Active Panel for Filtering** - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
+
+* **Remove Bank Tab Separator** - Enabling this causes the bank tab separators to be removed when the bank is filtered. This is just like the bank tags option.
+
+![Disable Bank Tab Bar](readme_images_and_gifs/remote_tab_separator.png)
+
+### Bank Tag Layouts Plugin 
+
+The ![Bank Tag Layouts Plugin](https://github.com/geheur/bank-tag-custom-layouts) is compatible with Inventory Setups and can be installed to create custom layouts for your bank filters.
+
+![Bank Tag Layouts](readme_images_and_gifs/bank_tag_layouts.png)
 
 ### Compatibility with Bank Tags
 
@@ -202,6 +225,12 @@ Currently there is one known compatibility issue with Bank Tags. If Bank Tags an
 If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
 
 ### Changelog
+
+##### 1.12
+Added ability to filter which setups are listed on "show worn items". Added favorites. Added ability to remove the bank tab separators. Added config option for manual bank filtering. Added mass import and export of setups. Added support for bolt pouch
+
+##### 1.11
+Toggle fuzzy now supports more items like God capes, twisted ancestral, and skilling outfits
 
 ##### 1.10
 Added update window for patch notes and helpful links. Added configuration option to make all slots fuzzy in new setups. Added fuzzy options for additional filtered items. Made stack comparison slot specific.
