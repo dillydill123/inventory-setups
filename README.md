@@ -212,7 +212,7 @@ In the settings of Inventory Setups, you can change default setup options, key b
 
 ### Bank Tag Layouts Plugin 
 
-The ![Bank Tag Layouts Plugin](https://github.com/geheur/bank-tag-custom-layouts) is compatible with Inventory Setups and can be installed to create custom layouts for your bank filters.
+The [Bank Tag Layouts Plugin](https://github.com/geheur/bank-tag-custom-layouts) is compatible with Inventory Setups and can be installed to create custom layouts for your bank filters.
 
 ![Bank Tag Layouts](readme_images_and_gifs/bank_tag_layouts.png)
 
