@@ -206,9 +206,9 @@ In the settings of Inventory Setups, you can change default setup options, key b
 
 * **Require Active Panel for Filtering** - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
 
-* **Remove Bank Tab Separator** - Enabling this causes the bank tab separators to be removed when the bank is filtered. This is just like the bank tags option.
+* **Show Worn Item Filter** - Changes which setups show up on the "show worn items" button when right clicked.
 
-![Disable Bank Tab Bar](readme_images_and_gifs/remote_tab_separator.png)
+* **Manual Bank Filter** - Enabling this causes the bank to not filter automatically when opened. You will need to manually trigger a bank filter by using a hot key or selecting a setup when the bank when it is already opened.
 
 ### Bank Tag Layouts Plugin 
 
