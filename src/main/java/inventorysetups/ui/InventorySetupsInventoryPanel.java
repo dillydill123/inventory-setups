@@ -53,8 +53,8 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	private final InventorySetupsBoltPouchPanel boltPouchPanel;
 
 	InventorySetupsInventoryPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin,
-								  final InventorySetupsRunePouchPanel runePouchPanel,
-								  final InventorySetupsBoltPouchPanel boltPouchPanel)
+									final InventorySetupsRunePouchPanel runePouchPanel,
+									final InventorySetupsBoltPouchPanel boltPouchPanel)
 	{
 		super(itemManager, plugin, "Inventory");
 		this.runePouchPanel = runePouchPanel;
@@ -254,9 +254,9 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 	}
 
 	private void processExactItems(final InventorySetup inventorySetup,
-								   final Map<Integer, List<Integer>> currentInventoryMapping,
-								   final List<Boolean> processedInvItems,
-								   final boolean allowFuzzy)
+									final Map<Integer, List<Integer>> currentInventoryMapping,
+									final List<Boolean> processedInvItems,
+									final boolean allowFuzzy)
 	{
 		List<InventorySetupsItem> setupInventory = inventorySetup.getInventory();
 

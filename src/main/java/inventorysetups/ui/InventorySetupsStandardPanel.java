@@ -25,7 +25,6 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupsStackCompareID;
 import inventorysetups.InventorySetupsPlugin;
 
 import net.runelite.client.ui.ColorScheme;

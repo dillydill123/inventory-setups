@@ -50,11 +50,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javafx.util.Pair;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import joptsimple.internal.Strings;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -349,24 +349,32 @@ public class InventorySetupsPlugin extends Plugin
 		// Adds menu entries to show worn items button
 		if (event.getOption().equals("Show worn items"))
 		{
-			List<Pair<InventorySetup, Integer>> setupsToShowOnWornItemsList;
+
+			@AllArgsConstructor
+			class ShowWornItemsPair
+			{
+				InventorySetup setup;
+				Integer index;
+			};
+
+			List<ShowWornItemsPair> setupsToShowOnWornItemsList;
 			switch (config.showWornItemsFilter())
 			{
 				case BANK_FILTERED:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-						.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
-						.filter(i -> inventorySetups.get(i.getValue()).isFilterBank())
+						.mapToObj(i -> new ShowWornItemsPair(inventorySetups.get(i), i))
+						.filter(i -> inventorySetups.get(i.index).isFilterBank())
 						.collect(Collectors.toList());
 					break;
 				case FAVORITED:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-						.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
-						.filter(i -> inventorySetups.get(i.getValue()).isFavorite())
+						.mapToObj(i -> new ShowWornItemsPair(inventorySetups.get(i), i))
+						.filter(i -> inventorySetups.get(i.index).isFavorite())
 						.collect(Collectors.toList());
 					break;
 				default:
 					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-						.mapToObj(i -> new Pair<>(inventorySetups.get(i), i))
+						.mapToObj(i -> new ShowWornItemsPair(inventorySetups.get(i), i))
 						.collect(Collectors.toList());
 					break;
 			}
@@ -385,11 +393,11 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				MenuEntry menuEntry = menuEntries[oldMenuSize + i] = new MenuEntry();
 				menuEntry.setOption(OPEN_SETUP_MENU_ENTRY);
-				final Pair<InventorySetup, Integer> setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
-				menuEntry.setTarget(ColorUtil.prependColorTag(setupIndexPair.getKey().getName(), JagexColors.MENU_TARGET));
+				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+				menuEntry.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), JagexColors.MENU_TARGET));
 
 				// The param will used to find the correct setup if a menu entry is clicked
-				menuEntry.setIdentifier(setupIndexPair.getValue());
+				menuEntry.setIdentifier(setupIndexPair.index);
 				menuEntry.setType(MenuAction.RUNELITE.getId());
 			}
 

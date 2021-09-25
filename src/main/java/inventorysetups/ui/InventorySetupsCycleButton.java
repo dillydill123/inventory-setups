@@ -44,8 +44,8 @@ public class InventorySetupsCycleButton<T> extends JLabel
 	private int currentIndex;
 
 	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final List<T> states,
-														 final List<ImageIcon> icons, final List<ImageIcon> hoverIcons,
-														 final List<String> tooltips, final Runnable runnable)
+								final List<ImageIcon> icons, final List<ImageIcon> hoverIcons,
+								final List<String> tooltips, final Runnable runnable)
 	{
 		super();
 		this.plugin = plugin;
