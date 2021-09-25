@@ -53,6 +53,6 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPane
 	@Override
 	protected List<InventorySetupsItem> getContainer(InventorySetup inventorySetup)
 	{
-		return inventorySetup.getRunePouch();
+		return inventorySetup.getRune_pouch();
 	}
 }

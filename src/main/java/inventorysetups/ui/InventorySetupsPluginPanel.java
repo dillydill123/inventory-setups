@@ -587,7 +587,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		searchBar.setVisible(false);
 
 		// only show the rune pouch if the setup has a rune pouch
-		runePouchPanel.setVisible(currentSelectedSetup.getRunePouch() != null);
+		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
 		highlightInventory();

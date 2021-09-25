@@ -41,7 +41,7 @@ public class InventorySetup
 	private List<InventorySetupsItem> equipment;
 
 	@Getter
-	private List<InventorySetupsItem> runePouch;
+	private List<InventorySetupsItem> rune_pouch;
 
 	@Getter
 	private List<InventorySetupsItem> boltPouch;
@@ -106,7 +106,7 @@ public class InventorySetup
 
 	public void updateRunePouch(final List<InventorySetupsItem> rp)
 	{
-		runePouch = rp;
+		rune_pouch = rp;
 	}
 
 	public void updateBoltPouch(final List<InventorySetupsItem> bp)

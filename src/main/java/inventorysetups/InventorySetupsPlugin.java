@@ -889,9 +889,9 @@ public class InventorySetupsPlugin extends Plugin
 							break;
 						case INVENTORY:
 							boolean runePouchContainsItem = false;
-							if (currentSetup.getRunePouch() != null)
+							if (currentSetup.getRune_pouch() != null)
 							{
-								runePouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getRunePouch());
+								runePouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getRune_pouch());
 							}
 							boolean boltPouchContainsItem = false;
 							if (currentSetup.getBoltPouch() != null)
@@ -1710,7 +1710,7 @@ public class InventorySetupsPlugin extends Plugin
 	private void updateNullFieldsOfSetup(final InventorySetup newSetup)
 	{
 		// Must be called from client thread!
-		if (newSetup.getRunePouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
+		if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
 		{
 			newSetup.updateRunePouch(getRunePouchData());
 		}
@@ -1779,7 +1779,7 @@ public class InventorySetupsPlugin extends Plugin
 			case EQUIPMENT:
 				return slot.getParentSetup().getEquipment();
 			case RUNE_POUCH:
-				return slot.getParentSetup().getRunePouch();
+				return slot.getParentSetup().getRune_pouch();
 			case BOLT_POUCH:
 				return slot.getParentSetup().getBoltPouch();
 			default:
@@ -1850,9 +1850,9 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		// check the rune pouch to see if it has the item (runes in this case)
-		if (setup.getRunePouch() != null)
+		if (setup.getRune_pouch() != null)
 		{
-			if (checkIfContainerContainsItem(itemID, setup.getRunePouch()))
+			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch()))
 			{
 				return true;
 			}
@@ -1921,7 +1921,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			// only display this message if we aren't replacing a rune pouch with a new rune pouch
-			if (slot.getParentSetup().getRunePouch() != null && !isItemRunePouch(oldItem.getId()))
+			if (slot.getParentSetup().getRune_pouch() != null && !isItemRunePouch(oldItem.getId()))
 			{
 				SwingUtilities.invokeLater(() ->
 				{
@@ -2053,7 +2053,7 @@ public class InventorySetupsPlugin extends Plugin
 			long setupId = setup.getId();
 			nextInventorySetupId = Long.max(nextInventorySetupId, setupId);
 
-			if (setup.getRunePouch() == null && containerContainsRunePouch(setup.getInventory()))
+			if (setup.getRune_pouch() == null && containerContainsRunePouch(setup.getInventory()))
 			{
 				setup.updateRunePouch(getRunePouchData());
 			}

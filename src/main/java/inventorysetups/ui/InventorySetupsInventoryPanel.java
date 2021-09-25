@@ -322,7 +322,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 
 	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, boolean doesCurrentInventoryHaveRunePouch)
 	{
-		if (inventorySetup.getRunePouch() != null)
+		if (inventorySetup.getRune_pouch() != null)
 		{
 
 			// attempt to highlight if rune pouch is available
