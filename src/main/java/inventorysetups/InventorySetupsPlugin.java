@@ -1012,7 +1012,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		if (panel.getCurrentSelectedSetup() != null && config.removeBankTabSeparator())
+		if (panel.getCurrentSelectedSetup() != null && config.removeBankTabSeparator() && isFilteringAllowed())
 		{
 			Widget[] containerChildren = itemContainer.getDynamicChildren();
 
