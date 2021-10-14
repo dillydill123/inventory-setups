@@ -550,6 +550,7 @@ public class InventorySetupsPlugin extends Plugin
 		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 
 		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
+		this.gson = new GsonBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -567,8 +568,6 @@ public class InventorySetupsPlugin extends Plugin
 
 			return true;
 		});
-
-		this.gson = new GsonBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 
 	}
 
