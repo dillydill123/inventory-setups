@@ -525,6 +525,8 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		catch (Exception e)
 		{
+			log.warn("Could not determine current plugin version");
+			log.warn(e.getMessage());
 			this.currentVersion = "";
 		}
 
@@ -1601,6 +1603,8 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			catch (Exception e)
 			{
+				log.error("Couldn't mass export setups");
+				log.error(e.getMessage());
 				JOptionPane.showMessageDialog(panel,
 						"Failed to export setups.",
 						"Mass Export Failed",
@@ -1644,6 +1648,8 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		catch (Exception e)
 		{
+			log.error("Couldn't import setup");
+			log.error(e.getMessage());
 			JOptionPane.showMessageDialog(panel,
 				"Invalid setup data.",
 				"Import Setup Failed",
@@ -1691,6 +1697,8 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			catch (Exception e)
 			{
+				log.error("Couldn't mass import setups");
+				log.error(e.getMessage());
 				JOptionPane.showMessageDialog(panel,
 						"Invalid setup data.",
 						"Mass Import Setup Failed",
@@ -1819,6 +1827,8 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			catch (Exception e)
 			{
+				log.error("Exception occurred while loading setup data");
+				log.error(e.getMessage());
 				inventorySetups = new ArrayList<>();
 			}
 		}
