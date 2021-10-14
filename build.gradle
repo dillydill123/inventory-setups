@@ -12,7 +12,7 @@ repositories {
 }
 
 
-def runeLiteVersion = '1.7.24'
+def runeLiteVersion = '1.7.26'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
@@ -20,12 +20,11 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok:1.18.4'
 
 	testImplementation 'junit:junit:4.12'
-	testImplementation 'org.slf4j:slf4j-simple:1.7.12'
-	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion, {
-		exclude group: 'ch.qos.logback', module: 'logback-classic'
-	}
+	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
-	testCompile group: 'com.google.inject.extensions', name: 'guice-testlib', version: '4.1.0'
+	testCompile group: 'com.google.inject.extensions', name: 'guice-testlib', version: '4.1.0', {
+		exclude group: 'com.google.inject', module: 'guice'
+	}
 }
 
 group = 'inventorysetups'
@@ -49,7 +48,9 @@ task createProperties(dependsOn: processResources) {
 classes {
 	dependsOn createProperties
 }
-
+// To create a shadow jar, run `gradlew shadowJar`
+// Output will be in build/libs
+// Run it with `java -jar -ea <name>.jar`
 //shadowJar {
 //	from sourceSets.test.output
 //	configurations = [project.configurations.testRuntimeClasspath]
