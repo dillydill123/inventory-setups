@@ -113,12 +113,8 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Added ability to filter which setups are listed on \"show worn items\" in the config.\n\n" +
-								"Added favorites.\n\n" +
-								"Added ability to remove the bank tab separators in the config.\n\n" +
-								"Added config option for manual bank filtering.\n\n" +
-								"Added mass import and export of setups.\n\n" +
-								"Added support for bolt pouch.";
+		String updateText =     "Fixed bug where bank tab separators were being removed when the bank was not filtered but a setup was selected.\n\n" +
+								"Potential fix for setups disappearing after startup for certain platforms. This issue is still being investigated.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
