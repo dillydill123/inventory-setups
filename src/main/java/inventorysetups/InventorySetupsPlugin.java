@@ -25,7 +25,6 @@
 package inventorysetups;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -177,6 +176,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsConfig config;
 
+	@Inject
 	private Gson gson;
 
 	@Inject
@@ -525,8 +525,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		catch (Exception e)
 		{
-			log.warn("Could not determine current plugin version");
-			log.warn(e.getMessage());
+			log.warn("Could not determine current plugin version", e);
 			this.currentVersion = "";
 		}
 
@@ -552,7 +551,8 @@ public class InventorySetupsPlugin extends Plugin
 		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 
 		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
-		this.gson = new GsonBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
+
+		this.gson = this.gson.newBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -1603,8 +1603,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			catch (Exception e)
 			{
-				log.error("Couldn't mass export setups");
-				log.error(e.getMessage());
+				log.error("Couldn't mass export setups", e);
 				JOptionPane.showMessageDialog(panel,
 						"Failed to export setups.",
 						"Mass Export Failed",
@@ -1648,8 +1647,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		catch (Exception e)
 		{
-			log.error("Couldn't import setup");
-			log.error(e.getMessage());
+			log.error("Couldn't import setup", e);
 			JOptionPane.showMessageDialog(panel,
 				"Invalid setup data.",
 				"Import Setup Failed",
@@ -1697,8 +1695,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			catch (Exception e)
 			{
-				log.error("Couldn't mass import setups");
-				log.error(e.getMessage());
+				log.error("Couldn't mass import setups", e);
 				JOptionPane.showMessageDialog(panel,
 						"Invalid setup data.",
 						"Mass Import Setup Failed",
@@ -1827,8 +1824,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			catch (Exception e)
 			{
-				log.error("Exception occurred while loading setup data");
-				log.error(e.getMessage());
+				log.error("Exception occurred while loading setup data", e);
 				inventorySetups = new ArrayList<>();
 			}
 		}
