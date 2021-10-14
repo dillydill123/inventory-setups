@@ -113,8 +113,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Fixed bug where bank tab separators were being removed when the bank was not filtered but a setup was selected.\n\n" +
-								"Potential fix for setups disappearing after startup for certain platforms. This issue is still being investigated.";
+		String updateText =     "Fixed bug where setups would disappear on certain platforms when RuneLite is launched. If you are still experiencing this bug after this update please make an issue on GitHub.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
