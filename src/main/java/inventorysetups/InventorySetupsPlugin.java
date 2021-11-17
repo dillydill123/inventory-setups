@@ -97,7 +97,7 @@ import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.runepouch.Runes;
+import net.runelite.client.game.RunepouchRune;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.NavigationButton;
@@ -840,7 +840,7 @@ public class InventorySetupsPlugin extends Plugin
 		for (int i = 0; i < RUNE_POUCH_RUNE_VARBITS.length; i++)
 		{
 			int runeId = client.getVar(RUNE_POUCH_RUNE_VARBITS[i]);
-			Runes rune = Runes.getRune(runeId);
+			RunepouchRune rune = RunepouchRune.getRune(runeId);
 			int runeAmount = rune == null ? 0 : client.getVar(RUNE_POUCH_AMOUNT_VARBITS[i]);
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
