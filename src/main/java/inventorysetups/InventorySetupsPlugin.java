@@ -519,7 +519,7 @@ public class InventorySetupsPlugin extends Plugin
 		try
 		{
 			final Properties props = new Properties();
-			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/version.properties");
+			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/version.txt");
 			props.load(is);
 			this.currentVersion = props.getProperty("version");
 		}

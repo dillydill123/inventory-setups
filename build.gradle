@@ -37,11 +37,7 @@ tasks.withType(JavaCompile) {
 
 task createProperties(dependsOn: processResources) {
 	doLast {
-		new File("$buildDir/resources/main/version.properties").withWriter { w ->
-			Properties p = new Properties()
-			p['version'] = project.version.toString()
-			p.store w, null
-		}
+		new File("$buildDir/resources/main/version.txt").text = "version=$project.version"
 	}
 }
 
