@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
@@ -379,60 +380,62 @@ public class InventorySetupsPlugin extends Plugin
 					break;
 			}
 
-			final int oldMenuSize = client.getMenuEntries().length;
-			int newSize = oldMenuSize + setupsToShowOnWornItemsList.size();
-			// 1 for closing setup, 1 for filtering add items, 1 for filtering equip, and one for filtering inventory, 1 for filtering all
-			if (panel.getCurrentSelectedSetup() != null)
-			{
-				newSize += 5;
-			}
-
 			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
 			{
 				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
-				client.createMenuEntry(oldMenuSize + i)
+				client.createMenuEntry(-1)
 						.setOption(OPEN_SETUP_MENU_ENTRY)
 						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), JagexColors.MENU_TARGET))
 						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
-						.setType(MenuAction.RUNELITE);
+						.setType(MenuAction.RUNELITE)
+						.onClick(e ->
+						{
+							resetBankSearch(true);
+							panel.setCurrentInventorySetup(inventorySetups.get(setupIndexPair.index), true);
+						});
 			}
 
 			if (panel.getCurrentSelectedSetup() != null)
 			{
 				// add menu entry to filter add items
-				client.createMenuEntry(newSize - 5)
+				client.createMenuEntry(-1)
 						.setOption(FILTER_ADD_ITEMS_ENTRY)
 						.setType(MenuAction.RUNELITE)
 						.setTarget("")
-						.setIdentifier(0);
+						.setIdentifier(0)
+						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS));
 
 				// add menu entry to filter equipment
-				client.createMenuEntry(newSize - 4)
+				client.createMenuEntry(-1)
 						.setOption(FILTER_EQUIPMENT_ENTRY)
 						.setType(MenuAction.RUNELITE)
 						.setTarget("")
-						.setIdentifier(0);
+						.setIdentifier(0)
+						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.EQUIPMENT));
 
 				// add menu entry to filter inventory
-				client.createMenuEntry(newSize - 3)
+				client.createMenuEntry(-1)
 						.setOption(FILTER_INVENTORY_ENTRY)
 						.setType(MenuAction.RUNELITE)
 						.setTarget("")
-						.setIdentifier(0);
+						.setIdentifier(0)
+						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.INVENTORY));
 
 				// add menu entry to filter all
-				client.createMenuEntry(newSize - 2)
+				client.createMenuEntry(-1)
 						.setOption(FILTER_ALL_ENTRY)
 						.setType(MenuAction.RUNELITE)
 						.setTarget("")
-						.setIdentifier(0);
+						.setIdentifier(0)
+						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ALL));
 
 				// add menu entry to close setup
-				client.createMenuEntry(newSize - 1)
+				client.createMenuEntry(-1)
 						.setOption(RETURN_TO_OVERVIEW_ENTRY)
 						.setType(MenuAction.RUNELITE)
 						.setTarget("")
-						.setIdentifier(0);
+						.setIdentifier(0)
+						.onClick(e -> panel.returnToOverviewPanel(false));
 			}
 		}
 		// If shift is held and item is right clicked in the bank while a setup is active,
@@ -448,8 +451,47 @@ public class InventorySetupsPlugin extends Plugin
 					.setTarget("")
 					.setIdentifier(0)
 					.setParam0(event.getActionParam0())
-					.setParam1(event.getActionParam1());
+					.setParam1(event.getActionParam1())
+					.onClick(e ->
+					{
+						final Item newItem = retrieveItemFromBankMenuEntry(e.getParam0());
+						if (newItem == null)
+						{
+							return;
+						}
+
+						final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+
+						// Item already exists, don't add it again
+						if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
+						{
+							addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+						}
+					});
 		}
+	}
+
+	// Retrieve an item from a selected menu entry in the bank
+	private Item retrieveItemFromBankMenuEntry(int inventoryIndex)
+	{
+		// This should never be hit, as the option only appears when the panel isn't null
+		if (panel.getCurrentSelectedSetup() == null)
+		{
+			return null;
+		}
+
+		ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
+		if (bankContainer == null)
+		{
+			return null;
+		}
+		Item[] items = bankContainer.getItems();
+		if (inventoryIndex < 0 || inventoryIndex >= items.length)
+		{
+			return null;
+		}
+		return bankContainer.getItems()[inventoryIndex];
 	}
 
 	@Subscribe
@@ -628,6 +670,12 @@ public class InventorySetupsPlugin extends Plugin
 			.collect(Collectors.toList());
 	}
 
+	public void doBankSearch(final InventorySetupsFilteringModeID filteringModeID)
+	{
+		bankFilteringMode = filteringModeID;
+		doBankSearch();
+	}
+
 	public void doBankSearch()
 	{
 		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
@@ -659,85 +707,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (event.getMenuAction() == MenuAction.RUNELITE)
 		{
-			if (event.getMenuOption().equals(OPEN_SETUP_MENU_ENTRY))
-			{
-				assert event.getId() >= 0 && event.getId() < inventorySetups.size() : "Action param out of range";
-
-				resetBankSearch(true);
-				panel.setCurrentInventorySetup(inventorySetups.get(event.getId()), true);
-				return;
-			}
-
-			if (event.getMenuOption().equals(RETURN_TO_OVERVIEW_ENTRY))
-			{
-				panel.returnToOverviewPanel(false);
-				return;
-			}
-
-			if (event.getMenuOption().equals(FILTER_ALL_ENTRY))
-			{
-				bankFilteringMode = InventorySetupsFilteringModeID.ALL;
-				doBankSearch();
-				return;
-			}
-
-			if (event.getMenuOption().equals(FILTER_INVENTORY_ENTRY))
-			{
-				bankFilteringMode = InventorySetupsFilteringModeID.INVENTORY;
-				doBankSearch();
-				return;
-			}
-
-			if (event.getMenuOption().equals(FILTER_EQUIPMENT_ENTRY))
-			{
-				bankFilteringMode = InventorySetupsFilteringModeID.EQUIPMENT;
-				doBankSearch();
-				return;
-			}
-
-			if (event.getMenuOption().equals(FILTER_ADD_ITEMS_ENTRY))
-			{
-				bankFilteringMode = InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS;
-				doBankSearch();
-				return;
-			}
-
-			if (event.getMenuOption().equals(ADD_TO_ADDITIONAL_ENTRY))
-			{
-				// This should never be hit, as the option only appears when the panel isn't null
-				if (panel.getCurrentSelectedSetup() == null)
-				{
-					return;
-				}
-
-				int inventoryIndex = event.getParam0();
-				ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
-				if (bankContainer == null)
-				{
-					return;
-				}
-				Item[] items = bankContainer.getItems();
-				if (inventoryIndex < 0 || inventoryIndex >= items.length)
-				{
-					return;
-				}
-				Item item = bankContainer.getItems()[inventoryIndex];
-				if (item == null)
-				{
-					return;
-				}
-
-				final Map<Integer, InventorySetupsItem> additionalFilteredItems =
-					panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
-
-				// Item already exists, don't add it again
-				if (!additionalFilteredItemsHasItem(item.getId(), additionalFilteredItems))
-				{
-					addAdditionalFilteredItem(item.getId(), additionalFilteredItems);
-				}
-
-			}
-
+			return;
 		}
 
 		if (panel.getCurrentSelectedSetup() == null)
@@ -751,14 +721,11 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				event.consume();
 			}
-			return;
 		}
-
 		else if (panel.getCurrentSelectedSetup() != null
 			&& (event.getMenuOption().startsWith("View tab") || event.getMenuOption().equals("View all items")))
 		{
 			internalFilteringIsAllowed = false;
-			return;
 		}
 	}
 
