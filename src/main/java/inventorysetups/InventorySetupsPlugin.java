@@ -379,68 +379,61 @@ public class InventorySetupsPlugin extends Plugin
 					break;
 			}
 
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			final int oldMenuSize = menuEntries.length;
+			final int oldMenuSize = client.getMenuEntries().length;
 			int newSize = oldMenuSize + setupsToShowOnWornItemsList.size();
 			// 1 for closing setup, 1 for filtering add items, 1 for filtering equip, and one for filtering inventory, 1 for filtering all
 			if (panel.getCurrentSelectedSetup() != null)
 			{
 				newSize += 5;
 			}
-			menuEntries = Arrays.copyOf(menuEntries, newSize);
 
 			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
 			{
-				MenuEntry menuEntry = menuEntries[oldMenuSize + i] = new MenuEntry();
-				menuEntry.setOption(OPEN_SETUP_MENU_ENTRY);
 				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
-				menuEntry.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), JagexColors.MENU_TARGET));
-
-				// The param will used to find the correct setup if a menu entry is clicked
-				menuEntry.setIdentifier(setupIndexPair.index);
-				menuEntry.setType(MenuAction.RUNELITE.getId());
+				client.createMenuEntry(oldMenuSize + i)
+						.setOption(OPEN_SETUP_MENU_ENTRY)
+						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), JagexColors.MENU_TARGET))
+						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
+						.setType(MenuAction.RUNELITE);
 			}
 
 			if (panel.getCurrentSelectedSetup() != null)
 			{
 				// add menu entry to filter add items
-				MenuEntry menuEntryAddItemsFilter = menuEntries[menuEntries.length - 5] = new MenuEntry();
-				menuEntryAddItemsFilter.setOption(FILTER_ADD_ITEMS_ENTRY);
-				menuEntryAddItemsFilter.setType(MenuAction.RUNELITE.getId());
-				menuEntryAddItemsFilter.setTarget("");
-				menuEntryAddItemsFilter.setIdentifier(0);
+				client.createMenuEntry(newSize - 5)
+						.setOption(FILTER_ADD_ITEMS_ENTRY)
+						.setType(MenuAction.RUNELITE)
+						.setTarget("")
+						.setIdentifier(0);
 
 				// add menu entry to filter equipment
-				MenuEntry menuEntryEquipmentFilter = menuEntries[menuEntries.length - 4] = new MenuEntry();
-				menuEntryEquipmentFilter.setOption(FILTER_EQUIPMENT_ENTRY);
-				menuEntryEquipmentFilter.setType(MenuAction.RUNELITE.getId());
-				menuEntryEquipmentFilter.setTarget("");
-				menuEntryEquipmentFilter.setIdentifier(0);
+				client.createMenuEntry(newSize - 4)
+						.setOption(FILTER_EQUIPMENT_ENTRY)
+						.setType(MenuAction.RUNELITE)
+						.setTarget("")
+						.setIdentifier(0);
 
 				// add menu entry to filter inventory
-				MenuEntry menuEntryInventoryFilter = menuEntries[menuEntries.length - 3] = new MenuEntry();
-				menuEntryInventoryFilter.setOption(FILTER_INVENTORY_ENTRY);
-				menuEntryInventoryFilter.setType(MenuAction.RUNELITE.getId());
-				menuEntryInventoryFilter.setTarget("");
-				menuEntryInventoryFilter.setIdentifier(0);
+				client.createMenuEntry(newSize - 3)
+						.setOption(FILTER_INVENTORY_ENTRY)
+						.setType(MenuAction.RUNELITE)
+						.setTarget("")
+						.setIdentifier(0);
 
 				// add menu entry to filter all
-				MenuEntry menuEntryAllFilter = menuEntries[menuEntries.length - 2] = new MenuEntry();
-				menuEntryAllFilter.setOption(FILTER_ALL_ENTRY);
-				menuEntryAllFilter.setType(MenuAction.RUNELITE.getId());
-				menuEntryAllFilter.setTarget("");
-				menuEntryAllFilter.setIdentifier(0);
+				client.createMenuEntry(newSize - 2)
+						.setOption(FILTER_ALL_ENTRY)
+						.setType(MenuAction.RUNELITE)
+						.setTarget("")
+						.setIdentifier(0);
 
 				// add menu entry to close setup
-				MenuEntry menuEntryCloseSetup = menuEntries[menuEntries.length - 1] = new MenuEntry();
-				menuEntryCloseSetup.setOption(RETURN_TO_OVERVIEW_ENTRY);
-				menuEntryCloseSetup.setType(MenuAction.RUNELITE.getId());
-				menuEntryCloseSetup.setTarget("");
-				menuEntryCloseSetup.setIdentifier(0);
+				client.createMenuEntry(newSize - 1)
+						.setOption(RETURN_TO_OVERVIEW_ENTRY)
+						.setType(MenuAction.RUNELITE)
+						.setTarget("")
+						.setIdentifier(0);
 			}
-
-
-			client.setMenuEntries(menuEntries);
 		}
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
@@ -449,19 +442,13 @@ public class InventorySetupsPlugin extends Plugin
 			&& client.isKeyPressed(KeyCode.KC_SHIFT)
 			&& event.getOption().equals("Examine"))
 		{
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			final int oldMenuSize = menuEntries.length;
-			menuEntries = Arrays.copyOf(menuEntries, oldMenuSize + 1);
-
-			MenuEntry menuEntryAddToAdditionalFiltered = menuEntries[menuEntries.length - 1] = new MenuEntry();
-			menuEntryAddToAdditionalFiltered.setOption(ADD_TO_ADDITIONAL_ENTRY);
-			menuEntryAddToAdditionalFiltered.setType(MenuAction.RUNELITE.getId());
-			menuEntryAddToAdditionalFiltered.setTarget("");
-			menuEntryAddToAdditionalFiltered.setIdentifier(0);
-			menuEntryAddToAdditionalFiltered.setParam0(event.getActionParam0());
-			menuEntryAddToAdditionalFiltered.setParam1(event.getActionParam1());
-
-			client.setMenuEntries(menuEntries);
+			client.createMenuEntry(-1)
+					.setOption(ADD_TO_ADDITIONAL_ENTRY)
+					.setType(MenuAction.RUNELITE)
+					.setTarget("")
+					.setIdentifier(0)
+					.setParam0(event.getActionParam0())
+					.setParam1(event.getActionParam1());
 		}
 	}
 
