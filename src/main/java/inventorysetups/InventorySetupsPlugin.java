@@ -1496,7 +1496,7 @@ public class InventorySetupsPlugin extends Plugin
 		for (int i = 0; i < size; i++)
 		{
 
-			final InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.fromInventoryID(id), i) ?
+			final InventorySetupsStackCompareID stackCompareType = panel != null && panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.fromInventoryID(id), i) ?
 				config.stackCompareType() : InventorySetupsStackCompareID.None;
 			if (items == null || i >= items.length)
 			{
