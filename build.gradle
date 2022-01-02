@@ -6,23 +6,23 @@ plugins {
 repositories {
 	mavenLocal()
 	maven {
-		url = 'http://repo.runelite.net'
+		url = 'https://repo.runelite.net'
 	}
 	mavenCentral()
 }
 
 
-def runeLiteVersion = '1.8.7-SNAPSHOT'
+def runeLiteVersion = '1.8.8'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
-	compileOnly 'org.projectlombok:lombok:1.18.4'
-	annotationProcessor 'org.projectlombok:lombok:1.18.4'
+	compileOnly 'org.projectlombok:lombok:1.18.20'
+	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
-	testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
-	testCompile group: 'com.google.inject.extensions', name: 'guice-testlib', version: '4.1.0', {
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
+	testImplementation group: 'com.google.inject.extensions', name: 'guice-testlib', version: '4.1.0', {
 		exclude group: 'com.google.inject', module: 'guice'
 	}
 }
