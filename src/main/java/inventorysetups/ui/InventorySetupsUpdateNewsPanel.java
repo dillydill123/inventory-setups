@@ -113,7 +113,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Fixed bug where setups would disappear on certain platforms when RuneLite is launched. If you are still experiencing this bug after this update please make an issue on GitHub.";
+		String updateText =     "Disabled filtering in group storage for group ironmen.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
