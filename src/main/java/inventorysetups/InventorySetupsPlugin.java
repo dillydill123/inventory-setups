@@ -841,7 +841,10 @@ public class InventorySetupsPlugin extends Plugin
 			case "bankSearchFilter":
 			{
 				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
-				if (currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
+				// Shared storage uses the bankmain filter scripts too. Allow using tag searches in it but don't
+				// apply the tag search from the active tab.
+				final boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
+				if (bankOpen && currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
 				{
 					int itemId = intStack[intStackSize - 1];
 					boolean containsItem = false;
@@ -948,7 +951,8 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// The return value of bankmain_searching is on the stack. If we have a setup active
 			// make it return true to put the bank in a searching state.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
+			boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
+			if (bankOpen && panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
 				client.getIntStack()[client.getIntStackSize() - 1] = 1; // true
 			}
