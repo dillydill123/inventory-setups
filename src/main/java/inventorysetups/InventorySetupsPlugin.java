@@ -385,7 +385,7 @@ public class InventorySetupsPlugin extends Plugin
 				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
 				client.createMenuEntry(-1)
 						.setOption(OPEN_SETUP_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), JagexColors.MENU_TARGET))
+						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), setupIndexPair.setup.getDisplayColor()))
 						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
 						.setType(MenuAction.RUNELITE)
 						.onClick(e ->
@@ -642,6 +642,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), name, "",
 				config.highlightColor(),
 				config.highlightDifference(),
+				config.displayColor(),
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
 				spellbook, nextInventorySetupId, false);
@@ -2039,6 +2040,10 @@ public class InventorySetupsPlugin extends Plugin
 			if (setup.getAdditionalFilteredItems() == null)
 			{
 				setup.updateAdditionalItems(new HashMap<>());
+			}
+			if (setup.getDisplayColor() == null)
+			{
+				setup.setDisplayColor(config.displayColor());
 			}
 		}
 
