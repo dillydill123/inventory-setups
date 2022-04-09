@@ -51,6 +51,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 // Standard panel for inventory setups, which contains all the configuration buttons
 public class InventorySetupsStandardPanel extends InventorySetupsPanel
@@ -112,7 +113,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private final FlatTextField nameInput = new FlatTextField();
 	private final JLabel save = new JLabel("Save");
 	private final JLabel cancel = new JLabel("Cancel");
-	private final JLabel rename = new JLabel("Rename");
+	private final JLabel rename = new JLabel("Edit");
 
 	static
 	{
@@ -200,6 +201,9 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
 					inventorySetup.setName(nameInput.getText());
+					Color newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
+					inventorySetup.setDisplayColor(newDisplayColor);
+
 					plugin.updateConfig();
 
 					nameInput.setEditable(false);
@@ -236,6 +240,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 					nameInput.setText(inventorySetup.getName());
 					updateNameActions(false);
 					requestFocusInWindow();
+					updateDisplayColorLabel();
 				}
 			}
 
@@ -289,12 +294,13 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		nameInput.setPreferredSize(new Dimension(0, 24));
 		nameInput.getTextField().setForeground(Color.WHITE);
-		nameInput.getTextField().setBorder(new EmptyBorder(0, 8, 0, 0));
+		nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
 		nameInput.getTextField().setComponentPopupMenu(moveSetupPopupMenu);
 
 		displayColorIndicator.setToolTipText("Edit the color of the name");
 		displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
-		displayColorIndicator.setBorder(new MatteBorder(0, 0, 3, 0, invSetup.getDisplayColor()));
+		displayColorIndicator.setVisible(false);
+		updateDisplayColorLabel();
 		displayColorIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -302,7 +308,14 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					openDisplayColorPicker();
+					openColorPicker("Choose a Display color", invSetup.getDisplayColor(),
+						c ->
+						{
+							displayColorIndicator.setBorder(new CompoundBorder(
+									new EmptyBorder(0, 4, 0, 0),
+									new MatteBorder(0, 0, 3, 0, c)));
+						}
+					);
 				}
 			}
 
@@ -455,7 +468,13 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					openHighlightColorPicker();
+					openColorPicker("Choose a Highlight color", invSetup.getHighlightColor(),
+						c ->
+						{
+							inventorySetup.setHighlightColor(c);
+							updateHighlightColorLabel();
+						}
+					);
 				}
 			}
 
@@ -583,6 +602,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		save.setVisible(saveAndCancel);
 		cancel.setVisible(saveAndCancel);
 		rename.setVisible(!saveAndCancel);
+		displayColorIndicator.setVisible(saveAndCancel);
 
 		if (saveAndCancel)
 		{
@@ -601,8 +621,9 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private void updateDisplayColorLabel()
 	{
 		Color color = inventorySetup.getDisplayColor();
-		displayColorIndicator.setBorder(new MatteBorder(0, 0, 3, 0, color));
-		displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
+		displayColorIndicator.setBorder(new CompoundBorder(
+				new EmptyBorder(0, 4, 0, 0),
+				new MatteBorder(0, 0, 3, 0, color)));
 	}
 
 	private void updateBankFilterLabel()
@@ -625,49 +646,17 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		highlightIndicator.setIcon(inventorySetup.isHighlightDifference() ? TOGGLE_HIGHLIGHT_ICON : NO_TOGGLE_HIGHLIGHT_ICON);
 	}
 
-	private void openHighlightColorPicker()
+	private void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)
 	{
 
 		RuneliteColorPicker colorPicker = plugin.getColorPickerManager().create(
 				SwingUtilities.windowForComponent(this),
-				inventorySetup.getHighlightColor(),
-				inventorySetup.getName(),
+				startingColor,
+				title,
 				false);
 
 		colorPicker.setLocation(getLocationOnScreen());
-		colorPicker.setOnColorChange(c ->
-		{
-			inventorySetup.setHighlightColor(c);
-			updateHighlightColorLabel();
-		});
-
-		colorPicker.addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				plugin.updateConfig();
-			}
-		});
-
-		colorPicker.setVisible(true);
-	}
-
-	private void openDisplayColorPicker()
-	{
-
-		RuneliteColorPicker colorPicker = plugin.getColorPickerManager().create(
-				SwingUtilities.windowForComponent(this),
-				inventorySetup.getDisplayColor(),
-				inventorySetup.getName(),
-				false);
-
-		colorPicker.setLocation(getLocationOnScreen());
-		colorPicker.setOnColorChange(c ->
-		{
-			inventorySetup.setDisplayColor(c);
-			updateDisplayColorLabel();
-		});
+		colorPicker.setOnColorChange(onColorChange);
 
 		colorPicker.addWindowListener(new WindowAdapter()
 		{
