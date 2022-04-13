@@ -219,11 +219,11 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsFilteringModeID bankFilteringMode;
 
-	private static final Varbits[] RUNE_POUCH_AMOUNT_VARBITS =
+	private static final int[] RUNE_POUCH_AMOUNT_VARBITS =
 		{
 			Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3
 		};
-	private static final Varbits[] RUNE_POUCH_RUNE_VARBITS =
+	private static final int[] RUNE_POUCH_RUNE_VARBITS =
 		{
 			Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
 		};
@@ -793,9 +793,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (int i = 0; i < RUNE_POUCH_RUNE_VARBITS.length; i++)
 		{
-			int runeId = client.getVar(RUNE_POUCH_RUNE_VARBITS[i]);
+			int runeId = client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS[i]);
 			RunepouchRune rune = RunepouchRune.getRune(runeId);
-			int runeAmount = rune == null ? 0 : client.getVar(RUNE_POUCH_AMOUNT_VARBITS[i]);
+			int runeAmount = rune == null ? 0 : client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS[i]);
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
