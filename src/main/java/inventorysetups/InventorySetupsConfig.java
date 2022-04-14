@@ -153,7 +153,7 @@ public interface InventorySetupsConfig extends Config
 	)
 	default Color displayColor()
 	{
-		return JagexColors.MENU_TARGET;
+		return null;
 	}
 
 	@ConfigItem(

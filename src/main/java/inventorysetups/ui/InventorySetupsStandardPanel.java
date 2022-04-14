@@ -29,6 +29,7 @@ import inventorysetups.InventorySetupsPlugin;
 
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
+import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.components.FlatTextField;
 import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ImageUtil;
@@ -184,7 +185,20 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 
 		JPanel nameWrapper = new JPanel(new BorderLayout());
 		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		nameWrapper.setBorder(NAME_BOTTOM_BORDER);
+
+		Color currentDisplayColor;
+		if (invSetup.getDisplayColor() == null)
+		{
+			nameWrapper.setBorder(NAME_BOTTOM_BORDER);
+			currentDisplayColor = JagexColors.MENU_TARGET;;
+		}
+		else
+		{
+			nameWrapper.setBorder(new CompoundBorder(
+					BorderFactory.createMatteBorder(0, 0, 2, 0, invSetup.getDisplayColor()),
+					BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR)));
+			currentDisplayColor = invSetup.getDisplayColor();
+		}
 
 		JPanel nameActions = new JPanel(new BorderLayout(3, 0));
 		nameActions.setBorder(new EmptyBorder(0, 0, 0, 8));
@@ -202,6 +216,10 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 				{
 					inventorySetup.setName(nameInput.getText());
 					Color newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
+					if (newDisplayColor == JagexColors.MENU_TARGET)
+					{
+						newDisplayColor = null;
+					}
 					inventorySetup.setDisplayColor(newDisplayColor);
 
 					plugin.updateConfig();
@@ -240,7 +258,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 					nameInput.setText(inventorySetup.getName());
 					updateNameActions(false);
 					requestFocusInWindow();
-					updateDisplayColorLabel();
+					updateDisplayColorLabel(currentDisplayColor);
 				}
 			}
 
@@ -300,7 +318,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		displayColorIndicator.setToolTipText("Edit the color of the name");
 		displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
 		displayColorIndicator.setVisible(false);
-		updateDisplayColorLabel();
+		updateDisplayColorLabel(currentDisplayColor);
 		displayColorIndicator.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -308,12 +326,10 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					openColorPicker("Choose a Display color", invSetup.getDisplayColor(),
+					openColorPicker("Choose a Display color", currentDisplayColor,
 						c ->
 						{
-							displayColorIndicator.setBorder(new CompoundBorder(
-									new EmptyBorder(0, 4, 0, 0),
-									new MatteBorder(0, 0, 3, 0, c)));
+							updateDisplayColorLabel(c);
 						}
 					);
 				}
@@ -618,9 +634,8 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		highlightColorIndicator.setIcon(inventorySetup.isHighlightDifference() ? HIGHLIGHT_COLOR_ICON : NO_HIGHLIGHT_COLOR_ICON);
 	}
 
-	private void updateDisplayColorLabel()
+	private void updateDisplayColorLabel(Color color)
 	{
-		Color color = inventorySetup.getDisplayColor();
 		displayColorIndicator.setBorder(new CompoundBorder(
 				new EmptyBorder(0, 4, 0, 0),
 				new MatteBorder(0, 0, 3, 0, color)));

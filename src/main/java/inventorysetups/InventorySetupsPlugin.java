@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
+import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
@@ -383,9 +384,10 @@ public class InventorySetupsPlugin extends Plugin
 			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
 			{
 				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+				Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
 				client.createMenuEntry(-1)
 						.setOption(OPEN_SETUP_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), setupIndexPair.setup.getDisplayColor()))
+						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
 						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
 						.setType(MenuAction.RUNELITE)
 						.onClick(e ->
@@ -2040,10 +2042,6 @@ public class InventorySetupsPlugin extends Plugin
 			if (setup.getAdditionalFilteredItems() == null)
 			{
 				setup.updateAdditionalItems(new HashMap<>());
-			}
-			if (setup.getDisplayColor() == null)
-			{
-				setup.setDisplayColor(config.displayColor());
 			}
 		}
 

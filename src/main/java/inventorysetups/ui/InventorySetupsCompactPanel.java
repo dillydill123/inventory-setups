@@ -32,6 +32,7 @@ import net.runelite.client.ui.components.FlatTextField;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -56,7 +57,7 @@ public class InventorySetupsCompactPanel extends InventorySetupsPanel
 
 		final FlatTextField nameInput = new FlatTextField();
 		nameInput.setText(inventorySetup.getName());
-		nameInput.setBorder(null);
+		nameInput.setBorder(new MatteBorder(0, 2, 0, 0, invSetup.getDisplayColor()));
 		nameInput.setEditable(false);
 		nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		nameInput.setPreferredSize(new Dimension(0, 24));
