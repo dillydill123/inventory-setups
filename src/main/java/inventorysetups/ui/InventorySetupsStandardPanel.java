@@ -34,11 +34,7 @@ import net.runelite.client.ui.components.FlatTextField;
 import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ImageUtil;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -114,7 +110,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	private final FlatTextField nameInput = new FlatTextField();
 	private final JLabel save = new JLabel("Save");
 	private final JLabel cancel = new JLabel("Cancel");
-	private final JLabel rename = new JLabel("Edit");
+	private final JLabel edit = new JLabel("Edit");
 
 	static
 	{
@@ -190,7 +186,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		if (invSetup.getDisplayColor() == null)
 		{
 			nameWrapper.setBorder(NAME_BOTTOM_BORDER);
-			currentDisplayColor = JagexColors.MENU_TARGET;;
+			currentDisplayColor = null;
 		}
 		else
 		{
@@ -215,11 +211,16 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
 					inventorySetup.setName(nameInput.getText());
-					Color newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
-					if (newDisplayColor == JagexColors.MENU_TARGET)
+					Color newDisplayColor = null;
+					if (displayColorIndicator.getBorder() != null)
 					{
-						newDisplayColor = null;
+						Color currentDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
+						if (currentDisplayColor != JagexColors.MENU_TARGET)
+						{
+							newDisplayColor = currentDisplayColor;
+						}
 					}
+
 					inventorySetup.setDisplayColor(newDisplayColor);
 
 					plugin.updateConfig();
@@ -275,9 +276,9 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			}
 		});
 
-		rename.setFont(FontManager.getRunescapeSmallFont());
-		rename.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-		rename.addMouseListener(new MouseAdapter()
+		edit.setFont(FontManager.getRunescapeSmallFont());
+		edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+		edit.addMouseListener(new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
@@ -292,19 +293,19 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			@Override
 			public void mouseEntered(MouseEvent mouseEvent)
 			{
-				rename.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker().darker());
+				edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker().darker());
 			}
 
 			@Override
 			public void mouseExited(MouseEvent mouseEvent)
 			{
-				rename.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+				edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 			}
 		});
 
 		nameActions.add(save, BorderLayout.EAST);
 		nameActions.add(cancel, BorderLayout.WEST);
-		nameActions.add(rename, BorderLayout.CENTER);
+		nameActions.add(edit, BorderLayout.CENTER);
 
 		nameInput.setText(inventorySetup.getName());
 		nameInput.setBorder(null);
@@ -318,6 +319,15 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		displayColorIndicator.setToolTipText("Edit the color of the name");
 		displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
 		displayColorIndicator.setVisible(false);
+
+		// Right click menu to remove the color on the setup
+		JPopupMenu displayColorMenu = new JPopupMenu();
+		JMenuItem removeColor = new JMenuItem("Remove the color of the name");
+		displayColorMenu.add(removeColor);
+		removeColor.addActionListener(e -> updateDisplayColorLabel(null));
+
+		displayColorIndicator.setComponentPopupMenu(displayColorMenu);
+
 		updateDisplayColorLabel(currentDisplayColor);
 		displayColorIndicator.addMouseListener(new MouseAdapter()
 		{
@@ -326,7 +336,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					openColorPicker("Choose a Display color", currentDisplayColor,
+					openColorPicker("Choose a Display color", currentDisplayColor == null ? JagexColors.MENU_TARGET : currentDisplayColor,
 						c ->
 						{
 							updateDisplayColorLabel(c);
@@ -617,7 +627,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 	{
 		save.setVisible(saveAndCancel);
 		cancel.setVisible(saveAndCancel);
-		rename.setVisible(!saveAndCancel);
+		edit.setVisible(!saveAndCancel);
 		displayColorIndicator.setVisible(saveAndCancel);
 
 		if (saveAndCancel)
@@ -639,6 +649,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		displayColorIndicator.setBorder(new CompoundBorder(
 				new EmptyBorder(0, 4, 0, 0),
 				new MatteBorder(0, 0, 3, 0, color)));
+
 	}
 
 	private void updateBankFilterLabel()

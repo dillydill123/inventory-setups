@@ -123,7 +123,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightDifference",
 			name = "Default Highlight",
 			description = "Configures the default setting for highlighting differences in new setups",
-			position = 4,
+			position = 3,
 			section = defaultSection
 	)
 	default boolean highlightDifference()
@@ -136,13 +136,26 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightColor",
 			name = "Default Highlight Color",
 			description = "Configures the default highlighting color in new setups",
-			position = 5,
+			position = 4,
 			section = defaultSection
 	)
 	default Color highlightColor()
 	{
 		return Color.RED;
 	}
+
+	@ConfigItem(
+			keyName = "enableDisplayColor",
+			name = "Default Enable Display Color",
+			description = "Configures the default display color in new setups",
+			position = 5,
+			section = defaultSection
+	)
+	default boolean enableDisplayColor()
+	{
+		return false;
+	}
+
 
 	@ConfigItem(
 			keyName = "displayColor",
@@ -153,14 +166,14 @@ public interface InventorySetupsConfig extends Config
 	)
 	default Color displayColor()
 	{
-		return null;
+		return Color.RED;
 	}
 
 	@ConfigItem(
 			keyName = "fuzzy",
 			name = "Default Fuzzy",
 			description = "Configures the default setting for fuzziness in new setups",
-			position = 7,
+			position = 8,
 			section = defaultSection
 	)
 	default boolean fuzzy()
@@ -172,7 +185,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "stackCompare",
 			name = "Default Stack Compare",
 			description = "Configures the default setting for stack compare in new setups",
-			position = 8,
+			position = 9,
 			section = defaultSection
 	)
 	default InventorySetupsStackCompareID stackCompareType()

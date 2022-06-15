@@ -644,7 +644,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), name, "",
 				config.highlightColor(),
 				config.highlightDifference(),
-				config.displayColor(),
+				config.enableDisplayColor() ? config.displayColor() : null,
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
 				spellbook, nextInventorySetupId, false);
