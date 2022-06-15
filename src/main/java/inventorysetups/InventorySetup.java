@@ -67,6 +67,10 @@ public class InventorySetup
 
 	@Getter
 	@Setter
+	private Color displayColor;
+
+	@Getter
+	@Setter
 	private boolean filterBank;
 
 	@Getter

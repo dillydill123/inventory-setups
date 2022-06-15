@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
+import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
@@ -383,9 +384,10 @@ public class InventorySetupsPlugin extends Plugin
 			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
 			{
 				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+				Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
 				client.createMenuEntry(-1)
 						.setOption(OPEN_SETUP_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), JagexColors.MENU_TARGET))
+						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
 						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
 						.setType(MenuAction.RUNELITE)
 						.onClick(e ->
@@ -642,6 +644,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), name, "",
 				config.highlightColor(),
 				config.highlightDifference(),
+				config.displayColor(),
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
 				spellbook, nextInventorySetupId, false);

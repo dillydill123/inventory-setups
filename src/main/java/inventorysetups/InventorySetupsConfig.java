@@ -31,6 +31,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Keybind;
+import net.runelite.client.ui.JagexColors;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
@@ -144,10 +145,22 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "displayColor",
+			name = "Default Display Color",
+			description = "Configures the default display color in new setups",
+			position = 6,
+			section = defaultSection
+	)
+	default Color displayColor()
+	{
+		return null;
+	}
+
+	@ConfigItem(
 			keyName = "fuzzy",
 			name = "Default Fuzzy",
 			description = "Configures the default setting for fuzziness in new setups",
-			position = 6,
+			position = 7,
 			section = defaultSection
 	)
 	default boolean fuzzy()
@@ -159,7 +172,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "stackCompare",
 			name = "Default Stack Compare",
 			description = "Configures the default setting for stack compare in new setups",
-			position = 7,
+			position = 8,
 			section = defaultSection
 	)
 	default InventorySetupsStackCompareID stackCompareType()

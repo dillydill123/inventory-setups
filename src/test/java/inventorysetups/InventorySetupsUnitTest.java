@@ -95,7 +95,7 @@ public class InventorySetupsUnitTest
 		Map<Integer, InventorySetupsItem> addItems = new HashMap<>();
 		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, boltPouch, addItems, "Test",
 												"", inventorySetupsConfig.highlightColor(), false,
-										false,false, 0, 0L, false);
+												inventorySetupsConfig.displayColor(), false,false, 0, 0L, false);
 
 		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL));
 	}
