@@ -2000,14 +2000,6 @@ public class InventorySetupsPlugin extends Plugin
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 
-			// Do not allow names of more than MAX_SETUP_NAME_LENGTH chars
-			if (setup.getName().length() > MAX_SETUP_NAME_LENGTH)
-			{
-				setup.setName(setup.getName().substring(0, MAX_SETUP_NAME_LENGTH));
-			}
-
-			// Fix duplicate name by adding an incrementing number to the duplicate
-			// Also update the set of names
 			final String newName = findNewNameForSetup(setup.getName());
 			setup.setName(newName);
 			inventorySetupNames.add(newName);
@@ -2015,8 +2007,15 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-	private String findNewNameForSetup(final String originalName)
+	private String findNewNameForSetup(String originalName)
 	{
+		// Do not allow names of more than MAX_SETUP_NAME_LENGTH chars
+		if (originalName.length() > MAX_SETUP_NAME_LENGTH)
+		{
+			originalName = originalName.substring(0, MAX_SETUP_NAME_LENGTH);
+		}
+
+		// Fix duplicate name by adding an incrementing number to the duplicate
 		String newName = originalName;
 		int i = 1;
 		while (inventorySetupNames.contains(newName))
