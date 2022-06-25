@@ -41,13 +41,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
@@ -148,6 +142,8 @@ public class InventorySetupsPlugin extends Plugin
 	private static final int ITEM_HORIZONTAL_SPACING = 48;
 	private static final int ITEM_ROW_START = 51;
 
+	private static final int MAX_SETUP_NAME_LENGTH = 50;
+
 	@Inject
 	@Getter
 	private Client client;
@@ -187,6 +183,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Getter
 	private List<InventorySetup> inventorySetups;
+
+	@Getter
+	private HashSet<String> inventorySetupNames;
 
 	private NavigationButton navButton;
 
@@ -592,7 +591,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			loadConfig();
 
-			SwingUtilities.invokeLater(() -> panel.rebuild(true));
+
 
 			return true;
 		});
@@ -601,8 +600,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void addInventorySetup()
 	{
-		final String name = JOptionPane.showInputDialog(panel,
-			"Enter the name of this setup.",
+		final String msg = "Enter the name of this setup (max " + MAX_SETUP_NAME_LENGTH + " chars).";
+		String name = JOptionPane.showInputDialog(panel,
+			msg,
 			"Add New Setup",
 			JOptionPane.PLAIN_MESSAGE);
 
@@ -610,6 +610,11 @@ public class InventorySetupsPlugin extends Plugin
 		if (name == null)
 		{
 			return;
+		}
+
+		if (name.length() > MAX_SETUP_NAME_LENGTH)
+		{
+			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
 		}
 
 		clientThread.invokeLater(() ->
@@ -1400,11 +1405,6 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				loadConfig();
-				SwingUtilities.invokeLater(() ->
-				{
-					panel.rebuild(true);
-				});
-
 				return true;
 			});
 		}
@@ -1417,11 +1417,6 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			loadConfig();
-			SwingUtilities.invokeLater(() ->
-			{
-				panel.rebuild(true);
-			});
-
 			return true;
 		});
 	}
@@ -1726,6 +1721,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void loadConfig()
 	{
+		inventorySetupNames = new HashSet<>();
 		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
@@ -1742,13 +1738,19 @@ public class InventorySetupsPlugin extends Plugin
 
 				// serialize the internal data structure from the json in the configuration
 				inventorySetups = gson.fromJson(storedSetups, typeSetups);
+				clientThread.invokeLater(() ->
+				{
+					updateOldSetups();
+					SwingUtilities.invokeLater(() -> panel.rebuild(true));
+				});
 
-				clientThread.invokeLater(this::updateOldSetups);
+
 			}
 			catch (Exception e)
 			{
 				log.error("Exception occurred while loading setup data", e);
 				inventorySetups = new ArrayList<>();
+
 			}
 		}
 	}
@@ -1759,7 +1761,6 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			inventorySetups.add(newSetup);
 			panel.rebuild(true);
-
 			updateConfig();
 		});
 	}
@@ -1768,7 +1769,6 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		SwingUtilities.invokeLater(() ->
 		{
-			inventorySetups.addAll(newSetups);
 			panel.rebuild(true);
 			updateConfig();
 		});
@@ -2001,11 +2001,39 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				setup.updateAdditionalItems(new HashMap<>());
 			}
+
+			// Do not allow names of more than MAX_SETUP_NAME_LENGTH chars
+			if (setup.getName().length() > MAX_SETUP_NAME_LENGTH)
+			{
+				setup.setName(setup.getName().substring(0, MAX_SETUP_NAME_LENGTH));
+			}
+
+			// Fix duplicate name by adding an incrementing number to the duplicate
+			// Also update the set of names
+			final String newName = findNewNameForSetup(setup.getName());
+			setup.setName(newName);
+			inventorySetupNames.add(newName);
 		}
 
-		// TODO: Fix names to certain length and don't allow duplicates
+	}
 
-
+	private String findNewNameForSetup(final String originalName)
+	{
+		String newName = originalName;
+		int i = 1;
+		while (inventorySetupNames.contains(newName))
+		{
+			String i_str = String.valueOf(i);
+			if (originalName.length() + i_str.length() > MAX_SETUP_NAME_LENGTH)
+			{
+				int chars_to_cut_off = i_str.length() - (MAX_SETUP_NAME_LENGTH - originalName.length());
+				newName = originalName.substring(0, MAX_SETUP_NAME_LENGTH - chars_to_cut_off) + i++;
+			}
+			else {
+				newName = originalName + i++;
+			}
+		}
+		return newName;
 	}
 
 	private String fixOldJSONData(final String json)
