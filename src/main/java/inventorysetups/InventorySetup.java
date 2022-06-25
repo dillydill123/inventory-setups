@@ -92,10 +92,6 @@ public class InventorySetup
 
 	@Getter
 	@Setter
-	private long Id;
-
-	@Getter
-	@Setter
 	private boolean favorite;
 
 	public void updateInventory(final List<InventorySetupsItem> inv)

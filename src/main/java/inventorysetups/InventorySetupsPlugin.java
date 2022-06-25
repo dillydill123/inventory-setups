@@ -48,7 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
@@ -67,7 +66,6 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
-import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
@@ -212,9 +210,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	// current version of the plugin
 	private String currentVersion;
-
-	// Id of the next inventory setup that will be created.
-	private long nextInventorySetupId;
 
 	@Setter
 	@Getter
@@ -639,15 +634,13 @@ public class InventorySetupsPlugin extends Plugin
 
 			int spellbook = getCurrentSpellbook();
 
-			updateNextSetupId();
-
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), name, "",
 				config.highlightColor(),
 				config.highlightDifference(),
 				config.enableDisplayColor() ? config.displayColor() : null,
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
-				spellbook, nextInventorySetupId, false);
+				spellbook, false);
 			addInventorySetupClientThread(invSetup);
 		});
 	}
@@ -1618,9 +1611,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void addSetupFromImport(final InventorySetup newSetup)
 	{
-		// override the ID with our own
-		updateNextSetupId();
-		newSetup.setId(nextInventorySetupId);
 		clientThread.invokeLater(() ->
 		{
 			updateNullFieldsOfSetup(newSetup);
@@ -1670,8 +1660,6 @@ public class InventorySetupsPlugin extends Plugin
 		// override the ID with our own
 		for (final InventorySetup inventorySetup : newSetups)
 		{
-			updateNextSetupId();
-			inventorySetup.setId(nextInventorySetupId);
 			clientThread.invokeLater(() ->
 			{
 				updateNullFieldsOfSetup(inventorySetup);
@@ -1716,31 +1704,6 @@ public class InventorySetupsPlugin extends Plugin
 		return internalFilteringIsAllowed && allowBasedOnActivePanel;
 	}
 
-	private void updateNextSetupId()
-	{
-		// If the nextInventorySetupId is max value (somehow...) reset all Ids starting from one
-		if (nextInventorySetupId == Long.MAX_VALUE)
-		{
-			nextInventorySetupId = 1;
-			for (final InventorySetup inventorySetup : inventorySetups)
-			{
-				// TODO mapping from old->new here
-				inventorySetup.setId(nextInventorySetupId++);
-			}
-
-			// TODO: Update section Id pointers here
-
-			// We could save the config here, but it's not necessary. This function could
-			// be called from loadConfig, so it's better to wait for a change in a setup
-			// to provoke saving the config.
-
-		}
-		else
-		{
-			nextInventorySetupId++;
-		}
-	}
-
 	private List<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
 	{
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
@@ -1767,7 +1730,6 @@ public class InventorySetupsPlugin extends Plugin
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
 			inventorySetups = new ArrayList<>();
-			nextInventorySetupId = 1L;
 		}
 		else
 		{
@@ -1781,7 +1743,7 @@ public class InventorySetupsPlugin extends Plugin
 				// serialize the internal data structure from the json in the configuration
 				inventorySetups = gson.fromJson(storedSetups, typeSetups);
 
-				clientThread.invokeLater(this::updateOldSetupsAndComputeNextId);
+				clientThread.invokeLater(this::updateOldSetups);
 			}
 			catch (Exception e)
 			{
@@ -2019,14 +1981,10 @@ public class InventorySetupsPlugin extends Plugin
 		return quantity;
 	}
 
-	private void updateOldSetupsAndComputeNextId()
+	private void updateOldSetups()
 	{
 		for (final InventorySetup setup : inventorySetups)
 		{
-			// figure out what the id of the next setup should be
-			long setupId = setup.getId();
-			nextInventorySetupId = Long.max(nextInventorySetupId, setupId);
-
 			if (setup.getRune_pouch() == null && containerContainsRunePouch(setup.getInventory()))
 			{
 				setup.updateRunePouch(getRunePouchData());
@@ -2045,16 +2003,9 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
-		for (final InventorySetup setup : inventorySetups)
-		{
-			// fix old setups that didn't have an Id. Start with 1 higher than the highest ID found.
-			long setupId = setup.getId();
-			if (setupId == 0L)
-			{
-				updateNextSetupId(); // if nextInventorySetupId overflows, this function will set the Id's starting from 1
-				setup.setId(nextInventorySetupId);
-			}
-		}
+		// TODO: Fix names to certain length and don't allow duplicates
+
+
 	}
 
 	private String fixOldJSONData(final String json)
