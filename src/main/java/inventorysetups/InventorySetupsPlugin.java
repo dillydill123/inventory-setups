@@ -617,6 +617,17 @@ public class InventorySetupsPlugin extends Plugin
 			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
 		}
 
+		if (inventorySetupNames.contains(name))
+		{
+			JOptionPane.showMessageDialog(panel,
+					name + " exceeds the " + MAX_SETUP_NAME_LENGTH + " character limit.",
+					"Setup Exceeds Character Limit",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		final String newName = name;
+
 		clientThread.invokeLater(() ->
 		{
 			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
@@ -639,7 +650,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			int spellbook = getCurrentSpellbook();
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), name, "",
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), newName, "",
 				config.highlightColor(),
 				config.highlightDifference(),
 				config.enableDisplayColor() ? config.displayColor() : null,
@@ -1760,6 +1771,7 @@ public class InventorySetupsPlugin extends Plugin
 		SwingUtilities.invokeLater(() ->
 		{
 			inventorySetups.add(newSetup);
+			inventorySetupNames.add(newSetup.getName());
 			panel.rebuild(true);
 			updateConfig();
 		});
@@ -1769,6 +1781,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		SwingUtilities.invokeLater(() ->
 		{
+			inventorySetups.addAll(newSetups);
 			panel.rebuild(true);
 			updateConfig();
 		});
