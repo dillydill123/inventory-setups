@@ -620,7 +620,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (inventorySetupNames.contains(name))
 		{
 			JOptionPane.showMessageDialog(panel,
-					name + " exceeds the " + MAX_SETUP_NAME_LENGTH + " character limit.",
+					"A setup with the name " + name + " already exists",
 					"Setup Exceeds Character Limit",
 					JOptionPane.ERROR_MESSAGE);
 			return;
@@ -1394,6 +1394,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
+		inventorySetupNames.remove(setup.getName());
 		inventorySetups.remove(setup);
 		panel.rebuild(false);
 		updateConfig();
@@ -1619,6 +1620,8 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		clientThread.invokeLater(() ->
 		{
+			final String newName = findNewNameForSetup(newSetup.getName());
+			newSetup.setName(newName);
 			updateNullFieldsOfSetup(newSetup);
 			addInventorySetupClientThread(newSetup);
 		});
@@ -1648,7 +1651,12 @@ public class InventorySetupsPlugin extends Plugin
 				}.getType();
 
 				final ArrayList<InventorySetup> newSetups = gson.fromJson(json, typeSetups);
-				addSetupFromImport(newSetups);
+
+				for (final InventorySetup inventorySetup : newSetups)
+				{
+					addSetupFromImport(inventorySetup);
+				}
+
 			}
 			catch (Exception e)
 			{
@@ -1659,19 +1667,6 @@ public class InventorySetupsPlugin extends Plugin
 						JOptionPane.ERROR_MESSAGE);
 			}
 		}
-	}
-
-	private void addSetupFromImport(final List<InventorySetup> newSetups)
-	{
-		// override the ID with our own
-		for (final InventorySetup inventorySetup : newSetups)
-		{
-			clientThread.invokeLater(() ->
-			{
-				updateNullFieldsOfSetup(inventorySetup);
-			});
-		}
-		addInventorySetupClientThread(newSetups);
 	}
 
 	private void updateNullFieldsOfSetup(final InventorySetup newSetup)
@@ -1772,16 +1767,6 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			inventorySetups.add(newSetup);
 			inventorySetupNames.add(newSetup.getName());
-			panel.rebuild(true);
-			updateConfig();
-		});
-	}
-
-	private void addInventorySetupClientThread(final List<InventorySetup> newSetups)
-	{
-		SwingUtilities.invokeLater(() ->
-		{
-			inventorySetups.addAll(newSetups);
 			panel.rebuild(true);
 			updateConfig();
 		});
