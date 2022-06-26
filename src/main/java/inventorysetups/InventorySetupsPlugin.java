@@ -1738,10 +1738,6 @@ public class InventorySetupsPlugin extends Plugin
 		inventorySetupNames = new HashSet<>();
 		sections = new ArrayList<>();
 
-		InventorySetupsSection section = new InventorySetupsSection("Other");
-		section.getSetups().add("test");
-		sections.add(section);
-
 		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		if (Strings.isNullOrEmpty(storedSetups))
 		{

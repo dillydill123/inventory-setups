@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.util.Map;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
+import static inventorysetups.ui.InventorySetupsStandardPanel.VIEW_SETUP_ICON;
 
 public class InventorySetupsSectionPanel extends JPanel implements InventorySetupsValidName
 {
@@ -40,6 +41,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
+		setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+		constraints.gridy++;
 		for (final String setupName : section.getSetups())
 		{
 			if (!includedSetups.containsKey(setupName))
@@ -64,7 +67,17 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			constraints.gridy++;
 		}
 
-		add(nameActions, BorderLayout.NORTH);
+		// Label that will be used to minimize or maximize setups in section
+		JLabel minMaxLabel = new JLabel();
+		minMaxLabel.setIcon(VIEW_SETUP_ICON);
+
+		JPanel nameWrapper = new JPanel();
+		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		nameWrapper.setLayout(new BorderLayout());
+		nameWrapper.add(minMaxLabel, BorderLayout.WEST);
+		nameWrapper.add(nameActions, BorderLayout.CENTER);
+
+		add(nameWrapper, BorderLayout.NORTH);
 		add(setupsPanel, BorderLayout.SOUTH);
 
 	}
