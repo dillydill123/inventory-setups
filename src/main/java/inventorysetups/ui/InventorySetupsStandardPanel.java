@@ -225,6 +225,40 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			}
 		});
 
+		nameInput.getDocument().addDocumentListener(new DocumentListener()
+		{
+			private void checkNameIsValid()
+			{
+				if (!isNameValid(nameInput.getText()))
+				{
+					save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+					save.setEnabled(false);
+				}
+				else
+				{
+					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+					save.setEnabled(true);
+				}
+			}
+			@Override
+			public void insertUpdate(DocumentEvent e)
+			{
+				checkNameIsValid();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e)
+			{
+				checkNameIsValid();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e)
+			{
+				checkNameIsValid();
+			}
+		});
+
 		save.setVisible(false);
 		save.setFont(FontManager.getRunescapeSmallFont());
 		save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
@@ -233,7 +267,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				if (SwingUtilities.isLeftMouseButton(mouseEvent) && save.isEnabled())
 				{
 					inventorySetup.setName(nameInput.getText());
 					Color newDisplayColor = null;
@@ -258,15 +292,28 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent mouseEvent)
-			{
-				save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR.darker());
+			public void mouseEntered(MouseEvent mouseEvent) {
+				if (isNameValid(nameInput.getText()))
+				{
+					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR.darker());
+				}
+				else
+				{
+					save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+				}
 			}
 
 			@Override
 			public void mouseExited(MouseEvent mouseEvent)
 			{
-				save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+				if (isNameValid(nameInput.getText()))
+				{
+					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+				}
+				else
+				{
+					save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+				}
 			}
 		});
 
@@ -646,6 +693,13 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		updateToggleHighlightLabel();
 		updateFavoriteIndicator();
 
+	}
+
+	private boolean isNameValid(final String name)
+	{
+		return (!nameInput.getText().isEmpty() &&
+				!plugin.getInventorySetupNames().contains(nameInput.getText())) ||
+				inventorySetup.getName().equals(nameInput.getText());
 	}
 
 	private void updateNameActions(boolean saveAndCancel)
