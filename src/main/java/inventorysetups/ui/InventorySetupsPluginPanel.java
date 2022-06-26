@@ -24,13 +24,7 @@
  */
 package inventorysetups.ui;
 
-import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupsFilteringModeID;
-import inventorysetups.InventorySetupsItem;
-import inventorysetups.InventorySetupsPlugin;
-
-import inventorysetups.InventorySetupsSlotID;
-import inventorysetups.InventorySetupsSortingID;
+import inventorysetups.*;
 
 import lombok.Getter;
 import net.runelite.api.InventoryID;
@@ -63,9 +57,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.*;
@@ -791,7 +783,23 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		if (plugin.getConfig().sectionMode())
 		{
-			// If a search occurs, only show sections that have a matching search
+			// Create a temporary set for the setups to speed up searching
+			Map<String, InventorySetup> includedSetupsMap = setups.stream().collect(Collectors.toMap(InventorySetup::getName, setup -> setup));
+
+			for (final InventorySetupsSection section : plugin.getSections())
+			{
+				// Only add the section if a setup from that section is included
+				if (section.getSetups().stream().anyMatch(includedSetupsMap::containsKey))
+				{
+					InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, includedSetupsMap);
+					overviewPanel.add(sectionPanel, constraints);
+					constraints.gridy++;
+
+					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+					constraints.gridy++;
+				}
+			}
+
 		}
 		else
 		{

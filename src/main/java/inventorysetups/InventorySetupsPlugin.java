@@ -35,6 +35,8 @@ import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -42,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
@@ -96,6 +99,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
@@ -184,6 +188,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Getter
 	private List<InventorySetup> inventorySetups;
+
+	@Getter
+	private List<InventorySetupsSection> sections;
 
 	@Getter
 	private HashSet<String> inventorySetupNames;
@@ -1729,6 +1736,12 @@ public class InventorySetupsPlugin extends Plugin
 	private void loadConfig()
 	{
 		inventorySetupNames = new HashSet<>();
+		sections = new ArrayList<>();
+
+		InventorySetupsSection section = new InventorySetupsSection("Other");
+		section.getSetups().add("test");
+		sections.add(section);
+
 		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
@@ -1942,6 +1955,30 @@ public class InventorySetupsPlugin extends Plugin
 	private boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
 	{
 		return checkIfContainerContainsItem(ItemID.BOLT_POUCH, container);
+	}
+
+	public void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)
+	{
+
+		RuneliteColorPicker colorPicker = getColorPickerManager().create(
+				SwingUtilities.windowForComponent(panel),
+				startingColor,
+				title,
+				false);
+
+		colorPicker.setLocation(panel.getLocationOnScreen());
+		colorPicker.setOnColorChange(onColorChange);
+
+		colorPicker.addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				updateConfig();
+			}
+		});
+
+		colorPicker.setVisible(true);
 	}
 
 	public int parseTextInputAmount(String input)

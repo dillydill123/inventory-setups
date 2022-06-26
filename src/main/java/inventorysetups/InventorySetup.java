@@ -32,7 +32,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
-public class InventorySetup
+public class InventorySetup implements InventorySetupsDisplayAttributes
 {
 	@Getter
 	private List<InventorySetupsItem> inventory;

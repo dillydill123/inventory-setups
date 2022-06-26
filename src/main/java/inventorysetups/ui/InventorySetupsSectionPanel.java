@@ -1,93 +1,78 @@
 package inventorysetups.ui;
 
-import inventorysetups.InventorySetupsPlugin;
-import inventorysetups.InventorySetupsSection;
+import inventorysetups.*;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.FlatTextField;
 
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.util.Map;
 
-public class InventorySetupsSectionPanel extends JPanel
+import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
+
+public class InventorySetupsSectionPanel extends JPanel implements InventorySetupsValidName
 {
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
 	protected final InventorySetupsSection section;
 
-	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section)
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, Map<String, InventorySetup> includedSetups)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.section = section;
 
-		setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		setPreferredSize(new Dimension(0, 24));
+		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section, plugin, panel, this, null, MAX_SETUP_NAME_LENGTH);
 
-		JPanel nameWrapper = new JPanel(new BorderLayout());
-		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		JPanel setupsPanel = new JPanel();
+		setupsPanel.setLayout(new GridBagLayout());
+		setupsPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-		final FlatTextField nameInput = new FlatTextField();
-		nameInput.setText(section.getName());
-		nameInput.setBorder(null);
-		nameInput.setEditable(false);
-		nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-		nameInput.setPreferredSize(new Dimension(0, 24));
-		nameInput.getTextField().setForeground(Color.WHITE);
-		nameInput.getTextField().setBorder(new EmptyBorder(0, 0, 0, 0));
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.weightx = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
 
-		nameWrapper.add(nameInput, BorderLayout.CENTER);
-
-		add(nameWrapper, BorderLayout.NORTH);
-
-		nameInput.getTextField().addMouseListener(new MouseAdapter()
+		for (final String setupName : section.getSetups())
 		{
-			@Override
-			public void mousePressed(MouseEvent e)
+			if (!includedSetups.containsKey(setupName))
 			{
-				if (SwingUtilities.isLeftMouseButton(e))
-				{
-					section.setMaximized(!section.isMaximized());
-					panel.rebuild(false);
-				}
+				continue;
 			}
 
-			@Override
-			public void mouseEntered(MouseEvent e)
+			final InventorySetup setup = includedSetups.get(setupName);
+			InventorySetupsPanel newPanel = null;
+			if (plugin.getConfig().compactMode())
 			{
-				nameInput.setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
+				newPanel = new InventorySetupsCompactPanel(plugin, panel, setup);
 			}
+			else
+			{
+				newPanel = new InventorySetupsStandardPanel(plugin, panel, setup);
+			}
+			setupsPanel.add(newPanel, constraints);
+			constraints.gridy++;
 
-			@Override
-			public void mouseExited(MouseEvent e)
-			{
-				nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-			}
-		});
+			setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+			constraints.gridy++;
+		}
+
+		add(nameActions, BorderLayout.NORTH);
+		add(setupsPanel, BorderLayout.SOUTH);
 
 	}
 
-	public void updateName(final String newName)
+	@Override
+	public boolean isNameValid(final String name)
 	{
-
-	}
-
-	public void addSetup(final Long newId)
-	{
-
-	}
-
-	public void removeSetup(final Long idToBeRemoved)
-	{
-
+		return true;
 	}
 
 }
