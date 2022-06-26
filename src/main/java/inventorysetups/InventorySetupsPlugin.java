@@ -120,6 +120,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY_SETUPS = "setups";
+
+	public static final String CONFIG_KEY_SECTION_MODE = "sectionMode";
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
@@ -320,8 +322,8 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getGroup().equals(CONFIG_GROUP))
 		{
-			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
-				event.getKey().equals(CONFIG_KEY_SORTING_MODE))
+			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
+				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
 			{
 				panel.rebuild(true);
 			}
@@ -510,9 +512,9 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public void switchViews(boolean compactMode)
+	public void switchViews(final String mode, boolean on)
 	{
-		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_COMPACT_MODE, compactMode);
+		configManager.setConfiguration(CONFIG_GROUP, mode, on);
 	}
 
 	public void toggleAlphabeticalMode(InventorySetupsSortingID mode)

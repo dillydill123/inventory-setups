@@ -32,8 +32,7 @@ import lombok.RequiredArgsConstructor;
 public enum InventorySetupsSortingID
 {
 	DEFAULT("Default", 0),
-	ALPHABETICAL("Alphabetical", 1),
-	SECTION("Section", 2);
+	ALPHABETICAL("Alphabetical", 1);
 
 	@Override
 	public String toString()

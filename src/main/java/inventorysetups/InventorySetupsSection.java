@@ -15,7 +15,7 @@ public class InventorySetupsSection
 	// The list of setup Ids that correspond to the setups contained in this section
 	private ArrayList<Long> setupIds;
 
-	// Whether or not the section is maximized (showing the collection of setups or not)
+	// Whether the section is maximized (showing the collection of setups or not)
 	@Getter
 	@Setter
 	private boolean isMaximized;

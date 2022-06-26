@@ -33,10 +33,7 @@ import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Keybind;
 import net.runelite.client.ui.JagexColors;
 
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
+import static inventorysetups.InventorySetupsPlugin.*;
 
 @ConfigGroup(InventorySetupsPlugin.CONFIG_GROUP)
 public interface InventorySetupsConfig extends Config
@@ -254,10 +251,21 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = CONFIG_KEY_SECTION_MODE,
+			name = "Section Mode",
+			description = "Configures the view to be in section mode",
+			position = 11
+	)
+	default boolean sectionMode()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_COMPACT_MODE,
 			name = "Compact Mode",
 			description = "Configures the setup panels to be compact",
-			position = 11
+			position = 12
 	)
 	default boolean compactMode()
 	{
@@ -268,7 +276,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_SORTING_MODE,
 			name = "Sorting Mode",
 			description = "Configures the sorting of setups",
-			position = 12
+			position = 13
 	)
 	default InventorySetupsSortingID sortingMode()
 	{
@@ -279,7 +287,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_HIDE_BUTTON,
 			name = "Hide Help Button",
 			description = "Hide the help button",
-			position = 13
+			position = 14
 	)
 	default boolean hideButton()
 	{
@@ -290,7 +298,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "disableBankTabBar",
 			name = "Disable Bank Tab Separator",
 			description = "Stops the thin bank tab separator from removing the bank filter when clicked",
-			position = 14
+			position = 15
 	)
 	default boolean disableBankTabBar()
 	{
@@ -301,7 +309,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "removeBankTabSeparator",
 			name = "Remove Bank Tab Separator",
 			description = "Removes the thin bank tab separators from the bank filter",
-			position = 15
+			position = 16
 	)
 	default boolean removeBankTabSeparator()
 	{
@@ -312,7 +320,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "requireActivePanelFilter",
 			name = "Require Active Panel for Filtering",
 			description = "Only allow filtering if the Inventory Setups panel is active",
-			position = 16
+			position = 17
 	)
 	default boolean requireActivePanelFilter()
 	{
@@ -323,7 +331,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "showWornItemsFilter",
 			name = "Show Worn Items Filter",
 			description = "Determines which setups show up when right clicking the show worn items menu",
-			position = 17
+			position = 18
 	)
 	default InventorySetupsShowWornItemsFilterID showWornItemsFilter()
 	{
@@ -334,7 +342,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_MANUAL_BANK_FILTER,
 			name = "Manual Bank Filter",
 			description = "Disable automatic bank filtering when opening the bank",
-			position = 18
+			position = 19
 	)
 	default boolean manualBankFilter()
 	{

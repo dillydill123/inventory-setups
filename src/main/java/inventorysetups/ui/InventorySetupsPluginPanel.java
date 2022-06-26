@@ -28,7 +28,7 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
-import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
+
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
 
@@ -67,6 +67,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static inventorysetups.InventorySetupsPlugin.*;
 
 // The main panel of the plugin that contains all viewing components
 public class InventorySetupsPluginPanel extends PluginPanel
@@ -107,6 +109,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private final JLabel helpButton;
 	private final JLabel compactViewMarker;
 	private final JLabel sortingMarker;
+	private final JLabel sectionViewMarker;
 	private final JLabel addMarker;
 	private final JLabel importMarker;
 	private final JLabel updateMarker;
@@ -256,7 +259,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					plugin.switchViews(!plugin.getConfig().compactMode());
+					plugin.switchViews(CONFIG_KEY_COMPACT_MODE, !plugin.getConfig().compactMode());
 					updateCompactViewMarker();
 				}
 			}
@@ -397,11 +400,41 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
+		this.sectionViewMarker = new JLabel(COMPACT_VIEW_ICON);
+		sectionViewMarker.setToolTipText("Switch to section mode");
+		sectionViewMarker.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					plugin.switchViews(CONFIG_KEY_SECTION_MODE, !plugin.getConfig().sectionMode());
+					updateSectionViewMarker();
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? COMPACT_VIEW_HOVER_ICON : NO_COMPACT_VIEW_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
+			}
+		});
+
+
 		this.overviewTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		overviewTopRightButtonsPanel.add(sectionViewMarker);
 		overviewTopRightButtonsPanel.add(sortingMarker);
 		overviewTopRightButtonsPanel.add(compactViewMarker);
 		overviewTopRightButtonsPanel.add(importMarker);
 		overviewTopRightButtonsPanel.add(addMarker);
+		sortingMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		compactViewMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		importMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		addMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
@@ -513,6 +546,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		// make sure the invEq panel isn't visible upon startup
 		setupDisplayPanel.setVisible(false);
 		helpButton.setVisible(!plugin.getConfig().hideButton());
+		updateSectionViewMarker();
 		updateCompactViewMarker();
 		updateSortingMarker();
 	}
@@ -714,6 +748,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 	}
 
+	private void updateSectionViewMarker()
+	{
+		sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
+		sectionViewMarker.setToolTipText("Switch to " + (plugin.getConfig().sectionMode() ? "standard mode" : "section mode"));
+	}
+
 	private void updateCompactViewMarker()
 	{
 		compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
@@ -739,6 +779,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		overviewPanel.setLayout(new GridBagLayout());
 		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+		updateSectionViewMarker();
 		updateCompactViewMarker();
 		updateSortingMarker();
 
@@ -748,8 +789,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 
-		// TODO adjust in case sections are selected instead
-		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.SECTION)
+		if (plugin.getConfig().sectionMode())
 		{
 			// If a search occurs, only show sections that have a matching search
 		}
