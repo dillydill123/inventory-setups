@@ -129,6 +129,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
 	public static final int NUM_EQUIPMENT_ITEMS = 14;
+	public static final int MAX_SETUP_NAME_LENGTH = 50;
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
 	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
@@ -141,8 +142,6 @@ public class InventorySetupsPlugin extends Plugin
 	private static final int ITEM_VERTICAL_SPACING = 36;
 	private static final int ITEM_HORIZONTAL_SPACING = 48;
 	private static final int ITEM_ROW_START = 51;
-
-	private static final int MAX_SETUP_NAME_LENGTH = 50;
 
 	@Inject
 	@Getter

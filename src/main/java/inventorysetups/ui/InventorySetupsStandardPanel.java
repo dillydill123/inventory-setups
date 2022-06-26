@@ -39,14 +39,14 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
@@ -199,6 +199,31 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		JPanel nameActions = new JPanel(new BorderLayout(3, 0));
 		nameActions.setBorder(new EmptyBorder(0, 0, 0, 8));
 		nameActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
+		// Limit character input to 50
+		AbstractDocument doc = (AbstractDocument)nameInput.getDocument();
+		doc.setDocumentFilter(new DocumentFilter()
+		{
+			@Override
+			public void insertString(FilterBypass fb, int offset, String str, AttributeSet a) throws BadLocationException
+			{
+				if ((fb.getDocument().getLength() + str.length()) <= InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH)
+				{
+					super.insertString(fb, offset, str, a);
+				}
+			}
+			@Override
+			public void replace(FilterBypass fb, int offset, int length, String str, AttributeSet a) throws BadLocationException
+			{
+				if ((fb.getDocument().getLength() + str.length() - length) >= InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH)
+				{
+					int chars_available = InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH - (fb.getDocument().getLength() - length);
+					int chars_to_cut = str.length() - chars_available;
+					str = str.substring(0, str.length() - chars_to_cut);
+				}
+				super.replace(fb, offset, length, str, a);
+			}
+		});
 
 		save.setVisible(false);
 		save.setFont(FontManager.getRunescapeSmallFont());
