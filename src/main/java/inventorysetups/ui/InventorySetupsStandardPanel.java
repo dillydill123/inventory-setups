@@ -200,7 +200,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 		nameActions.setBorder(new EmptyBorder(0, 0, 0, 8));
 		nameActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		// Limit character input to 50
+		// Limit character input
 		AbstractDocument doc = (AbstractDocument)nameInput.getDocument();
 		doc.setDocumentFilter(new DocumentFilter()
 		{
@@ -212,11 +212,14 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 					super.insertString(fb, offset, str, a);
 				}
 			}
+
+			// Replace handles pasting
 			@Override
 			public void replace(FilterBypass fb, int offset, int length, String str, AttributeSet a) throws BadLocationException
 			{
 				if ((fb.getDocument().getLength() + str.length() - length) >= InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH)
 				{
+					// If the user pastes a huge amount of text, cut it out until the maximum length is achieved
 					int chars_available = InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH - (fb.getDocument().getLength() - length);
 					int chars_to_cut = str.length() - chars_available;
 					str = str.substring(0, str.length() - chars_to_cut);
@@ -225,9 +228,10 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			}
 		});
 
+		// Add document listener to disable save button when the name isn't valid
 		nameInput.getDocument().addDocumentListener(new DocumentListener()
 		{
-			private void checkNameIsValid()
+			private void checkIsNameValid()
 			{
 				if (!isNameValid(nameInput.getText()))
 				{
@@ -243,19 +247,19 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel
 			@Override
 			public void insertUpdate(DocumentEvent e)
 			{
-				checkNameIsValid();
+				checkIsNameValid();
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e)
 			{
-				checkNameIsValid();
+				checkIsNameValid();
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e)
 			{
-				checkNameIsValid();
+				checkIsNameValid();
 			}
 		});
 
