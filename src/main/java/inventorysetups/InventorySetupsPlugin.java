@@ -618,7 +618,7 @@ public class InventorySetupsPlugin extends Plugin
 			JOptionPane.PLAIN_MESSAGE);
 
 		// cancel button was clicked
-		if (name == null)
+		if (name == null || name.isEmpty())
 		{
 			return;
 		}
@@ -681,7 +681,7 @@ public class InventorySetupsPlugin extends Plugin
 				JOptionPane.PLAIN_MESSAGE);
 
 		// cancel button was clicked
-		if (name == null)
+		if (name == null || name.isEmpty())
 		{
 			return;
 		}

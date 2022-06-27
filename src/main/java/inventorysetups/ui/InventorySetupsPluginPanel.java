@@ -327,6 +327,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 					{
 						plugin.addSection();
 					}
+					else
 					{
 						plugin.addInventorySetup();
 					}
