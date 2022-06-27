@@ -632,7 +632,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			JOptionPane.showMessageDialog(panel,
 					"A setup with the name " + name + " already exists",
-					"Setup Exceeds Character Limit",
+					"Setup Already Exists",
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
@@ -672,6 +672,44 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
+	public void addSection()
+	{
+		final String msg = "Enter the name of this section (max " + MAX_SETUP_NAME_LENGTH + " chars).";
+		String name = JOptionPane.showInputDialog(panel,
+				msg,
+				"Add New Setup",
+				JOptionPane.PLAIN_MESSAGE);
+
+		// cancel button was clicked
+		if (name == null)
+		{
+			return;
+		}
+
+		if (name.length() > MAX_SETUP_NAME_LENGTH)
+		{
+			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
+		}
+
+		if (sectionNames.contains(name))
+		{
+			JOptionPane.showMessageDialog(panel,
+					"A section with the name " + name + " already exists",
+					"Section Already Exists",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		final String newName = name;
+		SwingUtilities.invokeLater(() ->
+		{
+			sections.add(new InventorySetupsSection(newName));
+			updateConfig(false, true);
+			panel.rebuild(true);
+		});
+
+	}
+
 	public void moveSetup(int invIndex, int newPosition)
 	{
 		// Setup is already in the specified position or is out of position
@@ -682,7 +720,7 @@ public class InventorySetupsPlugin extends Plugin
 		InventorySetup setup = inventorySetups.remove(invIndex);
 		inventorySetups.add(newPosition, setup);
 		panel.rebuild(false);
-		updateConfig();
+		updateConfig(true, false);
 	}
 
 	public List<InventorySetup> filterSetups(String textToFilter)
@@ -780,7 +818,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), stackCompareType);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
-			updateConfig();
+			updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
@@ -1081,7 +1119,7 @@ public class InventorySetupsPlugin extends Plugin
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
-			updateConfig();
+			updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
@@ -1122,7 +1160,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			container.set(slot.getIndexInSlot(), newItem);
-			updateConfig();
+			updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 
@@ -1182,7 +1220,7 @@ public class InventorySetupsPlugin extends Plugin
 									}
 
 									container.set(slot.getIndexInSlot(), newItem);
-									updateConfig();
+									updateConfig(true, false);
 									panel.refreshCurrentSetup();
 
 								});
@@ -1220,7 +1258,7 @@ public class InventorySetupsPlugin extends Plugin
 							container.set(slot.getIndexInSlot(), newItem);
 						}
 
-						updateConfig();
+						updateConfig(true, false);
 						panel.refreshCurrentSetup();
 					}
 
@@ -1267,7 +1305,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
 				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
-				updateConfig();
+				updateConfig(true, false);
 				panel.refreshCurrentSetup();
 				return;
 			}
@@ -1289,7 +1327,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			container.set(slot.getIndexInSlot(), dummyItem);
-			updateConfig();
+			updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
@@ -1324,7 +1362,7 @@ public class InventorySetupsPlugin extends Plugin
 			container.get(slot.getIndexInSlot()).toggleIsFuzzy();
 		}
 
-		updateConfig();
+		updateConfig(true, false);
 		panel.refreshCurrentSetup();
 	}
 
@@ -1338,7 +1376,7 @@ public class InventorySetupsPlugin extends Plugin
 		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 		container.get(slot.getIndexInSlot()).setStackCompare(newStackCompare);
 
-		updateConfig();
+		updateConfig(true, false);
 		panel.refreshCurrentSetup();
 	}
 
@@ -1379,7 +1417,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			panel.getCurrentSelectedSetup().updateSpellbook(newSpellbook);
-			updateConfig();
+			updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 
@@ -1390,7 +1428,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			setup.updateNotes(text);
-			updateConfig();
+			updateConfig(true, false);
 		});
 	}
 
@@ -1408,14 +1446,25 @@ public class InventorySetupsPlugin extends Plugin
 		inventorySetupNames.remove(setup.getName());
 		inventorySetups.remove(setup);
 		panel.rebuild(false);
-		updateConfig();
+		updateConfig(true, false);
 	}
 
-	public void updateConfig()
+	public void updateConfig(boolean updateSetups, boolean updateSections)
 	{
-		// update setups
-		final String jsonSetups = gson.toJson(inventorySetups);
-		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS, jsonSetups);
+		if (updateSetups)
+		{
+			// update setups
+			final String jsonSetups = gson.toJson(inventorySetups);
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS, jsonSetups);
+		}
+
+		if (updateSections)
+		{
+			// update setups
+			final String jsonSections = gson.toJson(sections);
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SECTIONS, jsonSections);
+		}
+
 	}
 
 	@Subscribe
@@ -1781,7 +1830,7 @@ public class InventorySetupsPlugin extends Plugin
 			inventorySetups.add(newSetup);
 			inventorySetupNames.add(newSetup.getName());
 			panel.rebuild(true);
-			updateConfig();
+			updateConfig(true, false);
 		});
 	}
 
@@ -1973,7 +2022,7 @@ public class InventorySetupsPlugin extends Plugin
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				updateConfig();
+				updateConfig(true, true);
 			}
 		});
 

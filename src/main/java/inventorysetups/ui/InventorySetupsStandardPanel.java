@@ -185,7 +185,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					inventorySetup.setFilterBank(!inventorySetup.isFilterBank());
 					bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
 					updateBankFilterLabel();
-					plugin.updateConfig();
+					plugin.updateConfig(true, false);
 				}
 			}
 
@@ -214,7 +214,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					inventorySetup.setUnorderedHighlight(!inventorySetup.isUnorderedHighlight());
 					unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory and ignore order");
 					updateUnorderedHighlightIndicator();
-					plugin.updateConfig();
+					plugin.updateConfig(true, false);
 				}
 			}
 
@@ -243,7 +243,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					inventorySetup.setFavorite(!inventorySetup.isFavorite());
 					favoriteIndicator.setToolTipText(inventorySetup.isFavorite() ? "Remove this setup from the list of favorites" : "Favorite this setup so it appears at the top of the list");
 					updateFavoriteIndicator();
-					plugin.updateConfig();
+					plugin.updateConfig(true, false);
 					// rebuild the panel so this panel will move positions from being favorited/unfavorited
 					panel.rebuild(false);
 				}
@@ -275,7 +275,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					highlightIndicator.setToolTipText(inventorySetup.isHighlightDifference() ? "Disable highlighting" : "Enable highlighting");
 					updateToggleHighlightLabel();
 					updateHighlightColorLabel();
-					plugin.updateConfig();
+					plugin.updateConfig(true, false);
 				}
 			}
 

@@ -315,7 +315,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		// setup the add marker (+ sign in the top right)
 		this.addMarker = new JLabel(ADD_ICON);
-		addMarker.setToolTipText("Add a new inventory setup");
+		updateAddMarker();
 		addMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -323,7 +323,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					plugin.addInventorySetup();
+					if (plugin.getConfig().sectionMode())
+					{
+						plugin.addSection();
+					}
+					{
+						plugin.addInventorySetup();
+					}
 				}
 			}
 
@@ -548,6 +554,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		returnToOverviewPanel(resetScrollBar);
 		overviewPanel.removeAll();
+		updateAddMarker();
 
 		List<InventorySetup> setupsToAdd = null;
 		if (!searchBar.getText().isEmpty())
@@ -764,6 +771,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		validate();
 		repaint();
 		contentWrapperPane.getVerticalScrollBar().setValue(scrollbarValue);
+	}
+
+	private void updateAddMarker()
+	{
+		addMarker.setToolTipText(plugin.getConfig().sectionMode() ? "Add a new section" : "Add a new inventory setup");
 	}
 
 	// Redraw the entire panel given the list of setups

@@ -72,7 +72,7 @@ public class InventorySetupsCycleButton<T> extends JLabel
 					runnable.run();
 					setToolTipText(tooltips.get(currentIndex));
 					setIcon(icons.get(currentIndex));
-					plugin.updateConfig();
+					plugin.updateConfig(true, true);
 				}
 			}
 

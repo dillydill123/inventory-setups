@@ -158,7 +158,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
                     datum.setDisplayColor(newDisplayColor);
 
-                    plugin.updateConfig();
+                    plugin.updateConfig(true, true);
 
                     nameInput.setEditable(false);
                     updateNameActions(false);
