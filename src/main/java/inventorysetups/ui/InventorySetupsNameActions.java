@@ -23,9 +23,6 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.function.Consumer;
 
 import static inventorysetups.ui.InventorySetupsStandardPanel.DISPLAY_COLOR_HOVER_ICON;
 import static inventorysetups.ui.InventorySetupsStandardPanel.DISPLAY_COLOR_ICON;
@@ -148,7 +145,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
             {
                 if (SwingUtilities.isLeftMouseButton(mouseEvent) && save.isEnabled())
                 {
-                    datum.setName(nameInput.getText());
+                    validNameImplementer.updateName(nameInput.getText());
                     Color newDisplayColor = null;
                     if (displayColorIndicator.getBorder() != null)
                     {

@@ -124,6 +124,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY_SETUPS = "setups";
+	public static final String CONFIG_KEY_SECTIONS = "sections";
 
 	public static final String CONFIG_KEY_SECTION_MODE = "sectionMode";
 	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
@@ -193,12 +194,14 @@ public class InventorySetupsPlugin extends Plugin
 	private List<InventorySetupsSection> sections;
 
 	@Getter
-	private HashSet<String> inventorySetupNames;
+	private Set<String> inventorySetupNames;
+
+	@Getter
+	private Set<String> sectionNames;
 
 	private NavigationButton navButton;
 
 	@Inject
-
 	private InventorySetupsBankSearch bankSearch;
 
 	@Inject
@@ -1736,8 +1739,8 @@ public class InventorySetupsPlugin extends Plugin
 	private void loadConfig()
 	{
 		inventorySetupNames = new HashSet<>();
+		sectionNames = new HashSet<>();
 		sections = new ArrayList<>();
-
 		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
@@ -2039,6 +2042,37 @@ public class InventorySetupsPlugin extends Plugin
 			inventorySetupNames.add(newName);
 		}
 
+	}
+
+	public void updateSetupName(final InventorySetup setup, String newName)
+	{
+		final String originalName = setup.getName();
+		inventorySetupNames.remove(originalName);
+		inventorySetupNames.add(newName);
+		setup.setName(newName);
+
+		for (final InventorySetupsSection section : sections)
+		{
+			for (int i = 0; i < sections.size(); i++)
+			{
+				final List<String> names = sections.get(i).getSetups();
+				if (names.get(i).equals(originalName))
+				{
+					names.set(i, newName);
+					// There should be no duplicates in a section so break here
+					break;
+				}
+			}
+		}
+
+		// config will already be updated by caller so need to update it here
+	}
+
+	public void updateSectionName(final InventorySetupsSection section, String newName)
+	{
+		section.setName(newName);
+
+		// config will already be updated by caller so need to update it here
 	}
 
 	private String findNewNameForSetup(String originalName)

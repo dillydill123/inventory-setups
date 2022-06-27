@@ -17,7 +17,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 {
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
-	protected final InventorySetupsSection section;
+	private InventorySetupsSection section;
 
 	private final JLabel minMaxLabel;
 
@@ -133,6 +133,12 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	public boolean isNameValid(final String name)
 	{
 		return true;
+	}
+
+	@Override
+	public void updateName(final String newName)
+	{
+		plugin.updateSectionName(section, newName);
 	}
 
 	private void updateMinMaxLabel()

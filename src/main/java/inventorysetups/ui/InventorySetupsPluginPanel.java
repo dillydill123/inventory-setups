@@ -788,16 +788,15 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 			for (final InventorySetupsSection section : plugin.getSections())
 			{
-				// Only add the section if a setup from that section is included
-				if (section.getSetups().stream().anyMatch(includedSetupsMap::containsKey))
-				{
-					InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, includedSetupsMap);
-					overviewPanel.add(sectionPanel, constraints);
-					constraints.gridy++;
 
-					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-					constraints.gridy++;
-				}
+				// This will add all sections, but it will only show the setups that match the search
+				// This has the benefit of showing empty sections
+				InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, includedSetupsMap);
+				overviewPanel.add(sectionPanel, constraints);
+				constraints.gridy++;
+
+				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+				constraints.gridy++;
 			}
 
 		}

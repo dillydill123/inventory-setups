@@ -29,10 +29,6 @@ import inventorysetups.InventorySetupsPlugin;
 
 import inventorysetups.InventorySetupsValidName;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.FontManager;
-import net.runelite.client.ui.JagexColors;
-import net.runelite.client.ui.components.FlatTextField;
-import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ImageUtil;
 
 import javax.swing.*;
@@ -40,16 +36,11 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.function.Consumer;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
 
@@ -176,7 +167,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		JPanel nameActions = new InventorySetupsNameActions<InventorySetup>(invSetup, plugin, panel, this, moveSetupPopupMenu, MAX_SETUP_NAME_LENGTH);
+		JPanel nameActions = new InventorySetupsNameActions<>(invSetup, plugin, panel, this, moveSetupPopupMenu, MAX_SETUP_NAME_LENGTH);
 
 		JPanel bottomContainer = new JPanel(new BorderLayout());
 		bottomContainer.setBorder(new EmptyBorder(8, 0, 8, 0));
@@ -445,6 +436,13 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 		return (!name.isEmpty() &&
 				!plugin.getInventorySetupNames().contains(name)) ||
 				inventorySetup.getName().equals(name);
+	}
+
+	@Override
+	public void updateName(final String newName)
+	{
+		plugin.updateSetupName(inventorySetup, newName);
+
 	}
 
 	private void updateHighlightColorLabel()
