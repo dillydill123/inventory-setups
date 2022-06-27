@@ -433,9 +433,9 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 	@Override
 	public boolean isNameValid(final String name)
 	{
-		return (!name.isEmpty() &&
-				!plugin.getInventorySetupNames().contains(name)) ||
-				inventorySetup.getName().equals(name);
+		return !name.isEmpty() &&
+				!plugin.getInventorySetupNames().contains(name) &&
+				!inventorySetup.getName().equals(name);
 	}
 
 	@Override

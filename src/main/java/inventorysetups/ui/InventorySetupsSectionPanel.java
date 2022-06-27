@@ -28,7 +28,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 	static
 	{
-		final BufferedImage minMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/filter_icon.png");
+		final BufferedImage minMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/back_arrow_icon.png");
 		final BufferedImage minMaxSectionHoverImg = ImageUtil.luminanceOffset(minMaxSectionImg, -150);
 		MIN_MAX_SECTION_ICON = new ImageIcon(minMaxSectionImg);
 		MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(minMaxSectionHoverImg);
@@ -77,10 +77,12 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			}
 	 	});
 
+		// Add the button to nameActions so the color border will reach it as well.
+		nameActions.add(minMaxLabel, BorderLayout.WEST);
+
 		JPanel nameWrapper = new JPanel();
 		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		nameWrapper.setLayout(new BorderLayout());
-		nameWrapper.add(minMaxLabel, BorderLayout.WEST);
 		nameWrapper.add(nameActions, BorderLayout.CENTER);
 
 		add(nameWrapper, BorderLayout.NORTH);

@@ -51,18 +51,17 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
         this.datum = datum;
 
-        JPanel nameWrapper = new JPanel(new BorderLayout());
-        nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
         Color currentDisplayColor;
         if (datum.getDisplayColor() == null)
         {
-            nameWrapper.setBorder(NAME_BOTTOM_BORDER);
+            setBorder(NAME_BOTTOM_BORDER);
             currentDisplayColor = null;
         }
         else
         {
-            nameWrapper.setBorder(new CompoundBorder(
+            setBorder(new CompoundBorder(
                     BorderFactory.createMatteBorder(0, 0, 2, 0, datum.getDisplayColor()),
                     BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR)));
             currentDisplayColor = datum.getDisplayColor();
@@ -307,11 +306,11 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
             }
         });
 
-        nameWrapper.add(nameInput, BorderLayout.CENTER);
-        nameWrapper.add(nameActions, BorderLayout.EAST);
-        nameWrapper.add(displayColorIndicator, BorderLayout.WEST);
+        add(nameInput, BorderLayout.CENTER);
+        add(nameActions, BorderLayout.EAST);
+        add(displayColorIndicator, BorderLayout.WEST);
 
-        add(nameWrapper, BorderLayout.CENTER);
+        // Don't wrap this in another JPanel so those creating this can manipulate it still.
 
     }
 
