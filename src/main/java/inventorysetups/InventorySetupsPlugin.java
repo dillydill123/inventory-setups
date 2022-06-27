@@ -1788,8 +1788,52 @@ public class InventorySetupsPlugin extends Plugin
 	private void loadConfig()
 	{
 		inventorySetupNames = new HashSet<>();
-		sectionNames = new HashSet<>();
-		sections = new ArrayList<>();
+
+		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
+		{
+
+		}.getType();
+		Type sectionType = new TypeToken<ArrayList<InventorySetupsSection>>()
+		{
+
+		}.getType();
+
+		inventorySetups = loadData(CONFIG_KEY_SETUPS, setupType);
+		sections = loadData(CONFIG_KEY_SECTIONS, sectionType);
+
+		sectionNames = sections.stream().map(InventorySetupsSection::getName).collect(Collectors.toSet());
+
+		clientThread.invokeLater(() ->
+		{
+			updateOldSetups();
+			SwingUtilities.invokeLater(() -> panel.rebuild(true));
+		});
+	}
+
+	private <T> List<T> loadData(final String configKey, Type type)
+	{
+		final String storedData = configManager.getConfiguration(CONFIG_GROUP, configKey);
+		if (Strings.isNullOrEmpty(storedData))
+		{
+			return new ArrayList<>();
+		}
+		else
+		{
+			try
+			{
+				// serialize the internal data structure from the json in the configuration
+				return gson.fromJson(storedData, type);
+			}
+			catch (Exception e)
+			{
+				log.error("Exception occurred while loading data", e);
+				return new ArrayList<>();
+			}
+		}
+	}
+
+	private void loadSetups()
+	{
 		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		if (Strings.isNullOrEmpty(storedSetups))
 		{
@@ -1811,8 +1855,6 @@ public class InventorySetupsPlugin extends Plugin
 					updateOldSetups();
 					SwingUtilities.invokeLater(() -> panel.rebuild(true));
 				});
-
-
 			}
 			catch (Exception e)
 			{
