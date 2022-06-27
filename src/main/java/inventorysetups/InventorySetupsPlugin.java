@@ -2144,9 +2144,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (final InventorySetupsSection section : sections)
 		{
-			for (int i = 0; i < sections.size(); i++)
+			final List<String> names = section.getSetups();
+			for (int i = 0; i < names.size(); i++)
 			{
-				final List<String> names = sections.get(i).getSetups();
 				if (names.get(i).equals(originalName))
 				{
 					names.set(i, newName);
