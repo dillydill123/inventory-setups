@@ -263,6 +263,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         nameInput.getTextField().setForeground(Color.WHITE);
         nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
         nameInput.getTextField().setComponentPopupMenu(movePopupMenu);
+        nameInput.getTextField().setCaretPosition(0);
 
         displayColorIndicator.setToolTipText("Edit the color of the name");
         displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
