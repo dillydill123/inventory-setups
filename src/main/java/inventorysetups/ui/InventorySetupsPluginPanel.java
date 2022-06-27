@@ -704,8 +704,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	// returns to the overview panel
 	public void returnToOverviewPanel(boolean shouldResetScrollBar)
 	{
-		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
-		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
+		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty() && !plugin.getConfig().sectionMode());
+		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty() || plugin.getConfig().sectionMode());
 		setupDisplayPanel.setVisible(false);
 		overviewTopRightButtonsPanel.setVisible(true);
 		setupTopRightButtonsPanel.setVisible(false);
@@ -847,8 +847,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		{
 			northAnchoredPanel.setVisible(true);
 			updateNewsPanel.setVisible(false);
-			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty());
-			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty());
+			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty() && !plugin.getConfig().sectionMode());
+			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty() || plugin.getConfig().sectionMode());
 		}
 	}
 
