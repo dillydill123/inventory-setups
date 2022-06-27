@@ -7,7 +7,6 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.components.FlatTextField;
-import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -41,6 +40,8 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
     private final JLabel displayColorIndicator = new JLabel();
     private final FlatTextField nameInput = new FlatTextField();
 
+    private final InventorySetupsValidName validNameImplementer;
+
     public InventorySetupsNameActions(final T datum,
                                       final InventorySetupsPlugin plugin,
                                       final InventorySetupsPluginPanel panel,
@@ -50,6 +51,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         setLayout(new BorderLayout());
 
         this.datum = datum;
+        this.validNameImplementer = validNameImplementer;
 
         setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
@@ -102,35 +104,22 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         // Add document listener to disable save button when the name isn't valid
         nameInput.getDocument().addDocumentListener(new DocumentListener()
         {
-            private void checkIsNameValid()
-            {
-                if (!validNameImplementer.isNameValid(nameInput.getText()))
-                {
-                    save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-                    save.setEnabled(false);
-                }
-                else
-                {
-                    save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
-                    save.setEnabled(true);
-                }
-            }
             @Override
             public void insertUpdate(DocumentEvent e)
             {
-                checkIsNameValid();
+                updateSaveButtonDuringEditing();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e)
             {
-                checkIsNameValid();
+                updateSaveButtonDuringEditing();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e)
             {
-                checkIsNameValid();
+                updateSaveButtonDuringEditing();
             }
         });
 
@@ -306,11 +295,16 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
             }
         });
 
-        add(nameInput, BorderLayout.CENTER);
-        add(nameActions, BorderLayout.EAST);
-        add(displayColorIndicator, BorderLayout.WEST);
+        final JPanel wrapper = new JPanel();
+        wrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        wrapper.setLayout(new BorderLayout());
+        wrapper.add(nameInput, BorderLayout.CENTER);
+        wrapper.add(displayColorIndicator, BorderLayout.WEST);
+        wrapper.add(nameActions, BorderLayout.EAST);
 
-        // Don't wrap this in another JPanel so those creating this can manipulate it still.
+        add(wrapper, BorderLayout.CENTER);
+
+        // Any modifications to the name actions can be done with border layouts
 
     }
 
@@ -334,6 +328,29 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
                 new EmptyBorder(0, 4, 0, 0),
                 new MatteBorder(0, 0, 3, 0, color)));
 
+        // Update the save button
+        updateSaveButtonDuringEditing();
+    }
+
+    private void updateSaveButtonDuringEditing()
+    {
+        Color newDisplayColor = null;
+        if (displayColorIndicator.getBorder() != null)
+        {
+            newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
+        }
+
+        // If nothing has changed or name is invalid, disable the save button
+        if (datum.getDisplayColor() == newDisplayColor && !validNameImplementer.isNameValid(nameInput.getText()))
+        {
+            save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+            save.setEnabled(false);
+        }
+        else
+        {
+            save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+            save.setEnabled(true);
+        }
     }
 
 }

@@ -1443,10 +1443,16 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
+		// Remove the setup from any sections which have it
+		for (final InventorySetupsSection section : sections)
+		{
+			section.getSetups().remove(setup.getName());
+		}
+
 		inventorySetupNames.remove(setup.getName());
 		inventorySetups.remove(setup);
 		panel.rebuild(false);
-		updateConfig(true, false);
+		updateConfig(true, true);
 	}
 
 	public void updateConfig(boolean updateSetups, boolean updateSections)
@@ -1800,7 +1806,6 @@ public class InventorySetupsPlugin extends Plugin
 
 		inventorySetups = loadData(CONFIG_KEY_SETUPS, setupType);
 		sections = loadData(CONFIG_KEY_SECTIONS, sectionType);
-
 		sectionNames = sections.stream().map(InventorySetupsSection::getName).collect(Collectors.toSet());
 
 		clientThread.invokeLater(() ->

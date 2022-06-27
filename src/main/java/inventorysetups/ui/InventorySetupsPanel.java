@@ -48,6 +48,8 @@ public class InventorySetupsPanel extends JPanel
 		this.inventorySetup = invSetup;
 		this.moveSetupPopupMenu = new JPopupMenu();
 
+		// TODO: Add parent section param here which will be used to figure out which section a setup is a part of
+
 		JMenuItem moveUp = new JMenuItem("Move Inventory Setup Up");
 		JMenuItem moveDown = new JMenuItem("Move Inventory Setup Down");
 		JMenuItem moveToTop = new JMenuItem("Move Inventory Setup to Top");
