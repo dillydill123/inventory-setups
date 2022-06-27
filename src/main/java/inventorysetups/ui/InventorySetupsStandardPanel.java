@@ -88,8 +88,8 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 	private static final ImageIcon NO_FAVORITE_ICON;
 	private static final ImageIcon NO_FAVORITE_HOVER_ICON;
 
-	public static final ImageIcon VIEW_SETUP_ICON;
-	public static final ImageIcon VIEW_SETUP_HOVER_ICON;
+	private static final ImageIcon VIEW_SETUP_ICON;
+	private static final ImageIcon VIEW_SETUP_HOVER_ICON;
 
 	private static final ImageIcon DELETE_ICON;
 	private static final ImageIcon DELETE_HOVER_ICON;

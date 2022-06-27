@@ -2,23 +2,40 @@ package inventorysetups.ui;
 
 import inventorysetups.*;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.components.FlatTextField;
+import net.runelite.client.util.ImageUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.Map;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
-import static inventorysetups.ui.InventorySetupsStandardPanel.VIEW_SETUP_ICON;
 
 public class InventorySetupsSectionPanel extends JPanel implements InventorySetupsValidName
 {
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
 	protected final InventorySetupsSection section;
+
+	private final JLabel minMaxLabel;
+
+	private static final ImageIcon MIN_MAX_SECTION_ICON;
+	private static final ImageIcon MIN_MAX_SECTION_HOVER_ICON;
+	private static final ImageIcon NO_MIN_MAX_SECTION_ICON;
+	private static final ImageIcon NO_MIN_MAX_SECTION_HOVER_ICON;
+
+	static
+	{
+		final BufferedImage minMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/filter_icon.png");
+		final BufferedImage minMaxSectionHoverImg = ImageUtil.luminanceOffset(minMaxSectionImg, -150);
+		MIN_MAX_SECTION_ICON = new ImageIcon(minMaxSectionImg);
+		MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(minMaxSectionHoverImg);
+
+		NO_MIN_MAX_SECTION_ICON = new ImageIcon(minMaxSectionHoverImg);
+		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(minMaxSectionHoverImg, -100));
+	}
 
 	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, Map<String, InventorySetup> includedSetups)
 	{
@@ -31,45 +48,34 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section, plugin, panel, this, null, MAX_SETUP_NAME_LENGTH);
 
-		JPanel setupsPanel = new JPanel();
-		setupsPanel.setLayout(new GridBagLayout());
-		setupsPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.weightx = 1;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-
-		setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-		constraints.gridy++;
-		for (final String setupName : section.getSetups())
-		{
-			if (!includedSetups.containsKey(setupName))
-			{
-				continue;
-			}
-
-			final InventorySetup setup = includedSetups.get(setupName);
-			InventorySetupsPanel newPanel = null;
-			if (plugin.getConfig().compactMode())
-			{
-				newPanel = new InventorySetupsCompactPanel(plugin, panel, setup);
-			}
-			else
-			{
-				newPanel = new InventorySetupsStandardPanel(plugin, panel, setup);
-			}
-			setupsPanel.add(newPanel, constraints);
-			constraints.gridy++;
-
-			setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-			constraints.gridy++;
-		}
-
 		// Label that will be used to minimize or maximize setups in section
-		JLabel minMaxLabel = new JLabel();
-		minMaxLabel.setIcon(VIEW_SETUP_ICON);
+
+		this.minMaxLabel = new JLabel();
+		updateMinMaxLabel();
+		minMaxLabel.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				section.setMaximized(!section.isMaximized());
+				updateMinMaxLabel();
+				// TODO: Test scrollbar position with lots of sections. It shouldn't reset
+				// TODO: Update config once sections are saved in config
+				panel.rebuild(false);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_HOVER_ICON : NO_MIN_MAX_SECTION_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
+			}
+	 	});
 
 		JPanel nameWrapper = new JPanel();
 		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -78,7 +84,48 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		nameWrapper.add(nameActions, BorderLayout.CENTER);
 
 		add(nameWrapper, BorderLayout.NORTH);
-		add(setupsPanel, BorderLayout.SOUTH);
+
+		// Only add the section if it's maximized
+		if (section.isMaximized())
+		{
+			// This panel will contain all the setups that are part of the section
+			JPanel setupsPanel = new JPanel();
+			setupsPanel.setLayout(new GridBagLayout());
+			setupsPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.fill = GridBagConstraints.HORIZONTAL;
+			constraints.weightx = 1;
+			constraints.gridx = 0;
+			constraints.gridy = 0;
+
+			setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+			constraints.gridy++;
+			for (final String setupName : section.getSetups())
+			{
+				if (!includedSetups.containsKey(setupName))
+				{
+					continue;
+				}
+
+				final InventorySetup setup = includedSetups.get(setupName);
+				InventorySetupsPanel newPanel = null;
+				if (plugin.getConfig().compactMode())
+				{
+					newPanel = new InventorySetupsCompactPanel(plugin, panel, setup);
+				}
+				else
+				{
+					newPanel = new InventorySetupsStandardPanel(plugin, panel, setup);
+				}
+				setupsPanel.add(newPanel, constraints);
+				constraints.gridy++;
+
+				setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+				constraints.gridy++;
+			}
+			add(setupsPanel, BorderLayout.SOUTH);
+		}
 
 	}
 
@@ -86,6 +133,12 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	public boolean isNameValid(final String name)
 	{
 		return true;
+	}
+
+	private void updateMinMaxLabel()
+	{
+		minMaxLabel.setToolTipText(section.isMaximized() ? "Minimize section" : "Maximize section");
+		minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
 	}
 
 }
