@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
 
-public class InventorySetupsSectionPanel extends JPanel implements InventorySetupsValidName
+public class InventorySetupsSectionPanel extends JPanel implements InventorySetupsValidName, InventorySetupsMoveHandler<InventorySetupsSection>
 {
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
@@ -46,7 +46,6 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		this.setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section, plugin, panel, this, null, MAX_SETUP_NAME_LENGTH);
 
 		// Label that will be used to minimize or maximize setups in section
 
@@ -55,13 +54,16 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		minMaxLabel.addMouseListener(new MouseAdapter()
 		{
 			@Override
-			public void mouseClicked(MouseEvent e)
+			public void mousePressed(MouseEvent mouseEvent)
 			{
-				section.setMaximized(!section.isMaximized());
-				updateMinMaxLabel();
-				// TODO: Test scrollbar position with lots of sections. It shouldn't reset
-				plugin.updateConfig(false, true);
-				panel.rebuild(false);
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					section.setMaximized(!section.isMaximized());
+					updateMinMaxLabel();
+					// TODO: Test scrollbar position with lots of sections. It shouldn't reset
+					plugin.updateConfig(false, true);
+					panel.rebuild(false);
+				}
 			}
 
 			@Override
@@ -77,7 +79,17 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			}
 	 	});
 
-		// Add the button to nameActions so the color border will reach it as well.
+		// Add the right click menu to delete sections
+		JPopupMenu popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Section", section);
+		JMenuItem addToSection = new JMenuItem("Delete Section...");
+		addToSection.addActionListener(e ->
+		{
+			plugin.removeSection(section);
+		});
+		popupMenu.add(addToSection);
+
+		// Add the button to nameActions so the color border will reach it as well
+		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section, plugin, panel, this, popupMenu, MAX_SETUP_NAME_LENGTH);
 		nameActions.add(minMaxLabel, BorderLayout.WEST);
 
 		JPanel nameWrapper = new JPanel();
@@ -85,6 +97,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		nameWrapper.setLayout(new BorderLayout());
 		nameWrapper.add(nameActions, BorderLayout.CENTER);
 
+		nameWrapper.setComponentPopupMenu(popupMenu);
 		add(nameWrapper, BorderLayout.NORTH);
 
 		// Only add the section if it's maximized
@@ -128,6 +141,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 				constraints.gridy++;
 			}
+
 			add(setupsPanel, BorderLayout.SOUTH);
 		}
 
@@ -149,6 +163,73 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	{
 		minMaxLabel.setToolTipText(section.isMaximized() ? "Minimize section" : "Maximize section");
 		minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
+	}
+
+	@Override
+	public void moveUp(final InventorySetupsSection section)
+	{
+		int sectionIndex = plugin.getSections().indexOf(section);
+		plugin.moveSection(sectionIndex, sectionIndex - 1);
+	}
+
+	@Override
+	public void moveDown(final InventorySetupsSection section)
+	{
+		int sectionIndex = plugin.getSections().indexOf(section);
+		plugin.moveSection(sectionIndex, sectionIndex + 1);
+	}
+
+	@Override
+	public void moveToTop(final InventorySetupsSection section)
+	{
+		int sectionIndex = plugin.getSections().indexOf(section);
+		plugin.moveSection(sectionIndex, 0);
+	}
+
+	@Override
+	public void moveToBottom(final InventorySetupsSection section)
+	{
+		int sectionIndex = plugin.getSections().indexOf(section);
+		plugin.moveSection(sectionIndex, plugin.getSections().size() - 1);
+	}
+
+	@Override
+	public void moveToPosition(final InventorySetupsSection section)
+	{
+		int sectionIndex = plugin.getSections().indexOf(section);
+		final String posDialog = "Enter a position between 1 and " + String.valueOf(plugin.getSections().size()) +
+				". Current section is in position " + String.valueOf(sectionIndex + 1) + ".";
+		final String newPositionStr = JOptionPane.showInputDialog(panel,
+				posDialog,
+				"Move Section",
+				JOptionPane.PLAIN_MESSAGE);
+
+		// cancel button was clicked
+		if (newPositionStr == null)
+		{
+			return;
+		}
+
+		try
+		{
+			int newPosition = Integer.parseInt(newPositionStr);
+			if (newPosition < 1 || newPosition > plugin.getSections().size())
+			{
+				JOptionPane.showMessageDialog(panel,
+						"Invalid position.",
+						"Move Section Failed",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			plugin.moveSection(sectionIndex, newPosition - 1);
+		}
+		catch (NumberFormatException ex)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"Invalid position.",
+					"Move Section Failed",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 }

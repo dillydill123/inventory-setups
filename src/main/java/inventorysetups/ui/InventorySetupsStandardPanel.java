@@ -167,7 +167,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-		JPanel nameActions = new InventorySetupsNameActions<>(invSetup, plugin, panel, this, moveSetupPopupMenu, MAX_SETUP_NAME_LENGTH);
+		JPanel nameActions = new InventorySetupsNameActions<>(invSetup, plugin, panel, this, popupMenu, MAX_SETUP_NAME_LENGTH);
 
 		JPanel bottomContainer = new JPanel(new BorderLayout());
 		bottomContainer.setBorder(new EmptyBorder(8, 0, 8, 0));

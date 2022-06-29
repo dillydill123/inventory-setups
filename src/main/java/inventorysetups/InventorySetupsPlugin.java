@@ -713,7 +713,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void moveSetup(int invIndex, int newPosition)
 	{
 		// Setup is already in the specified position or is out of position
-		if (invIndex == newPosition || newPosition < 0 || newPosition >= inventorySetups.size())
+		if (isNewPositionInvalid(invIndex, newPosition, inventorySetups.size()))
 		{
 			return;
 		}
@@ -721,6 +721,24 @@ public class InventorySetupsPlugin extends Plugin
 		inventorySetups.add(newPosition, setup);
 		panel.rebuild(false);
 		updateConfig(true, false);
+	}
+
+	public void moveSection(int sectionIndex, int newPosition)
+	{
+		// Setup is already in the specified position or is out of position
+		if (isNewPositionInvalid(sectionIndex, newPosition, sections.size()))
+		{
+			return;
+		}
+		InventorySetupsSection section = sections.remove(sectionIndex);
+		sections.add(newPosition, section);
+		panel.rebuild(false);
+		updateConfig(false, true);
+	}
+
+	private boolean isNewPositionInvalid(int oldPosition, int newPosition, int size)
+	{
+		return oldPosition == newPosition || newPosition < 0 || newPosition >= size;
 	}
 
 	public List<InventorySetup> filterSetups(String textToFilter)
@@ -1434,11 +1452,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void removeInventorySetup(final InventorySetup setup)
 	{
-		int confirm = JOptionPane.showConfirmDialog(panel,
-			"Are you sure you want to permanently delete this inventory setup?",
-			"Warning", JOptionPane.OK_CANCEL_OPTION);
-
-		if (confirm != JOptionPane.YES_OPTION)
+		if (!isDeletionConfirmed("Are you sure you want to permanently delete this inventory setup?", "Warning"))
 		{
 			return;
 		}
@@ -1453,6 +1467,28 @@ public class InventorySetupsPlugin extends Plugin
 		inventorySetups.remove(setup);
 		panel.rebuild(false);
 		updateConfig(true, true);
+	}
+
+	public void removeSection(final InventorySetupsSection section)
+	{
+
+		if (!isDeletionConfirmed("Are you sure you want to permanently delete this section?", "Warning"))
+		{
+			return;
+		}
+
+		sectionNames.remove(section.getName());
+		sections.remove(section);
+		panel.rebuild(false);
+		updateConfig(false, true);
+	}
+
+	private boolean isDeletionConfirmed(final String message, final String title)
+	{
+		int confirm = JOptionPane.showConfirmDialog(panel,
+				message, title, JOptionPane.OK_CANCEL_OPTION);
+
+		return confirm == JOptionPane.YES_OPTION;
 	}
 
 	public void updateConfig(boolean updateSetups, boolean updateSections)

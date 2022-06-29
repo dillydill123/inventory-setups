@@ -33,14 +33,14 @@ import javax.swing.*;
 import java.util.List;
 
 // The base class for panels that each display a setup
-public class InventorySetupsPanel extends JPanel
+public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveHandler<InventorySetup>
 {
 
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
 	protected final InventorySetup inventorySetup;
 	protected InventorySetupsSection section;
-	protected final JPopupMenu moveSetupPopupMenu;
+	protected final JPopupMenu popupMenu;
 
 	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
 	{
@@ -48,103 +48,11 @@ public class InventorySetupsPanel extends JPanel
 		this.panel = panel;
 		this.inventorySetup = invSetup;
 		this.section = null;
-		this.moveSetupPopupMenu = new JPopupMenu();
+		this.popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Inventory Setup", invSetup);
 
 		// TODO: Add parent section param here which will be used to figure out which section a setup is a part of
-
-		JMenuItem moveUp = new JMenuItem("Move Inventory Setup Up");
-		JMenuItem moveDown = new JMenuItem("Move Inventory Setup Down");
-		JMenuItem moveToTop = new JMenuItem("Move Inventory Setup to Top");
-		JMenuItem moveToBottom = new JMenuItem("Move Inventory Setup to Bottom");
-		JMenuItem moveToPosition = new JMenuItem("Move Inventory Setup to Position...");
 		JMenuItem addToSection = new JMenuItem("Add Setup to Section...");
-		moveSetupPopupMenu.add(moveUp);
-		moveSetupPopupMenu.add(moveDown);
-		moveSetupPopupMenu.add(moveToTop);
-		moveSetupPopupMenu.add(moveToBottom);
-		moveSetupPopupMenu.add(moveToPosition);
-		moveSetupPopupMenu.add(addToSection);
-
-		moveUp.addActionListener(e ->
-		{
-			if (!checkSortingMode())
-			{
-				return;
-			}
-			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
-			plugin.moveSetup(invIndex, invIndex - 1);
-		});
-
-		moveDown.addActionListener(e ->
-		{
-			if (!checkSortingMode())
-			{
-				return;
-			}
-			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
-			plugin.moveSetup(invIndex, invIndex + 1);
-		});
-
-		moveToTop.addActionListener(e ->
-		{
-			if (!checkSortingMode())
-			{
-				return;
-			}
-			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
-			plugin.moveSetup(invIndex, 0);
-		});
-		moveToBottom.addActionListener(e ->
-		{
-			if (!checkSortingMode())
-			{
-				return;
-			}
-			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
-			plugin.moveSetup(invIndex, plugin.getInventorySetups().size() - 1);
-		});
-		moveToPosition.addActionListener(e ->
-		{
-			if (!checkSortingMode())
-			{
-				return;
-			}
-			int invIndex = plugin.getInventorySetups().indexOf(invSetup);
-			final String posDialog = "Enter a position between 1 and " + String.valueOf(plugin.getInventorySetups().size()) +
-									". Current setup is in position " + String.valueOf(invIndex + 1) + ".";
-			final String newPositionStr = JOptionPane.showInputDialog(panel,
-					posDialog,
-					"Move Setup",
-					JOptionPane.PLAIN_MESSAGE);
-
-			// cancel button was clicked
-			if (newPositionStr == null)
-			{
-				return;
-			}
-
-			try
-			{
-				int newPosition = Integer.parseInt(newPositionStr);
-				if (newPosition < 1 || newPosition > plugin.getInventorySetups().size())
-				{
-					JOptionPane.showMessageDialog(panel,
-							"Invalid position.",
-							"Move Setup Failed",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				plugin.moveSetup(invIndex, newPosition - 1);
-			}
-			catch (NumberFormatException ex)
-			{
-				JOptionPane.showMessageDialog(panel,
-						"Invalid position.",
-						"Move Setup Failed",
-						JOptionPane.ERROR_MESSAGE);
-			}
-
-		});
+		popupMenu.add(addToSection);
 
 		addToSection.addActionListener(e ->
 		{
@@ -160,20 +68,74 @@ public class InventorySetupsPanel extends JPanel
 
 		});
 
-		setComponentPopupMenu(moveSetupPopupMenu);
+		setComponentPopupMenu(popupMenu);
 	}
 
-	private boolean checkSortingMode()
+	@Override
+	public void moveUp(final InventorySetup invSetup)
 	{
-		if (plugin.getConfig().sortingMode() != InventorySetupsSortingID.DEFAULT)
+		int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+		plugin.moveSetup(invIndex, invIndex - 1);
+	}
+
+	@Override
+	public void moveDown(final InventorySetup invSetup)
+	{
+		int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+		plugin.moveSetup(invIndex, invIndex + 1);
+	}
+
+	@Override
+	public void moveToTop(final InventorySetup invSetup)
+	{
+		int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+		plugin.moveSetup(invIndex, 0);
+	}
+
+	@Override
+	public void moveToBottom(final InventorySetup invSetup)
+	{
+		int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+		plugin.moveSetup(invIndex, plugin.getInventorySetups().size() - 1);
+	}
+
+	@Override
+	public void moveToPosition(final InventorySetup invSetup)
+	{
+		int invIndex = plugin.getInventorySetups().indexOf(invSetup);
+		final String posDialog = "Enter a position between 1 and " + String.valueOf(plugin.getInventorySetups().size()) +
+				". Current setup is in position " + String.valueOf(invIndex + 1) + ".";
+		final String newPositionStr = JOptionPane.showInputDialog(panel,
+				posDialog,
+				"Move Setup",
+				JOptionPane.PLAIN_MESSAGE);
+
+		// cancel button was clicked
+		if (newPositionStr == null)
 		{
-			JOptionPane.showMessageDialog(panel,
-					"You cannot move setups while a sorting mode is enabled.",
-					"Move Setup Failed",
-					JOptionPane.ERROR_MESSAGE);
-			return false;
+			return;
 		}
 
-		return true;
+		try
+		{
+			int newPosition = Integer.parseInt(newPositionStr);
+			if (newPosition < 1 || newPosition > plugin.getInventorySetups().size())
+			{
+				JOptionPane.showMessageDialog(panel,
+						"Invalid position.",
+						"Move Setup Failed",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			plugin.moveSetup(invIndex, newPosition - 1);
+		}
+		catch (NumberFormatException ex)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"Invalid position.",
+					"Move Setup Failed",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
+
 }

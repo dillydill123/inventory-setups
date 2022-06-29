@@ -68,7 +68,7 @@ public class InventorySetupsCompactPanel extends InventorySetupsPanel
 
 		add(nameWrapper, BorderLayout.NORTH);
 
-		nameInput.getTextField().setComponentPopupMenu(moveSetupPopupMenu);
+		nameInput.getTextField().setComponentPopupMenu(popupMenu);
 		nameInput.getTextField().addMouseListener(new MouseAdapter()
 		{
 			@Override
