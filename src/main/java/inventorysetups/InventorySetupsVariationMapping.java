@@ -68,7 +68,12 @@ public class InventorySetupsVariationMapping
 		mappings.put(ItemID.SPIRIT_ANGLER_HEADBAND, ItemID.ANGLER_HAT);
 		mappings.put(ItemID.SPIRIT_ANGLER_TOP, ItemID.ANGLER_TOP);
 		mappings.put(ItemID.SPIRIT_ANGLER_WADERS, ItemID.ANGLER_WADERS);
-
+		
+		// ToB ornament kits -> base version
+		mappings.put(ItemID.SANGUINE_SCYTHE_OF_VITUR, ItemID.SCYTHE_OF_VITUR);
+		mappings.put(ItemID.HOLY_SCYTHE_OF_VITUR, ItemID.SCYTHE_OF_VITUR);
+		mappings.put(ItemID.HOLY_SANGUINESTI_STAFF, ItemID.SANGUINESTI_STAFF);
+		mappings.put(ItemID.HOLY_GHRAZI_RAPIER, ItemID.GHRAZI_RAPIER);
 	}
 
 }

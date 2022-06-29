@@ -12,7 +12,7 @@ repositories {
 }
 
 
-def runeLiteVersion = '1.8.23'
+def runeLiteVersion = '1.8.25'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
