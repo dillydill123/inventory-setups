@@ -80,11 +80,17 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 		// Add the right click menu to delete sections
 		JPopupMenu popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Section", section);
+		JMenuItem exportSection = new JMenuItem("Export Section");
 		JMenuItem addToSection = new JMenuItem("Delete Section...");
+		exportSection.addActionListener(e ->
+		{
+			plugin.exportSection(section);
+		});
 		addToSection.addActionListener(e ->
 		{
 			plugin.removeSection(section);
 		});
+		popupMenu.add(exportSection);
 		popupMenu.add(addToSection);
 
 		// Add the button to nameActions so the color border will reach it as well

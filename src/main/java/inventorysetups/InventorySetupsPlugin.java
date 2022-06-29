@@ -1669,6 +1669,18 @@ public class InventorySetupsPlugin extends Plugin
 			JOptionPane.PLAIN_MESSAGE);
 	}
 
+	public void exportSection(final InventorySetupsSection section)
+	{
+		final String json = gson.toJson(section);
+		final StringSelection contents = new StringSelection(json);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
+
+		JOptionPane.showMessageDialog(panel,
+				"Section data was copied to clipboard.",
+				"Export Setup Succeeded",
+				JOptionPane.PLAIN_MESSAGE);
+	}
+
 	public <T> void massExport(List<T> data, final String type, final String file_prefix)
 	{
 
