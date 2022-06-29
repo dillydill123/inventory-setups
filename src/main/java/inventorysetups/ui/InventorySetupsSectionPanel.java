@@ -60,7 +60,6 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				{
 					section.setMaximized(!section.isMaximized());
 					updateMinMaxLabel();
-					// TODO: Test scrollbar position with lots of sections. It shouldn't reset
 					plugin.updateConfig(false, true);
 					panel.rebuild(false);
 				}

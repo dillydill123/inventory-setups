@@ -701,11 +701,11 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		final String newName = name;
+		InventorySetupsSection newSection = new InventorySetupsSection(newName);
+
 		SwingUtilities.invokeLater(() ->
 		{
-			sections.add(new InventorySetupsSection(newName));
-			updateConfig(false, true);
-			panel.rebuild(true);
+			addSectionClientThread(newSection);
 		});
 
 	}
@@ -725,6 +725,13 @@ public class InventorySetupsPlugin extends Plugin
 
 		updateConfig(false, true);
 		// No need to rebuild panel since the section view will contain the updates
+	}
+
+	public void addSetupsToSection(final InventorySetupsSection section, final List<String> setupNames)
+	{
+		section.getSetups().addAll(setupNames);
+		updateConfig(false, true);
+		panel.rebuild(false);
 	}
 
 	public void moveSetup(int invIndex, int newPosition)
@@ -1662,12 +1669,12 @@ public class InventorySetupsPlugin extends Plugin
 			JOptionPane.PLAIN_MESSAGE);
 	}
 
-	public void massExportSetups()
+	public <T> void massExport(List<T> data, final String type, final String file_prefix)
 	{
-		final String json = gson.toJson(inventorySetups);
+
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		fileChooser.setDialogTitle("Choose Directory to Export Setups");
+		fileChooser.setDialogTitle("Choose Directory to Export " + type);
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
 		int returnValue = fileChooser.showSaveDialog(panel);
@@ -1676,32 +1683,32 @@ public class InventorySetupsPlugin extends Plugin
 			final File directory = fileChooser.getSelectedFile();
 			String login_name = client.getLocalPlayer() != null ? "_" + client.getLocalPlayer().getName() : "";
 			login_name = login_name.replace(" ", "_");
-			String newFileName = directory.getAbsolutePath() + "/inventory_setups" + login_name + ".json";
+			String newFileName = directory.getAbsolutePath() + "/" + file_prefix + login_name + ".json";
 			newFileName = newFileName.replace("\\", "/");
 			try
 			{
+				final String json = gson.toJson(data);
 				FileOutputStream outputStream = new FileOutputStream(newFileName);
 				outputStream.write(json.getBytes());
 				outputStream.close();
 			}
 			catch (Exception e)
 			{
-				log.error("Couldn't mass export setups", e);
+				log.error("Couldn't mass export " + type, e);
 				JOptionPane.showMessageDialog(panel,
-						"Failed to export setups.",
+						"Failed to export " + type + ".",
 						"Mass Export Failed",
 						JOptionPane.PLAIN_MESSAGE);
 				return;
 			}
 
-			JLabel messageLabel = new JLabel("<html><center>All setups were exported successfully to<br>" + newFileName);
+			JLabel messageLabel = new JLabel("<html><center>All " + type + " were exported successfully to<br>" + newFileName);
 			messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 			JOptionPane.showMessageDialog(panel,
 					messageLabel,
 					"Mass Export Succeeded",
 					JOptionPane.PLAIN_MESSAGE);
 		}
-
 	}
 
 	public void importSetup()
@@ -1724,7 +1731,14 @@ public class InventorySetupsPlugin extends Plugin
 
 			}.getType();
 
+
 			final InventorySetup newSetup = gson.fromJson(setup, type);
+
+			if (isImportedSetupInvalid(newSetup))
+			{
+				throw new RuntimeException("Imported setup was missing required fields");
+			}
+
 			addSetupFromImport(newSetup);
 
 		}
@@ -1742,14 +1756,163 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		clientThread.invokeLater(() ->
 		{
-			final String newName = findNewNameForSetup(newSetup.getName());
+			final String newName = findNewName(newSetup.getName(), inventorySetupNames);
 			newSetup.setName(newName);
+			// This requires the client thread
 			updateNullFieldsOfSetup(newSetup);
 			addInventorySetupClientThread(newSetup);
 		});
 	}
 
 	public void massImportSetups()
+	{
+		try
+		{
+			final Path path = showMassImportFolderDialog();
+			if (path == null)
+			{
+				return;
+			}
+			final String json = new String(Files.readAllBytes(path));
+
+			Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
+			{
+
+			}.getType();
+
+			final ArrayList<InventorySetup> newSetups = gson.fromJson(json, typeSetups);
+
+			// It's possible that the gson call succeeds but returns setups that have basically nothing
+			// This can occur if trying to import a section file instead of a inventory setup file, since they share fields
+			// Therefore, do some additional checking for required fields
+			for (final InventorySetup setup : newSetups)
+			{
+				if (isImportedSetupInvalid(setup))
+				{
+					throw new RuntimeException("Mass import section file was missing required fields");
+				}
+			}
+
+			for (final InventorySetup inventorySetup : newSetups)
+			{
+				addSetupFromImport(inventorySetup);
+			}
+
+		}
+		catch (Exception e)
+		{
+			log.error("Couldn't mass import setups", e);
+			JOptionPane.showMessageDialog(panel,
+					"Invalid setup data.",
+					"Mass Import Setup Failed",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private boolean isImportedSetupInvalid(final InventorySetup setup)
+	{
+		return setup.getName() == null || setup.getInventory() == null || setup.getEquipment() == null || setup.getAdditionalFilteredItems() == null;
+	}
+
+	public void importSection()
+	{
+		try
+		{
+			final String section = JOptionPane.showInputDialog(panel,
+					"Enter section data",
+					"Import New Section",
+					JOptionPane.PLAIN_MESSAGE);
+
+			// cancel button was clicked
+			if (section == null)
+			{
+				return;
+			}
+
+			Type type = new TypeToken<InventorySetupsSection>()
+			{
+
+			}.getType();
+
+			final InventorySetupsSection newSection = gson.fromJson(section, type);
+
+			if (isImportedSectionValid(newSection))
+			{
+				throw new RuntimeException("Imported section was missing required fields");
+			}
+
+			addSectionFromImport(newSection);
+		}
+		catch (Exception e)
+		{
+			log.error("Couldn't import setup", e);
+			JOptionPane.showMessageDialog(panel,
+					"Invalid section data.",
+					"Import section Failed",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	public void massImportSections()
+	{
+		try
+		{
+			final Path path = showMassImportFolderDialog();
+			if (path == null)
+			{
+				return;
+			}
+			final String json = new String(Files.readAllBytes(path));
+
+			Type typeSetups = new TypeToken<ArrayList<InventorySetupsSection>>()
+			{
+
+			}.getType();
+
+			final ArrayList<InventorySetupsSection> newSections = gson.fromJson(json, typeSetups);
+
+			// It's possible that the gson call succeeds but returns sections that have basically nothing
+			// This can occur if trying to import an inventory setup file instead of a section file, since they share fields
+			// Therefore, do some additional checking for required fields
+			for (final InventorySetupsSection section : newSections)
+			{
+				if (isImportedSectionValid(section))
+				{
+					throw new RuntimeException("Mass import section file was missing required fields");
+				}
+			}
+
+			for (final InventorySetupsSection section : newSections)
+			{
+				addSectionFromImport(section);
+			}
+
+		}
+		catch (Exception e)
+		{
+			log.error("Couldn't mass import sections", e);
+			JOptionPane.showMessageDialog(panel,
+					"Invalid section data.",
+					"Mass Import Section Failed",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private boolean isImportedSectionValid(final InventorySetupsSection section)
+	{
+		return section.getName() == null || section.getSetups() == null;
+	}
+
+	private void addSectionFromImport(final InventorySetupsSection newSection)
+	{
+		final String newName = findNewName(newSection.getName(), sectionNames);
+		newSection.setName(newName);
+		// Remove setups which don't exist
+		newSection.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
+		addSectionClientThread(newSection);
+	}
+
+	private Path showMassImportFolderDialog()
 	{
 		final JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -1759,35 +1922,14 @@ public class InventorySetupsPlugin extends Plugin
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
 
 		int returnValue = fileChooser.showOpenDialog(panel);
+
 		if (returnValue == JFileChooser.APPROVE_OPTION)
 		{
-			final File file = fileChooser.getSelectedFile();
-			try
-			{
-				final Path path = Paths.get(file.getAbsolutePath());
-				final String json = new String(Files.readAllBytes(path));
-
-				Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
-				{
-
-				}.getType();
-
-				final ArrayList<InventorySetup> newSetups = gson.fromJson(json, typeSetups);
-
-				for (final InventorySetup inventorySetup : newSetups)
-				{
-					addSetupFromImport(inventorySetup);
-				}
-
-			}
-			catch (Exception e)
-			{
-				log.error("Couldn't mass import setups", e);
-				JOptionPane.showMessageDialog(panel,
-						"Invalid setup data.",
-						"Mass Import Setup Failed",
-						JOptionPane.ERROR_MESSAGE);
-			}
+			return Paths.get(fileChooser.getSelectedFile().getAbsolutePath());
+		}
+		else
+		{
+			return null;
 		}
 	}
 
@@ -1893,39 +2035,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	private void loadSetups()
-	{
-		final String storedSetups = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
-		if (Strings.isNullOrEmpty(storedSetups))
-		{
-			inventorySetups = new ArrayList<>();
-		}
-		else
-		{
-			try
-			{
-				Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
-				{
-
-				}.getType();
-
-				// serialize the internal data structure from the json in the configuration
-				inventorySetups = gson.fromJson(storedSetups, typeSetups);
-				clientThread.invokeLater(() ->
-				{
-					updateOldSetups();
-					SwingUtilities.invokeLater(() -> panel.rebuild(true));
-				});
-			}
-			catch (Exception e)
-			{
-				log.error("Exception occurred while loading setup data", e);
-				inventorySetups = new ArrayList<>();
-
-			}
-		}
-	}
-
 	private void addInventorySetupClientThread(final InventorySetup newSetup)
 	{
 		SwingUtilities.invokeLater(() ->
@@ -1934,6 +2043,17 @@ public class InventorySetupsPlugin extends Plugin
 			inventorySetupNames.add(newSetup.getName());
 			panel.rebuild(true);
 			updateConfig(true, false);
+		});
+	}
+
+	private void addSectionClientThread(final InventorySetupsSection newSection)
+	{
+		SwingUtilities.invokeLater(() ->
+		{
+			sections.add(newSection);
+			sectionNames.add(newSection.getName());
+			panel.rebuild(true);
+			updateConfig(false, true);
 		});
 	}
 
@@ -2189,7 +2309,7 @@ public class InventorySetupsPlugin extends Plugin
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 
-			final String newName = findNewNameForSetup(setup.getName());
+			final String newName = findNewName(setup.getName(), inventorySetupNames);
 			setup.setName(newName);
 			inventorySetupNames.add(newName);
 		}
@@ -2227,7 +2347,7 @@ public class InventorySetupsPlugin extends Plugin
 		// config will already be updated by caller so need to update it here
 	}
 
-	private String findNewNameForSetup(String originalName)
+	private String findNewName(String originalName, final Set<String> objects)
 	{
 		// Do not allow names of more than MAX_SETUP_NAME_LENGTH chars
 		if (originalName.length() > MAX_SETUP_NAME_LENGTH)
@@ -2238,7 +2358,7 @@ public class InventorySetupsPlugin extends Plugin
 		// Fix duplicate name by adding an incrementing number to the duplicate
 		String newName = originalName;
 		int i = 1;
-		while (inventorySetupNames.contains(newName))
+		while (objects.contains(newName))
 		{
 			String i_str = String.valueOf(i);
 			if (originalName.length() + i_str.length() > MAX_SETUP_NAME_LENGTH)

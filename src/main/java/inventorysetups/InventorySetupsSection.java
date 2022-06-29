@@ -25,7 +25,8 @@ public class InventorySetupsSection implements InventorySetupsDisplayAttributes
 
 	// The list of setups
 	@Getter
-	private final List<String> setups;
+	@Setter
+	private List<String> setups;
 
 	@Getter
 	@Setter

@@ -270,14 +270,18 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		});
 
 		JPopupMenu massImportExportMenu = new JPopupMenu();
-		JMenuItem massImportMenu = new JMenuItem("Mass Import");
-		JMenuItem massExportMenu = new JMenuItem("Mass Export");
-		massImportExportMenu.add(massImportMenu);
-		massImportExportMenu.add(massExportMenu);
+		JMenuItem massImportSetupsMenu = new JMenuItem("Mass Import Setups");
+		JMenuItem massExportSetupsMenu = new JMenuItem("Mass Export Setups");
+		JMenuItem massImportSectionsMenu = new JMenuItem("Mass Import Sections");
+		JMenuItem massExportSectionsMenu = new JMenuItem("Mass Export Sections");
+		massImportExportMenu.add(massImportSetupsMenu);
+		massImportExportMenu.add(massExportSetupsMenu);
+		massImportExportMenu.add(massImportSectionsMenu);
+		massImportExportMenu.add(massExportSectionsMenu);
 
 		this.importMarker = new JLabel(IMPORT_ICON);
 		importMarker.setComponentPopupMenu(massImportExportMenu);
-		importMarker.setToolTipText("Import a new inventory setup");
+		updateImportMarker();
 		importMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -285,7 +289,14 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					plugin.importSetup();
+					if (plugin.getConfig().sectionMode())
+					{
+						plugin.importSection();
+					}
+					else
+					{
+						plugin.importSetup();
+					}
 				}
 			}
 
@@ -303,17 +314,24 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		});
 
 		// set mass export/import options
-		massImportMenu.addActionListener(e ->
+		massImportSetupsMenu.addActionListener(e ->
 		{
 			plugin.massImportSetups();
 		});
-		massExportMenu.addActionListener(e ->
+		massExportSetupsMenu.addActionListener(e ->
 		{
-			plugin.massExportSetups();
+			plugin.massExport(plugin.getInventorySetups(), "Setups", "inventory_setups");
+		});
+		massImportSectionsMenu.addActionListener(e ->
+		{
+			plugin.massImportSections();
+		});
+		massExportSectionsMenu.addActionListener(e ->
+		{
+			plugin.massExport(plugin.getSections(), "Sections", "sections");
 		});
 
-
-		// setup the add marker (+ sign in the top right)
+		// set up the add marker (+ sign in the top right)
 		this.addMarker = new JLabel(ADD_ICON);
 		updateAddMarker();
 		addMarker.addMouseListener(new MouseAdapter()
@@ -556,6 +574,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		returnToOverviewPanel(resetScrollBar);
 		overviewPanel.removeAll();
 		updateAddMarker();
+		updateImportMarker();
 
 		List<InventorySetup> setupsToAdd = null;
 		if (!searchBar.getText().isEmpty())
@@ -777,6 +796,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private void updateAddMarker()
 	{
 		addMarker.setToolTipText(plugin.getConfig().sectionMode() ? "Add a new section" : "Add a new inventory setup");
+	}
+
+	private void updateImportMarker()
+	{
+		importMarker.setToolTipText(plugin.getConfig().sectionMode() ? "Import a new section" : "Import a new inventory setup");
 	}
 
 	// Redraw the entire panel given the list of setups
