@@ -26,6 +26,7 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsSection;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.FlatTextField;
 
@@ -43,9 +44,9 @@ import java.awt.event.MouseEvent;
 public class InventorySetupsCompactPanel extends InventorySetupsPanel
 {
 
-	InventorySetupsCompactPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
+	InventorySetupsCompactPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section)
 	{
-		super(plugin, panel, invSetup);
+		super(plugin, panel, invSetup, section);
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);

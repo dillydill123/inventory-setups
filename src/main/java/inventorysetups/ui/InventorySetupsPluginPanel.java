@@ -820,11 +820,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				InventorySetupsPanel newPanel = null;
 				if (plugin.getConfig().compactMode())
 				{
-					newPanel = new InventorySetupsCompactPanel(plugin, this, setup);
+					newPanel = new InventorySetupsCompactPanel(plugin, this, setup, null);
 				}
 				else
 				{
-					newPanel = new InventorySetupsStandardPanel(plugin, this, setup);
+					newPanel = new InventorySetupsStandardPanel(plugin, this, setup, null);
 				}
 				overviewPanel.add(newPanel, constraints);
 				constraints.gridy++;

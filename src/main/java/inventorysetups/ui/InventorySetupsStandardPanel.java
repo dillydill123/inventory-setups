@@ -27,6 +27,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
 
+import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsValidName;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
@@ -160,9 +161,9 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 		DISPLAY_COLOR_HOVER_ICON = new ImageIcon(highlightHover);
 	}
 
-	InventorySetupsStandardPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
+	InventorySetupsStandardPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section)
 	{
-		super(plugin, panel, invSetup);
+		super(plugin, panel, invSetup, section);
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);

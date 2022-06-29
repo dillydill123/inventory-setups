@@ -42,17 +42,28 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 	protected InventorySetupsSection section;
 	protected final JPopupMenu popupMenu;
 
-	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
+	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.inventorySetup = invSetup;
-		this.section = null;
+		this.section = section;
 		this.popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Inventory Setup", invSetup);
 
-		// TODO: Add parent section param here which will be used to figure out which section a setup is a part of
 		JMenuItem addToSection = new JMenuItem("Add Setup to Section...");
 		popupMenu.add(addToSection);
+
+		// If the section is not null, then add a menu to remove this setup from that section
+		if (this.section != null)
+		{
+			JMenuItem removeFromSection = new JMenuItem("Remove from section");
+			removeFromSection.addActionListener(e ->
+			{
+				plugin.removeInventorySetupFromSection(invSetup, section);
+			});
+
+			popupMenu.add(removeFromSection);
+		}
 
 		addToSection.addActionListener(e ->
 		{
@@ -63,9 +74,10 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 			selectionDialog.show();
 			List<String> selectedSections = selectionDialog.getSelectedItems();
 
-			// TODO: Check result and handle accordingly
-			// TODO: Section should be passed in to the constructor so no need to handle it here
-
+			if (!selectedSections.isEmpty())
+			{
+				plugin.addSetupToSections(invSetup, selectedSections);
+			}
 		});
 
 		setComponentPopupMenu(popupMenu);

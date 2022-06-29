@@ -126,14 +126,13 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				final InventorySetup setup = includedSetups.get(setupName);
 				InventorySetupsPanel newPanel = null;
 
-				// TODO: Pass section value here so panels know which section they are a part of
 				if (plugin.getConfig().compactMode())
 				{
-					newPanel = new InventorySetupsCompactPanel(plugin, panel, setup);
+					newPanel = new InventorySetupsCompactPanel(plugin, panel, setup, section);
 				}
 				else
 				{
-					newPanel = new InventorySetupsStandardPanel(plugin, panel, setup);
+					newPanel = new InventorySetupsStandardPanel(plugin, panel, setup, section);
 				}
 				setupsPanel.add(newPanel, constraints);
 				constraints.gridy++;

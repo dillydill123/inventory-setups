@@ -710,6 +710,23 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
+	public void addSetupToSections(final InventorySetup setup, final List<String> sectionNames)
+	{
+		for (final String sectionName : sectionNames)
+		{
+			// Get the appropriate section
+			final InventorySetupsSection section = sections.stream().filter(s -> s.getName().equals(sectionName)).findFirst().get();
+			// Don't add the setup if it's already part of a section
+			if (!section.getSetups().contains(setup.getName()))
+			{
+				section.getSetups().add(setup.getName());
+			}
+		}
+
+		updateConfig(false, true);
+		// No need to rebuild panel since the section view will contain the updates
+	}
+
 	public void moveSetup(int invIndex, int newPosition)
 	{
 		// Setup is already in the specified position or is out of position
@@ -1452,33 +1469,36 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void removeInventorySetup(final InventorySetup setup)
 	{
-		if (!isDeletionConfirmed("Are you sure you want to permanently delete this inventory setup?", "Warning"))
+		if (isDeletionConfirmed("Are you sure you want to permanently delete this inventory setup?", "Warning"))
 		{
-			return;
-		}
+			// Remove the setup from any sections which have it
+			for (final InventorySetupsSection section : sections)
+			{
+				section.getSetups().remove(setup.getName());
+			}
 
-		// Remove the setup from any sections which have it
-		for (final InventorySetupsSection section : sections)
-		{
-			section.getSetups().remove(setup.getName());
+			inventorySetupNames.remove(setup.getName());
+			inventorySetups.remove(setup);
+			panel.rebuild(false);
+			updateConfig(true, true);
 		}
-
-		inventorySetupNames.remove(setup.getName());
-		inventorySetups.remove(setup);
-		panel.rebuild(false);
-		updateConfig(true, true);
 	}
 
 	public void removeSection(final InventorySetupsSection section)
 	{
-
-		if (!isDeletionConfirmed("Are you sure you want to permanently delete this section?", "Warning"))
+		if (isDeletionConfirmed("Are you sure you want to permanently delete this section?", "Warning"))
 		{
-			return;
+			sectionNames.remove(section.getName());
+			sections.remove(section);
+			panel.rebuild(false);
+			updateConfig(false, true);
 		}
+	}
 
-		sectionNames.remove(section.getName());
-		sections.remove(section);
+	public void removeInventorySetupFromSection(final InventorySetup setup, final InventorySetupsSection section)
+	{
+		// No confirmation needed
+		section.getSetups().remove(setup.getName());
 		panel.rebuild(false);
 		updateConfig(false, true);
 	}
