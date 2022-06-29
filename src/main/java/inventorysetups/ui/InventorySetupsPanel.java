@@ -25,12 +25,12 @@
 package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
+import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsSortingID;
 import inventorysetups.InventorySetupsPlugin;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
+
+import javax.swing.*;
+import java.util.List;
 
 // The base class for panels that each display a setup
 public class InventorySetupsPanel extends JPanel
@@ -39,6 +39,7 @@ public class InventorySetupsPanel extends JPanel
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
 	protected final InventorySetup inventorySetup;
+	protected InventorySetupsSection section;
 	protected final JPopupMenu moveSetupPopupMenu;
 
 	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup)
@@ -46,6 +47,7 @@ public class InventorySetupsPanel extends JPanel
 		this.plugin = plugin;
 		this.panel = panel;
 		this.inventorySetup = invSetup;
+		this.section = null;
 		this.moveSetupPopupMenu = new JPopupMenu();
 
 		// TODO: Add parent section param here which will be used to figure out which section a setup is a part of
@@ -55,11 +57,13 @@ public class InventorySetupsPanel extends JPanel
 		JMenuItem moveToTop = new JMenuItem("Move Inventory Setup to Top");
 		JMenuItem moveToBottom = new JMenuItem("Move Inventory Setup to Bottom");
 		JMenuItem moveToPosition = new JMenuItem("Move Inventory Setup to Position...");
+		JMenuItem addToSection = new JMenuItem("Add Setup to Section...");
 		moveSetupPopupMenu.add(moveUp);
 		moveSetupPopupMenu.add(moveDown);
 		moveSetupPopupMenu.add(moveToTop);
 		moveSetupPopupMenu.add(moveToBottom);
 		moveSetupPopupMenu.add(moveToPosition);
+		moveSetupPopupMenu.add(addToSection);
 
 		moveUp.addActionListener(e ->
 		{
@@ -139,6 +143,20 @@ public class InventorySetupsPanel extends JPanel
 						"Move Setup Failed",
 						JOptionPane.ERROR_MESSAGE);
 			}
+
+		});
+
+		addToSection.addActionListener(e ->
+		{
+			final String[] sectionNames = plugin.getSections().stream().map(InventorySetupsSection::getName).toArray(String[]::new);
+			final String message = "Select sections to add this setup to";
+			final String title = "Select Sections";
+			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(title, message, sectionNames);
+			selectionDialog.show();
+			List<String> selectedSections = selectionDialog.getSelectedItems();
+
+			// TODO: Check result and handle accordingly
+			// TODO: Section should be passed in to the constructor so no need to handle it here
 
 		});
 
