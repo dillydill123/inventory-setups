@@ -150,7 +150,9 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	@Override
 	public boolean isNameValid(final String name)
 	{
-		return true;
+		return !name.isEmpty() &&
+				!plugin.getSectionNames().contains(name) &&
+				!section.getName().equals(name);
 	}
 
 	@Override
