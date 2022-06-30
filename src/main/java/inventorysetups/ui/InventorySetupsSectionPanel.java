@@ -113,7 +113,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		// Add the button to nameActions so the color border will reach it as well
 		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section,
 																					plugin, panel, this,
-																					popupMenu, MAX_SETUP_NAME_LENGTH, ColorScheme.DARKER_GRAY_COLOR);
+																					popupMenu, MAX_SETUP_NAME_LENGTH, new Color(45, 45, 45));
 		nameActions.add(minMaxLabel, BorderLayout.WEST);
 
 		JPanel nameWrapper = new JPanel();
