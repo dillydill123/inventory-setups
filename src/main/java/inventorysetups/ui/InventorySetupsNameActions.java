@@ -46,14 +46,15 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
                                       final InventorySetupsPlugin plugin,
                                       final InventorySetupsPluginPanel panel,
                                       final InventorySetupsValidName validNameImplementer,
-                                      final JPopupMenu movePopupMenu, int maxLength)
+                                      final JPopupMenu movePopupMenu, int maxLength,
+                                      final Color panelColor)
     {
         setLayout(new BorderLayout());
 
         this.datum = datum;
         this.validNameImplementer = validNameImplementer;
 
-        setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        setBackground(panelColor);
 
         Color currentDisplayColor;
         if (datum.getDisplayColor() == null)
@@ -71,7 +72,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
         JPanel nameActions = new JPanel(new BorderLayout(3, 0));
         nameActions.setBorder(new EmptyBorder(0, 0, 0, 8));
-        nameActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameActions.setBackground(panelColor);
 
         // Limit character input
         AbstractDocument doc = (AbstractDocument)nameInput.getDocument();
@@ -126,6 +127,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         save.setVisible(false);
         save.setFont(FontManager.getRunescapeSmallFont());
         save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+        save.setBackground(panelColor);
         save.addMouseListener(new MouseAdapter()
         {
             @Override
@@ -184,6 +186,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         cancel.setVisible(false);
         cancel.setFont(FontManager.getRunescapeSmallFont());
         cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
+        cancel.setBackground(panelColor);
         cancel.addMouseListener(new MouseAdapter()
         {
             @Override
@@ -214,6 +217,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
         edit.setFont(FontManager.getRunescapeSmallFont());
         edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+        edit.setBackground(panelColor);
         edit.addMouseListener(new MouseAdapter()
         {
             @Override
@@ -246,15 +250,17 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         nameInput.setText(datum.getName());
         nameInput.setBorder(null);
         nameInput.setEditable(false);
-        nameInput.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameInput.setBackground(panelColor);
         nameInput.setPreferredSize(new Dimension(0, 24));
         nameInput.getTextField().setForeground(Color.WHITE);
+        nameInput.getTextField().setBackground(panelColor);
         nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
         nameInput.getTextField().setComponentPopupMenu(movePopupMenu);
         nameInput.getTextField().setCaretPosition(0);
 
         displayColorIndicator.setToolTipText("Edit the color of the name");
         displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
+        displayColorIndicator.setBackground(panelColor);
         displayColorIndicator.setVisible(false);
 
         // Right click menu to remove the color on the setup
@@ -296,7 +302,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
         });
 
         final JPanel wrapper = new JPanel();
-        wrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        wrapper.setBackground(panelColor);
         wrapper.setLayout(new BorderLayout());
         wrapper.add(nameInput, BorderLayout.CENTER);
         wrapper.add(displayColorIndicator, BorderLayout.WEST);
