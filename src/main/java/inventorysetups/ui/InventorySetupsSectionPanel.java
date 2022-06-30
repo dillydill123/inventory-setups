@@ -92,9 +92,9 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		addSetupsToSection.addActionListener(e ->
 		{
 			final String[] setupNames = plugin.getInventorySetups().stream().map(InventorySetup::getName).toArray(String[]::new);
-			final String message = "Select setups to add this section to";
+			final String message = "Select setups to add to this section";
 			final String title = "Select Setups";
-			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(title, message, setupNames);
+			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, setupNames);
 			selectionDialog.show();
 			List<String> selectedSetups = selectionDialog.getSelectedItems();
 

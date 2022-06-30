@@ -70,7 +70,7 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 			final String[] sectionNames = plugin.getSections().stream().map(InventorySetupsSection::getName).toArray(String[]::new);
 			final String message = "Select sections to add this setup to";
 			final String title = "Select Sections";
-			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(title, message, sectionNames);
+			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, sectionNames);
 			selectionDialog.show();
 			List<String> selectedSections = selectionDialog.getSelectedItems();
 

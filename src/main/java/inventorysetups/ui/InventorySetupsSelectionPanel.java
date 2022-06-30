@@ -21,11 +21,17 @@ public class InventorySetupsSelectionPanel
     private ActionListener okEvent, cancelEvent;
     private final JDialog dialog;
 
-    public InventorySetupsSelectionPanel(String title, String message, String[] options)
+    public InventorySetupsSelectionPanel(JPanel parent, String title, String message, String[] options)
     {
         this.list = new JList<>(options);
         this.list.setBackground(ColorScheme.DARKER_GRAY_HOVER_COLOR);
         JLabel label = new JLabel(message);
+        JLabel ctrlClickLabel = new JLabel("Ctrl + Click to select multiple");
+        JPanel topLabels = new JPanel(new BorderLayout());
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        ctrlClickLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        topLabels.add(label, BorderLayout.NORTH);
+        topLabels.add(ctrlClickLabel, BorderLayout.CENTER);
 
         JButton okButton = new JButton("Ok");
         okButton.addActionListener(this::handleOkButtonClick);
@@ -40,7 +46,7 @@ public class InventorySetupsSelectionPanel
         JPanel panel = new JPanel(new BorderLayout(5,5));
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(list);
-        panel.add(label, BorderLayout.NORTH);
+        panel.add(topLabels, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Compute width and height
@@ -61,7 +67,7 @@ public class InventorySetupsSelectionPanel
         JOptionPane optionPane = new JOptionPane(panel);
         optionPane.setOptions(new Object[]{okButton, cancelButton});
 
-        dialog = optionPane.createDialog("Select option");
+        dialog = optionPane.createDialog(parent,"Select option");
         dialog.setIconImage(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB_PRE));
         dialog.setTitle(title);
     }
