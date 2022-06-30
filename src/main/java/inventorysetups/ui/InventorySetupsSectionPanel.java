@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Map;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
@@ -80,18 +81,35 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 		// Add the right click menu to delete sections
 		JPopupMenu popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Section", section);
+		// TODO: Add select setups to add to this section option
 		JMenuItem exportSection = new JMenuItem("Export Section");
-		JMenuItem addToSection = new JMenuItem("Delete Section...");
+		JMenuItem addSetupsToSection = new JMenuItem("Add setups to section..");
+		JMenuItem deleteSection = new JMenuItem("Delete Section...");
 		exportSection.addActionListener(e ->
 		{
 			plugin.exportSection(section);
 		});
-		addToSection.addActionListener(e ->
+		addSetupsToSection.addActionListener(e ->
+		{
+			final String[] setupNames = plugin.getInventorySetups().stream().map(InventorySetup::getName).toArray(String[]::new);
+			final String message = "Select setups to add this section to";
+			final String title = "Select Setups";
+			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(title, message, setupNames);
+			selectionDialog.show();
+			List<String> selectedSetups = selectionDialog.getSelectedItems();
+
+			if (!selectedSetups.isEmpty())
+			{
+				plugin.addSetupsToSection(section, selectedSetups);
+			}
+		});
+		deleteSection.addActionListener(e ->
 		{
 			plugin.removeSection(section);
 		});
+		popupMenu.add(addSetupsToSection);
 		popupMenu.add(exportSection);
-		popupMenu.add(addToSection);
+		popupMenu.add(deleteSection);
 
 		// Add the button to nameActions so the color border will reach it as well
 		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section, plugin, panel, this, popupMenu, MAX_SETUP_NAME_LENGTH);

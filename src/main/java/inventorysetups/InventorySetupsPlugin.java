@@ -729,7 +729,13 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void addSetupsToSection(final InventorySetupsSection section, final List<String> setupNames)
 	{
-		section.getSetups().addAll(setupNames);
+		for (final String setupName : setupNames)
+		{
+			if (!section.getSetups().contains(setupName))
+			{
+				section.getSetups().add(setupName);
+			}
+		}
 		updateConfig(false, true);
 		panel.rebuild(false);
 	}
