@@ -72,6 +72,10 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private static ImageIcon COMPACT_VIEW_HOVER_ICON;
 	private static ImageIcon NO_COMPACT_VIEW_ICON;
 	private static ImageIcon NO_COMPACT_VIEW_HOVER_ICON;
+	private static ImageIcon SECTION_VIEW_ICON;
+	private static ImageIcon SECTION_VIEW_HOVER_ICON;
+	private static ImageIcon NO_SECTION_VIEW_ICON;
+	private static ImageIcon NO_SECTION_VIEW_HOVER_ICON;
 	private static ImageIcon ALPHABETICAL_ICON;
 	private static ImageIcon ALPHABETICAL_HOVER_ICON;
 	private static ImageIcon NO_ALPHABETICAL_ICON;
@@ -129,6 +133,14 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		final BufferedImage helpIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/help_button.png");
 		HELP_ICON = new ImageIcon(helpIcon);
 		HELP_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(helpIcon, 0.53f));
+
+		final BufferedImage sectionIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/section_mode_icon.png");
+		final BufferedImage sectionIconHover = ImageUtil.luminanceOffset(sectionIcon, -150);
+		SECTION_VIEW_ICON = new ImageIcon(sectionIcon);
+		SECTION_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(sectionIcon, 0.53f));
+
+		NO_SECTION_VIEW_ICON = new ImageIcon(sectionIconHover);
+		NO_SECTION_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(sectionIconHover, -100));
 
 		final BufferedImage compactIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/compact_mode_icon.png");
 		final BufferedImage compactIconHover = ImageUtil.luminanceOffset(compactIcon, -150);
@@ -434,13 +446,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			@Override
 			public void mouseEntered(MouseEvent e)
 			{
-				sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? COMPACT_VIEW_HOVER_ICON : NO_COMPACT_VIEW_HOVER_ICON);
+				sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? SECTION_VIEW_HOVER_ICON : NO_SECTION_VIEW_HOVER_ICON);
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e)
 			{
-				sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
+				sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? SECTION_VIEW_ICON : NO_SECTION_VIEW_ICON);
 			}
 		});
 
@@ -769,7 +781,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private void updateSectionViewMarker()
 	{
-		sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
+		sectionViewMarker.setIcon(plugin.getConfig().sectionMode() ? SECTION_VIEW_ICON : NO_SECTION_VIEW_ICON);
 		sectionViewMarker.setToolTipText("Switch to " + (plugin.getConfig().sectionMode() ? "standard mode" : "section mode"));
 	}
 
