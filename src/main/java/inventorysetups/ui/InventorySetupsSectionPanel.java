@@ -85,7 +85,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		JPopupMenu popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Section", section);
 		JMenuItem exportSection = new JMenuItem("Export Section");
 		JMenuItem addSetupsToSection = new JMenuItem("Add setups to section..");
-		JMenuItem deleteSection = new JMenuItem("Delete Section...");
+		JMenuItem deleteSection = new JMenuItem("Delete Section..");
 		exportSection.addActionListener(e ->
 		{
 			plugin.exportSection(section);

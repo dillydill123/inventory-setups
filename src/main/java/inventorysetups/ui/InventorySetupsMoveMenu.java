@@ -21,7 +21,7 @@ public class InventorySetupsMoveMenu<T> extends JPopupMenu
         JMenuItem moveDown = new JMenuItem("Move " + type + " Down");
         JMenuItem moveToTop = new JMenuItem("Move " + type + " to Top");
         JMenuItem moveToBottom = new JMenuItem("Move " + type + " to Bottom");
-        JMenuItem moveToPosition = new JMenuItem("Move " + type + " to Position...");
+        JMenuItem moveToPosition = new JMenuItem("Move " + type + " to Position..");
         add(moveUp);
         add(moveDown);
         add(moveToTop);

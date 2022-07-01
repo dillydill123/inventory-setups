@@ -50,7 +50,7 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 		this.section = section;
 		this.popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Inventory Setup", invSetup);
 
-		JMenuItem addToSection = new JMenuItem("Add Setup to Section...");
+		JMenuItem addToSection = new JMenuItem("Add Setup to Section..");
 		popupMenu.add(addToSection);
 
 		// If the section is not null, then add a menu to remove this setup from that section
