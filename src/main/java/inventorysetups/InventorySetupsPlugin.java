@@ -30,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.ui.InventorySetupsEquipmentPanel;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Color;
@@ -601,8 +602,6 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			loadConfig();
-
-
 
 			return true;
 		});
@@ -2010,6 +2009,7 @@ public class InventorySetupsPlugin extends Plugin
 	private void loadConfig()
 	{
 		inventorySetupNames = new HashSet<>();
+		sectionNames = new HashSet<>();
 
 		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
 		{
@@ -2022,7 +2022,13 @@ public class InventorySetupsPlugin extends Plugin
 
 		inventorySetups = loadData(CONFIG_KEY_SETUPS, setupType);
 		sections = loadData(CONFIG_KEY_SECTIONS, sectionType);
-		sectionNames = sections.stream().map(InventorySetupsSection::getName).collect(Collectors.toSet());
+		// Fix names of setups from config if there are duplicate names
+		for (final InventorySetupsSection section : sections)
+		{
+			final String newName = findNewName(section.getName(), sectionNames);
+			section.setName(newName);
+			sectionNames.add(newName);
+		}
 
 		clientThread.invokeLater(() ->
 		{
