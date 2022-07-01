@@ -49,10 +49,6 @@ import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
 public class InventorySetupsStandardPanel extends InventorySetupsPanel implements InventorySetupsValidName
 {
 
-	private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
-			BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-			BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
-
 	private static final int H_GAP_BTN = 4;
 
 	private static final ImageIcon BANK_FILTER_ICON;

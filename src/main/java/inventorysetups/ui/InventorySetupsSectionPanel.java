@@ -18,7 +18,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 {
 	protected final InventorySetupsPlugin plugin;
 	protected final InventorySetupsPluginPanel panel;
-	private InventorySetupsSection section;
+	private final InventorySetupsSection section;
 
 	private final JLabel minMaxLabel;
 
@@ -29,13 +29,15 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 	static
 	{
-		final BufferedImage minMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/back_arrow_icon.png");
+		final BufferedImage minMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/down_arrow.png");
 		final BufferedImage minMaxSectionHoverImg = ImageUtil.luminanceOffset(minMaxSectionImg, -150);
 		MIN_MAX_SECTION_ICON = new ImageIcon(minMaxSectionImg);
 		MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(minMaxSectionHoverImg);
 
-		NO_MIN_MAX_SECTION_ICON = new ImageIcon(minMaxSectionHoverImg);
-		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(minMaxSectionHoverImg, -100));
+		final BufferedImage noMinMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/right_arrow.png");
+		final BufferedImage noMaxSectionHoverImg = ImageUtil.luminanceOffset(noMinMaxSectionImg, -150);
+		NO_MIN_MAX_SECTION_ICON = new ImageIcon(noMinMaxSectionImg);
+		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(noMaxSectionHoverImg);
 	}
 
 	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, Map<String, InventorySetup> includedSetups)
@@ -111,10 +113,16 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		popupMenu.add(deleteSection);
 
 		// Add the button to nameActions so the color border will reach it as well
+		final Color nameWrapperColor = new Color(20, 20, 20);
 		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section,
 																					plugin, panel, this,
-																					popupMenu, MAX_SETUP_NAME_LENGTH, new Color(45, 45, 45));
-		nameActions.add(minMaxLabel, BorderLayout.WEST);
+																					popupMenu, MAX_SETUP_NAME_LENGTH, nameWrapperColor);
+		final JPanel westNameActions = new JPanel(new BorderLayout());
+		westNameActions.setBackground(nameWrapperColor);
+		westNameActions.add(Box.createRigidArea(new Dimension(6, 0)), BorderLayout.WEST);
+		westNameActions.add(minMaxLabel, BorderLayout.CENTER);
+
+		nameActions.add(westNameActions, BorderLayout.WEST);
 
 		JPanel nameWrapper = new JPanel();
 		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -150,6 +158,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				final InventorySetup setup = includedSetups.get(setupName);
 				InventorySetupsPanel newPanel = null;
 
+				final JPanel wrapperPanelForSetup = new JPanel();
+				wrapperPanelForSetup.setLayout(new BorderLayout());
 				if (plugin.getConfig().compactMode())
 				{
 					newPanel = new InventorySetupsCompactPanel(plugin, panel, setup, section);
@@ -158,7 +168,11 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				{
 					newPanel = new InventorySetupsStandardPanel(plugin, panel, setup, section);
 				}
-				setupsPanel.add(newPanel, constraints);
+				// Add an indentation to the setup
+				wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
+				wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
+
+				setupsPanel.add(wrapperPanelForSetup, constraints);
 				constraints.gridy++;
 
 				setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
