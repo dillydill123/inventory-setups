@@ -184,6 +184,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
 					updateBankFilterLabel();
 					plugin.updateConfig(true, false);
+					panel.rebuild(false);
 				}
 			}
 
@@ -213,6 +214,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory and ignore order");
 					updateUnorderedHighlightIndicator();
 					plugin.updateConfig(true, false);
+					panel.rebuild(false);
 				}
 			}
 
@@ -274,6 +276,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					updateToggleHighlightLabel();
 					updateHighlightColorLabel();
 					plugin.updateConfig(true, false);
+					panel.rebuild(false);
 				}
 			}
 
@@ -304,6 +307,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 						{
 							inventorySetup.setHighlightColor(c);
 							updateHighlightColorLabel();
+							panel.rebuild(false);
 						}
 					);
 				}

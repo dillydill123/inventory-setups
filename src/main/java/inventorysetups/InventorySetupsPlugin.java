@@ -723,7 +723,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		updateConfig(false, true);
-		// No need to rebuild panel since the section view will contain the updates
+		panel.rebuild(false);
 	}
 
 	public void addSetupsToSection(final InventorySetupsSection section, final List<String> setupNames)
