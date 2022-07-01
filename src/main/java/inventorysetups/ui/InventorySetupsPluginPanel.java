@@ -514,10 +514,10 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			@Override
 			public void keyReleased(KeyEvent e)
 			{
-				rebuild(true);
+				redrawOverviewPanel(true);
 			}
 		});
-		searchBar.addClearListener(() -> rebuild(true));
+		searchBar.addClearListener(() -> redrawOverviewPanel(true));
 
 		// the panel that stays at the top and doesn't scroll
 		// contains the title and buttons
@@ -581,12 +581,15 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	}
 
 	// Redraw the entire overview panel, considering the text in the search bar
-	public void rebuild(boolean resetScrollBar)
+	public void redrawOverviewPanel(boolean resetScrollBar)
 	{
 		returnToOverviewPanel(resetScrollBar);
 		overviewPanel.removeAll();
 		updateAddMarker();
 		updateImportMarker();
+		updateSectionViewMarker();
+		updateCompactViewMarker();
+		updateSortingMarker();
 
 		List<InventorySetup> setupsToAdd = null;
 		if (!searchBar.getText().isEmpty())
@@ -604,7 +607,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			setupsToAdd.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
 
-		init(setupsToAdd);
+		layoutSetups(setupsToAdd);
 
 		revalidate();
 		repaint();
@@ -815,14 +818,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		importMarker.setToolTipText(plugin.getConfig().sectionMode() ? "Import a new section" : "Import a new inventory setup");
 	}
 
-	// Redraw the entire panel given the list of setups
-	private void init(List<InventorySetup> setups)
+	// Layout setups according
+	private void layoutSetups(List<InventorySetup> setups)
 	{
 		overviewPanel.setLayout(new GridBagLayout());
 		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		updateSectionViewMarker();
-		updateCompactViewMarker();
-		updateSortingMarker();
 
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.HORIZONTAL;

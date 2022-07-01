@@ -153,7 +153,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
                     nameInput.setEditable(false);
                     updateNameActions(false);
                     requestFocusInWindow();
-                    panel.rebuild(false);
+                    panel.redrawOverviewPanel(false);
                 }
             }
 

@@ -33,8 +33,6 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.BorderLayout;
@@ -184,7 +182,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					bankFilterIndicator.setToolTipText(inventorySetup.isFilterBank() ? "Disable bank filtering" : "Enable bank filtering");
 					updateBankFilterLabel();
 					plugin.updateConfig(true, false);
-					panel.rebuild(false);
+					panel.redrawOverviewPanel(false);
 				}
 			}
 
@@ -214,7 +212,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					unorderedHighlightIndicator.setToolTipText(inventorySetup.isUnorderedHighlight() ? "Enable default ordered highlighting" : "Only highlight items that are missing from the inventory and ignore order");
 					updateUnorderedHighlightIndicator();
 					plugin.updateConfig(true, false);
-					panel.rebuild(false);
+					panel.redrawOverviewPanel(false);
 				}
 			}
 
@@ -245,7 +243,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					updateFavoriteIndicator();
 					plugin.updateConfig(true, false);
 					// rebuild the panel so this panel will move positions from being favorited/unfavorited
-					panel.rebuild(false);
+					panel.redrawOverviewPanel(false);
 				}
 			}
 
@@ -276,7 +274,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					updateToggleHighlightLabel();
 					updateHighlightColorLabel();
 					plugin.updateConfig(true, false);
-					panel.rebuild(false);
+					panel.redrawOverviewPanel(false);
 				}
 			}
 
@@ -307,7 +305,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 						{
 							inventorySetup.setHighlightColor(c);
 							updateHighlightColorLabel();
-							panel.rebuild(false);
+							panel.redrawOverviewPanel(false);
 						}
 					);
 				}

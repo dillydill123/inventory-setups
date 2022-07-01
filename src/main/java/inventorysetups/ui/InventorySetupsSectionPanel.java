@@ -64,7 +64,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 					section.setMaximized(!section.isMaximized());
 					updateMinMaxLabel();
 					plugin.updateConfig(false, true);
-					panel.rebuild(false);
+					panel.redrawOverviewPanel(false);
 				}
 			}
 

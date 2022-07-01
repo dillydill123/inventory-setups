@@ -30,7 +30,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
-import inventorysetups.ui.InventorySetupsEquipmentPanel;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Color;
@@ -336,7 +335,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
 				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
 			{
-				panel.rebuild(true);
+				panel.redrawOverviewPanel(true);
 			}
 			else if (event.getKey().equals(CONFIG_KEY_MANUAL_BANK_FILTER))
 			{
@@ -723,7 +722,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		updateConfig(false, true);
-		panel.rebuild(false);
+		panel.redrawOverviewPanel(false);
 	}
 
 	public void addSetupsToSection(final InventorySetupsSection section, final List<String> setupNames)
@@ -736,7 +735,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 		updateConfig(false, true);
-		panel.rebuild(false);
+		panel.redrawOverviewPanel(false);
 	}
 
 	public void moveSetup(int invIndex, int newPosition)
@@ -748,7 +747,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		InventorySetup setup = inventorySetups.remove(invIndex);
 		inventorySetups.add(newPosition, setup);
-		panel.rebuild(false);
+		panel.redrawOverviewPanel(false);
 		updateConfig(true, false);
 	}
 
@@ -761,7 +760,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		InventorySetupsSection section = sections.remove(sectionIndex);
 		sections.add(newPosition, section);
-		panel.rebuild(false);
+		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
 	}
 
@@ -1491,7 +1490,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			inventorySetupNames.remove(setup.getName());
 			inventorySetups.remove(setup);
-			panel.rebuild(false);
+			panel.redrawOverviewPanel(false);
 			updateConfig(true, true);
 		}
 	}
@@ -1502,7 +1501,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			sectionNames.remove(section.getName());
 			sections.remove(section);
-			panel.rebuild(false);
+			panel.redrawOverviewPanel(false);
 			updateConfig(false, true);
 		}
 	}
@@ -1511,7 +1510,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		// No confirmation needed
 		section.getSetups().remove(setup.getName());
-		panel.rebuild(false);
+		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
 	}
 
@@ -2033,7 +2032,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			updateOldSetups();
-			SwingUtilities.invokeLater(() -> panel.rebuild(true));
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 		});
 	}
 
@@ -2065,7 +2064,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			inventorySetups.add(newSetup);
 			inventorySetupNames.add(newSetup.getName());
-			panel.rebuild(true);
+			panel.redrawOverviewPanel(true);
 			updateConfig(true, false);
 		});
 	}
@@ -2076,7 +2075,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			sections.add(newSection);
 			sectionNames.add(newSection.getName());
-			panel.rebuild(true);
+			panel.redrawOverviewPanel(true);
 			updateConfig(false, true);
 		});
 	}
