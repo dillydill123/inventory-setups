@@ -284,6 +284,10 @@ Currently there is one known compatibility issue with Bank Tags. If Bank Tags an
 
 If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
 
+### Donations
+
+Inventory Setups was developed by me in my free time (100+ hours of work). I did for it fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
+
 ### Changelog
 
 ##### 1.13
