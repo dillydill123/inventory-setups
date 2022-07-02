@@ -79,7 +79,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(noMaxSectionHoverImg);
 	}
 
-	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, List<InventorySetup> includedSetups)
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
@@ -88,9 +88,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		this.setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
-
 		// Label that will be used to minimize or maximize setups in section
-
 		this.minMaxLabel = new JLabel();
 		updateMinMaxLabel();
 		minMaxLabel.addMouseListener(new MouseAdapter()
@@ -101,7 +99,6 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
 					section.setMaximized(!section.isMaximized());
-					updateMinMaxLabel();
 					plugin.updateConfig(false, true);
 					panel.redrawOverviewPanel(false);
 				}
@@ -170,57 +167,6 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 		nameWrapper.setComponentPopupMenu(popupMenu);
 		add(nameWrapper, BorderLayout.NORTH);
-
-		// Only add the section if it's maximized
-		if (section.isMaximized())
-		{
-			// This panel will contain all the setups that are part of the section
-			JPanel setupsPanel = new JPanel();
-			setupsPanel.setLayout(new GridBagLayout());
-			setupsPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-
-			GridBagConstraints constraints = new GridBagConstraints();
-			constraints.fill = GridBagConstraints.HORIZONTAL;
-			constraints.weightx = 1;
-			constraints.gridx = 0;
-			constraints.gridy = 0;
-
-			setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-			constraints.gridy++;
-
-			// For quick look up
-			Set<String> setupsInSection = new HashSet<>(section.getSetups());
-
-			for (final InventorySetup setup : includedSetups)
-			{
-				if (!setupsInSection.contains(setup.getName()))
-				{
-					continue;
-				}
-				final JPanel wrapperPanelForSetup = new JPanel();
-				wrapperPanelForSetup.setLayout(new BorderLayout());
-				InventorySetupsPanel newPanel = null;
-				if (plugin.getConfig().compactMode())
-				{
-					newPanel = new InventorySetupsCompactPanel(plugin, panel, setup, section);
-				}
-				else
-				{
-					newPanel = new InventorySetupsStandardPanel(plugin, panel, setup, section);
-				}
-				// Add an indentation to the setup
-				wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
-				wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
-
-				setupsPanel.add(wrapperPanelForSetup, constraints);
-				constraints.gridy++;
-
-				setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-				constraints.gridy++;
-			}
-
-			add(setupsPanel, BorderLayout.SOUTH);
-		}
 
 	}
 

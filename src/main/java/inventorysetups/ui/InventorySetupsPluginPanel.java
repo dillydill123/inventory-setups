@@ -36,8 +36,10 @@ import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
@@ -841,22 +843,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		if (plugin.getConfig().sectionMode())
 		{
-			// Create a temporary set for the setups to speed up searching
-			Map<String, InventorySetup> includedSetupsMap = setups.stream().collect(Collectors.toMap(InventorySetup::getName, setup -> setup));
-
-			for (final InventorySetupsSection section : plugin.getSections())
-			{
-
-				// This will add all sections, but it will only show the setups that match the search
-				// This has the benefit of showing empty sections
-				InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, setups);
-				overviewPanel.add(sectionPanel, constraints);
-				constraints.gridy++;
-
-				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-				constraints.gridy++;
-			}
-
+			layoutSections(setups, constraints);
 		}
 		else
 		{
@@ -894,6 +881,64 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			updateNewsPanel.setVisible(false);
 			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty() && !plugin.getConfig().sectionMode());
 			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty() || plugin.getConfig().sectionMode());
+		}
+	}
+
+	private void layoutSections(final List<InventorySetup> setups, final GridBagConstraints constraints)
+	{
+		for (final InventorySetupsSection section : plugin.getSections())
+		{
+
+			// This will add all sections, but it will only show the setups that match the search
+			// This has the benefit of showing empty sections
+			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section);
+
+			overviewPanel.add(sectionPanel, constraints);
+			constraints.gridy++;
+
+			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+			constraints.gridy++;
+
+			// Only add the section if it's maximized
+			if (section.isMaximized())
+			{
+
+				// For quick look up
+				Set<String> setupsInSection = new HashSet<>(section.getSetups());
+
+				for (final InventorySetup setup : setups)
+				{
+					if (!setupsInSection.contains(setup.getName()))
+					{
+						continue;
+					}
+					final JPanel wrapperPanelForSetup = new JPanel();
+					wrapperPanelForSetup.setLayout(new BorderLayout());
+					InventorySetupsPanel newPanel = null;
+					if (plugin.getConfig().compactMode())
+					{
+						newPanel = new InventorySetupsCompactPanel(plugin, this, setup, section);
+					}
+					else
+					{
+						newPanel = new InventorySetupsStandardPanel(plugin, this, setup, section);
+					}
+					// Add an indentation to the setup
+					wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
+					wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
+
+					overviewPanel.add(wrapperPanelForSetup, constraints);
+					constraints.gridy++;
+
+					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+					constraints.gridy++;
+				}
+
+				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+				constraints.gridy++;
+
+			}
+
 		}
 	}
 
