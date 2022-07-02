@@ -14,6 +14,8 @@ To create a new setup, gear up for the activity you would like to save, and then
 
 ![Green Plus Button](readme_images_and_gifs/create_new_setup.gif)
 
+Setups must have a unique name and have a maximum length of 50 characters.
+
 ### Overview Panel
 
 The overview panel contains all the setups and options to manipulate them.
@@ -160,19 +162,70 @@ You can also add or update items by using the search option. The fuzzy indicator
 
 ![Additional Filtered Items](readme_images_and_gifs/additional_items_filter.gif)
 
-### Exporting and Importing Setups
+### Sections
 
-It is possible to import and export inventory setups. This is useful if you would like to share your setups with your friends. To export an inventory setup, click on the export button next to the view setup button. This will copy the setup to your clipboard. You can then send this to your friends.
+Sections are a way to organize your setups into different categories. Here is a preview of what sections look like.
+
+![Section Preview](readme_images_and_gifs/section_preview.gif)
+
+To get started, click on the section mode button at the top of the panel.
+
+![Section Mode](readme_images_and_gifs/section_mode.png)
+Like setups, section names have a maximum length of 50 and must be unique.
+
+When you are in the section mode view, use the import or add button to create or import a section.
+
+![Section Create](readme_images_and_gifs/sections_create.gif)
+
+#### Adding Setups to a Section
+
+To add setups to your section, there are two ways to do this. You can right click a section and select "Add setups to section..". This will open a dialogue where you can select setups to add to the section.
+
+You can also right click a setup and select "Add setup to sections.." This will open a dialogue where you can select sections for the setup to be a part of.
+
+With both dialogues, you can CTRL + Click to select multiple options.
+
+![Add Setups to Section](readme_images_and_gifs/add_setups_to_section.gif)
+
+Once you have setups added to a section, you can view them by clicking the maximize arrow. You can minimize a section by click the arrow again.
+
+Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many sections as you'd like.
+
+To remove a setup from a section, make sure you are in section view. Then you can right click on a setup and select "Remove from section". This will remove the setup from that section.
+
+#### Remove Setups from a Section
+
+![Remove from Section](readme_images_and_gifs/remove_from_section.gif)
+
+Do not use the X button to remove a setup from a section. This will simply delete your setup. When a setup is deleted, it will be removed from all sections.
+
+#### Section Menu Options
+
+Right clicking a section will show a menu with some options. Here you can move the section, export it, add setups to it, and delete it.
+
+![Sections Right Click Menu](readme_images_and_gifs/section_right_click.png)
+
+### Exporting and Importing Setups and Sections
+
+It is possible to import and export inventory setups and sections. This is useful if you would like to share your setups with your friends. To export an inventory setup, click on the export button next to the view setup button. This will copy the setup to your clipboard. You can then send this to your friends.
+
+To export a section, right click a section in section view and select the appropriate option.
 
 ![Export Setup](readme_images_and_gifs/export.png)
 
-To import a setup, click on the green import button in the top right. It will prompt for a setup. Paste the setup and confirm. The new setup will be added to the bottom of the list of setups.
+To import a setup, click on the green import button in the top right. It will prompt for a setup. Paste the setup and confirm.The new setup will be added to the bottom of the list of setups.
+
+The same can be done for sections, but you must be in section view to import a section.
 
 ![Import Setup](readme_images_and_gifs/import.png)
 
 You can also mass import or export by right clicking the import button and following the instructions.
 
 ![Mass Import Export](readme_images_and_gifs/mass_import_export.png)
+
+#### Note About Importing
+
+Duplicate names for setups or sections are not allowed in Inventory Setups. If you attempt to import a section or setup that has a name which already exists, the plugin will find a new name for it by adding a number to the end.
 
 ### Configuration Settings
 
@@ -185,6 +238,12 @@ In the settings of Inventory Setups, you can change default setup options, key b
 * **Default Highlight Unordered Difference** - Enabling this will make it so all newly created setups will have unordered highlighting enabled
 * **Default Highlight** - Enabling this will make it so all newly created setups will have highlighting enabled
 * **Default Highlight Color** - The default highlighting color for newly created setups
+* **Default Enable Display Color** - Enabling this will make it so all newly created setups will have the default display color
+* **Default Display Color** - The default color that will be used as a display color for new setups. The option above must be enabled
+
+![Display Color Gif](readme_images_and_gifs/display_color.gif)
+Hint: You can right click the paint bucket to delete the color of a setup or section.
+
 * **Default Fuzzy** - Enabling this will make all slots fuzzy for newly created setups
 * **Default Stack Compare** - The default stack comparison type for all slots in newly created setups
 
