@@ -1931,8 +1931,13 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		final String newName = findNewName(newSection.getName(), sectionNames);
 		newSection.setName(newName);
+
+		// Remove any duplicates that came in when importing
+		newSection.setSetups(newSection.getSetups().stream().distinct().collect(Collectors.toList()));
+
 		// Remove setups which don't exist
 		newSection.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
+		
 		addSectionClientThread(newSection);
 	}
 
