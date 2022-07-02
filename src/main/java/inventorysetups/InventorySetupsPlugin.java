@@ -2381,7 +2381,7 @@ public class InventorySetupsPlugin extends Plugin
 		// Fix duplicate name by adding an incrementing number to the duplicate
 		String newName = originalName;
 		int i = 1;
-		while (objects.contains(newName))
+		while (objects.contains(newName) || newName.isEmpty())
 		{
 			String i_str = String.valueOf(i);
 			if (originalName.length() + i_str.length() > MAX_SETUP_NAME_LENGTH)
