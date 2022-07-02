@@ -97,11 +97,11 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(latestUpdatePanelInfo);
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+		contentPanel.add(closePanel);
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(newUserPanelInfo);
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(suggestionPanelInfo);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-		contentPanel.add(closePanel);
 
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -120,8 +120,8 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		String updateText =     "Sections are here! Sections are a new way to organize your setups. Click the link below to learn more.\n\n" +
 								"Support for ToB ornament kits in fuzzy mapping.\n\n" +
 								"You can now add a color border to setups. Click 'edit' and select a color with the paint bucket. Right click the paint bucket to remove.\n\n" +
-								"Duplicate names for setups are no longer supported. Duplicate names will be fixed upon start up.\n\n" +
-								"Names of setups has been limited to 50 characters. Names exceeding this length will be fixed upon start up.";
+								"Duplicate names for setups are no longer supported and have a max length.\n\n" +
+								"This update is larger than most, so it is highly recommended you mass export your setups for safety.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
@@ -132,7 +132,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		textArea.setFocusable(false);
 		textArea.setBackground(ColorScheme.DARK_GRAY_COLOR);
 		Font textAreaFont = FontManager.getRunescapeSmallFont();
-		//textAreaFont = textAreaFont.deriveFont(textAreaFont.getStyle(), (float)textAreaFont.getSize() - (float)0.1);
+		textAreaFont = textAreaFont.deriveFont(textAreaFont.getStyle(), (float)textAreaFont.getSize() - (float)0.1);
 		textArea.setFont(textAreaFont);
 
 		textArea.setBorder(new EmptyBorder(0, 0, 0, 0));
