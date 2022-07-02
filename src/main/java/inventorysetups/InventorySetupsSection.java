@@ -1,9 +1,9 @@
 package inventorysetups;
 
+import java.awt.Color;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 

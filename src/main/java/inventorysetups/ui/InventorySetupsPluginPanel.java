@@ -24,8 +24,20 @@
  */
 package inventorysetups.ui;
 
-import inventorysetups.*;
-
+import inventorysetups.InventorySetup;
+import inventorysetups.InventorySetupsFilteringModeID;
+import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsPlugin;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
+import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
+import inventorysetups.InventorySetupsSection;
+import inventorysetups.InventorySetupsSlotID;
+import inventorysetups.InventorySetupsSortingID;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
@@ -57,10 +69,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.*;
 import java.util.stream.Collectors;
-
-import static inventorysetups.InventorySetupsPlugin.*;
 
 // The main panel of the plugin that contains all viewing components
 public class InventorySetupsPluginPanel extends PluginPanel

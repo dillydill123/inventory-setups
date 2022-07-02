@@ -26,10 +26,12 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupsPlugin;
 
-import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 
 // Implementation of a cycle button which provides a way to cycle through multiple states in one button (JLabel)
 // When clicked, the cycle button will properly set the icons, tooltips, and execute the provided runnable for any necessary logic
