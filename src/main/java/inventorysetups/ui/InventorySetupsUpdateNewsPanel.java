@@ -1,21 +1,19 @@
 package inventorysetups.ui;
 
+import com.sun.jna.platform.win32.WinNT;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.LinkBrowser;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import static inventorysetups.InventorySetupsPlugin.SUGGESTION_LINK;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
@@ -90,13 +88,13 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		contentPanel.add(welcomePanel);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(latestUpdatePanelInfo);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(newUserPanelInfo);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(suggestionPanelInfo);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
 		contentPanel.add(closePanel);
 
 		setLayout(new BorderLayout());
@@ -113,7 +111,11 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Disabled filtering in group storage for group ironmen.";
+		String updateText =     "Sections are here! Sections are a new way to organize your setups. Click the link below to learn more.\n\n" +
+								"Support for ToB ornament kits in fuzzy mapping.\n\n" +
+								"You can now add a color border to setups. Click 'edit' and select a color with the paint bucket. Right click the paint bucket to remove.\n\n" +
+								"Duplicate names for setups are no longer supported. Duplicate names will be fixed upon start up.\n\n" +
+								"Names of setups has been limited to 50 characters. Names exceeding this length will be fixed upon start up.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
@@ -123,7 +125,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		textArea.setEditable(false);
 		textArea.setFocusable(false);
 		textArea.setBackground(ColorScheme.DARK_GRAY_COLOR);
-		textArea.setFont(FontManager.getRunescapeSmallFont());
+		Font textAreaFont = FontManager.getRunescapeSmallFont();
+		//textAreaFont = textAreaFont.deriveFont(textAreaFont.getStyle(), (float)textAreaFont.getSize() - (float)0.1);
+		textArea.setFont(textAreaFont);
+
 		textArea.setBorder(new EmptyBorder(0, 0, 0, 0));
 
 		final JPanel contentPanel = new JPanel();
@@ -138,6 +143,35 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel updatePanel = new JPanel(new BorderLayout());
 		updatePanel.add(contentPanel, BorderLayout.CENTER);
+
+		String text = "<html>Click here to learn about sections!</html>";
+		JLabel sectionsHyperLink = new JLabel(text);
+		sectionsHyperLink.setHorizontalAlignment(SwingConstants.LEFT);
+		sectionsHyperLink.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				LinkBrowser.browse("https://github.com/dillydill123/inventory-setups#sections");
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				sectionsHyperLink.setText("<html><a href=''>Click here to learn about sections!</html>");
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				sectionsHyperLink.setText(text);
+			}
+		});
+
+		JPanel hyperLinkPanel = new JPanel(new BorderLayout());
+		hyperLinkPanel.add(sectionsHyperLink, BorderLayout.SOUTH);
+		hyperLinkPanel.add(Box.createRigidArea(new Dimension(0 ,8)), BorderLayout.NORTH);
+		updatePanel.add(hyperLinkPanel, BorderLayout.SOUTH);
 
 		return updatePanel;
 	}
