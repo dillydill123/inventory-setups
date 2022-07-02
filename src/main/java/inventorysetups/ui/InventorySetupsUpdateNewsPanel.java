@@ -1,6 +1,5 @@
 package inventorysetups.ui;
 
-import com.sun.jna.platform.win32.WinNT;
 import inventorysetups.InventorySetupsPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -170,7 +169,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		JPanel hyperLinkPanel = new JPanel(new BorderLayout());
 		hyperLinkPanel.add(sectionsHyperLink, BorderLayout.SOUTH);
-		hyperLinkPanel.add(Box.createRigidArea(new Dimension(0 ,8)), BorderLayout.NORTH);
+		hyperLinkPanel.add(Box.createRigidArea(new Dimension(0, 8)), BorderLayout.NORTH);
 		updatePanel.add(hyperLinkPanel, BorderLayout.SOUTH);
 
 		return updatePanel;

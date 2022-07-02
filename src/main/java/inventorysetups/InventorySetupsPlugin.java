@@ -2389,7 +2389,8 @@ public class InventorySetupsPlugin extends Plugin
 				int chars_to_cut_off = i_str.length() - (MAX_SETUP_NAME_LENGTH - originalName.length());
 				newName = originalName.substring(0, MAX_SETUP_NAME_LENGTH - chars_to_cut_off) + i++;
 			}
-			else {
+			else
+			{
 				newName = originalName + i++;
 			}
 		}

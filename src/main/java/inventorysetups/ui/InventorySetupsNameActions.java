@@ -52,335 +52,336 @@ import static inventorysetups.ui.InventorySetupsStandardPanel.DISPLAY_COLOR_ICON
 
 public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttributes> extends JPanel
 {
-    private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-            BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
+	private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
+			BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
+			BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
 
 
-    public final T datum;
-    private final JLabel save = new JLabel("Save");
-    private final JLabel cancel = new JLabel("Cancel");
-    private final JLabel edit = new JLabel("Edit");
-    private final JLabel displayColorIndicator = new JLabel();
-    private final FlatTextField nameInput = new FlatTextField();
+	public final T datum;
+	private final JLabel save = new JLabel("Save");
+	private final JLabel cancel = new JLabel("Cancel");
+	private final JLabel edit = new JLabel("Edit");
+	private final JLabel displayColorIndicator = new JLabel();
+	private final FlatTextField nameInput = new FlatTextField();
 
-    private final InventorySetupsValidName validNameImplementer;
+	private final InventorySetupsValidName validNameImplementer;
 
-    public InventorySetupsNameActions(final T datum,
-                                      final InventorySetupsPlugin plugin,
-                                      final InventorySetupsPluginPanel panel,
-                                      final InventorySetupsValidName validNameImplementer,
-                                      final JPopupMenu movePopupMenu, int maxLength,
-                                      final Color panelColor)
-    {
-        setLayout(new BorderLayout());
+	public InventorySetupsNameActions(final T datum,
+										final InventorySetupsPlugin plugin,
+										final InventorySetupsPluginPanel panel,
+										final InventorySetupsValidName validNameImplementer,
+										final JPopupMenu movePopupMenu, int maxLength,
+										final Color panelColor)
+	{
+		setLayout(new BorderLayout());
 
-        this.datum = datum;
-        this.validNameImplementer = validNameImplementer;
+		this.datum = datum;
+		this.validNameImplementer = validNameImplementer;
 
-        setBackground(panelColor);
+		setBackground(panelColor);
 
-        Color currentDisplayColor;
-        if (datum.getDisplayColor() == null)
-        {
-            setBorder(NAME_BOTTOM_BORDER);
-            currentDisplayColor = null;
-        }
-        else
-        {
-            setBorder(new CompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 2, 0, datum.getDisplayColor()),
-                    BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR)));
-            currentDisplayColor = datum.getDisplayColor();
-        }
+		Color currentDisplayColor;
+		if (datum.getDisplayColor() == null)
+		{
+			setBorder(NAME_BOTTOM_BORDER);
+			currentDisplayColor = null;
+		}
+		else
+		{
+			setBorder(new CompoundBorder(
+					BorderFactory.createMatteBorder(0, 0, 2, 0, datum.getDisplayColor()),
+					BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR)));
+			currentDisplayColor = datum.getDisplayColor();
+		}
 
-        JPanel nameActions = new JPanel(new BorderLayout(3, 0));
-        nameActions.setBorder(new EmptyBorder(0, 0, 0, 8));
-        nameActions.setBackground(panelColor);
+		JPanel nameActions = new JPanel(new BorderLayout(3, 0));
+		nameActions.setBorder(new EmptyBorder(0, 0, 0, 8));
+		nameActions.setBackground(panelColor);
 
-        // Limit character input
-        AbstractDocument doc = (AbstractDocument)nameInput.getDocument();
-        doc.setDocumentFilter(new DocumentFilter()
-        {
-            @Override
-            public void insertString(FilterBypass fb, int offset, String str, AttributeSet a) throws BadLocationException
-            {
-                if ((fb.getDocument().getLength() + str.length()) <= maxLength)
-                {
-                    super.insertString(fb, offset, str, a);
-                }
-            }
+		// Limit character input
+		AbstractDocument doc = (AbstractDocument)nameInput.getDocument();
+		doc.setDocumentFilter(new DocumentFilter()
+		{
+			@Override
+			public void insertString(FilterBypass fb, int offset, String str, AttributeSet a) throws BadLocationException
+			{
+				if ((fb.getDocument().getLength() + str.length()) <= maxLength)
+				{
+					super.insertString(fb, offset, str, a);
+				}
+			}
 
-            // Replace handles pasting
-            @Override
-            public void replace(FilterBypass fb, int offset, int length, String str, AttributeSet a) throws BadLocationException
-            {
-                if ((fb.getDocument().getLength() + str.length() - length) >= maxLength)
-                {
-                    // If the user pastes a huge amount of text, cut it out until the maximum length is achieved
-                    int chars_available = maxLength - (fb.getDocument().getLength() - length);
-                    int chars_to_cut = str.length() - chars_available;
-                    str = str.substring(0, str.length() - chars_to_cut);
-                }
-                super.replace(fb, offset, length, str, a);
-            }
-        });
+			// Replace handles pasting
+			@Override
+			public void replace(FilterBypass fb, int offset, int length, String str, AttributeSet a) throws BadLocationException
+			{
+				if ((fb.getDocument().getLength() + str.length() - length) >= maxLength)
+				{
+					// If the user pastes a huge amount of text, cut it out until the maximum length is achieved
+					int chars_available = maxLength - (fb.getDocument().getLength() - length);
+					int chars_to_cut = str.length() - chars_available;
+					str = str.substring(0, str.length() - chars_to_cut);
+				}
+				super.replace(fb, offset, length, str, a);
+			}
+		});
 
-        // Add document listener to disable save button when the name isn't valid
-        nameInput.getDocument().addDocumentListener(new DocumentListener()
-        {
-            @Override
-            public void insertUpdate(DocumentEvent e)
-            {
-                updateSaveButtonDuringEditing();
-            }
+		// Add document listener to disable save button when the name isn't valid
+		nameInput.getDocument().addDocumentListener(new DocumentListener()
+		{
+			@Override
+			public void insertUpdate(DocumentEvent e)
+			{
+				updateSaveButtonDuringEditing();
+			}
 
-            @Override
-            public void removeUpdate(DocumentEvent e)
-            {
-                updateSaveButtonDuringEditing();
-            }
+			@Override
+			public void removeUpdate(DocumentEvent e)
+			{
+				updateSaveButtonDuringEditing();
+			}
 
-            @Override
-            public void changedUpdate(DocumentEvent e)
-            {
-                updateSaveButtonDuringEditing();
-            }
-        });
+			@Override
+			public void changedUpdate(DocumentEvent e)
+			{
+				updateSaveButtonDuringEditing();
+			}
+		});
 
-        save.setVisible(false);
-        save.setFont(FontManager.getRunescapeSmallFont());
-        save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
-        save.setBackground(panelColor);
-        save.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent mouseEvent)
-            {
-                if (SwingUtilities.isLeftMouseButton(mouseEvent) && save.isEnabled())
-                {
-                    validNameImplementer.updateName(nameInput.getText());
-                    Color newDisplayColor = null;
-                    if (displayColorIndicator.getBorder() != null)
-                    {
-                        Color currentDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
-                        if (currentDisplayColor != JagexColors.MENU_TARGET)
-                        {
-                            newDisplayColor = currentDisplayColor;
-                        }
-                    }
+		save.setVisible(false);
+		save.setFont(FontManager.getRunescapeSmallFont());
+		save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+		save.setBackground(panelColor);
+		save.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				if (SwingUtilities.isLeftMouseButton(mouseEvent) && save.isEnabled())
+				{
+					validNameImplementer.updateName(nameInput.getText());
+					Color newDisplayColor = null;
+					if (displayColorIndicator.getBorder() != null)
+					{
+						Color currentDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
+						if (currentDisplayColor != JagexColors.MENU_TARGET)
+						{
+							newDisplayColor = currentDisplayColor;
+						}
+					}
 
-                    datum.setDisplayColor(newDisplayColor);
+					datum.setDisplayColor(newDisplayColor);
 
-                    plugin.updateConfig(true, true);
+					plugin.updateConfig(true, true);
 
-                    nameInput.setEditable(false);
-                    updateNameActions(false);
-                    requestFocusInWindow();
-                    panel.redrawOverviewPanel(false);
-                }
-            }
+					nameInput.setEditable(false);
+					updateNameActions(false);
+					requestFocusInWindow();
+					panel.redrawOverviewPanel(false);
+				}
+			}
 
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent) {
-                if (validNameImplementer.isNameValid(nameInput.getText()))
-                {
-                    save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR.darker());
-                }
-                else
-                {
-                    save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-                }
-            }
+			@Override
+			public void mouseEntered(MouseEvent mouseEvent)
+			{
+				if (validNameImplementer.isNameValid(nameInput.getText()))
+				{
+					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR.darker());
+				}
+				else
+				{
+					save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+				}
+			}
 
-            @Override
-            public void mouseExited(MouseEvent mouseEvent)
-            {
-                if (validNameImplementer.isNameValid(nameInput.getText()))
-                {
-                    save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
-                }
-                else
-                {
-                    save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-                }
-            }
-        });
+			@Override
+			public void mouseExited(MouseEvent mouseEvent)
+			{
+				if (validNameImplementer.isNameValid(nameInput.getText()))
+				{
+					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+				}
+				else
+				{
+					save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+				}
+			}
+		});
 
-        cancel.setVisible(false);
-        cancel.setFont(FontManager.getRunescapeSmallFont());
-        cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
-        cancel.setBackground(panelColor);
-        cancel.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent mouseEvent)
-            {
-                if (SwingUtilities.isLeftMouseButton(mouseEvent))
-                {
-                    nameInput.setEditable(false);
-                    nameInput.setText(datum.getName());
-                    updateNameActions(false);
-                    requestFocusInWindow();
-                    updateDisplayColorLabel(currentDisplayColor);
-                }
-            }
+		cancel.setVisible(false);
+		cancel.setFont(FontManager.getRunescapeSmallFont());
+		cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
+		cancel.setBackground(panelColor);
+		cancel.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					nameInput.setEditable(false);
+					nameInput.setText(datum.getName());
+					updateNameActions(false);
+					requestFocusInWindow();
+					updateDisplayColorLabel(currentDisplayColor);
+				}
+			}
 
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent)
-            {
-                cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR.darker());
-            }
+			@Override
+			public void mouseEntered(MouseEvent mouseEvent)
+			{
+				cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR.darker());
+			}
 
-            @Override
-            public void mouseExited(MouseEvent mouseEvent)
-            {
-                cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
-            }
-        });
+			@Override
+			public void mouseExited(MouseEvent mouseEvent)
+			{
+				cancel.setForeground(ColorScheme.PROGRESS_ERROR_COLOR);
+			}
+		});
 
-        edit.setFont(FontManager.getRunescapeSmallFont());
-        edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-        edit.setBackground(panelColor);
-        edit.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent mouseEvent)
-            {
-                if (SwingUtilities.isLeftMouseButton(mouseEvent))
-                {
-                    nameInput.setEditable(true);
-                    updateNameActions(true);
-                }
-            }
+		edit.setFont(FontManager.getRunescapeSmallFont());
+		edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+		edit.setBackground(panelColor);
+		edit.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					nameInput.setEditable(true);
+					updateNameActions(true);
+				}
+			}
 
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent)
-            {
-                edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker().darker());
-            }
+			@Override
+			public void mouseEntered(MouseEvent mouseEvent)
+			{
+				edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker().darker());
+			}
 
-            @Override
-            public void mouseExited(MouseEvent mouseEvent)
-            {
-                edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-            }
-        });
+			@Override
+			public void mouseExited(MouseEvent mouseEvent)
+			{
+				edit.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+			}
+		});
 
-        nameActions.add(save, BorderLayout.EAST);
-        nameActions.add(cancel, BorderLayout.WEST);
-        nameActions.add(edit, BorderLayout.CENTER);
+		nameActions.add(save, BorderLayout.EAST);
+		nameActions.add(cancel, BorderLayout.WEST);
+		nameActions.add(edit, BorderLayout.CENTER);
 
-        nameInput.setText(datum.getName());
-        nameInput.setBorder(null);
-        nameInput.setEditable(false);
-        nameInput.setBackground(panelColor);
-        nameInput.setPreferredSize(new Dimension(0, 24));
-        nameInput.getTextField().setForeground(Color.WHITE);
-        nameInput.getTextField().setBackground(panelColor);
-        nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
-        nameInput.getTextField().setComponentPopupMenu(movePopupMenu);
-        nameInput.getTextField().setCaretPosition(0);
+		nameInput.setText(datum.getName());
+		nameInput.setBorder(null);
+		nameInput.setEditable(false);
+		nameInput.setBackground(panelColor);
+		nameInput.setPreferredSize(new Dimension(0, 24));
+		nameInput.getTextField().setForeground(Color.WHITE);
+		nameInput.getTextField().setBackground(panelColor);
+		nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
+		nameInput.getTextField().setComponentPopupMenu(movePopupMenu);
+		nameInput.getTextField().setCaretPosition(0);
 
-        displayColorIndicator.setToolTipText("Edit the color of the name");
-        displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
-        displayColorIndicator.setBackground(panelColor);
-        displayColorIndicator.setVisible(false);
+		displayColorIndicator.setToolTipText("Edit the color of the name");
+		displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
+		displayColorIndicator.setBackground(panelColor);
+		displayColorIndicator.setVisible(false);
 
-        // Right click menu to remove the color on the setup
-        JPopupMenu displayColorMenu = new JPopupMenu();
-        JMenuItem removeColor = new JMenuItem("Remove the color of the name");
-        displayColorMenu.add(removeColor);
-        removeColor.addActionListener(e -> updateDisplayColorLabel(null));
+		// Right click menu to remove the color on the setup
+		JPopupMenu displayColorMenu = new JPopupMenu();
+		JMenuItem removeColor = new JMenuItem("Remove the color of the name");
+		displayColorMenu.add(removeColor);
+		removeColor.addActionListener(e -> updateDisplayColorLabel(null));
 
-        displayColorIndicator.setComponentPopupMenu(displayColorMenu);
+		displayColorIndicator.setComponentPopupMenu(displayColorMenu);
 
-        updateDisplayColorLabel(currentDisplayColor);
-        displayColorIndicator.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent mouseEvent)
-            {
-                if (SwingUtilities.isLeftMouseButton(mouseEvent))
-                {
-                    plugin.openColorPicker("Choose a Display color", currentDisplayColor == null ? JagexColors.MENU_TARGET : currentDisplayColor,
-                            c ->
-                            {
-                                updateDisplayColorLabel(c);
-                            }
-                    );
-                }
-            }
+		updateDisplayColorLabel(currentDisplayColor);
+		displayColorIndicator.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					plugin.openColorPicker("Choose a Display color", currentDisplayColor == null ? JagexColors.MENU_TARGET : currentDisplayColor,
+							c ->
+							{
+								updateDisplayColorLabel(c);
+							}
+					);
+				}
+			}
 
-            @Override
-            public void mouseEntered(MouseEvent mouseEvent)
-            {
-                displayColorIndicator.setIcon(DISPLAY_COLOR_HOVER_ICON);
-            }
+			@Override
+			public void mouseEntered(MouseEvent mouseEvent)
+			{
+				displayColorIndicator.setIcon(DISPLAY_COLOR_HOVER_ICON);
+			}
 
-            @Override
-            public void mouseExited(MouseEvent mouseEvent)
-            {
-                displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
-            }
-        });
+			@Override
+			public void mouseExited(MouseEvent mouseEvent)
+			{
+				displayColorIndicator.setIcon(DISPLAY_COLOR_ICON);
+			}
+		});
 
-        final JPanel wrapper = new JPanel();
-        wrapper.setBackground(panelColor);
-        wrapper.setLayout(new BorderLayout());
-        wrapper.add(nameInput, BorderLayout.CENTER);
-        wrapper.add(displayColorIndicator, BorderLayout.WEST);
-        wrapper.add(nameActions, BorderLayout.EAST);
+		final JPanel wrapper = new JPanel();
+		wrapper.setBackground(panelColor);
+		wrapper.setLayout(new BorderLayout());
+		wrapper.add(nameInput, BorderLayout.CENTER);
+		wrapper.add(displayColorIndicator, BorderLayout.WEST);
+		wrapper.add(nameActions, BorderLayout.EAST);
 
-        add(wrapper, BorderLayout.CENTER);
+		add(wrapper, BorderLayout.CENTER);
 
-        // Any modifications to the name actions can be done with border layouts
+		// Any modifications to the name actions can be done with border layouts
 
-    }
+	}
 
-    private void updateNameActions(boolean saveAndCancel)
-    {
-        save.setVisible(saveAndCancel);
-        cancel.setVisible(saveAndCancel);
-        edit.setVisible(!saveAndCancel);
-        displayColorIndicator.setVisible(saveAndCancel);
+	private void updateNameActions(boolean saveAndCancel)
+	{
+		save.setVisible(saveAndCancel);
+		cancel.setVisible(saveAndCancel);
+		edit.setVisible(!saveAndCancel);
+		displayColorIndicator.setVisible(saveAndCancel);
 
-        if (saveAndCancel)
-        {
-            nameInput.getTextField().requestFocusInWindow();
-            nameInput.getTextField().selectAll();
-        }
-    }
+		if (saveAndCancel)
+		{
+			nameInput.getTextField().requestFocusInWindow();
+			nameInput.getTextField().selectAll();
+		}
+	}
 
-    private void updateDisplayColorLabel(Color color)
-    {
-        displayColorIndicator.setBorder(new CompoundBorder(
-                new EmptyBorder(0, 4, 0, 0),
-                new MatteBorder(0, 0, 3, 0, color)));
+	private void updateDisplayColorLabel(Color color)
+	{
+		displayColorIndicator.setBorder(new CompoundBorder(
+				new EmptyBorder(0, 4, 0, 0),
+				new MatteBorder(0, 0, 3, 0, color)));
 
-        // Update the save button
-        updateSaveButtonDuringEditing();
-    }
+		// Update the save button
+		updateSaveButtonDuringEditing();
+	}
 
-    private void updateSaveButtonDuringEditing()
-    {
-        Color newDisplayColor = null;
-        if (displayColorIndicator.getBorder() != null)
-        {
-            newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
-        }
+	private void updateSaveButtonDuringEditing()
+	{
+		Color newDisplayColor = null;
+		if (displayColorIndicator.getBorder() != null)
+		{
+			newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
+		}
 
-        // If nothing has changed or name is invalid, disable the save button
-        if (datum.getDisplayColor() == newDisplayColor && !validNameImplementer.isNameValid(nameInput.getText()))
-        {
-            save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-            save.setEnabled(false);
-        }
-        else
-        {
-            save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
-            save.setEnabled(true);
-        }
-    }
+		// If nothing has changed or name is invalid, disable the save button
+		if (datum.getDisplayColor() == newDisplayColor && !validNameImplementer.isNameValid(nameInput.getText()))
+		{
+			save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+			save.setEnabled(false);
+		}
+		else
+		{
+			save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+			save.setEnabled(true);
+		}
+	}
 
 }

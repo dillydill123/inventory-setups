@@ -103,7 +103,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
 			}
-	 	});
+		});
 
 		// Add the right click menu to delete sections
 		JPopupMenu popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Section", section);

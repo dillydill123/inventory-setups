@@ -26,7 +26,6 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsSection;
-import inventorysetups.InventorySetupsSortingID;
 import inventorysetups.InventorySetupsPlugin;
 
 import javax.swing.*;
