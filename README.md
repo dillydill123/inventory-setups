@@ -172,7 +172,7 @@ To get started, click on the section mode button at the top of the panel.
 
 ![Section Mode](readme_images_and_gifs/section_mode.png)
 
-When you are in the section mode view, use the import or add button to create or import a section.
+When you are in the section mode view, the import and add button can now be used to add or import sections instead of setups.
 
 ![Section Create](readme_images_and_gifs/sections_create.gif)
 
@@ -188,7 +188,7 @@ With both dialogues, you can CTRL + Click to select multiple options.
 
 ![Add Setups to Section](readme_images_and_gifs/add_setups_to_section.gif)
 
-Once you have setups added to a section, you can view them by clicking the maximize arrow. You can minimize a section by click the arrow again.
+Once you have setups added to a section, you can view them by clicking the maximize arrow. You can minimize a section by clicking the arrow again.
 
 Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many sections as you'd like.
 
