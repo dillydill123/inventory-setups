@@ -674,7 +674,12 @@ public class InventorySetupsPlugin extends Plugin
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
 				spellbook, false);
-			addInventorySetupClientThread(invSetup);
+
+			inventorySetups.add(invSetup);
+			inventorySetupNames.add(invSetup.getName());
+			updateConfig(true, false);
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+
 		});
 	}
 
@@ -708,11 +713,11 @@ public class InventorySetupsPlugin extends Plugin
 
 		final String newName = name;
 		InventorySetupsSection newSection = new InventorySetupsSection(newName);
+		sections.add(newSection);
+		sectionNames.add(newSection.getName());
 
-		SwingUtilities.invokeLater(() ->
-		{
-			addSectionClientThread(newSection);
-		});
+		updateConfig(false, true);
+		SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 	}
 
@@ -1763,7 +1768,12 @@ public class InventorySetupsPlugin extends Plugin
 				throw new RuntimeException("Imported setup was missing required fields");
 			}
 
-			addSetupFromImport(newSetup);
+			preProcessNewSetup(newSetup);
+			inventorySetups.add(newSetup);
+			inventorySetupNames.add(newSetup.getName());
+
+			updateConfig(true, false);
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		}
 		catch (Exception e)
@@ -1774,22 +1784,6 @@ public class InventorySetupsPlugin extends Plugin
 				"Import Setup Failed",
 				JOptionPane.ERROR_MESSAGE);
 		}
-	}
-
-	private void addSetupFromImport(final InventorySetup newSetup)
-	{
-		clientThread.invokeLater(() ->
-		{
-			final String newName = findNewName(newSetup.getName(), inventorySetupNames);
-			newSetup.setName(newName);
-
-			// Must add the name here as well for the same reason as addSectionFromImport
-			inventorySetupNames.add(newName);
-
-			// This requires the client thread
-			updateNullFieldsOfSetup(newSetup);
-			addInventorySetupClientThread(newSetup);
-		});
 	}
 
 	public void massImportSetups()
@@ -1823,8 +1817,13 @@ public class InventorySetupsPlugin extends Plugin
 
 			for (final InventorySetup inventorySetup : newSetups)
 			{
-				addSetupFromImport(inventorySetup);
+				preProcessNewSetup(inventorySetup);
+				inventorySetups.add(inventorySetup);
+				inventorySetupNames.add(inventorySetup.getName());
 			}
+			
+			updateConfig(true, false);
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		}
 		catch (Exception e)
@@ -1869,7 +1868,11 @@ public class InventorySetupsPlugin extends Plugin
 				throw new RuntimeException("Imported section was missing required fields");
 			}
 
-			addSectionFromImport(newSection);
+			preProcessNewSection(newSection);
+			sections.add(newSection);
+			sectionNames.add(newSection.getName());
+			updateConfig(false, true);
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 		}
 		catch (Exception e)
 		{
@@ -1912,8 +1915,13 @@ public class InventorySetupsPlugin extends Plugin
 
 			for (final InventorySetupsSection section : newSections)
 			{
-				addSectionFromImport(section);
+				preProcessNewSection(section);
+				sections.add(section);
+				sectionNames.add(section.getName());
 			}
+
+			updateConfig(false, true);
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		}
 		catch (Exception e)
@@ -1931,16 +1939,10 @@ public class InventorySetupsPlugin extends Plugin
 		return section.getName() == null || section.getSetups() == null;
 	}
 
-	private void addSectionFromImport(final InventorySetupsSection newSection)
+	private void preProcessNewSection(final InventorySetupsSection newSection)
 	{
 		final String newName = findNewName(newSection.getName(), sectionNames);
 		newSection.setName(newName);
-
-		// The section name will be added again in the addSectionClientThread
-		// But it has to be done here as well so when more imports are added
-		// The name will be taken and it won't allow a duplicate name
-		// This happens because we use invokeLater in addSectionClientThread
-		sectionNames.add(newName);
 
 		// Remove any duplicates that came in when importing
 		newSection.setSetups(newSection.getSetups().stream().distinct().collect(Collectors.toList()));
@@ -1948,7 +1950,12 @@ public class InventorySetupsPlugin extends Plugin
 		// Remove setups which don't exist
 		newSection.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
 
-		addSectionClientThread(newSection);
+	}
+
+	private void preProcessNewSetup(final InventorySetup newSetup)
+	{
+		final String newName = findNewName(newSetup.getName(), inventorySetupNames);
+		newSetup.setName(newName);
 	}
 
 	private Path showMassImportFolderDialog()
@@ -1969,23 +1976,6 @@ public class InventorySetupsPlugin extends Plugin
 		else
 		{
 			return null;
-		}
-	}
-
-	private void updateNullFieldsOfSetup(final InventorySetup newSetup)
-	{
-		// Must be called from client thread!
-		if (newSetup.getRune_pouch() == null && checkIfContainerContainsItem(ItemID.RUNE_POUCH, newSetup.getInventory()))
-		{
-			newSetup.updateRunePouch(getRunePouchData());
-		}
-		if (newSetup.getBoltPouch() == null && checkIfContainerContainsItem(ItemID.BOLT_POUCH, newSetup.getInventory()))
-		{
-			newSetup.updateBoltPouch(getBoltPouchData());
-		}
-		if (newSetup.getNotes() == null)
-		{
-			newSetup.updateNotes("");
 		}
 	}
 
@@ -2091,28 +2081,6 @@ public class InventorySetupsPlugin extends Plugin
 				return new ArrayList<>();
 			}
 		}
-	}
-
-	private void addInventorySetupClientThread(final InventorySetup newSetup)
-	{
-		SwingUtilities.invokeLater(() ->
-		{
-			inventorySetups.add(newSetup);
-			inventorySetupNames.add(newSetup.getName());
-			panel.redrawOverviewPanel(true);
-			updateConfig(true, false);
-		});
-	}
-
-	private void addSectionClientThread(final InventorySetupsSection newSection)
-	{
-		SwingUtilities.invokeLater(() ->
-		{
-			sections.add(newSection);
-			sectionNames.add(newSection.getName());
-			panel.redrawOverviewPanel(true);
-			updateConfig(false, true);
-		});
 	}
 
 	public boolean setupContainsItem(final InventorySetup setup, int itemID)
