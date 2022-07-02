@@ -171,11 +171,12 @@ Sections are a way to organize your setups into different categories. Here is a 
 To get started, click on the section mode button at the top of the panel.
 
 ![Section Mode](readme_images_and_gifs/section_mode.png)
-Like setups, section names have a maximum length of 50 and must be unique.
 
 When you are in the section mode view, use the import or add button to create or import a section.
 
 ![Section Create](readme_images_and_gifs/sections_create.gif)
+
+Like setups, section names have a maximum length of 50 and must be unique.
 
 #### Adding Setups to a Section
 
@@ -191,11 +192,11 @@ Once you have setups added to a section, you can view them by clicking the maxim
 
 Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many sections as you'd like.
 
-To remove a setup from a section, make sure you are in section view. Then you can right click on a setup and select "Remove from section". This will remove the setup from that section.
-
 #### Remove Setups from a Section
 
 ![Remove from Section](readme_images_and_gifs/remove_from_section.gif)
+
+To remove a setup from a section, make sure you are in section view. Then you can right click on a setup and select "Remove from section". This will remove the setup from that section.
 
 Do not use the X button to remove a setup from a section. This will simply delete your setup. When a setup is deleted, it will be removed from all sections.
 
@@ -284,6 +285,9 @@ Currently there is one known compatibility issue with Bank Tags. If Bank Tags an
 If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
 
 ### Changelog
+
+##### 1.13
+Added sections and display colors to setups and sections
 
 ##### 1.12
 Added ability to filter which setups are listed on "show worn items". Added favorites. Added ability to remove the bank tab separators. Added config option for manual bank filtering. Added mass import and export of setups. Added support for bolt pouch
