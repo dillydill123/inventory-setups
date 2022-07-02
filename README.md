@@ -190,7 +190,7 @@ With both dialogues, you can CTRL + Click to select multiple options.
 
 Once you have setups added to a section, you can view them by clicking the maximize arrow. You can minimize a section by clicking the arrow again.
 
-Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many sections as you'd like.
+Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many different sections as you'd like.
 
 #### Remove Setups from a Section
 
