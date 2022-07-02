@@ -5,17 +5,17 @@
 Save gear setups for specific activities.
 
 Contents
-- [Creating a New Setup](#Creating a New Setup)
-- [Overview Panel](#Overview Panel)
-- [Editing a Setup](#Editing a Setup)
-- [Bank Filtering](#Bank Filtering)
+- [Creating a New Setup](#Creating-a-New-Setup)
+- [Overview Panel](#Overview-Panel)
+- [Editing a Setup](#Editing-a-Setup)
+- [Bank Filtering](#Bank-Filtering)
 - [Highlighting](#Highlighting)
-- [Additional Filtered Items](#Additional Filtered Items)
+- [Additional Filtered Items](#Additional-Filtered-Items)
 - [Sections](#Sections)
-- [Importing and Exporting](#Exporting and Importing Setups and Sections)
-- [Configuration Settings](#Configuration Settings)
-- [Other Plugin Compatibilities](#Bank Tag Layouts Plugin)
-- [Support and Suggestions](#Support and Suggestions)
+- [Importing and Exporting](#Exporting-and-Importing-Setups-and-Sections)
+- [Configuration Settings](#Configuration-Settings)
+- [Other Plugin Compatibilities](#Bank-Tag-Layouts Plugin)
+- [Support and Suggestions](#Support-and-Suggestions)
 
 ## Creating a New Setup
 
