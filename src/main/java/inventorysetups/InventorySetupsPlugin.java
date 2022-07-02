@@ -2035,6 +2035,10 @@ public class InventorySetupsPlugin extends Plugin
 			final String newName = findNewName(section.getName(), sectionNames);
 			section.setName(newName);
 			sectionNames.add(newName);
+
+			// Remove any duplicates that exist
+			List<String> uniqueSetups = section.getSetups().stream().distinct().collect(Collectors.toList());
+			section.setSetups(uniqueSetups);
 		}
 
 		clientThread.invokeLater(() ->
