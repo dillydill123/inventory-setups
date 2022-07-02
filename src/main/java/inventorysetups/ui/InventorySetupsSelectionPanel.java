@@ -92,7 +92,7 @@ public class InventorySetupsSelectionPanel
 		list.setFixedCellHeight((int)Math.ceil(bounds.getHeight() + 1));
 		int widthInPixels = (int)Math.ceil(bounds.getWidth()) + 25;
 		int max_char_height = metrics.getMaxAscent() + metrics.getMaxDescent();
-		int heightInPixels = max_char_height * options.length + 35;
+		int heightInPixels = max_char_height * options.length + 50;
 
 		int maxHeight = 400;
 		int maxWidth = 500;

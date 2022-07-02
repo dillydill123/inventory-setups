@@ -64,6 +64,7 @@ public class InventorySetupsCompactPanel extends InventorySetupsPanel
 		nameInput.setPreferredSize(new Dimension(0, 24));
 		nameInput.getTextField().setForeground(Color.WHITE);
 		nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
+		nameInput.getTextField().setCaretPosition(0);
 
 		nameWrapper.add(nameInput, BorderLayout.CENTER);
 
