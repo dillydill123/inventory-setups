@@ -343,7 +343,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
 				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
 			{
-				panel.redrawOverviewPanel(false);
+				panel.redrawOverviewPanel(event.getKey().equals(CONFIG_KEY_SECTION_MODE));
 			}
 			else if (event.getKey().equals(CONFIG_KEY_MANUAL_BANK_FILTER))
 			{
