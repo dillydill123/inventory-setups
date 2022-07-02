@@ -1782,6 +1782,10 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			final String newName = findNewName(newSetup.getName(), inventorySetupNames);
 			newSetup.setName(newName);
+
+			// Must add the name here as well for the same reason as addSectionFromImport
+			inventorySetupNames.add(newName);
+
 			// This requires the client thread
 			updateNullFieldsOfSetup(newSetup);
 			addInventorySetupClientThread(newSetup);
@@ -1932,12 +1936,18 @@ public class InventorySetupsPlugin extends Plugin
 		final String newName = findNewName(newSection.getName(), sectionNames);
 		newSection.setName(newName);
 
+		// The section name will be added again in the addSectionClientThread
+		// But it has to be done here as well so when more imports are added
+		// The name will be taken and it won't allow a duplicate name
+		// This happens because we use invokeLater in addSectionClientThread
+		sectionNames.add(newName);
+
 		// Remove any duplicates that came in when importing
 		newSection.setSetups(newSection.getSetups().stream().distinct().collect(Collectors.toList()));
 
 		// Remove setups which don't exist
 		newSection.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
-		
+
 		addSectionClientThread(newSection);
 	}
 
@@ -2049,6 +2059,14 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			updateOldSetups();
+
+			// Remove setups that don't exist in each section
+			for (final InventorySetupsSection section : sections)
+			{
+				// Remove setups which don't exist in a section
+				section.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
+			}
+
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 		});
 	}
