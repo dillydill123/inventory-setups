@@ -228,6 +228,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 				{
 					nameInput.setEditable(false);
 					nameInput.setText(datum.getName());
+					nameInput.getTextField().setCaretPosition(0);
 					updateNameActions(false);
 					requestFocusInWindow();
 					updateDisplayColorLabel(currentDisplayColor);
