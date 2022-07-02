@@ -849,7 +849,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 				// This will add all sections, but it will only show the setups that match the search
 				// This has the benefit of showing empty sections
-				InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, includedSetupsMap);
+				InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, setups);
 				overviewPanel.add(sectionPanel, constraints);
 				constraints.gridy++;
 

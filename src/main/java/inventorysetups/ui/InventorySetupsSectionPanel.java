@@ -33,7 +33,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -78,7 +79,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(noMaxSectionHoverImg);
 	}
 
-	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, Map<String, InventorySetup> includedSetups)
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, List<InventorySetup> includedSetups)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
@@ -186,18 +187,19 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 			setupsPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 			constraints.gridy++;
-			for (final String setupName : section.getSetups())
+
+			// For quick look up
+			Set<String> setupsInSection = new HashSet<>(section.getSetups());
+
+			for (final InventorySetup setup : includedSetups)
 			{
-				if (!includedSetups.containsKey(setupName))
+				if (!setupsInSection.contains(setup.getName()))
 				{
 					continue;
 				}
-
-				final InventorySetup setup = includedSetups.get(setupName);
-				InventorySetupsPanel newPanel = null;
-
 				final JPanel wrapperPanelForSetup = new JPanel();
 				wrapperPanelForSetup.setLayout(new BorderLayout());
+				InventorySetupsPanel newPanel = null;
 				if (plugin.getConfig().compactMode())
 				{
 					newPanel = new InventorySetupsCompactPanel(plugin, panel, setup, section);
