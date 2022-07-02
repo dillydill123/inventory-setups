@@ -117,7 +117,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Sections are here! Sections are a new way to organize your setups. Click the link below to learn more.\n\n" +
+		String updateText =     "Sections are here! Sections are a new way to organize your setups. Visit the guide for more info.\n\n" +
 								"Support for ToB ornament kits in fuzzy mapping.\n\n" +
 								"You can now add a color border to setups. Click 'edit' and select a color with the paint bucket. Right click the paint bucket to remove.\n\n" +
 								"Duplicate names for setups are no longer supported and have a max length.\n\n" +
@@ -149,35 +149,6 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel updatePanel = new JPanel(new BorderLayout());
 		updatePanel.add(contentPanel, BorderLayout.CENTER);
-
-		String text = "<html>Click here to learn about sections!</html>";
-		JLabel sectionsHyperLink = new JLabel(text);
-		sectionsHyperLink.setHorizontalAlignment(SwingConstants.LEFT);
-		sectionsHyperLink.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mousePressed(MouseEvent e)
-			{
-				LinkBrowser.browse("https://github.com/dillydill123/inventory-setups#sections");
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e)
-			{
-				sectionsHyperLink.setText("<html><a href=''>Click here to learn about sections!</html>");
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e)
-			{
-				sectionsHyperLink.setText(text);
-			}
-		});
-
-		JPanel hyperLinkPanel = new JPanel(new BorderLayout());
-		hyperLinkPanel.add(sectionsHyperLink, BorderLayout.SOUTH);
-		hyperLinkPanel.add(Box.createRigidArea(new Dimension(0, 8)), BorderLayout.NORTH);
-		updatePanel.add(hyperLinkPanel, BorderLayout.SOUTH);
 
 		return updatePanel;
 	}
