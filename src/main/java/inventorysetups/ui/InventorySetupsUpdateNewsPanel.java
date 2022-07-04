@@ -118,9 +118,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 		String updateText =     "Sections are here! Sections are a new way to organize your setups. Visit the guide for more info.\n\n" +
-								"Support for ToB ornament kits in fuzzy mapping.\n\n" +
-								"You can now add a color border to setups. Click 'edit' and select a color with the paint bucket. Right click the paint bucket to remove.\n\n" +
-								"Duplicate names for setups are no longer supported and have a max length.\n\n" +
+								"Move buttons on top panel to a second row because thwe help button was colliding with the section button.\n\n" +
 								"This update is larger than most, so it is highly recommended you mass export your setups for safety.";
 
 		JTextArea textArea = new JTextArea(2, 20);
