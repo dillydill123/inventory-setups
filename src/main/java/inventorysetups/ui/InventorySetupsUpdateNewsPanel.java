@@ -118,7 +118,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 		String updateText =     "Sections are here! Sections are a new way to organize your setups. Visit the guide for more info.\n\n" +
-								"Move buttons on top panel to a second row because the help button was colliding with the section button.\n\n" +
+								"Moved buttons on top panel to a second row because the help button was colliding with the section button.\n\n" +
 								"Fixed bug where favorites where showing up in reverse order.\n\n" +
 								"This update is larger than most, so it is highly recommended you mass export your setups for safety.";
 
