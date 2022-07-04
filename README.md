@@ -23,7 +23,7 @@ To start, turn on the plugin and click on the equipment panel icon on the sideba
 
 ![Panel Icon](readme_images_and_gifs/panel_icon.png)
 
-To create a new setup, gear up for the activity you would like to save, and then click on the green plus button in the top right. It will prompt for a name, and then will take your current inventory and equipment and create a new setup.
+To create a new setup, gear up for the activity you would like to save, and then click on the green plus button at the top. It will prompt for a name, and then will take your current inventory and equipment and create a new setup.
 
 ![Green Plus Button](readme_images_and_gifs/create_new_setup.gif)
 
@@ -227,7 +227,7 @@ To export a section, right click a section in section view and select the approp
 
 ![Export Setup](readme_images_and_gifs/export.png)
 
-To import a setup, click on the green import button in the top right. It will prompt for a setup. Paste the setup and confirm.The new setup will be added to the bottom of the list of setups.
+To import a setup, click on the green import button at the top. It will prompt for a setup. Paste the setup and confirm.The new setup will be added to the bottom of the list of setups.
 
 The same can be done for sections, but you must be in section view to import a section.
 
