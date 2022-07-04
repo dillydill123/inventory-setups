@@ -640,9 +640,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		List<InventorySetup> favSetups = setupsToAdd.stream().filter(InventorySetup::isFavorite).collect(Collectors.toList());
 		setupsToAdd.removeAll(favSetups);
-		for (final InventorySetup favoritedInvSetup : favSetups)
+		for (int i = favSetups.size() - 1; i >= 0; i--)
 		{
-			setupsToAdd.add(0, favoritedInvSetup);
+			setupsToAdd.add(0, favSetups.get(i));
 		}
 	}
 
