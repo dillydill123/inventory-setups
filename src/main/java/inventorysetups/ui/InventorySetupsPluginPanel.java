@@ -105,13 +105,17 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private final JPanel updateNewsPanel; // Panel that is displayed for plugin update/news
 	private final JPanel setupDisplayPanel; // Panel that is displayed when a setup is selected
 	private final JPanel overviewPanel; // Panel that is displayed during overview, contains all setups
-	private JPanel northAnchoredPanel; // Anchored panel in the north that won't scroll
+	private final JPanel northAnchoredPanel; // Anchored panel in the north that won't scroll
 	private final JScrollPane contentWrapperPane; // Panel for wrapping any content so it can scroll
 
-	private final JPanel overviewTopRightButtonsPanel;
-	private final JPanel setupTopRightButtonsPanel;
+	// The top panel which will have the title and add/import and change views
+	private final JPanel overviewTopPanel;
 
-	private final JLabel title;
+	// The top panel when veiwing a setup
+	private final JPanel setupTopPanel;
+
+	private final JLabel mainTitle;
+	private final JLabel setupTitle;
 	private final JLabel helpButton;
 	private final JLabel compactViewMarker;
 	private final JLabel sortingMarker;
@@ -203,12 +207,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		this.updateNewsPanel = new InventorySetupsUpdateNewsPanel(plugin, this);
 		this.setupDisplayPanel = new JPanel();
 		this.overviewPanel = new JPanel();
+		this.overviewTopPanel = new JPanel();
 		this.overviewPanelScrollPosition = 0;
 
 		// setup the title
-		this.title = new JLabel();
-		title.setText(MAIN_TITLE);
-		title.setForeground(Color.WHITE);
+		this.mainTitle = new JLabel();
+		mainTitle.setText(MAIN_TITLE);
+		mainTitle.setForeground(Color.WHITE);
 
 		this.helpButton = new JLabel(HELP_ICON);
 		helpButton.setToolTipText("Click for help. This button can be hidden in the config.");
@@ -466,42 +471,45 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
-
-		this.overviewTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-		overviewTopRightButtonsPanel.add(sectionViewMarker);
-		overviewTopRightButtonsPanel.add(sortingMarker);
-		overviewTopRightButtonsPanel.add(compactViewMarker);
-		overviewTopRightButtonsPanel.add(importMarker);
-		overviewTopRightButtonsPanel.add(addMarker);
+		JPanel overViewMarkers = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		overViewMarkers.add(sectionViewMarker);
+		overViewMarkers.add(sortingMarker);
+		overViewMarkers.add(compactViewMarker);
+		overViewMarkers.add(importMarker);
+		overViewMarkers.add(addMarker);
 		sortingMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		compactViewMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		importMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		addMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 
-		this.setupTopRightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-		setupTopRightButtonsPanel.add(updateMarker);
-		setupTopRightButtonsPanel.add(backMarker);
+		final JPanel overviewTitleAndHelpButton = new JPanel();
+		overviewTitleAndHelpButton.setLayout(new BorderLayout());
+		overviewTitleAndHelpButton.add(mainTitle, BorderLayout.WEST);
+		overviewTitleAndHelpButton.add(helpButton, BorderLayout.EAST);
+
+		final JPanel setupViewMarkers = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		setupViewMarkers.add(updateMarker);
+		setupViewMarkers.add(backMarker);
 		backMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 
-		// the panel on the top right that holds the buttons
-		final JPanel markersPanel = new JPanel();
-		markersPanel.setLayout(new FlowLayout());
-		markersPanel.add(overviewTopRightButtonsPanel);
-		markersPanel.add(setupTopRightButtonsPanel);
-		overviewTopRightButtonsPanel.setVisible(true);
-		setupTopRightButtonsPanel.setVisible(false);
+		this.setupTitle = new JLabel();
+		setupTitle.setForeground(Color.WHITE);
+		final JPanel setupTitleAndButtons = new JPanel();
+		setupTitleAndButtons.setLayout(new BorderLayout());
+		setupTitleAndButtons.add(setupTitle, BorderLayout.WEST);
+		setupTitleAndButtons.add(setupViewMarkers, BorderLayout.EAST);
 
-		final JPanel titleAndHelpButton = new JPanel();
-		titleAndHelpButton.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-		titleAndHelpButton.add(title);
-		titleAndHelpButton.add(helpButton);
-		helpButton.setBorder(new EmptyBorder(0, 8, 0, 0));
+		this.setupTopPanel = new JPanel(new BorderLayout());
+		setupTopPanel.add(setupTitleAndButtons, BorderLayout.CENTER);
 
-		// the top panel that has the title and the buttons, and search bar
-		final JPanel titleAndMarkersPanel = new JPanel();
-		titleAndMarkersPanel.setLayout(new BorderLayout());
-		titleAndMarkersPanel.add(titleAndHelpButton, BorderLayout.WEST);
-		titleAndMarkersPanel.add(markersPanel, BorderLayout.EAST);
+		// the panel on the top that holds the title and buttons
+		overviewTopPanel.setLayout(new BorderLayout());
+		overviewTopPanel.add(overviewTitleAndHelpButton, BorderLayout.NORTH);
+		overviewTopPanel.add(Box.createRigidArea(new Dimension(0, 3)), BorderLayout.CENTER);
+		overviewTopPanel.add(overViewMarkers, BorderLayout.SOUTH);
+
+		overviewTopPanel.setVisible(true);
+		setupTopPanel.setVisible(false);
 
 		this.searchBar = new IconTextField();
 		searchBar.setIcon(IconTextField.Icon.SEARCH);
@@ -529,13 +537,18 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		});
 		searchBar.addClearListener(() -> redrawOverviewPanel(true));
 
+		final JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BorderLayout());
+		topPanel.add(overviewTopPanel, BorderLayout.NORTH);
+		topPanel.add(setupTopPanel, BorderLayout.SOUTH);
+
 		// the panel that stays at the top and doesn't scroll
 		// contains the title and buttons
 		this.northAnchoredPanel = new JPanel();
 		northAnchoredPanel.setLayout(new BoxLayout(northAnchoredPanel, BoxLayout.Y_AXIS));
 		northAnchoredPanel.setBorder(new EmptyBorder(0, 0, 10, 0));
-		northAnchoredPanel.add(titleAndMarkersPanel);
-		northAnchoredPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+		northAnchoredPanel.add(topPanel);
+		northAnchoredPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		northAnchoredPanel.add(searchBar);
 
 		// the panel that holds the inventory and equipment panels
@@ -653,14 +666,14 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		additionalFilteredItemsPanel.updatePanelWithSetupInformation(inventorySetup);
 		notesPanel.updatePanelWithSetupInformation(inventorySetup);
 
-		overviewTopRightButtonsPanel.setVisible(false);
-		setupTopRightButtonsPanel.setVisible(true);
+		overviewTopPanel.setVisible(false);
+		setupTopPanel.setVisible(true);
 
 		setupDisplayPanel.setVisible(true);
 		noSetupsPanel.setVisible(false);
 		overviewPanel.setVisible(false);
 
-		title.setText(inventorySetup.getName());
+		setupTitle.setText(inventorySetup.getName());
 		helpButton.setVisible(false);
 		searchBar.setVisible(false);
 
@@ -751,9 +764,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty() && !plugin.getConfig().sectionMode());
 		overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty() || plugin.getConfig().sectionMode());
 		setupDisplayPanel.setVisible(false);
-		overviewTopRightButtonsPanel.setVisible(true);
-		setupTopRightButtonsPanel.setVisible(false);
-		title.setText(MAIN_TITLE);
+		overviewTopPanel.setVisible(true);
+		setupTopPanel.setVisible(false);
 		helpButton.setVisible(!plugin.getConfig().hideButton());
 		searchBar.setVisible(true);
 
