@@ -78,6 +78,7 @@ public class InventorySetupsCache
 	@AllArgsConstructor
 	static public class SetupsSectionCounter
 	{
+		@Getter
 		InventorySetup setup;
 		@Getter
 		Integer count;

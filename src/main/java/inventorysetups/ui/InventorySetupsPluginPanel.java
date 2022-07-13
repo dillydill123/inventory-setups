@@ -915,8 +915,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				}
 			}
 
-			// This will add all sections, but it will only show the setups that match the search
-			// This has the benefit of showing empty sections
 			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section);
 
 			overviewPanel.add(sectionPanel, constraints);
@@ -925,25 +923,23 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 			constraints.gridy++;
 
-			// Only add the section if it's maximized
+			// Only add the setups if it's maximized
 			if (section.isMaximized())
 			{
-				for (final InventorySetup setup : setups)
+				for (final String name : section.getSetups())
 				{
-					if (!setupsInSection.contains(setup.getName()))
-					{
-						continue;
-					}
+					final InventorySetup setupInSection = plugin.getCache().getSetupsSectionCounter().get(name).getSetup();
+
 					final JPanel wrapperPanelForSetup = new JPanel();
 					wrapperPanelForSetup.setLayout(new BorderLayout());
 					InventorySetupsPanel newPanel = null;
 					if (plugin.getConfig().compactMode())
 					{
-						newPanel = new InventorySetupsCompactPanel(plugin, this, setup, section);
+						newPanel = new InventorySetupsCompactPanel(plugin, this, setupInSection, section);
 					}
 					else
 					{
-						newPanel = new InventorySetupsStandardPanel(plugin, this, setup, section);
+						newPanel = new InventorySetupsStandardPanel(plugin, this, setupInSection, section);
 					}
 					// Add an indentation to the setup
 					wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);

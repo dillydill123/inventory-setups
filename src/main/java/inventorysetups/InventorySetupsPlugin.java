@@ -775,6 +775,19 @@ public class InventorySetupsPlugin extends Plugin
 		updateConfig(false, true);
 	}
 
+	public void moveSetupWithinSection(final InventorySetupsSection section, int invIndex, int newPosition)
+	{
+		// Setup is already in the specified position or is out of position
+		if (isNewPositionInvalid(invIndex, newPosition, section.getSetups().size()))
+		{
+			return;
+		}
+		final String setupName = section.getSetups().remove(invIndex);
+		section.getSetups().add(newPosition, setupName);
+		panel.redrawOverviewPanel(false);
+		updateConfig(false, true);
+	}
+
 	private boolean isNewPositionInvalid(int oldPosition, int newPosition, int size)
 	{
 		return oldPosition == newPosition || newPosition < 0 || newPosition >= size;
