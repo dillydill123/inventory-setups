@@ -672,7 +672,7 @@ public class InventorySetupsPlugin extends Plugin
 				spellbook, false);
 
 			inventorySetups.add(invSetup);
-			cache.getInventorySetupNames().add(invSetup.getName());
+			cache.addSetup(invSetup);
 			updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
@@ -710,7 +710,7 @@ public class InventorySetupsPlugin extends Plugin
 		final String newName = name;
 		InventorySetupsSection newSection = new InventorySetupsSection(newName);
 		sections.add(newSection);
-		cache.getSectionNames().add(newSection.getName());
+		cache.addSection(newSection);
 
 		updateConfig(false, true);
 		SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -730,7 +730,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
-		cache.getSetupsWithoutSections().remove(setup.getName());
+		cache.addSetupToSection(setup.getName());
 		updateConfig(false, true);
 		panel.redrawOverviewPanel(false);
 	}
@@ -739,7 +739,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		for (final String setupName : setupNames)
 		{
-			cache.getSetupsWithoutSections().remove(setupName);
+			cache.addSetupToSection(setupName);
 			if (!section.getSetups().contains(setupName))
 			{
 				section.getSetups().add(setupName);
@@ -1499,7 +1499,7 @@ public class InventorySetupsPlugin extends Plugin
 				section.getSetups().remove(setup.getName());
 			}
 
-			cache.getInventorySetupNames().remove(setup.getName());
+			cache.removeSetup(setup);
 			inventorySetups.remove(setup);
 			panel.redrawOverviewPanel(false);
 			updateConfig(true, true);
@@ -1510,7 +1510,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (isDeletionConfirmed("Are you sure you want to permanently delete this section?", "Warning"))
 		{
-			cache.getSectionNames().remove(section.getName());
+			cache.removeSection(section);
 			sections.remove(section);
 			panel.redrawOverviewPanel(false);
 			updateConfig(false, true);
@@ -1522,11 +1522,7 @@ public class InventorySetupsPlugin extends Plugin
 		// No confirmation needed
 		section.getSetups().remove(setup.getName());
 
-		boolean anySectionContainsSetup = anySectionContainsSetup(setup.getName());
-		if (!anySectionContainsSetup)
-		{
-			cache.getSetupsWithoutSections().remove(setup.getName());
-		}
+		cache.removeSetupFromSection(setup);
 
 		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
@@ -1775,7 +1771,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			preProcessNewSetup(newSetup);
 			inventorySetups.add(newSetup);
-			cache.getInventorySetupNames().add(newSetup.getName());
+			cache.addSetup(newSetup);
 
 			updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -1824,7 +1820,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				preProcessNewSetup(inventorySetup);
 				inventorySetups.add(inventorySetup);
-				cache.getInventorySetupNames().add(inventorySetup.getName());
+				cache.addSetup(inventorySetup);
 			}
 			
 			updateConfig(true, false);
@@ -1875,7 +1871,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			preProcessNewSection(newSection);
 			sections.add(newSection);
-			cache.getSectionNames().add(newSection.getName());
+			cache.addSection(newSection);
 			updateConfig(false, true);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 		}
@@ -1922,7 +1918,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				preProcessNewSection(section);
 				sections.add(section);
-				cache.getSectionNames().add(section.getName());
+				cache.addSection(section);
 			}
 
 			updateConfig(false, true);
@@ -2043,7 +2039,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			final String newName = findNewName(section.getName(), cache.getSectionNames());
 			section.setName(newName);
-			cache.getSectionNames().add(newName);
+			cache.addSection(section);
 
 			// Remove any duplicates that exist
 			List<String> uniqueSetups = section.getSetups().stream().distinct().collect(Collectors.toList());
@@ -2058,15 +2054,11 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				// Remove setups which don't exist in a section
 				section.getSetups().removeIf(s -> !cache.getInventorySetupNames().contains(s));
-			}
 
-			// Find out which setups are "unassigned" to a section. This will help make the unassigned section
-			for (final InventorySetup setup : inventorySetups)
-			{
-				boolean anySectionContainsSetup = anySectionContainsSetup(setup.getName());
-				if (!anySectionContainsSetup)
+				// Count how many sections each setup is a part of
+				for (final String setupName : section.getSetups())
 				{
-					cache.getSetupsWithoutSections().add(setup.getName());
+					cache.addSetupToSection(setupName);
 				}
 			}
 
@@ -2094,18 +2086,6 @@ public class InventorySetupsPlugin extends Plugin
 				return new ArrayList<>();
 			}
 		}
-	}
-
-	private boolean anySectionContainsSetup(final String setupName)
-	{
-		for (final InventorySetupsSection section : sections)
-		{
-			if (section.getSetups().contains(setupName))
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public boolean setupContainsItem(final InventorySetup setup, int itemID)
@@ -2362,7 +2342,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			final String newName = findNewName(setup.getName(), cache.getInventorySetupNames());
 			setup.setName(newName);
-			cache.getInventorySetupNames().add(newName);
+			cache.addSetup(setup);
 		}
 
 	}
@@ -2370,8 +2350,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void updateSetupName(final InventorySetup setup, String newName)
 	{
 		final String originalName = setup.getName();
-		cache.getInventorySetupNames().remove(originalName);
-		cache.getInventorySetupNames().add(newName);
+		cache.updateSetupName(setup, newName);
 		setup.setName(newName);
 
 		for (final InventorySetupsSection section : sections)
@@ -2393,9 +2372,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void updateSectionName(final InventorySetupsSection section, String newName)
 	{
+		cache.updateSectionName(section, newName);
 		section.setName(newName);
-		cache.getSectionNames().remove(section.getName());
-		cache.getSectionNames().add(newName);
 		// config will already be updated by caller so no need to update it here
 	}
 
