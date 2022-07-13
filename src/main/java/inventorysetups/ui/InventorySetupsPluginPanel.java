@@ -897,8 +897,23 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private void layoutSections(final List<InventorySetup> setups, final GridBagConstraints constraints)
 	{
+		Set<String> setupNamesToBeIncluded = setups.stream().map(InventorySetup::getName).collect(Collectors.toSet());
+
 		for (final InventorySetupsSection section : plugin.getSections())
 		{
+			// For quick look up
+			Set<String> setupsInSection = new HashSet<>(section.getSetups());
+
+			// If the search bar is not empty, do not to show empty sections
+			if (!searchBar.getText().isEmpty())
+			{
+				Set<String> intersection = new HashSet<>(setupsInSection);
+				intersection.retainAll(setupNamesToBeIncluded);
+				if (intersection.isEmpty())
+				{
+					continue;
+				}
+			}
 
 			// This will add all sections, but it will only show the setups that match the search
 			// This has the benefit of showing empty sections
@@ -913,10 +928,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			// Only add the section if it's maximized
 			if (section.isMaximized())
 			{
-
-				// For quick look up
-				Set<String> setupsInSection = new HashSet<>(section.getSetups());
-
 				for (final InventorySetup setup : setups)
 				{
 					if (!setupsInSection.contains(setup.getName()))
@@ -947,9 +958,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 				constraints.gridy++;
-
 			}
-
 		}
 	}
 
