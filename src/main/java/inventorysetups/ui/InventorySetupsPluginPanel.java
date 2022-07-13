@@ -926,36 +926,56 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			// Only add the setups if it's maximized
 			if (section.isMaximized())
 			{
-				for (final String name : section.getSetups())
+				// If it's the default sorting mode (i.e., no sorting mode, use the order of setups in the section
+				// Else use the order of the passed in setups, as they will be sorted according to the sorting mode
+				if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.DEFAULT)
 				{
-					final InventorySetup setupInSection = plugin.getCache().getSetupsSectionCounter().get(name).getSetup();
-
-					final JPanel wrapperPanelForSetup = new JPanel();
-					wrapperPanelForSetup.setLayout(new BorderLayout());
-					InventorySetupsPanel newPanel = null;
-					if (plugin.getConfig().compactMode())
+					for (final String name : section.getSetups())
 					{
-						newPanel = new InventorySetupsCompactPanel(plugin, this, setupInSection, section);
+						final InventorySetup setupInSection = plugin.getCache().getSetupsSectionCounter().get(name).getSetup();
+						createSetupPanelForSection(setupInSection, section, constraints);
 					}
-					else
+				}
+				else
+				{
+					for (final InventorySetup setup : setups)
 					{
-						newPanel = new InventorySetupsStandardPanel(plugin, this, setupInSection, section);
+						if (!setupsInSection.contains(setup.getName()))
+						{
+							continue;
+						}
+						createSetupPanelForSection(setup, section, constraints);
 					}
-					// Add an indentation to the setup
-					wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
-					wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
-
-					overviewPanel.add(wrapperPanelForSetup, constraints);
-					constraints.gridy++;
-
-					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-					constraints.gridy++;
 				}
 
 				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 				constraints.gridy++;
 			}
 		}
+	}
+
+	private void createSetupPanelForSection(final InventorySetup setupInSection, final InventorySetupsSection section, final GridBagConstraints constraints)
+	{
+		final JPanel wrapperPanelForSetup = new JPanel();
+		wrapperPanelForSetup.setLayout(new BorderLayout());
+		InventorySetupsPanel newPanel = null;
+		if (plugin.getConfig().compactMode())
+		{
+			newPanel = new InventorySetupsCompactPanel(plugin, this, setupInSection, section);
+		}
+		else
+		{
+			newPanel = new InventorySetupsStandardPanel(plugin, this, setupInSection, section);
+		}
+		// Add an indentation to the setup
+		wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
+		wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
+
+		overviewPanel.add(wrapperPanelForSetup, constraints);
+		constraints.gridy++;
+
+		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+		constraints.gridy++;
 	}
 
 }
