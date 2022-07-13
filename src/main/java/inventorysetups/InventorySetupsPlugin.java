@@ -730,6 +730,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
+		cache.getSetupsWithoutSections().remove(setup.getName());
 		updateConfig(false, true);
 		panel.redrawOverviewPanel(false);
 	}
@@ -738,6 +739,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		for (final String setupName : setupNames)
 		{
+			cache.getSetupsWithoutSections().remove(setupName);
 			if (!section.getSetups().contains(setupName))
 			{
 				section.getSetups().add(setupName);
@@ -1519,6 +1521,13 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		// No confirmation needed
 		section.getSetups().remove(setup.getName());
+
+		boolean anySectionContainsSetup = anySectionContainsSetup(setup.getName());
+		if (!anySectionContainsSetup)
+		{
+			cache.getSetupsWithoutSections().remove(setup.getName());
+		}
+
 		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
 	}
@@ -2045,11 +2054,20 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			processSetupsFromConfig();
 
-			// Remove setups that don't exist in each section
 			for (final InventorySetupsSection section : sections)
 			{
 				// Remove setups which don't exist in a section
 				section.getSetups().removeIf(s -> !cache.getInventorySetupNames().contains(s));
+			}
+
+			// Find out which setups are "unassigned" to a section. This will help make the unassigned section
+			for (final InventorySetup setup : inventorySetups)
+			{
+				boolean anySectionContainsSetup = anySectionContainsSetup(setup.getName());
+				if (!anySectionContainsSetup)
+				{
+					cache.getSetupsWithoutSections().add(setup.getName());
+				}
 			}
 
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
@@ -2076,6 +2094,18 @@ public class InventorySetupsPlugin extends Plugin
 				return new ArrayList<>();
 			}
 		}
+	}
+
+	private boolean anySectionContainsSetup(final String setupName)
+	{
+		for (final InventorySetupsSection section : sections)
+		{
+			if (section.getSetups().contains(setupName))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean setupContainsItem(final InventorySetup setup, int itemID)
