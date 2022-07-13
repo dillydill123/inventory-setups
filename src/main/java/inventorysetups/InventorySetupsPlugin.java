@@ -138,6 +138,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String CONFIG_KEY_VERSION_STR = "version";
+	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
@@ -337,7 +338,8 @@ public class InventorySetupsPlugin extends Plugin
 		if (event.getGroup().equals(CONFIG_GROUP))
 		{
 			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
-				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
+				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
+				event.getKey().equals(CONFIG_KEY_UNASSIGNED_MAXIMIZED))
 			{
 				panel.redrawOverviewPanel(false);
 			}
@@ -526,9 +528,23 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public void switchViews(final String mode, boolean on)
+	public void setConfigValue(final String key, boolean on)
 	{
-		configManager.setConfiguration(CONFIG_GROUP, mode, on);
+		configManager.setConfiguration(CONFIG_GROUP, key, on);
+	}
+
+	public boolean getBooleanConfigValue(final String key)
+	{
+		try
+		{
+			String value = configManager.getConfiguration(CONFIG_GROUP, key);
+			return Boolean.parseBoolean(value);
+		}
+		catch (Exception e)
+		{
+			log.error("Couldn't retrieve config value with key " + key, e);
+			return false;
+		}
 	}
 
 	public void toggleAlphabeticalMode(InventorySetupsSortingID mode)

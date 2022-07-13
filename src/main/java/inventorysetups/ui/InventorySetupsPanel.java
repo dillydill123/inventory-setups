@@ -46,17 +46,30 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 
 	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section)
 	{
+		this(plugin, panel, invSetup, section, true);
+	}
+
+	InventorySetupsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section, boolean allowEditable)
+	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.inventorySetup = invSetup;
 		this.section = section;
-		this.popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Inventory Setup", invSetup);
+
+		if (allowEditable)
+		{
+			this.popupMenu = new InventorySetupsMoveMenu<>(plugin, panel, this, "Inventory Setup", invSetup);
+		}
+		else
+		{
+			this.popupMenu = new JPopupMenu();
+		}
 
 		JMenuItem addToSection = new JMenuItem("Add Setup to Sections..");
 		popupMenu.add(addToSection);
 
 		// If the section is not null, then add a menu to remove this setup from that section
-		if (this.section != null)
+		if (this.section != null && allowEditable)
 		{
 			JMenuItem removeFromSection = new JMenuItem("Remove from section");
 			removeFromSection.addActionListener(e ->

@@ -26,6 +26,7 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_UNASSIGNED_MAXIMIZED;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsValidName;
 import java.awt.BorderLayout;
@@ -77,6 +78,11 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section)
 	{
+		this(plugin, panel, section, true);
+	}
+
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, boolean allowEditable)
+	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.section = section;
@@ -94,9 +100,17 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					section.setMaximized(!section.isMaximized());
-					plugin.updateConfig(false, true);
-					panel.redrawOverviewPanel(false);
+					if (allowEditable)
+					{
+						section.setMaximized(!section.isMaximized());
+						plugin.updateConfig(false, true);
+						panel.redrawOverviewPanel(false);
+					}
+					else
+					{
+						// This is for the unassigned section.
+						plugin.setConfigValue(CONFIG_KEY_UNASSIGNED_MAXIMIZED, !section.isMaximized());
+					}
 				}
 			}
 
@@ -148,7 +162,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		final Color nameWrapperColor = new Color(20, 20, 20);
 		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section,
 																					plugin, panel, this,
-																					popupMenu, MAX_SETUP_NAME_LENGTH, nameWrapperColor);
+																					popupMenu, MAX_SETUP_NAME_LENGTH,
+																					nameWrapperColor, allowEditable);
 		final JPanel westNameActions = new JPanel(new BorderLayout());
 		westNameActions.setBackground(nameWrapperColor);
 		westNameActions.add(Box.createRigidArea(new Dimension(6, 0)), BorderLayout.WEST);
@@ -161,7 +176,12 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		nameWrapper.setLayout(new BorderLayout());
 		nameWrapper.add(nameActions, BorderLayout.CENTER);
 
-		nameWrapper.setComponentPopupMenu(popupMenu);
+		// If we are in unassigned mode, don't allow the user to edit with the right click pop menu
+		if (allowEditable)
+		{
+			nameWrapper.setComponentPopupMenu(popupMenu);
+		}
+
 		add(nameWrapper, BorderLayout.NORTH);
 
 	}

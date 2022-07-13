@@ -46,7 +46,12 @@ public class InventorySetupsCompactPanel extends InventorySetupsPanel
 
 	InventorySetupsCompactPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section)
 	{
-		super(plugin, panel, invSetup, section);
+		this(plugin, panel, invSetup, section, true);
+	}
+
+	InventorySetupsCompactPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section, boolean allowEditable)
+	{
+		super(plugin, panel, invSetup, section, allowEditable);
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
