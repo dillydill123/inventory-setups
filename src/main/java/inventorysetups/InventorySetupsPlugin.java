@@ -726,11 +726,11 @@ public class InventorySetupsPlugin extends Plugin
 			// Don't add the setup if it's already part of a section
 			if (!section.getSetups().contains(setup.getName()))
 			{
+				cache.addSetupToSection(setup.getName());
 				section.getSetups().add(setup.getName());
 			}
 		}
 
-		cache.addSetupToSection(setup.getName());
 		updateConfig(false, true);
 		panel.redrawOverviewPanel(false);
 	}
