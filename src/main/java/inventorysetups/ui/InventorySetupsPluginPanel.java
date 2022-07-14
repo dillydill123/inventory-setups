@@ -393,6 +393,22 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
+		// Add right click menu to addmarker for convenience
+		final JPopupMenu addMarkerMenu = new JPopupMenu();
+		final JMenuItem addMarkerAddNewSetup = new JMenuItem("Add new setup..");
+		final JMenuItem addMarkerAddNewSection = new JMenuItem("Add new section..");
+		addMarkerMenu.add(addMarkerAddNewSetup);
+		addMarkerMenu.add(addMarkerAddNewSection);
+		addMarkerAddNewSetup.addActionListener(e ->
+		{
+			plugin.addInventorySetup();
+		});
+		addMarkerAddNewSection.addActionListener(e ->
+		{
+			plugin.addSection();
+		});
+		addMarker.setComponentPopupMenu(addMarkerMenu);
+
 		this.updateMarker = new JLabel(UPDATE_ICON);
 		updateMarker.setToolTipText("Update setup with current inventory and equipment");
 		updateMarker.addMouseListener(new MouseAdapter()
