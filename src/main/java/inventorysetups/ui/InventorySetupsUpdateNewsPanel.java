@@ -8,7 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
-import javax.swing.SwingConstants;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.LinkBrowser;
@@ -18,8 +17,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 import static inventorysetups.InventorySetupsPlugin.SUGGESTION_LINK;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
@@ -117,10 +114,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Sections are here! Sections are a new way to organize your setups. Visit the guide for more info.\n\n" +
-								"Moved buttons on top panel to a second row because the help button was colliding with the section button.\n\n" +
-								"Fixed bug where favorites where showing up in reverse order.\n\n" +
-								"This update is larger than most, so it is highly recommended you mass export your setups for safety.";
+		String updateText =     "Fixed bug where moving setups in a section was adjusting the global position instead of the position within a section.\n\n" +
+								"Added an uneditable \"Unassigned\" section that will appear at the bottom in section view and will contain all setups that aren't assigned to a section. You can still add these setups to sections by right clicking them.\n\n" +
+								"When searching in section mode, section headers will not appear anymore if they don't have any matching setups.\n\n" +
+								"Added a right click menu with options to add a new setup or section to the plus button.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
