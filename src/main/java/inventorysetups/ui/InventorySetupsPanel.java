@@ -82,6 +82,15 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 
 		addToSection.addActionListener(e ->
 		{
+			if (plugin.getSections().isEmpty())
+			{
+				JOptionPane.showMessageDialog(panel,
+					"You must create a section first",
+					"No Sections to Add Setup To",
+					JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+
 			final String[] sectionNames = plugin.getSections().stream().map(InventorySetupsSection::getName).toArray(String[]::new);
 			final String message = "Select sections to add this setup to";
 			final String title = "Select Sections";
