@@ -445,7 +445,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 	public boolean isNameValid(final String name)
 	{
 		return !name.isEmpty() &&
-				!plugin.getCache().getInventorySetupNames().contains(name) &&
+				!plugin.getCache().getInventorySetupNames().containsKey(name) &&
 				!inventorySetup.getName().equals(name);
 	}
 

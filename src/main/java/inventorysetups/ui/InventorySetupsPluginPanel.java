@@ -948,7 +948,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 						{
 							continue;
 						}
-						final InventorySetup setupInSection = plugin.getCache().getSetupsSectionCounter().get(name).getSetup();
+						final InventorySetup setupInSection = plugin.getCache().getInventorySetupNames().get(name);
 						createSetupPanelForSection(setupInSection, section, constraints, true);
 					}
 				}
@@ -1010,7 +1010,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		boolean unassignedSetupExists = false;
 		for (final InventorySetup setup : setups)
 		{
-			if (plugin.getCache().getSetupsSectionCounter().get(setup.getName()).getCount() == 0)
+			if (plugin.getCache().getSetupSectionsMap().get(setup.getName()).size() == 0)
 			{
 				unassignedSetupExists = true;
 				unassignedSection.getSetups().add(setup.getName());
@@ -1039,7 +1039,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		for (final String setupName : unassignedSection.getSetups())
 		{
-			final InventorySetup setup = plugin.getCache().getSetupsSectionCounter().get(setupName).getSetup();
+			final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
 			createSetupPanelForSection(setup, unassignedSection, constraints, false);
 		}
 

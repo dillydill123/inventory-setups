@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 // Class to assist with speeding up operations by caching names when the config is loaded
@@ -12,87 +11,105 @@ public class InventorySetupsCache
 {
 	public InventorySetupsCache()
 	{
-		this.inventorySetupNames = new HashSet<>();
-		this.sectionNames = new HashSet<>();
-		this.setupsSectionCounter = new HashMap<>();
+		this.inventorySetupNames = new HashMap<>();
+		this.sectionNames = new HashMap<>();
+		this.setupSectionsMap = new HashMap<>();
+		this.sectionSetupsMap = new HashMap<>();
 	}
 
 	public void addSetup(final InventorySetup setup)
 	{
-		inventorySetupNames.add(setup.getName());
-		setupsSectionCounter.put(setup.getName(), new SetupsSectionCounter(setup, 0));
+		inventorySetupNames.put(setup.getName(), setup);
+		setupSectionsMap.put(setup.getName(), new HashMap<>());
 	}
 
 	public void addSection(final InventorySetupsSection section)
 	{
-		sectionNames.add(section.getName());
+		sectionNames.put(section.getName(), section);
+		sectionSetupsMap.put(section.getName(), new HashMap<>());
 	}
 
 	public void updateSetupName(final InventorySetup setup, final String newName)
 	{
 		inventorySetupNames.remove(setup.getName());
-		inventorySetupNames.add(newName);
+		inventorySetupNames.put(newName, setup);
+
+		// Update the setup in each section -> setups map
+		for (final String sectionName : sectionSetupsMap.keySet())
+		{
+			sectionSetupsMap.get(sectionName).remove(setup.getName());
+			sectionSetupsMap.get(sectionName).put(newName, setup);
+		}
 
 		// Update the key with the new name
-		setupsSectionCounter.put(newName, setupsSectionCounter.remove(setup.getName()));
+		setupSectionsMap.put(newName, setupSectionsMap.remove(setup.getName()));
 	}
 
 	public void updateSectionName(final InventorySetupsSection section, final String newName)
 	{
 		sectionNames.remove(section.getName());
-		sectionNames.add(newName);
+		sectionNames.put(newName, section);
+
+		// Update the section in each setup -> section map
+		for (final String setupName : setupSectionsMap.keySet())
+		{
+			setupSectionsMap.get(setupName).remove(section.getName());
+			setupSectionsMap.get(setupName).put(newName, section);
+		}
+
+		// Update the key with the new name
+		sectionSetupsMap.put(newName, sectionSetupsMap.remove(section.getName()));
 	}
 
 	public void removeSetup(final InventorySetup setup)
 	{
 		inventorySetupNames.remove(setup.getName());
-		setupsSectionCounter.remove(setup.getName());
+		setupSectionsMap.remove(setup.getName());
+
+		// Remove the setup from each section set map
+		for (final String sectionName : sectionSetupsMap.keySet())
+		{
+			sectionSetupsMap.get(sectionName).remove(setup.getName());
+		}
 	}
 
 	public void removeSection(final InventorySetupsSection section)
 	{
 		sectionNames.remove(section.getName());
+		sectionSetupsMap.remove(section.getName());
 		for (final String setupName : section.getSetups())
 		{
-			setupsSectionCounter.get(setupName).decreaseCount();
+			setupSectionsMap.get(setupName).remove(section.getName());
 		}
 	}
 
-	public void addSetupToSection(final String setupName)
+	public void addSetupToSection(final InventorySetupsSection section, final InventorySetup setup)
 	{
-		setupsSectionCounter.get(setupName).increaseCount();
+		setupSectionsMap.get(setup.getName()).put(section.getName(), section);
+		sectionSetupsMap.get(section.getName()).put(setup.getName(), setup);
 	}
 
-	public void removeSetupFromSection(final InventorySetup setup)
+	public void removeSetupFromSection(final InventorySetupsSection section, final InventorySetup setup)
 	{
-		setupsSectionCounter.get(setup.getName()).decreaseCount();
+		setupSectionsMap.get(setup.getName()).remove(section.getName());
+		sectionSetupsMap.get(section.getName()).remove(setup.getName());
 	}
 
-
+	// Mapping from inventory setup name -> inventory setup object
 	@Getter
-	private final Set<String> inventorySetupNames;
+	private final Map<String, InventorySetup> inventorySetupNames;
 
+	// Mapping from section name -> section object
 	@Getter
-	private final Set<String> sectionNames;
+	private final Map<String, InventorySetupsSection> sectionNames;
 
-	@AllArgsConstructor
-	static public class SetupsSectionCounter
-	{
-		@Getter
-		InventorySetup setup;
-		@Getter
-		Integer count;
-
-		public void increaseCount()
-		{
-			count++;
-		}
-		public void decreaseCount()
-		{
-			count--;
-		}
-	};
-
+	// Mapping from setup name -> Map of name to section for each section the setup is a part of
+	// Useful for determining if it should be added to the "unassigned" section
 	@Getter
-	private final Map<String, SetupsSectionCounter> setupsSectionCounter;
+	private final Map<String, Map<String, InventorySetupsSection>> setupSectionsMap;
+
+	// Mapping from section -> Map of name to setup for each setup that is part of the section
+	// Useful for determining the intersection of setups to display and setups in a section
+	@Getter
+	private final Map<String, Map<String, InventorySetup>> sectionSetupsMap;
 }

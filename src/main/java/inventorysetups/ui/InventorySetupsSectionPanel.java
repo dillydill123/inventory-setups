@@ -190,7 +190,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	public boolean isNameValid(final String name)
 	{
 		return !name.isEmpty() &&
-				!plugin.getCache().getSectionNames().contains(name) &&
+				!plugin.getCache().getSectionNames().containsKey(name) &&
 				!section.getName().equals(name);
 	}
 

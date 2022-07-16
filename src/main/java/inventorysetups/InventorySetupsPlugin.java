@@ -646,7 +646,7 @@ public class InventorySetupsPlugin extends Plugin
 			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
 		}
 
-		if (cache.getInventorySetupNames().contains(name))
+		if (cache.getInventorySetupNames().containsKey(name))
 		{
 			JOptionPane.showMessageDialog(panel,
 					"A setup with the name " + name + " already exists",
@@ -714,7 +714,7 @@ public class InventorySetupsPlugin extends Plugin
 			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
 		}
 
-		if (cache.getSectionNames().contains(name))
+		if (cache.getSectionNames().containsKey(name))
 		{
 			JOptionPane.showMessageDialog(panel,
 					"A section with the name " + name + " already exists",
@@ -742,7 +742,7 @@ public class InventorySetupsPlugin extends Plugin
 			// Don't add the setup if it's already part of a section
 			if (!section.getSetups().contains(setup.getName()))
 			{
-				cache.addSetupToSection(setup.getName());
+				cache.addSetupToSection(section, setup);
 				section.getSetups().add(setup.getName());
 			}
 		}
@@ -755,7 +755,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		for (final String setupName : setupNames)
 		{
-			cache.addSetupToSection(setupName);
+			cache.addSetupToSection(section, cache.getInventorySetupNames().get(setupName));
 			if (!section.getSetups().contains(setupName))
 			{
 				section.getSetups().add(setupName);
@@ -1551,7 +1551,7 @@ public class InventorySetupsPlugin extends Plugin
 		// No confirmation needed
 		section.getSetups().remove(setup.getName());
 
-		cache.removeSetupFromSection(setup);
+		cache.removeSetupFromSection(section, setup);
 
 		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
@@ -1971,20 +1971,20 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void preProcessNewSection(final InventorySetupsSection newSection)
 	{
-		final String newName = findNewName(newSection.getName(), cache.getSectionNames());
+		final String newName = findNewName(newSection.getName(), cache.getSectionNames().keySet());
 		newSection.setName(newName);
 
 		// Remove any duplicates that came in when importing
 		newSection.setSetups(newSection.getSetups().stream().distinct().collect(Collectors.toList()));
 
 		// Remove setups which don't exist
-		newSection.getSetups().removeIf(s -> !cache.getInventorySetupNames().contains(s));
+		newSection.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
 
 	}
 
 	private void preProcessNewSetup(final InventorySetup newSetup)
 	{
-		final String newName = findNewName(newSetup.getName(), cache.getInventorySetupNames());
+		final String newName = findNewName(newSetup.getName(), cache.getInventorySetupNames().keySet());
 		newSetup.setName(newName);
 	}
 
@@ -2066,7 +2066,7 @@ public class InventorySetupsPlugin extends Plugin
 		// Fix names of setups from config if there are duplicate names
 		for (final InventorySetupsSection section : sections)
 		{
-			final String newName = findNewName(section.getName(), cache.getSectionNames());
+			final String newName = findNewName(section.getName(), cache.getSectionNames().keySet());
 			section.setName(newName);
 			cache.addSection(section);
 
@@ -2082,12 +2082,12 @@ public class InventorySetupsPlugin extends Plugin
 			for (final InventorySetupsSection section : sections)
 			{
 				// Remove setups which don't exist in a section
-				section.getSetups().removeIf(s -> !cache.getInventorySetupNames().contains(s));
+				section.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
 
 				// Count how many sections each setup is a part of
 				for (final String setupName : section.getSetups())
 				{
-					cache.addSetupToSection(setupName);
+					cache.addSetupToSection(section, cache.getInventorySetupNames().get(setupName));
 				}
 			}
 
@@ -2369,7 +2369,7 @@ public class InventorySetupsPlugin extends Plugin
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 
-			final String newName = findNewName(setup.getName(), cache.getInventorySetupNames());
+			final String newName = findNewName(setup.getName(), cache.getInventorySetupNames().keySet());
 			setup.setName(newName);
 			cache.addSetup(setup);
 		}
