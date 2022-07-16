@@ -919,8 +919,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		for (final InventorySetupsSection section : plugin.getSections())
 		{
 			// For quick look up
-			Set<String> setupsInSection = new HashSet<>(section.getSetups());
-
+			Set<String> setupsInSection = plugin.getCache().getSectionSetupsMap().get(section.getName()).keySet();
 			if (sectionShouldBeHidden(setupNamesToBeIncluded, setupsInSection))
 			{
 				continue;
@@ -1005,21 +1004,18 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		// For quick look up
 		Set<String> setupsInSection = new HashSet<>();
-
 		// Always output the unassigned setups in the defined order of the provided setups
-		boolean unassignedSetupExists = false;
 		for (final InventorySetup setup : setups)
 		{
 			if (plugin.getCache().getSetupSectionsMap().get(setup.getName()).size() == 0)
 			{
-				unassignedSetupExists = true;
 				unassignedSection.getSetups().add(setup.getName());
 				setupsInSection.add(setup.getName());
 			}
 		}
 
 		// don't show the unassigned section if there are no unassigned setups
-		if (!unassignedSetupExists || sectionShouldBeHidden(setupNamesToBeIncluded, setupsInSection))
+		if (unassignedSection.getSetups().isEmpty() || sectionShouldBeHidden(setupNamesToBeIncluded, setupsInSection))
 		{
 			return;
 		}
