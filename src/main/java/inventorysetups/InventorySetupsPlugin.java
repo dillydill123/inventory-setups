@@ -1428,6 +1428,12 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 		{
+			// Empty slot was selected to be toggled, don't do anything
+			if (slot.getIndexInSlot() >= slot.getParentSetup().getAdditionalFilteredItems().size())
+			{
+				return;
+			}
+
 			final Map<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
 			final int slotID = slot.getIndexInSlot();
 			int j = 0;
