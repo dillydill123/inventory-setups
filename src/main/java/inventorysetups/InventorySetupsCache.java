@@ -27,6 +27,13 @@ public class InventorySetupsCache
 	{
 		sectionNames.put(section.getName(), section);
 		sectionSetupsMap.put(section.getName(), new HashMap<>());
+
+		// If we are importing a section, it can have setups already associated with it
+		// In this case, this function assumes the setups already exist
+		for (final String setupName : section.getSetups())
+		{
+			addSetupToSection(section, inventorySetupNames.get(setupName));
+		}
 	}
 
 	public void updateSetupName(final InventorySetup setup, final String newName)
@@ -72,7 +79,7 @@ public class InventorySetupsCache
 		inventorySetupNames.remove(setup.getName());
 		setupSectionsMap.remove(setup.getName());
 
-		// Remove the setup from each section set map
+		// Remove the setup for each section in the section -> setups map
 		for (final String sectionName : sectionSetupsMap.keySet())
 		{
 			sectionSetupsMap.get(sectionName).remove(setup.getName());
@@ -83,6 +90,8 @@ public class InventorySetupsCache
 	{
 		sectionNames.remove(section.getName());
 		sectionSetupsMap.remove(section.getName());
+
+		// Remove the section for each setup in the setup -> sections map
 		for (final String setupName : section.getSetups())
 		{
 			setupSectionsMap.get(setupName).remove(section.getName());
