@@ -116,7 +116,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 		String updateText =     "Fixed bug where moving setups in a section was adjusting the global position instead of the position within a section.\n\n" +
 								"Added an uneditable \"Unassigned\" section that will appear at the bottom in section view and will contain all setups that aren't assigned to a section. You can still add these setups to sections by right clicking them.\n\n" +
-								"When searching in section mode, section headers will not appear anymore if they don't have any matching setups.\n\n" +
+								"When searching in section mode, section headers will not appear anymore if they don't have any matching setups. If a section does have a matching setup, it will be maximized during the search\n\n" +
 								"Added a right click menu with options to add a new setup or section to the plus button.";
 
 		JTextArea textArea = new JTextArea(2, 20);

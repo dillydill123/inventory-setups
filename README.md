@@ -205,6 +205,8 @@ Once you have setups added to a section, you can view them by clicking the maxim
 
 Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many different sections as you'd like.
 
+You can use the search bar to search for setups while in section mode. Any sections that don't have a matching setup will be hidden, and sections which do have a matching setup will automatically be maximized.
+
 #### Remove Setups from a Section
 
 ![Remove from Section](readme_images_and_gifs/remove_from_section.gif)
