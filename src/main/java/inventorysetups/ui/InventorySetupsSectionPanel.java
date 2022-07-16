@@ -62,6 +62,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	private static final ImageIcon MIN_MAX_SECTION_HOVER_ICON;
 	private static final ImageIcon NO_MIN_MAX_SECTION_ICON;
 	private static final ImageIcon NO_MIN_MAX_SECTION_HOVER_ICON;
+	private boolean forceMaximization;
 
 	static
 	{
@@ -76,16 +77,17 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(noMaxSectionHoverImg);
 	}
 
-	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section)
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, boolean forceMaximization)
 	{
-		this(plugin, panel, section, true);
+		this(plugin, panel, section, forceMaximization, true);
 	}
 
-	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, boolean allowEditable)
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, boolean forceMaximization, boolean allowEditable)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.section = section;
+		this.forceMaximization = forceMaximization;
 
 		this.setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -100,7 +102,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					if (allowEditable)
+					if (allowEditable && !forceMaximization)
 					{
 						section.setMaximized(!section.isMaximized());
 						plugin.updateConfig(false, true);
@@ -117,12 +119,22 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			@Override
 			public void mouseEntered(MouseEvent e)
 			{
+				if (forceMaximization)
+				{
+					return;
+				}
+
 				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_HOVER_ICON : NO_MIN_MAX_SECTION_HOVER_ICON);
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e)
 			{
+				if (forceMaximization)
+				{
+					return;
+				}
+
 				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
 			}
 		});
@@ -202,8 +214,16 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 	private void updateMinMaxLabel()
 	{
-		minMaxLabel.setToolTipText(section.isMaximized() ? "Minimize section" : "Maximize section");
-		minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
+		if (forceMaximization)
+		{
+			minMaxLabel.setToolTipText("");
+			minMaxLabel.setIcon(MIN_MAX_SECTION_ICON);
+		}
+		else
+		{
+			minMaxLabel.setToolTipText(section.isMaximized() ? "Minimize section" : "Maximize section");
+			minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
+		}
 	}
 
 	@Override

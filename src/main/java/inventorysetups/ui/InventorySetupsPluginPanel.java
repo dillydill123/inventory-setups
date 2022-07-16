@@ -925,7 +925,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				continue;
 			}
 
-			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section);
+			boolean forceMaximization = !searchBar.getText().isEmpty();
+			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, forceMaximization);
 
 			overviewPanel.add(sectionPanel, constraints);
 			constraints.gridy++;
@@ -933,8 +934,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 			constraints.gridy++;
 
-			// Only add the setups if it's maximized
-			if (section.isMaximized())
+			// Only add the setups if it's maximized. If we are searching, force maximization.
+			if (section.isMaximized() || forceMaximization)
 			{
 				// If it's the default sorting mode (i.e., no sorting mode, use the order of setups in the section
 				// Else use the order of the passed in setups, as they will be sorted according to the sorting mode
@@ -966,6 +967,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 				constraints.gridy++;
 			}
+
 		}
 
 		// Create the bottom unassigned section
@@ -1020,15 +1022,17 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			return;
 		}
 
-		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, false);
+		boolean forceMaximization = !searchBar.getText().isEmpty();
+
+		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, forceMaximization, false);
 		overviewPanel.add(sectionPanel, constraints);
 		constraints.gridy++;
 
 		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 		constraints.gridy++;
 
-		// If the section isn't maximized, don't show any setups
-		if (!unassignedSection.isMaximized())
+		// If the section isn't maximized, don't show any setups. If we are searching, force maximization
+		if (!unassignedSection.isMaximized() && !forceMaximization)
 		{
 			return;
 		}
