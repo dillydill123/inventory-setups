@@ -37,8 +37,11 @@ public class InventorySetupsCache
 		// Update the setup in each section -> setups map
 		for (final String sectionName : sectionSetupsMap.keySet())
 		{
-			sectionSetupsMap.get(sectionName).remove(setup.getName());
-			sectionSetupsMap.get(sectionName).put(newName, setup);
+			if (sectionSetupsMap.get(sectionName).containsKey(setup.getName()))
+			{
+				sectionSetupsMap.get(sectionName).remove(setup.getName());
+				sectionSetupsMap.get(sectionName).put(newName, setup);
+			}
 		}
 
 		// Update the key with the new name
@@ -53,8 +56,11 @@ public class InventorySetupsCache
 		// Update the section in each setup -> section map
 		for (final String setupName : setupSectionsMap.keySet())
 		{
-			setupSectionsMap.get(setupName).remove(section.getName());
-			setupSectionsMap.get(setupName).put(newName, section);
+			if (setupSectionsMap.get(setupName).containsKey(section.getName()))
+			{
+				setupSectionsMap.get(setupName).remove(section.getName());
+				setupSectionsMap.get(setupName).put(newName, section);
+			}
 		}
 
 		// Update the key with the new name
