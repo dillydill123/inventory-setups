@@ -43,6 +43,10 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 
 	private List<InventorySetupsSlot> ammoSlots;
 
+	private GridLayout gridLayout;
+
+	private List<Boolean> ammoSlotsAddedToPanel;
+
 	InventorySetupsAmmunitionPanel(ItemManager itemManager, InventorySetupsPlugin plugin, String captionText)
 	{
 		super(itemManager, plugin, captionText);
@@ -58,12 +62,14 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 	public void setupContainerPanel(JPanel containerSlotsPanel)
 	{
 		ammoSlots = new ArrayList<>();
+		ammoSlotsAddedToPanel = new ArrayList<>();
 		for (int i = 0; i < getSlotsCount(); i++)
 		{
 			ammoSlots.add(new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, getSlotId(), i));
+			ammoSlotsAddedToPanel.add(Boolean.TRUE);
 		}
 
-		final GridLayout gridLayout = new GridLayout(1, 4, 1, 1);
+		this.gridLayout = new GridLayout(1, 4, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
 		for (final InventorySetupsSlot slot : ammoSlots)
@@ -85,7 +91,8 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 	{
 		assert getContainer(inventorySetup) != null : "Container is null.";
 
-		assert currentContainer.size() == getSlotsCount() : "Incorrect size";
+		int slotsCount = getSlotsCount();
+		assert slotsCount == getSlotsCount() : "Incorrect size";
 
 		isHighlighted = true;
 
@@ -140,9 +147,28 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 		List<InventorySetupsItem> container = getContainer(setup);
 		if (container != null)
 		{
+			// grid layout is dumb, it won't center the panel if a slot is invisible, so we have to remove the slot instead...
+			// Make sure to set the columns as well.
+			gridLayout.setColumns(container.size());
 			for (int i = 0; i < ammoSlots.size(); i++)
 			{
-				super.setSlotImageAndText(ammoSlots.get(i), setup, container.get(i));
+				if (i >= container.size())
+				{
+					if (ammoSlotsAddedToPanel.get(i))
+					{
+						ammoSlotsAddedToPanel.set(i, Boolean.FALSE);
+						this.getContainerSlotsPanel().remove(ammoSlots.get(i));
+					}
+				}
+				else
+				{
+					if (!ammoSlotsAddedToPanel.get(i))
+					{
+						ammoSlotsAddedToPanel.set(i, Boolean.TRUE);
+						this.getContainerSlotsPanel().add(ammoSlots.get(i));
+					}
+					super.setSlotImageAndText(ammoSlots.get(i), setup, container.get(i));
+				}
 			}
 		}
 		else

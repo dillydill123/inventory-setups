@@ -27,6 +27,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsRunePouchType;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsVariationMapping;
 import java.awt.GridLayout;
@@ -110,19 +111,16 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			return;
 		}
 
-		boolean currInvHasRunePouch = false;
+		InventorySetupsRunePouchType rpType = InventorySetupsRunePouchType.NONE;
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			InventorySetupsItem currInvItem = currInventory.get(i);
-			if (!currInvHasRunePouch && InventorySetupsVariationMapping.map(currInvItem.getId()) == ItemID.RUNE_POUCH)
-			{
-				currInvHasRunePouch = true;
-			}
+			rpType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(currInvItem.getId()));
 			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
 
-		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
-		plugin.getClientThread().invokeLater(() -> handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal));
+		final InventorySetupsRunePouchType rpTypeFinal = rpType;
+		plugin.getClientThread().invokeLater(() -> handleRunePouchHighlighting(inventorySetup, rpTypeFinal));
 
 		boolean currInvHasBoltPouch = false;
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
@@ -169,16 +167,12 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		Map<Integer, List<Integer>> currentInventoryMapping = new HashMap<>();
 
 		// collect items in current inventory in the form of a Map -> List of stack sizes
-		boolean currInvHasRunePouch = false;
+		InventorySetupsRunePouchType runePouchType = InventorySetupsRunePouchType.NONE;
 		boolean currInvHasBoltPouch = false;
 		for (final InventorySetupsItem item : currInventory)
 		{
 			// Use fuzzy mapping
-			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.RUNE_POUCH)
-			{
-				currInvHasRunePouch = true;
-			}
-
+			runePouchType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(item.getId()));
 			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.BOLT_POUCH)
 			{
 				currInvHasBoltPouch = true;
@@ -240,10 +234,10 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			updateCurrentUnorderedSlot(savedItemId, inventorySetup, inventorySlots.get(i), savedItemFromInventory, currentItemListForSpecificId, currentInventoryMapping);
 		}
 
-		final boolean currInvHasRunePouchFinal = currInvHasRunePouch;
+		final InventorySetupsRunePouchType rpTypeFinal = runePouchType;
 		plugin.getClientThread().invokeLater(() ->
 		{
-			handleRunePouchHighlighting(inventorySetup, currInvHasRunePouchFinal);
+			handleRunePouchHighlighting(inventorySetup, rpTypeFinal);
 		});
 
 		final boolean currInvHasBoltPouchFinal = currInvHasBoltPouch;
@@ -320,15 +314,14 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		}
 	}
 
-	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, boolean doesCurrentInventoryHaveRunePouch)
+	private void handleRunePouchHighlighting(final InventorySetup inventorySetup, final InventorySetupsRunePouchType runePouchType)
 	{
 		if (inventorySetup.getRune_pouch() != null)
 		{
-
 			// attempt to highlight if rune pouch is available
-			if (doesCurrentInventoryHaveRunePouch)
+			if (runePouchType != InventorySetupsRunePouchType.NONE)
 			{
-				List<InventorySetupsItem> runePouchToCheck = plugin.getRunePouchData();
+				List<InventorySetupsItem> runePouchToCheck = plugin.getRunePouchData(runePouchType);
 				runePouchPanel.highlightSlots(runePouchToCheck, inventorySetup);
 			}
 			else // if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch

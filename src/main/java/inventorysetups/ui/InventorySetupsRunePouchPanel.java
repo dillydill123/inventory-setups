@@ -28,11 +28,21 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSlotID;
+
+import java.util.Arrays;
 import java.util.List;
+
+import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
 
 public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPanel
 {
+	// 23650 is what shows up when selecting a RunePouch from ChatBoxItemSearch, 27086 is likely lms
+	public static final List<Integer> RUNE_POUCH_IDS = Arrays.asList(ItemID.RUNE_POUCH, ItemID.RUNE_POUCH_L, ItemID.RUNE_POUCH_23650, ItemID.RUNE_POUCH_27086);
+
+	// TODO: Update IDs here
+	public static final List<Integer> RUNE_POUCH_ELIDINIS_IDS = Arrays.asList();
+
 	InventorySetupsRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Rune Pouch");
@@ -47,7 +57,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPane
 	@Override
 	protected int getSlotsCount()
 	{
-		return 3;
+		return 4;
 	}
 
 	@Override

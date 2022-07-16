@@ -152,9 +152,10 @@ public class InventorySetupsPersistentDataManager
 	{
 		for (final InventorySetup setup : inventorySetups)
 		{
-			if (setup.getRune_pouch() == null && plugin.containerContainsRunePouch(setup.getInventory()))
+			final InventorySetupsRunePouchType runePouchType = plugin.getRunePouchTypeFromContainer(setup.getInventory());
+			if (setup.getRune_pouch() == null && runePouchType != InventorySetupsRunePouchType.NONE)
 			{
-				setup.updateRunePouch(plugin.getRunePouchData());
+				setup.updateRunePouch(plugin.getRunePouchData(runePouchType));
 			}
 			if (setup.getBoltPouch() == null && plugin.containerContainsBoltPouch(setup.getInventory()))
 			{
