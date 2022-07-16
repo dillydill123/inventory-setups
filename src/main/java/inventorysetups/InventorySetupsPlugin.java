@@ -738,9 +738,9 @@ public class InventorySetupsPlugin extends Plugin
 		for (final String sectionName : sectionNames)
 		{
 			// Get the appropriate section
-			final InventorySetupsSection section = sections.stream().filter(s -> s.getName().equals(sectionName)).findFirst().get();
+			final InventorySetupsSection section = cache.getSectionNames().get(sectionName);
 			// Don't add the setup if it's already part of a section
-			if (!section.getSetups().contains(setup.getName()))
+			if (!cache.getSectionSetupsMap().get(sectionName).containsKey(setup.getName()))
 			{
 				cache.addSetupToSection(section, setup);
 				section.getSetups().add(setup.getName());
@@ -755,9 +755,9 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		for (final String setupName : setupNames)
 		{
-			cache.addSetupToSection(section, cache.getInventorySetupNames().get(setupName));
-			if (!section.getSetups().contains(setupName))
+			if (!cache.getSectionSetupsMap().get(section.getName()).containsKey(setupName))
 			{
+				cache.addSetupToSection(section, cache.getInventorySetupNames().get(setupName));
 				section.getSetups().add(setupName);
 			}
 		}
