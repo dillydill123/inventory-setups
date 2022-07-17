@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -139,6 +138,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String CONFIG_KEY_VERSION_STR = "version";
+	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
@@ -202,10 +202,7 @@ public class InventorySetupsPlugin extends Plugin
 	private List<InventorySetupsSection> sections;
 
 	@Getter
-	private Set<String> inventorySetupNames;
-
-	@Getter
-	private Set<String> sectionNames;
+	private InventorySetupsCache cache;
 
 	private NavigationButton navButton;
 
@@ -341,7 +338,8 @@ public class InventorySetupsPlugin extends Plugin
 		if (event.getGroup().equals(CONFIG_GROUP))
 		{
 			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
-				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON))
+				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
+				event.getKey().equals(CONFIG_KEY_UNASSIGNED_MAXIMIZED))
 			{
 				panel.redrawOverviewPanel(false);
 			}
@@ -530,9 +528,23 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public void switchViews(final String mode, boolean on)
+	public void setConfigValue(final String key, boolean on)
 	{
-		configManager.setConfiguration(CONFIG_GROUP, mode, on);
+		configManager.setConfiguration(CONFIG_GROUP, key, on);
+	}
+
+	public boolean getBooleanConfigValue(final String key)
+	{
+		try
+		{
+			String value = configManager.getConfiguration(CONFIG_GROUP, key);
+			return Boolean.parseBoolean(value);
+		}
+		catch (Exception e)
+		{
+			log.error("Couldn't retrieve config value with key " + key, e);
+			return false;
+		}
 	}
 
 	public void toggleAlphabeticalMode(InventorySetupsSortingID mode)
@@ -634,7 +646,7 @@ public class InventorySetupsPlugin extends Plugin
 			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
 		}
 
-		if (inventorySetupNames.contains(name))
+		if (cache.getInventorySetupNames().containsKey(name))
 		{
 			JOptionPane.showMessageDialog(panel,
 					"A setup with the name " + name + " already exists",
@@ -675,8 +687,8 @@ public class InventorySetupsPlugin extends Plugin
 				config.highlightUnorderedDifference(),
 				spellbook, false);
 
+			cache.addSetup(invSetup);
 			inventorySetups.add(invSetup);
-			inventorySetupNames.add(invSetup.getName());
 			updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
@@ -702,7 +714,7 @@ public class InventorySetupsPlugin extends Plugin
 			name = name.substring(0, MAX_SETUP_NAME_LENGTH);
 		}
 
-		if (sectionNames.contains(name))
+		if (cache.getSectionNames().containsKey(name))
 		{
 			JOptionPane.showMessageDialog(panel,
 					"A section with the name " + name + " already exists",
@@ -713,8 +725,8 @@ public class InventorySetupsPlugin extends Plugin
 
 		final String newName = name;
 		InventorySetupsSection newSection = new InventorySetupsSection(newName);
+		cache.addSection(newSection);
 		sections.add(newSection);
-		sectionNames.add(newSection.getName());
 
 		updateConfig(false, true);
 		SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -725,11 +737,11 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		for (final String sectionName : sectionNames)
 		{
-			// Get the appropriate section
-			final InventorySetupsSection section = sections.stream().filter(s -> s.getName().equals(sectionName)).findFirst().get();
-			// Don't add the setup if it's already part of a section
-			if (!section.getSetups().contains(setup.getName()))
+			// Don't add the setup if it's already part of this section
+			if (!cache.getSectionSetupsMap().get(sectionName).containsKey(setup.getName()))
 			{
+				final InventorySetupsSection section = cache.getSectionNames().get(sectionName);
+				cache.addSetupToSection(section, setup);
 				section.getSetups().add(setup.getName());
 			}
 		}
@@ -742,8 +754,11 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		for (final String setupName : setupNames)
 		{
-			if (!section.getSetups().contains(setupName))
+			// Don't add the setup if it's already part of this section
+			if (!cache.getSectionSetupsMap().get(section.getName()).containsKey(setupName))
 			{
+				final InventorySetup setup = cache.getInventorySetupNames().get(setupName);
+				cache.addSetupToSection(section, setup);
 				section.getSetups().add(setupName);
 			}
 		}
@@ -773,6 +788,19 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		InventorySetupsSection section = sections.remove(sectionIndex);
 		sections.add(newPosition, section);
+		panel.redrawOverviewPanel(false);
+		updateConfig(false, true);
+	}
+
+	public void moveSetupWithinSection(final InventorySetupsSection section, int invIndex, int newPosition)
+	{
+		// Setup is already in the specified position or is out of position
+		if (isNewPositionInvalid(invIndex, newPosition, section.getSetups().size()))
+		{
+			return;
+		}
+		final String setupName = section.getSetups().remove(invIndex);
+		section.getSetups().add(newPosition, setupName);
 		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
 	}
@@ -1400,6 +1428,12 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 		{
+			// Empty slot was selected to be toggled, don't do anything
+			if (slot.getIndexInSlot() >= slot.getParentSetup().getAdditionalFilteredItems().size())
+			{
+				return;
+			}
+
 			final Map<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
 			final int slotID = slot.getIndexInSlot();
 			int j = 0;
@@ -1498,10 +1532,12 @@ public class InventorySetupsPlugin extends Plugin
 			// Remove the setup from any sections which have it
 			for (final InventorySetupsSection section : sections)
 			{
-				section.getSetups().remove(setup.getName());
+				if (cache.getSectionSetupsMap().get(section.getName()).containsKey(setup.getName()))
+				{
+					section.getSetups().remove(setup.getName());
+				}
 			}
-
-			inventorySetupNames.remove(setup.getName());
+			cache.removeSetup(setup);
 			inventorySetups.remove(setup);
 			panel.redrawOverviewPanel(false);
 			updateConfig(true, true);
@@ -1512,7 +1548,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (isDeletionConfirmed("Are you sure you want to permanently delete this section?", "Warning"))
 		{
-			sectionNames.remove(section.getName());
+			cache.removeSection(section);
 			sections.remove(section);
 			panel.redrawOverviewPanel(false);
 			updateConfig(false, true);
@@ -1522,7 +1558,9 @@ public class InventorySetupsPlugin extends Plugin
 	public void removeInventorySetupFromSection(final InventorySetup setup, final InventorySetupsSection section)
 	{
 		// No confirmation needed
+		cache.removeSetupFromSection(section, setup);
 		section.getSetups().remove(setup.getName());
+
 		panel.redrawOverviewPanel(false);
 		updateConfig(false, true);
 	}
@@ -1769,8 +1807,8 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			preProcessNewSetup(newSetup);
+			cache.addSetup(newSetup);
 			inventorySetups.add(newSetup);
-			inventorySetupNames.add(newSetup.getName());
 
 			updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -1818,8 +1856,8 @@ public class InventorySetupsPlugin extends Plugin
 			for (final InventorySetup inventorySetup : newSetups)
 			{
 				preProcessNewSetup(inventorySetup);
+				cache.addSetup(inventorySetup);
 				inventorySetups.add(inventorySetup);
-				inventorySetupNames.add(inventorySetup.getName());
 			}
 			
 			updateConfig(true, false);
@@ -1869,8 +1907,9 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			preProcessNewSection(newSection);
+			cache.addSection(newSection);
 			sections.add(newSection);
-			sectionNames.add(newSection.getName());
+
 			updateConfig(false, true);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 		}
@@ -1916,8 +1955,8 @@ public class InventorySetupsPlugin extends Plugin
 			for (final InventorySetupsSection section : newSections)
 			{
 				preProcessNewSection(section);
+				cache.addSection(section);
 				sections.add(section);
-				sectionNames.add(section.getName());
 			}
 
 			updateConfig(false, true);
@@ -1941,20 +1980,20 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void preProcessNewSection(final InventorySetupsSection newSection)
 	{
-		final String newName = findNewName(newSection.getName(), sectionNames);
+		final String newName = findNewName(newSection.getName(), cache.getSectionNames().keySet());
 		newSection.setName(newName);
 
 		// Remove any duplicates that came in when importing
 		newSection.setSetups(newSection.getSetups().stream().distinct().collect(Collectors.toList()));
 
 		// Remove setups which don't exist
-		newSection.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
+		newSection.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
 
 	}
 
 	private void preProcessNewSetup(final InventorySetup newSetup)
 	{
-		final String newName = findNewName(newSetup.getName(), inventorySetupNames);
+		final String newName = findNewName(newSetup.getName(), cache.getInventorySetupNames().keySet());
 		newSetup.setName(newName);
 	}
 
@@ -2020,8 +2059,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void loadConfig()
 	{
-		inventorySetupNames = new HashSet<>();
-		sectionNames = new HashSet<>();
+		this.cache = new InventorySetupsCache();
 
 		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
 		{
@@ -2037,9 +2075,8 @@ public class InventorySetupsPlugin extends Plugin
 		// Fix names of setups from config if there are duplicate names
 		for (final InventorySetupsSection section : sections)
 		{
-			final String newName = findNewName(section.getName(), sectionNames);
+			final String newName = findNewName(section.getName(), cache.getSectionNames().keySet());
 			section.setName(newName);
-			sectionNames.add(newName);
 
 			// Remove any duplicates that exist
 			List<String> uniqueSetups = section.getSetups().stream().distinct().collect(Collectors.toList());
@@ -2048,13 +2085,13 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientThread.invokeLater(() ->
 		{
-			updateOldSetups();
+			processSetupsFromConfig();
 
-			// Remove setups that don't exist in each section
 			for (final InventorySetupsSection section : sections)
 			{
 				// Remove setups which don't exist in a section
-				section.getSetups().removeIf(s -> !inventorySetupNames.contains(s));
+				section.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
+				cache.addSection(section);
 			}
 
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
@@ -2314,7 +2351,7 @@ public class InventorySetupsPlugin extends Plugin
 		return quantity;
 	}
 
-	private void updateOldSetups()
+	private void processSetupsFromConfig()
 	{
 		for (final InventorySetup setup : inventorySetups)
 		{
@@ -2335,42 +2372,37 @@ public class InventorySetupsPlugin extends Plugin
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 
-			final String newName = findNewName(setup.getName(), inventorySetupNames);
+			final String newName = findNewName(setup.getName(), cache.getInventorySetupNames().keySet());
 			setup.setName(newName);
-			inventorySetupNames.add(newName);
+			cache.addSetup(setup);
 		}
 
 	}
 
-	public void updateSetupName(final InventorySetup setup, String newName)
+	public void updateSetupName(final InventorySetup setup, final String newName)
 	{
 		final String originalName = setup.getName();
-		inventorySetupNames.remove(originalName);
-		inventorySetupNames.add(newName);
-		setup.setName(newName);
-
 		for (final InventorySetupsSection section : sections)
 		{
-			final List<String> names = section.getSetups();
-			for (int i = 0; i < names.size(); i++)
+			if (cache.getSectionSetupsMap().get(section.getName()).containsKey(originalName))
 			{
-				if (names.get(i).equals(originalName))
-				{
-					names.set(i, newName);
-					// There should be no duplicates in a section so break here
-					break;
-				}
+				final List<String> names = section.getSetups();
+				int indexOf = names.indexOf(originalName);
+				names.set(indexOf, newName);
 			}
 		}
-
-		// config will already be updated by caller so need to update it here
+		// Make sure not to set the new name of the setup before allowing the cache to update
+		cache.updateSetupName(setup, newName);
+		setup.setName(newName);
+		// config will already be updated by caller so no need to update it here
 	}
 
-	public void updateSectionName(final InventorySetupsSection section, String newName)
+	public void updateSectionName(final InventorySetupsSection section, final String newName)
 	{
+		// Make sure not to set the new name of the section before allowing the cache to update
+		cache.updateSectionName(section, newName);
 		section.setName(newName);
-
-		// config will already be updated by caller so need to update it here
+		// config will already be updated by caller so no need to update it here
 	}
 
 	private String findNewName(String originalName, final Set<String> objects)

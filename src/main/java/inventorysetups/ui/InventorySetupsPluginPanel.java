@@ -30,6 +30,7 @@ import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_UNASSIGNED_MAXIMIZED;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsSlotID;
@@ -278,7 +279,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					plugin.switchViews(CONFIG_KEY_COMPACT_MODE, !plugin.getConfig().compactMode());
+					plugin.setConfigValue(CONFIG_KEY_COMPACT_MODE, !plugin.getConfig().compactMode());
 					updateCompactViewMarker();
 				}
 			}
@@ -392,6 +393,22 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
+		// Add right click menu to addmarker for convenience
+		final JPopupMenu addMarkerMenu = new JPopupMenu();
+		final JMenuItem addMarkerAddNewSetup = new JMenuItem("Add new setup..");
+		final JMenuItem addMarkerAddNewSection = new JMenuItem("Add new section..");
+		addMarkerMenu.add(addMarkerAddNewSetup);
+		addMarkerMenu.add(addMarkerAddNewSection);
+		addMarkerAddNewSetup.addActionListener(e ->
+		{
+			plugin.addInventorySetup();
+		});
+		addMarkerAddNewSection.addActionListener(e ->
+		{
+			plugin.addSection();
+		});
+		addMarker.setComponentPopupMenu(addMarkerMenu);
+
 		this.updateMarker = new JLabel(UPDATE_ICON);
 		updateMarker.setToolTipText("Update setup with current inventory and equipment");
 		updateMarker.addMouseListener(new MouseAdapter()
@@ -453,7 +470,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					plugin.switchViews(CONFIG_KEY_SECTION_MODE, !plugin.getConfig().sectionMode());
+					plugin.setConfigValue(CONFIG_KEY_SECTION_MODE, !plugin.getConfig().sectionMode());
 					updateSectionViewMarker();
 				}
 			}
@@ -897,12 +914,19 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private void layoutSections(final List<InventorySetup> setups, final GridBagConstraints constraints)
 	{
+		Set<String> setupNamesToBeIncluded = setups.stream().map(InventorySetup::getName).collect(Collectors.toSet());
+
 		for (final InventorySetupsSection section : plugin.getSections())
 		{
+			// For quick look up
+			Set<String> setupsInSection = plugin.getCache().getSectionSetupsMap().get(section.getName()).keySet();
+			if (sectionShouldBeHidden(setupNamesToBeIncluded, setupsInSection))
+			{
+				continue;
+			}
 
-			// This will add all sections, but it will only show the setups that match the search
-			// This has the benefit of showing empty sections
-			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section);
+			boolean forceMaximization = !searchBar.getText().isEmpty();
+			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, forceMaximization);
 
 			overviewPanel.add(sectionPanel, constraints);
 			constraints.gridy++;
@@ -910,47 +934,130 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 			constraints.gridy++;
 
-			// Only add the section if it's maximized
-			if (section.isMaximized())
+			// Only add the setups if it's maximized. If we are searching, force maximization.
+			if (section.isMaximized() || forceMaximization)
 			{
-
-				// For quick look up
-				Set<String> setupsInSection = new HashSet<>(section.getSetups());
-
-				for (final InventorySetup setup : setups)
+				// If it's the default sorting mode (i.e., no sorting mode, use the order of setups in the section
+				// Else use the order of the passed in setups, as they will be sorted according to the sorting mode
+				if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.DEFAULT)
 				{
-					if (!setupsInSection.contains(setup.getName()))
+					for (final String name : section.getSetups())
 					{
-						continue;
+						// If we are searching and the setup doesn't match the search, don't add setup
+						if (!setupNamesToBeIncluded.contains(name))
+						{
+							continue;
+						}
+						final InventorySetup setupInSection = plugin.getCache().getInventorySetupNames().get(name);
+						createSetupPanelForSection(setupInSection, section, constraints, true);
 					}
-					final JPanel wrapperPanelForSetup = new JPanel();
-					wrapperPanelForSetup.setLayout(new BorderLayout());
-					InventorySetupsPanel newPanel = null;
-					if (plugin.getConfig().compactMode())
+				}
+				else
+				{
+					for (final InventorySetup setup : setups)
 					{
-						newPanel = new InventorySetupsCompactPanel(plugin, this, setup, section);
+						if (!setupsInSection.contains(setup.getName()))
+						{
+							continue;
+						}
+						createSetupPanelForSection(setup, section, constraints, true);
 					}
-					else
-					{
-						newPanel = new InventorySetupsStandardPanel(plugin, this, setup, section);
-					}
-					// Add an indentation to the setup
-					wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
-					wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
-
-					overviewPanel.add(wrapperPanelForSetup, constraints);
-					constraints.gridy++;
-
-					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-					constraints.gridy++;
 				}
 
 				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 				constraints.gridy++;
-
 			}
 
 		}
+
+		// Create the bottom unassigned section
+		createUnassignedSection(setups, constraints, setupNamesToBeIncluded);
+
+	}
+
+	private void createSetupPanelForSection(final InventorySetup setupInSection, final InventorySetupsSection section, final GridBagConstraints constraints, boolean allowEditable)
+	{
+		final JPanel wrapperPanelForSetup = new JPanel();
+		wrapperPanelForSetup.setLayout(new BorderLayout());
+		InventorySetupsPanel newPanel = null;
+		if (plugin.getConfig().compactMode())
+		{
+			newPanel = new InventorySetupsCompactPanel(plugin, this, setupInSection, section, allowEditable);
+		}
+		else
+		{
+			newPanel = new InventorySetupsStandardPanel(plugin, this, setupInSection, section, allowEditable);
+		}
+		// Add an indentation to the setup
+		wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
+		wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
+
+		overviewPanel.add(wrapperPanelForSetup, constraints);
+		constraints.gridy++;
+
+		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+		constraints.gridy++;
+	}
+
+	private void createUnassignedSection(final List<InventorySetup> setups, final GridBagConstraints constraints, final Set<String> setupNamesToBeIncluded)
+	{
+		InventorySetupsSection unassignedSection = new InventorySetupsSection("Unassigned");
+		unassignedSection.setMaximized(plugin.getBooleanConfigValue(CONFIG_KEY_UNASSIGNED_MAXIMIZED));
+
+		// For quick look up
+		Set<String> setupsInSection = new HashSet<>();
+		// Always output the unassigned setups in the defined order of the provided setups
+		for (final InventorySetup setup : setups)
+		{
+			if (plugin.getCache().getSetupSectionsMap().get(setup.getName()).size() == 0)
+			{
+				unassignedSection.getSetups().add(setup.getName());
+				setupsInSection.add(setup.getName());
+			}
+		}
+
+		// don't show the unassigned section if there are no unassigned setups
+		if (unassignedSection.getSetups().isEmpty() || sectionShouldBeHidden(setupNamesToBeIncluded, setupsInSection))
+		{
+			return;
+		}
+
+		boolean forceMaximization = !searchBar.getText().isEmpty();
+
+		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, forceMaximization, false);
+		overviewPanel.add(sectionPanel, constraints);
+		constraints.gridy++;
+
+		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+		constraints.gridy++;
+
+		// If the section isn't maximized, don't show any setups. If we are searching, force maximization
+		if (!unassignedSection.isMaximized() && !forceMaximization)
+		{
+			return;
+		}
+
+		for (final String setupName : unassignedSection.getSetups())
+		{
+			final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
+			createSetupPanelForSection(setup, unassignedSection, constraints, false);
+		}
+
+		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+		constraints.gridy++;
+	}
+
+	private boolean sectionShouldBeHidden(final Set<String> setupNamesToBeIncluded, final Set<String> setupsInSection)
+	{
+		// If the search bar is not empty, do not to show empty sections
+		if (!searchBar.getText().isEmpty())
+		{
+			Set<String> intersection = new HashSet<>(setupsInSection);
+			intersection.retainAll(setupNamesToBeIncluded);
+			return intersection.isEmpty();
+		}
+
+		return false;
 	}
 
 }

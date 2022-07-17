@@ -26,11 +26,13 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_UNASSIGNED_MAXIMIZED;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsValidName;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -61,6 +63,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	private static final ImageIcon MIN_MAX_SECTION_HOVER_ICON;
 	private static final ImageIcon NO_MIN_MAX_SECTION_ICON;
 	private static final ImageIcon NO_MIN_MAX_SECTION_HOVER_ICON;
+	private boolean forceMaximization;
 
 	static
 	{
@@ -75,11 +78,17 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		NO_MIN_MAX_SECTION_HOVER_ICON = new ImageIcon(noMaxSectionHoverImg);
 	}
 
-	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section)
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, boolean forceMaximization)
+	{
+		this(plugin, panel, section, forceMaximization, true);
+	}
+
+	InventorySetupsSectionPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetupsSection section, boolean forceMaximization, boolean allowEditable)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.section = section;
+		this.forceMaximization = forceMaximization;
 
 		this.setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -94,21 +103,39 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
-					section.setMaximized(!section.isMaximized());
-					plugin.updateConfig(false, true);
-					panel.redrawOverviewPanel(false);
+					if (allowEditable && !forceMaximization)
+					{
+						section.setMaximized(!section.isMaximized());
+						plugin.updateConfig(false, true);
+						panel.redrawOverviewPanel(false);
+					}
+					else
+					{
+						// This is for the unassigned section.
+						plugin.setConfigValue(CONFIG_KEY_UNASSIGNED_MAXIMIZED, !section.isMaximized());
+					}
 				}
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e)
 			{
+				if (forceMaximization)
+				{
+					return;
+				}
+
 				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_HOVER_ICON : NO_MIN_MAX_SECTION_HOVER_ICON);
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e)
 			{
+				if (forceMaximization)
+				{
+					return;
+				}
+
 				minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
 			}
 		});
@@ -125,6 +152,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		addSetupsToSection.addActionListener(e ->
 		{
 			final String[] setupNames = plugin.getInventorySetups().stream().map(InventorySetup::getName).toArray(String[]::new);
+			Arrays.sort(setupNames, String.CASE_INSENSITIVE_ORDER);
 			final String message = "Select setups to add to this section";
 			final String title = "Select Setups";
 			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, setupNames);
@@ -148,7 +176,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		final Color nameWrapperColor = new Color(20, 20, 20);
 		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section,
 																					plugin, panel, this,
-																					popupMenu, MAX_SETUP_NAME_LENGTH, nameWrapperColor);
+																					popupMenu, MAX_SETUP_NAME_LENGTH,
+																					nameWrapperColor, allowEditable);
 		final JPanel westNameActions = new JPanel(new BorderLayout());
 		westNameActions.setBackground(nameWrapperColor);
 		westNameActions.add(Box.createRigidArea(new Dimension(6, 0)), BorderLayout.WEST);
@@ -161,7 +190,12 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		nameWrapper.setLayout(new BorderLayout());
 		nameWrapper.add(nameActions, BorderLayout.CENTER);
 
-		nameWrapper.setComponentPopupMenu(popupMenu);
+		// If we are in unassigned mode, don't allow the user to edit with the right click pop menu
+		if (allowEditable)
+		{
+			nameWrapper.setComponentPopupMenu(popupMenu);
+		}
+
 		add(nameWrapper, BorderLayout.NORTH);
 
 	}
@@ -170,7 +204,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	public boolean isNameValid(final String name)
 	{
 		return !name.isEmpty() &&
-				!plugin.getSectionNames().contains(name) &&
+				!plugin.getCache().getSectionNames().containsKey(name) &&
 				!section.getName().equals(name);
 	}
 
@@ -182,8 +216,16 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 	private void updateMinMaxLabel()
 	{
-		minMaxLabel.setToolTipText(section.isMaximized() ? "Minimize section" : "Maximize section");
-		minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
+		if (forceMaximization)
+		{
+			minMaxLabel.setToolTipText("");
+			minMaxLabel.setIcon(MIN_MAX_SECTION_ICON);
+		}
+		else
+		{
+			minMaxLabel.setToolTipText(section.isMaximized() ? "Minimize section" : "Maximize section");
+			minMaxLabel.setIcon(section.isMaximized() ? MIN_MAX_SECTION_ICON : NO_MIN_MAX_SECTION_ICON);
+		}
 	}
 
 	@Override

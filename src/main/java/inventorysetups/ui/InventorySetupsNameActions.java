@@ -78,7 +78,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 										final InventorySetupsPluginPanel panel,
 										final InventorySetupsValidName validNameImplementer,
 										final JPopupMenu movePopupMenu, int maxLength,
-										final Color panelColor)
+										final Color panelColor, boolean allowEditable)
 	{
 		setLayout(new BorderLayout());
 
@@ -288,7 +288,10 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 		nameInput.getTextField().setForeground(Color.WHITE);
 		nameInput.getTextField().setBackground(panelColor);
 		nameInput.getTextField().setBorder(new EmptyBorder(0, 6, 0, 0));
-		nameInput.getTextField().setComponentPopupMenu(movePopupMenu);
+		if (allowEditable)
+		{
+			nameInput.getTextField().setComponentPopupMenu(movePopupMenu);
+		}
 		nameInput.getTextField().setCaretPosition(0);
 
 		displayColorIndicator.setToolTipText("Edit the color of the name");
@@ -339,8 +342,10 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 		wrapper.setLayout(new BorderLayout());
 		wrapper.add(nameInput, BorderLayout.CENTER);
 		wrapper.add(displayColorIndicator, BorderLayout.WEST);
-		wrapper.add(nameActions, BorderLayout.EAST);
-
+		if (allowEditable)
+		{
+			wrapper.add(nameActions, BorderLayout.EAST);
+		}
 		add(wrapper, BorderLayout.CENTER);
 
 		// Any modifications to the name actions can be done with border layouts

@@ -185,7 +185,7 @@ To get started, click on the section mode button at the top of the panel.
 
 ![Section Mode](readme_images_and_gifs/section_mode.png)
 
-When you are in the section mode view, the import and add button can now be used to add or import sections instead of setups.
+When you are in the section mode view, the add and import buttons can now be used to add or import sections instead of setups. You will also see the "Unassigned" section which shows all setups which are not assigned to a section.
 
 ![Section Create](readme_images_and_gifs/sections_create.gif)
 
@@ -197,13 +197,15 @@ To add setups to your section, there are two ways to do this. You can right clic
 
 You can also right click a setup and select "Add setup to sections.." This will open a dialogue where you can select sections for the setup to be a part of.
 
-With both dialogues, you can CTRL + Click to select multiple options.
+With both dialogues, you can CTRL + Click to select multiple options. The setups/sections displayed on the dialogue will be in alphabetical order.
 
 ![Add Setups to Section](readme_images_and_gifs/add_setups_to_section.gif)
 
 Once you have setups added to a section, you can view them by clicking the maximize arrow. You can minimize a section by clicking the arrow again.
 
 Duplicate setups are not allowed in a section. If you selected setups which already exist in a section, they will not be added again. However, a setup can be a part of as many different sections as you'd like.
+
+You can use the search bar to search for setups while in section mode. Any sections that don't have a matching setup will be hidden, and sections which do have a matching setup will automatically be maximized.
 
 #### Remove Setups from a Section
 
@@ -213,11 +215,21 @@ To remove a setup from a section, make sure you are in section view. Then you ca
 
 Do not use the X button to remove a setup from a section. This will simply delete your setup. When a setup is deleted, it will be removed from all sections.
 
+#### Moving Setups in a Section
+
+You can right click a setup while in section mode and select one of the move options to move a setup within a section. This will not affect the position of the setup in the normal view. It only modifies the position within the section.
+
 #### Section Menu Options
 
 Right clicking a section will show a menu with some options. Here you can move the section, export it, add setups to it, and delete it.
 
 ![Sections Right Click Menu](readme_images_and_gifs/section_right_click.png)
+
+#### Unassigned Section
+
+The "Unassigned" section contains all setups which are not assigned to a section. It cannot be modified or deleted, and will always appear at the bottom. The setups can be searched for, viewed and added to other sections. Once a setup is added to a section, it will be removed from the unassigned section. If there are no "Unassigned" setups, this section will be hidden.
+
+With this section, you do not need to switch from section mode to normal mode when attempting to view or modify a setup that is not in a section, and will give you an easy way to identify setups that may need a section. You can also minimize and maximize it just like any other section.
 
 ### Exporting and Importing Setups and Sections
 

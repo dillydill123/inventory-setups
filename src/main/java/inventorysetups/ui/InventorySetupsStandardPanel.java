@@ -161,13 +161,20 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 
 	InventorySetupsStandardPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section)
 	{
-		super(plugin, panel, invSetup, section);
+		this(plugin, panel, invSetup, section, true);
+	}
+
+	InventorySetupsStandardPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel, InventorySetup invSetup, InventorySetupsSection section, boolean allowEditable)
+	{
+		super(plugin, panel, invSetup, section, allowEditable);
 
 		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
+		// Always allow the name actions to work for the standard panel
 		JPanel nameActions = new InventorySetupsNameActions<>(invSetup, plugin, panel, this,
-																popupMenu, MAX_SETUP_NAME_LENGTH, ColorScheme.DARKER_GRAY_COLOR);
+																popupMenu, MAX_SETUP_NAME_LENGTH,
+																ColorScheme.DARKER_GRAY_COLOR, true);
 
 		JPanel bottomContainer = new JPanel(new BorderLayout());
 		bottomContainer.setBorder(new EmptyBorder(8, 0, 8, 0));
@@ -438,7 +445,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 	public boolean isNameValid(final String name)
 	{
 		return !name.isEmpty() &&
-				!plugin.getInventorySetupNames().contains(name) &&
+				!plugin.getCache().getInventorySetupNames().containsKey(name) &&
 				!inventorySetup.getName().equals(name);
 	}
 
