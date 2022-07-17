@@ -32,6 +32,7 @@ import inventorysetups.InventorySetupsValidName;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -151,6 +152,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		addSetupsToSection.addActionListener(e ->
 		{
 			final String[] setupNames = plugin.getInventorySetups().stream().map(InventorySetup::getName).toArray(String[]::new);
+			Arrays.sort(setupNames, String.CASE_INSENSITIVE_ORDER);
 			final String message = "Select setups to add to this section";
 			final String title = "Select Setups";
 			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, setupNames);

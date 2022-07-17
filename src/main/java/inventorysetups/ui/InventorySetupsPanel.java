@@ -28,6 +28,7 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsPlugin;
 
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -92,6 +93,7 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 			}
 
 			final String[] sectionNames = plugin.getSections().stream().map(InventorySetupsSection::getName).toArray(String[]::new);
+			Arrays.sort(sectionNames, String.CASE_INSENSITIVE_ORDER);
 			final String message = "Select sections to add this setup to";
 			final String title = "Select Sections";
 			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, sectionNames);

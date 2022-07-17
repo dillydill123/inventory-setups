@@ -197,7 +197,7 @@ To add setups to your section, there are two ways to do this. You can right clic
 
 You can also right click a setup and select "Add setup to sections.." This will open a dialogue where you can select sections for the setup to be a part of.
 
-With both dialogues, you can CTRL + Click to select multiple options.
+With both dialogues, you can CTRL + Click to select multiple options. The setups/sections displayed on the dialogue will be in alphabetical order.
 
 ![Add Setups to Section](readme_images_and_gifs/add_setups_to_section.gif)
 
