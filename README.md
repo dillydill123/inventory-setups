@@ -311,7 +311,7 @@ If you need help, have any suggestions, or notice any bugs, you can comment them
 
 ### Donations
 
-Inventory Setups was developed by me in my free time (100+ hours of work). I did for it fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
+Inventory Setups was developed by me in my free time (100+ hours of work). I did it for fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
 
 ### Changelog
 
