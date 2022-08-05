@@ -166,6 +166,7 @@ public class InventorySetupsPlugin extends Plugin
 	private SessionManager sessionManager;
 
 	@Inject
+	@Getter
 	private ItemManager itemManager;
 
 	@Inject
