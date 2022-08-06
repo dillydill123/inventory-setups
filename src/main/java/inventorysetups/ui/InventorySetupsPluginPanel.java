@@ -24,6 +24,7 @@
  */
 package inventorysetups.ui;
 
+import inventorysetups.EnhancedSwingUtilities;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
@@ -608,7 +609,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	public void redrawOverviewPanel(boolean resetScrollBar)
 	{
 		returnToOverviewPanel(resetScrollBar);
-		overviewPanel.removeAll();
+		EnhancedSwingUtilities.fastRemoveAll(overviewPanel);
 		updateAddMarker();
 		updateImportMarker();
 		updateSectionViewMarker();
