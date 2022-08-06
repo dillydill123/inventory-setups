@@ -875,22 +875,50 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 		else
 		{
+			int currentCol = 0;
+			int maxRowSize = 4;
 			for (final InventorySetup setup : setups)
 			{
-				InventorySetupsPanel newPanel = null;
-				if (plugin.getConfig().compactMode())
+
+				if (plugin.getConfig().compactMode() || true)
 				{
-					newPanel = new InventorySetupsCompactPanel(plugin, this, setup, null);
+					InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, null);
+					overviewPanel.add(newPanel, constraints);
+					constraints.gridx++;
+					overviewPanel.add(Box.createRigidArea(new Dimension(5, 0)), constraints);
+					if (currentCol == maxRowSize - 1)
+					{
+						currentCol = 0;
+						constraints.gridx = 0;
+						constraints.gridy++;
+						overviewPanel.add(Box.createRigidArea(new Dimension(0, 5)), constraints);
+						constraints.gridy++;
+					}
+					else
+					{
+						currentCol++;
+						constraints.gridx++;
+					}
+
 				}
 				else
 				{
-					newPanel = new InventorySetupsStandardPanel(plugin, this, setup, null);
-				}
-				overviewPanel.add(newPanel, constraints);
-				constraints.gridy++;
+					InventorySetupsPanel newPanel = null;
+					if (plugin.getConfig().compactMode())
+					{
+						newPanel = new InventorySetupsCompactPanel(plugin, this, setup, null);
+					}
+					else
+					{
+						newPanel = new InventorySetupsStandardPanel(plugin, this, setup, null);
+					}
+					overviewPanel.add(newPanel, constraints);
+					constraints.gridy++;
 
-				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-				constraints.gridy++;
+					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+					constraints.gridy++;
+				}
+
 			}
 		}
 

@@ -31,7 +31,6 @@ public class InventorySetupsIconPanel extends InventorySetupsPanel
 
 		setPreferredSize(new Dimension(46, 42));
 
-
 		JLabel imageLabel = new JLabel();
 		AsyncBufferedImage itemImg = plugin.getItemManager().getImage(ItemID.TWISTED_BOW, 1, false);
 		imageLabel.setIcon(new ImageIcon(itemImg));
