@@ -32,6 +32,8 @@ import inventorysetups.InventorySetupsValidName;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -156,13 +158,16 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			final String message = "Select setups to add to this section";
 			final String title = "Select Setups";
 			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, setupNames);
-			selectionDialog.show();
-			List<String> selectedSetups = selectionDialog.getSelectedItems();
-
-			if (!selectedSetups.isEmpty())
+			selectionDialog.setOnOk(e1 ->
 			{
-				plugin.addSetupsToSection(section, selectedSetups);
-			}
+				List<String> selectedSetups = selectionDialog.getSelectedItems();
+				if (!selectedSetups.isEmpty())
+				{
+					plugin.addSetupsToSection(section, selectedSetups);
+				}
+			});
+			selectionDialog.show();
+
 		});
 		deleteSection.addActionListener(e ->
 		{

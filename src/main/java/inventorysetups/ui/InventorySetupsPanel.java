@@ -28,6 +28,8 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsPlugin;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JMenuItem;
@@ -97,13 +99,16 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 			final String message = "Select sections to add this setup to";
 			final String title = "Select Sections";
 			InventorySetupsSelectionPanel selectionDialog = new InventorySetupsSelectionPanel(panel, title, message, sectionNames);
-			selectionDialog.show();
-			List<String> selectedSections = selectionDialog.getSelectedItems();
-
-			if (!selectedSections.isEmpty())
+			selectionDialog.setOnOk(e1 ->
 			{
-				plugin.addSetupToSections(invSetup, selectedSections);
-			}
+				List<String> selectedSections = selectionDialog.getSelectedItems();
+
+				if (!selectedSections.isEmpty())
+				{
+					plugin.addSetupToSections(invSetup, selectedSections);
+				}
+			});
+			selectionDialog.show();
 		});
 
 		setComponentPopupMenu(popupMenu);
