@@ -859,32 +859,43 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		{
 			int currentCol = 0;
 			int maxRowSize = 4;
-			for (final InventorySetup setup : setups)
+			for (int i = 0; i < setups.size(); i++)
 			{
-
+				final InventorySetup setup = setups.get(i);
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
+					constraints.fill = GridBagConstraints.NONE;
 					InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, null);
 					overviewPanel.add(newPanel, constraints);
 					constraints.gridx++;
-					overviewPanel.add(Box.createRigidArea(new Dimension(5, 0)), constraints);
 					if (currentCol == maxRowSize - 1)
 					{
 						currentCol = 0;
 						constraints.gridx = 0;
 						constraints.gridy++;
+						constraints.fill = GridBagConstraints.HORIZONTAL;
 						overviewPanel.add(Box.createRigidArea(new Dimension(0, 5)), constraints);
 						constraints.gridy++;
 					}
 					else
 					{
 						currentCol++;
-						constraints.gridx++;
+					}
+
+					if (currentCol != 0 && i == setups.size() - 1)
+					{
+						// Make "empty" slots
+						for (int j = currentCol; j < maxRowSize; j++)
+						{
+							overviewPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.INVENTORY, -1), constraints);
+							constraints.gridx++;
+						}
 					}
 
 				}
 				else
 				{
+					constraints.fill = GridBagConstraints.HORIZONTAL;
 					InventorySetupsPanel newPanel = null;
 					if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.COMPACT)
 					{
@@ -900,8 +911,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 					overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 					constraints.gridy++;
 				}
-
 			}
+
 		}
 
 		setupDisplayPanel.setVisible(false);
