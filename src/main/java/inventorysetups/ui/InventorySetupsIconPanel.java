@@ -47,6 +47,7 @@ public class InventorySetupsIconPanel extends InventorySetupsPanel
 		}
 
 		AsyncBufferedImage itemImg = plugin.getItemManager().getImage(itemIDForImage, 1, false);
+		itemImg.onLoaded(this::repaint);
 		imageLabel.setIcon(new ImageIcon(itemImg));
 		add(imageLabel);
 
