@@ -134,7 +134,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_SECTIONS = "sections";
 
 	public static final String CONFIG_KEY_SECTION_MODE = "sectionMode";
-	public static final String CONFIG_KEY_COMPACT_MODE = "compactMode";
+	public static final String CONFIG_KEY_PANEL_VIEW = "panelView";
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String CONFIG_KEY_VERSION_STR = "version";
@@ -338,7 +338,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getGroup().equals(CONFIG_GROUP))
 		{
-			if (event.getKey().equals(CONFIG_KEY_COMPACT_MODE) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
+			if (event.getKey().equals(CONFIG_KEY_PANEL_VIEW) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
 				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
 				event.getKey().equals(CONFIG_KEY_UNASSIGNED_MAXIMIZED))
 			{
@@ -532,6 +532,11 @@ public class InventorySetupsPlugin extends Plugin
 	public void setConfigValue(final String key, boolean on)
 	{
 		configManager.setConfiguration(CONFIG_GROUP, key, on);
+	}
+
+	public void setConfigValue(final String key, final String value)
+	{
+		configManager.setConfiguration(CONFIG_GROUP, key, value);
 	}
 
 	public boolean getBooleanConfigValue(final String key)

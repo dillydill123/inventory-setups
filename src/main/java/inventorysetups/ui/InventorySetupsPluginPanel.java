@@ -27,8 +27,9 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
+import inventorysetups.InventorySetupsPanelViewID;
 import inventorysetups.InventorySetupsPlugin;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_UNASSIGNED_MAXIMIZED;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
@@ -36,6 +37,7 @@ import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -118,7 +120,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private final JLabel mainTitle;
 	private final JLabel setupTitle;
 	private final JLabel helpButton;
-	private final JLabel compactViewMarker;
+	private final InventorySetupsCycleButton<InventorySetupsPanelViewID> panelViewMarker;
 	private final JLabel sortingMarker;
 	private final JLabel sectionViewMarker;
 	private final JLabel addMarker;
@@ -271,31 +273,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
-		this.compactViewMarker = new JLabel(COMPACT_VIEW_ICON);
-		compactViewMarker.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mousePressed(MouseEvent e)
-			{
-				if (SwingUtilities.isLeftMouseButton(e))
-				{
-					plugin.setConfigValue(CONFIG_KEY_COMPACT_MODE, !plugin.getConfig().compactMode());
-					updateCompactViewMarker();
-				}
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e)
-			{
-				compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_HOVER_ICON : NO_COMPACT_VIEW_HOVER_ICON);
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e)
-			{
-				compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
-			}
-		});
+		List<ImageIcon> icons = new ArrayList<>(Arrays.asList(NO_COMPACT_VIEW_ICON, COMPACT_VIEW_ICON, COMPACT_VIEW_HOVER_ICON));
+		List<ImageIcon> hoverIcons = new ArrayList<>(Arrays.asList(NO_COMPACT_VIEW_ICON, COMPACT_VIEW_HOVER_ICON, COMPACT_VIEW_HOVER_ICON));
+		List<String> tooltips = new ArrayList<>(Arrays.asList("Switch to compact mode", "Switch to icon mode", "Switch to standard mode"));
+		this.panelViewMarker = new InventorySetupsCycleButton<>(plugin, InventorySetupsPanelViewID.getValues(), icons, hoverIcons, tooltips);
+		Runnable r = () -> plugin.setConfigValue(CONFIG_KEY_PANEL_VIEW, panelViewMarker.getCurrentState().toString());
+		this.panelViewMarker.setRunnable(r);
 
 		JPopupMenu massImportExportMenu = new JPopupMenu();
 		JMenuItem massImportSetupsMenu = new JMenuItem("Mass Import Setups");
@@ -491,11 +474,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		JPanel overViewMarkers = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		overViewMarkers.add(sectionViewMarker);
 		overViewMarkers.add(sortingMarker);
-		overViewMarkers.add(compactViewMarker);
+		overViewMarkers.add(panelViewMarker);
 		overViewMarkers.add(importMarker);
 		overViewMarkers.add(addMarker);
 		sortingMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
-		compactViewMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
+		panelViewMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		importMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 		addMarker.setBorder(new EmptyBorder(0, 8, 0, 0));
 
@@ -616,7 +599,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		setupDisplayPanel.setVisible(false);
 		helpButton.setVisible(!plugin.getConfig().hideButton());
 		updateSectionViewMarker();
-		updateCompactViewMarker();
+		updatePanelViewMarker();
 		updateSortingMarker();
 	}
 
@@ -628,7 +611,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		updateAddMarker();
 		updateImportMarker();
 		updateSectionViewMarker();
-		updateCompactViewMarker();
+		updatePanelViewMarker();
 		updateSortingMarker();
 
 		List<InventorySetup> setupsToAdd = null;
@@ -827,10 +810,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		sectionViewMarker.setToolTipText("Switch to " + (plugin.getConfig().sectionMode() ? "standard mode" : "section mode"));
 	}
 
-	private void updateCompactViewMarker()
+	private void updatePanelViewMarker()
 	{
-		compactViewMarker.setIcon(plugin.getConfig().compactMode() ? COMPACT_VIEW_ICON : NO_COMPACT_VIEW_ICON);
-		compactViewMarker.setToolTipText("Switch to " + (plugin.getConfig().compactMode() ? "standard mode" : "compact mode"));
+		panelViewMarker.setCurrentState(plugin.getConfig().panelView());
 	}
 
 	private void updateSortingMarker()
@@ -880,7 +862,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			for (final InventorySetup setup : setups)
 			{
 
-				if (plugin.getConfig().compactMode() || true)
+				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
 					InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, null);
 					overviewPanel.add(newPanel, constraints);
@@ -904,7 +886,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				else
 				{
 					InventorySetupsPanel newPanel = null;
-					if (plugin.getConfig().compactMode())
+					if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.COMPACT)
 					{
 						newPanel = new InventorySetupsCompactPanel(plugin, this, setup, null);
 					}

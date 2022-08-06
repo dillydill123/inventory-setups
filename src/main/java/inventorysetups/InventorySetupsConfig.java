@@ -24,9 +24,9 @@
  */
 package inventorysetups;
 
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_COMPACT_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 import java.awt.Color;
@@ -264,9 +264,21 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = CONFIG_KEY_COMPACT_MODE,
+		keyName = CONFIG_KEY_PANEL_VIEW,
+		name = "Panel View",
+		description = "Configures which type of panels are displayed for setups",
+		position = 12
+	)
+	default InventorySetupsPanelViewID panelView()
+	{
+		return InventorySetupsPanelViewID.STANDARD;
+	}
+
+	@ConfigItem(
+			keyName = "Deprecated",
 			name = "Compact Mode",
 			description = "Configures the setup panels to be compact",
+			hidden = true,
 			position = 12
 	)
 	default boolean compactMode()

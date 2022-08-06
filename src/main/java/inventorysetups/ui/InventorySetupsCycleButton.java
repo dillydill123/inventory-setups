@@ -32,6 +32,7 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
+import lombok.Setter;
 
 // Implementation of a cycle button which provides a way to cycle through multiple states in one button (JLabel)
 // When clicked, the cycle button will properly set the icons, tooltips, and execute the provided runnable for any necessary logic
@@ -42,8 +43,19 @@ public class InventorySetupsCycleButton<T> extends JLabel
 	private final List<ImageIcon> icons;
 	private final List<ImageIcon> hoverIcons;
 	private final List<String> tooltips;
-	private final Runnable runnable;
+	@Setter
 	private int currentIndex;
+	private MouseAdapter runnableAdapter;
+
+	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final List<T> states,
+							final List<ImageIcon> icons, final List<ImageIcon> hoverIcons,
+							final List<String> tooltips)
+	{
+		this(plugin, states, icons, hoverIcons, tooltips, () ->
+		{
+
+		});
+	}
 
 	InventorySetupsCycleButton(final InventorySetupsPlugin plugin, final List<T> states,
 								final List<ImageIcon> icons, final List<ImageIcon> hoverIcons,
@@ -54,7 +66,6 @@ public class InventorySetupsCycleButton<T> extends JLabel
 		this.states = states;
 		this.icons = icons;
 		this.hoverIcons = hoverIcons;
-		this.runnable = runnable;
 		this.tooltips = tooltips;
 		this.currentIndex = 0;
 
@@ -63,33 +74,7 @@ public class InventorySetupsCycleButton<T> extends JLabel
 		assert this.icons.size() == this.hoverIcons.size();
 		assert this.hoverIcons.size() == this.tooltips.size();
 
-		addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mousePressed(MouseEvent mouseEvent)
-			{
-				if (SwingUtilities.isLeftMouseButton(mouseEvent))
-				{
-					currentIndex = (currentIndex + 1) % states.size();
-					runnable.run();
-					setToolTipText(tooltips.get(currentIndex));
-					setIcon(icons.get(currentIndex));
-					plugin.updateConfig(true, true);
-				}
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent mouseEvent)
-			{
-				setIcon(hoverIcons.get(currentIndex));
-			}
-
-			@Override
-			public void mouseExited(MouseEvent mouseEvent)
-			{
-				setIcon(icons.get(currentIndex));
-			}
-		});
+		setRunnable(runnable);
 	}
 
 	public void setCurrentState(final T state)
@@ -104,6 +89,38 @@ public class InventorySetupsCycleButton<T> extends JLabel
 		}
 		setIcon(icons.get(currentIndex));
 		setToolTipText(tooltips.get(currentIndex));
+	}
+
+	public void setRunnable(final Runnable r)
+	{
+		removeMouseListener(runnableAdapter);
+		this.runnableAdapter = new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				if (SwingUtilities.isLeftMouseButton(mouseEvent))
+				{
+					currentIndex = (currentIndex + 1) % states.size();
+					r.run();
+					setToolTipText(tooltips.get(currentIndex));
+					setIcon(icons.get(currentIndex));
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent mouseEvent)
+			{
+				setIcon(hoverIcons.get(currentIndex));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent mouseEvent)
+			{
+				setIcon(icons.get(currentIndex));
+			}
+		};
+		addMouseListener(runnableAdapter);
 	}
 
 	public T getCurrentState()
