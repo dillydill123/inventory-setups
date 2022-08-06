@@ -12,7 +12,7 @@ repositories {
 }
 
 
-def runeLiteVersion = '1.8.27.1'
+def runeLiteVersion = '1.8.30'
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
@@ -37,7 +37,7 @@ tasks.withType(JavaCompile) {
 
 task createProperties(dependsOn: processResources) {
 	doLast {
-		new File("$buildDir/resources/main/version.txt").text = "version=$project.version"
+		new File("$buildDir/resources/main/invsetups_version.txt").text = "version=$project.version"
 	}
 }
 

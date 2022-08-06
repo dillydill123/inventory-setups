@@ -575,7 +575,7 @@ public class InventorySetupsPlugin extends Plugin
 		try
 		{
 			final Properties props = new Properties();
-			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/version.txt");
+			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/invsetups_version.txt");
 			props.load(is);
 			this.currentVersion = props.getProperty("version");
 		}
