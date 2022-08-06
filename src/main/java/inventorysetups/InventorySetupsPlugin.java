@@ -214,6 +214,7 @@ public class InventorySetupsPlugin extends Plugin
 	private KeyManager keyManager;
 
 	@Inject
+	@Getter
 	private ChatboxItemSearch itemSearch;
 
 	@Inject
@@ -1378,6 +1379,28 @@ public class InventorySetupsPlugin extends Plugin
 				!searchInput.getValue().toLowerCase().contains("b");
 
 		return stillInputtingNumbers || letterIsInput;
+	}
+
+	public void updateInventorySetupIcon(final InventorySetup setup)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			JOptionPane.showMessageDialog(panel,
+				"You must be logged in to search.",
+				"Cannot Search for Item",
+				JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		itemSearch
+			.tooltipText("Set slot to")
+			.onItemSelected((itemId) ->
+			{
+				int finalId = itemManager.canonicalize(itemId);
+				setup.setIconID(finalId);
+				updateConfig(true, false);
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+			}).build();
 	}
 
 	public void removeItemFromSlot(final InventorySetupsSlot slot)

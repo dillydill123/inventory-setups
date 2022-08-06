@@ -3,13 +3,13 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSection;
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.ItemID;
@@ -74,5 +74,9 @@ public class InventorySetupsIconPanel extends InventorySetupsPanel
 				setBackground(ColorScheme.DARKER_GRAY_COLOR);
 			}
 		});
+
+		JMenuItem updateIcon = new JMenuItem("Update Icon..");
+		updateIcon.addActionListener(e -> plugin.updateInventorySetupIcon(invSetup));
+		popupMenu.add(updateIcon);
 	}
 }
