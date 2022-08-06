@@ -94,6 +94,10 @@ public class InventorySetup implements InventorySetupsDisplayAttributes
 	@Setter
 	private boolean favorite;
 
+	@Getter
+	@Setter
+	private int iconID;
+
 	public void updateInventory(final List<InventorySetupsItem> inv)
 	{
 		inventory = inv;

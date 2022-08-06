@@ -691,7 +691,7 @@ public class InventorySetupsPlugin extends Plugin
 				config.enableDisplayColor() ? config.displayColor() : null,
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
-				spellbook, false);
+				spellbook, false, -1);
 
 			cache.addSetup(invSetup);
 			inventorySetups.add(invSetup);
