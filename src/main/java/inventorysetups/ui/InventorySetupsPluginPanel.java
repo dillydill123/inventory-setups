@@ -860,7 +860,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		{
 			if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 			{
-				JPanel iconGridPanel = createIconPanelGrid(setups, 4);
+				JPanel iconGridPanel = createIconPanelGrid(setups, 4, null, null, true);
 				overviewPanel.add(iconGridPanel, constraints);
 				constraints.gridy++;
 			}
@@ -935,20 +935,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				{
 					if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 					{
-						int numAdded = 0;
-						JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
-						for (final String name : section.getSetups())
-						{
-							if (!setupNamesToBeIncluded.contains(name))
-							{
-								continue;
-							}
-							final InventorySetup setupInSection = plugin.getCache().getInventorySetupNames().get(name);
-							InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setupInSection, section);
-							wrapperPanel.add(newPanel);
-							numAdded++;
-						}
-						final JPanel iconGridPanel = addExtraIconSlotsAndExpansionStopper(wrapperPanel, numAdded, maxColSize);
+						final JPanel iconGridPanel = createIconPanelGridFromNames(section.getSetups(), 4, setupNamesToBeIncluded, section, true);
 						overviewPanel.add(iconGridPanel, constraints);
 						constraints.gridy++;
 					}
@@ -971,19 +958,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 					// Sorting mode is being used, so use the original setup array to determine the order.
 					if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 					{
-						int numAdded = 0;
-						JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
-						for (final InventorySetup setup : setups)
-						{
-							if (!setupsInSection.contains(setup.getName()))
-							{
-								continue;
-							}
-							InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, section);
-							wrapperPanel.add(newPanel);
-							numAdded++;
-						}
-						final JPanel iconGridPanel = addExtraIconSlotsAndExpansionStopper(wrapperPanel, numAdded, maxColSize);
+						final JPanel iconGridPanel = createIconPanelGrid(setups, 4, setupsInSection, section, true);
 						overviewPanel.add(iconGridPanel, constraints);
 						constraints.gridy++;
 					}
@@ -1077,7 +1052,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 		{
-			final JPanel iconGridPanel = createIconPanelGridFromNames(unassignedSection.getSetups(), 4);
+			final JPanel iconGridPanel = createIconPanelGridFromNames(unassignedSection.getSetups(), 4, null, unassignedSection, false);
 			overviewPanel.add(iconGridPanel, constraints);
 			constraints.gridy++;
 		}
@@ -1107,27 +1082,39 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		return false;
 	}
 
-	private JPanel createIconPanelGrid(final List<InventorySetup> setups, int maxColSize)
+	private JPanel createIconPanelGrid(final List<InventorySetup> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
 	{
+		int added = 0;
 		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
 		for (final InventorySetup setup : setups)
 		{
-			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, null);
+			if (includedNames != null && !includedNames.contains(setup.getName()))
+			{
+				continue;
+			}
+			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, section, allowEditable);
 			wrapperPanel.add(newPanel);
+			added++;
 		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, setups.size(), maxColSize);
+		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize);
 	}
 
-	private JPanel createIconPanelGridFromNames(final List<String> setups, int maxColSize)
+	private JPanel createIconPanelGridFromNames(final List<String> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
 	{
+		int added = 0;
 		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
 		for (final String setupName : setups)
 		{
+			if (includedNames != null && !includedNames.contains(setupName))
+			{
+				continue;
+			}
 			final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
-			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, null);
+			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, section, allowEditable);
 			wrapperPanel.add(newPanel);
+			added++;
 		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, setups.size(), maxColSize);
+		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize);
 	}
 
 	private JPanel addExtraIconSlotsAndExpansionStopper(final JPanel iconGridPanel, int size, int maxColSize)
