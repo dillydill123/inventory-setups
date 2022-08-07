@@ -3,14 +3,17 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSection;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.ItemID;
 import net.runelite.client.ui.ColorScheme;
@@ -27,12 +30,16 @@ public class InventorySetupsIconPanel extends InventorySetupsPanel
 	{
 		super(plugin, panel, invSetup, section, allowEditable);
 
-		setLayout(new GridBagLayout());
+		setLayout(new BorderLayout());
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
+		//final int sizeOfImage = 33;
+		//setPreferredSize(new Dimension(sizeOfImage + 4, sizeOfImage + 2));
 		setPreferredSize(new Dimension(46, 42));
 
 		JLabel imageLabel = new JLabel();
+		imageLabel.setHorizontalAlignment(JLabel.CENTER);
+		imageLabel.setVerticalAlignment(JLabel.CENTER);
 		int itemIDForImage = invSetup.getIconID();
 		// ID 0 is "Dwarf Remains" meaning setups saved before iconID was added will default to 0
 		// and a picture of "Dwarf Remains" will be used. So exclude 0 as well and select a weapon
@@ -46,10 +53,20 @@ public class InventorySetupsIconPanel extends InventorySetupsPanel
 			}
 		}
 
+		add(imageLabel, BorderLayout.CENTER);
 		AsyncBufferedImage itemImg = plugin.getItemManager().getImage(itemIDForImage, 1, false);
-		itemImg.onLoaded(this::repaint);
-		imageLabel.setIcon(new ImageIcon(itemImg));
-		add(imageLabel);
+		Runnable r = () ->
+		{
+			// Use 33 width for 5 items per row, else just used the AsyncBufferedImage if no scaling with 4
+			// Might need to set a preferred width to get the exact size you want
+			//Image scaledItemImg = itemImg.getScaledInstance(sizeOfImage, -1, Image.SCALE_SMOOTH);
+			imageLabel.setIcon(new ImageIcon(itemImg));
+			this.repaint();
+		};
+		itemImg.onLoaded(r); // transforms if loaded later
+		r.run(); // transforms if already loaded
+
+		imageLabel.setBorder(new EmptyBorder(2, 2, 2, 2));
 
 		setToolTipText(invSetup.getName());
 		addMouseListener(new MouseAdapter()

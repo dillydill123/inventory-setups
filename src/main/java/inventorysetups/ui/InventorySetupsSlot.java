@@ -65,6 +65,11 @@ public class InventorySetupsSlot extends JPanel
 
 	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot)
 	{
+		this(color, id, indexInSlot, 46, 42);
+	}
+
+	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot, int width, int height)
+	{
 		this.slotID = id;
 		this.imageLabel = new JLabel();
 		this.parentSetup = null;
@@ -74,7 +79,7 @@ public class InventorySetupsSlot extends JPanel
 		stackIndicator.setFont(FontManager.getRunescapeSmallFont());
 		this.indexInSlot = indexInSlot;
 
-		setPreferredSize(new Dimension(46, 42));
+		setPreferredSize(new Dimension(width, height));
 		setBackground(color);
 		setLayout(new GridBagLayout());
 		// Set constraints to put it in the north east (top right)

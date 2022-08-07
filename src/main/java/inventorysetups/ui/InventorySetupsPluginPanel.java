@@ -860,7 +860,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		{
 			if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 			{
-				JPanel iconGridPanel = InventorySetupsSectionPanel.createIconPanelGrid(plugin, this, setups, 4, null, null, true);
+				JPanel iconGridPanel = InventorySetupsSectionPanel.createIconPanelGrid(plugin, this, setups, InventorySetupsSectionPanel.MAX_ICONS_PER_ROW, null, null, true);
 				overviewPanel.add(iconGridPanel, constraints);
 				constraints.gridy++;
 			}

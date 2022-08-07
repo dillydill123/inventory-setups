@@ -74,6 +74,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	private static final ImageIcon NO_MIN_MAX_SECTION_HOVER_ICON;
 	private boolean forceMaximization;
 
+	public static final int MAX_ICONS_PER_ROW = 4;
+
 	static
 	{
 		final BufferedImage minMaxSectionImg = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/down_arrow.png");
@@ -231,7 +233,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
-					final JPanel iconGridPanel = createIconPanelGridFromNames(plugin, panel, section.getSetups(), 4, setupNamesToBeIncluded, section, true);
+					final JPanel iconGridPanel = createIconPanelGridFromNames(plugin, panel, section.getSetups(), MAX_ICONS_PER_ROW, setupNamesToBeIncluded, section, true);
 					panelWithSetups.add(iconGridPanel, constraints);
 					constraints.gridy++;
 				}
@@ -256,7 +258,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				// Sorting mode is being used, so use the original setup array to determine the order.
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
-					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, setups, 4, setupsInSection, section, true);
+					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, setups, MAX_ICONS_PER_ROW, setupsInSection, section, true);
 					panelWithSetups.add(iconGridPanel, constraints);
 					constraints.gridy++;
 				}
@@ -308,6 +310,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	public static JPanel createIconPanelGrid(final InventorySetupsPlugin plugin, final InventorySetupsPluginPanel panel, final List<InventorySetup> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
 	{
 		int added = 0;
+		int width = 0;
+		int height = 0;
 		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
 		for (final InventorySetup setup : setups)
 		{
@@ -316,15 +320,19 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				continue;
 			}
 			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, panel, setup, section, allowEditable);
+			width = newPanel.getWidth();
+			height = newPanel.getHeight();
 			wrapperPanel.add(newPanel);
 			added++;
 		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize);
+		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize, width, height);
 	}
 
 	public static JPanel createIconPanelGridFromNames(final InventorySetupsPlugin plugin, final InventorySetupsPluginPanel panel, final List<String> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
 	{
 		int added = 0;
+		int width = 0;
+		int height = 0;
 		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
 		for (final String setupName : setups)
 		{
@@ -334,18 +342,20 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			}
 			final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
 			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, panel, setup, section, allowEditable);
+			width = newPanel.getWidth();
+			height = newPanel.getHeight();
 			wrapperPanel.add(newPanel);
 			added++;
 		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize);
+		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize, width, height);
 	}
 
-	public static JPanel addExtraIconSlotsAndExpansionStopper(final JPanel iconGridPanel, int size, int maxColSize)
+	public static JPanel addExtraIconSlotsAndExpansionStopper(final JPanel iconGridPanel, int size, int maxColSize, int width, int height)
 	{
 		// Add empty slots
 		for (int i = size; i % maxColSize != 0; i++)
 		{
-			iconGridPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.INVENTORY, -1));
+			iconGridPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.INVENTORY, -1, width, height));
 		}
 
 		// This stops the Slots in the gridlayout from expanding to fill space
