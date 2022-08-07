@@ -37,7 +37,6 @@ import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
-import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -861,7 +860,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		{
 			if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 			{
-				JPanel iconGridPanel = createIconPanelGrid(setups, 4, null, null, true);
+				JPanel iconGridPanel = InventorySetupsSectionPanel.createIconPanelGrid(plugin, this, setups, 4, null, null, true);
 				overviewPanel.add(iconGridPanel, constraints);
 				constraints.gridy++;
 			}
@@ -909,7 +908,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private void layoutSections(final List<InventorySetup> setups, final GridBagConstraints constraints)
 	{
 		Set<String> setupNamesToBeIncluded = setups.stream().map(InventorySetup::getName).collect(Collectors.toSet());
-		int maxColSize = 4;
 		for (final InventorySetupsSection section : plugin.getSections())
 		{
 			// For quick look up
@@ -920,97 +918,15 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 
 			boolean forceMaximization = !searchBar.getText().isEmpty();
-			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, forceMaximization);
+			InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, section, forceMaximization, true, setupNamesToBeIncluded, setupsInSection, setups);
 			overviewPanel.add(sectionPanel, constraints);
 			constraints.gridy++;
-
-			overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
+			overviewPanel.add(Box.createRigidArea(new Dimension(0, 5)), constraints);
 			constraints.gridy++;
-
-			// Only add the setups if it's maximized. If we are searching, force maximization.
-			if (section.isMaximized() || forceMaximization)
-			{
-				// If it's the default sorting mode (i.e., no sorting mode, use the order of setups in the section
-				// Else use the order of the passed in setups, as they will be sorted according to the sorting mode
-				if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.DEFAULT)
-				{
-					if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
-					{
-						final JPanel iconGridPanel = createIconPanelGridFromNames(section.getSetups(), 4, setupNamesToBeIncluded, section, true);
-						overviewPanel.add(iconGridPanel, constraints);
-						constraints.gridy++;
-					}
-					else
-					{
-						for (final String name : section.getSetups())
-						{
-							// If we are searching and the setup doesn't match the search, don't add setup
-							if (!setupNamesToBeIncluded.contains(name))
-							{
-								continue;
-							}
-							final InventorySetup setupInSection = plugin.getCache().getInventorySetupNames().get(name);
-							createSetupPanelForSection(setupInSection, section, constraints, true);
-						}
-					}
-				}
-				else
-				{
-					// Sorting mode is being used, so use the original setup array to determine the order.
-					if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
-					{
-						final JPanel iconGridPanel = createIconPanelGrid(setups, 4, setupsInSection, section, true);
-						overviewPanel.add(iconGridPanel, constraints);
-						constraints.gridy++;
-					}
-					else
-					{
-						for (final InventorySetup setup : setups)
-						{
-							if (!setupsInSection.contains(setup.getName()))
-							{
-								continue;
-							}
-							createSetupPanelForSection(setup, section, constraints, true);
-						}
-					}
-				}
-
-				overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-				constraints.gridy++;
-			}
-
 		}
-
 		// Create the bottom unassigned section
 		createUnassignedSection(setups, constraints, setupNamesToBeIncluded);
 
-	}
-
-	private void createSetupPanelForSection(final InventorySetup setupInSection, final InventorySetupsSection section, final GridBagConstraints constraints, boolean allowEditable)
-	{
-		final JPanel wrapperPanelForSetup = new JPanel();
-		wrapperPanelForSetup.setLayout(new BorderLayout());
-
-		InventorySetupsPanel newPanel = null;
-		if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.COMPACT)
-		{
-			newPanel = new InventorySetupsCompactPanel(plugin, this, setupInSection, section, allowEditable);
-		}
-		else
-		{
-			newPanel = new InventorySetupsStandardPanel(plugin, this, setupInSection, section, allowEditable);
-		}
-
-		// Add an indentation to the setup
-		wrapperPanelForSetup.add(Box.createRigidArea(new Dimension(12, 0)), BorderLayout.WEST);
-		wrapperPanelForSetup.add(newPanel, BorderLayout.CENTER);
-
-		overviewPanel.add(wrapperPanelForSetup, constraints);
-		constraints.gridy++;
-
-		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-		constraints.gridy++;
 	}
 
 	private void createUnassignedSection(final List<InventorySetup> setups, final GridBagConstraints constraints, final Set<String> setupNamesToBeIncluded)
@@ -1038,39 +954,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		boolean forceMaximization = !searchBar.getText().isEmpty();
 
-		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, forceMaximization, false);
+		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, forceMaximization, false, null, null, setups);
 		overviewPanel.add(sectionPanel, constraints);
-		constraints.gridy++;
-
-		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
-		constraints.gridy++;
-
-		// If the section isn't maximized, don't show any setups. If we are searching, force maximization
-		if (!unassignedSection.isMaximized() && !forceMaximization)
-		{
-			return;
-		}
-
-		if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
-		{
-			final JPanel iconGridPanel = createIconPanelGridFromNames(unassignedSection.getSetups(), 4, null, unassignedSection, false);
-			overviewPanel.add(iconGridPanel, constraints);
-			constraints.gridy++;
-		}
-		else
-		{
-			for (final String setupName : unassignedSection.getSetups())
-			{
-				final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
-				createSetupPanelForSection(setup, unassignedSection, constraints, false);
-			}
-		}
-
-		overviewPanel.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 		constraints.gridy++;
 	}
 
-	private boolean sectionShouldBeHidden(final Set<String> setupNamesToBeIncluded, final Set<String> setupsInSection)
+	public boolean sectionShouldBeHidden(final Set<String> setupNamesToBeIncluded, final Set<String> setupsInSection)
 	{
 		// If the search bar is not empty, do not to show empty sections
 		if (!searchBar.getText().isEmpty())
@@ -1081,55 +970,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		return false;
-	}
-
-	private JPanel createIconPanelGrid(final List<InventorySetup> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
-	{
-		int added = 0;
-		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
-		for (final InventorySetup setup : setups)
-		{
-			if (includedNames != null && !includedNames.contains(setup.getName()))
-			{
-				continue;
-			}
-			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, section, allowEditable);
-			wrapperPanel.add(newPanel);
-			added++;
-		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize);
-	}
-
-	private JPanel createIconPanelGridFromNames(final List<String> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
-	{
-		int added = 0;
-		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
-		for (final String setupName : setups)
-		{
-			if (includedNames != null && !includedNames.contains(setupName))
-			{
-				continue;
-			}
-			final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
-			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, this, setup, section, allowEditable);
-			wrapperPanel.add(newPanel);
-			added++;
-		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize);
-	}
-
-	private JPanel addExtraIconSlotsAndExpansionStopper(final JPanel iconGridPanel, int size, int maxColSize)
-	{
-		// Add empty slots
-		for (int i = size; i % maxColSize != 0; i++)
-		{
-			iconGridPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.INVENTORY, -1));
-		}
-
-		// This stops the Slots in the gridlayout from expanding to fill space
-		JPanel stopExpansionLayout = new JPanel(new FlowLayout());
-		stopExpansionLayout.add(iconGridPanel);
-		return stopExpansionLayout;
 	}
 
 }
