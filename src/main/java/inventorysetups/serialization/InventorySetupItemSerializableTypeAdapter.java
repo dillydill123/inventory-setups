@@ -58,6 +58,7 @@ public class InventorySetupItemSerializableTypeAdapter extends TypeAdapter<Inven
 		Boolean f = null;
 		InventorySetupsStackCompareID sc = null;
 
+		in.beginObject();
 		while (in.hasNext())
 		{
 			JsonToken token = in.peek();
@@ -85,6 +86,7 @@ public class InventorySetupItemSerializableTypeAdapter extends TypeAdapter<Inven
 			}
 		}
 
+		in.endObject();
 		return new InventorySetupItemSerializable(id, q, f, sc);
 	}
 }

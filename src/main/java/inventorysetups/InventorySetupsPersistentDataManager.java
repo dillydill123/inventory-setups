@@ -98,6 +98,7 @@ public class InventorySetupsPersistentDataManager
 		}
 
 		newTest();
+		newTest2();
 
 	}
 
@@ -108,11 +109,28 @@ public class InventorySetupsPersistentDataManager
 		{
 			issList.add(InventorySetupSerializable.convertFromInventorySetup(setup));
 		}
-		//https://stackoverflow.com/questions/58782291/using-gson-how-can-i-serialize-nulls-in-maps-but-not-in-other-classes
-		//https://stackoverflow.com/questions/35477267/gson-serialize-null-for-specific-class-or-field
 
 		final String data = gson.toJson(issList);
 		configManager.setConfiguration(CONFIG_GROUP, "setupsV2", data);
+	}
+
+	private void newTest2()
+	{
+		Type setupType = new TypeToken<ArrayList<InventorySetupSerializable>>()
+		{
+
+		}.getType();
+
+		List<InventorySetupSerializable> issList = new ArrayList<>(loadData("setupsV2", setupType));
+
+		List<InventorySetup> invSetups = new ArrayList<>();
+		for (final InventorySetupSerializable iss : issList)
+		{
+			invSetups.add(InventorySetupSerializable.convertToInventorySetup(iss));
+		}
+
+		return;
+
 	}
 
 	public void updateConfig(boolean updateSetups, boolean updateSections)

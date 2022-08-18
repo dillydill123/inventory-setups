@@ -32,6 +32,10 @@ public class InventorySetupItemSerializable
 
 	static public InventorySetupsItem convertToInventorySetupItem(final InventorySetupItemSerializable is)
 	{
+		if (is == null)
+		{
+			return InventorySetupsItem.getDummyItem();
+		}
 		int id = is.getId();
 		// Name is not saved in the serializable object. It must be obtained from the item manager at runtime
 		String name = "";
