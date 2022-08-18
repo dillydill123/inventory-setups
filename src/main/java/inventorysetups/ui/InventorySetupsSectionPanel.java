@@ -211,11 +211,11 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		}
 
 		add(nameWrapper, BorderLayout.NORTH);
-		addSetups(setupNamesToBeIncluded, setupsInSection, setups);
+		addSetups(setupNamesToBeIncluded, setupsInSection, setups, allowEditable);
 
 	}
 
-	public void addSetups(final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups)
+	public void addSetups(final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups, boolean allowEditable)
 	{
 		// Only add the setups if it's maximized. If we are searching, force maximization.
 		if (section.isMaximized() || forceMaximization)
@@ -233,7 +233,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
-					final JPanel iconGridPanel = createIconPanelGridFromNames(plugin, panel, section.getSetups(), MAX_ICONS_PER_ROW, setupNamesToBeIncluded, section, true);
+					final JPanel iconGridPanel = createIconPanelGridFromNames(plugin, panel, section.getSetups(), MAX_ICONS_PER_ROW, setupNamesToBeIncluded, section, allowEditable);
 					panelWithSetups.add(iconGridPanel, constraints);
 					constraints.gridy++;
 				}
@@ -249,7 +249,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 							continue;
 						}
 						final InventorySetup setupInSection = plugin.getCache().getInventorySetupNames().get(name);
-						createSetupPanelForSection(setupInSection, section, constraints, true);
+						createSetupPanelForSection(setupInSection, section, constraints, allowEditable);
 					}
 				}
 			}
@@ -258,7 +258,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				// Sorting mode is being used, so use the original setup array to determine the order.
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
-					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, setups, MAX_ICONS_PER_ROW, setupsInSection, section, true);
+					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, setups, MAX_ICONS_PER_ROW, setupsInSection, section, allowEditable);
 					panelWithSetups.add(iconGridPanel, constraints);
 					constraints.gridy++;
 				}
@@ -272,7 +272,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 						{
 							continue;
 						}
-						createSetupPanelForSection(setup, section, constraints, true);
+						createSetupPanelForSection(setup, section, constraints, allowEditable);
 					}
 				}
 			}
