@@ -126,6 +126,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY_SETUPS = "setups";
+	public static final String CONFIG_KEY_SETUPS_V2 = "setupsV2";
 	public static final String CONFIG_KEY_SECTIONS = "sections";
 	public static final String CONFIG_KEY_SECTION_MODE = "sectionMode";
 	public static final String CONFIG_KEY_PANEL_VIEW = "panelView";

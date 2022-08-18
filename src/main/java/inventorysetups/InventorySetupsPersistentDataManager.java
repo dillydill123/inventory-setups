@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTIONS;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SETUPS;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SETUPS_V2;
 
 @Slf4j
 public class InventorySetupsPersistentDataManager
@@ -66,16 +67,38 @@ public class InventorySetupsPersistentDataManager
 		sections.clear();
 		cache.clearAll();
 
-		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
+		String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+		if (oldData != null)
+		{
+			// Perform migration of old data
+			String newData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
+			if (Strings.isNullOrEmpty(newData))
+			{
+				Type setupType = new TypeToken<ArrayList<InventorySetup>>()
+				{
+
+				}.getType();
+				inventorySetups.addAll(loadData(CONFIG_KEY_SETUPS, setupType));
+				updateConfig(true, false);
+			}
+
+			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+		}
+
+		Type setupTypeV2 = new TypeToken<ArrayList<InventorySetupSerializable>>()
 		{
 
 		}.getType();
+		List<InventorySetupSerializable> issList = new ArrayList<>(loadData(CONFIG_KEY_SETUPS_V2, setupTypeV2));
+		for (final InventorySetupSerializable iss : issList)
+		{
+			inventorySetups.add(InventorySetupSerializable.convertToInventorySetup(iss));
+		}
+
 		Type sectionType = new TypeToken<ArrayList<InventorySetupsSection>>()
 		{
 
 		}.getType();
-
-		inventorySetups.addAll(loadData(CONFIG_KEY_SETUPS, setupType));
 		sections.addAll(loadData(CONFIG_KEY_SECTIONS, sectionType));
 		// Fix names of setups from config if there are duplicate names
 		for (final InventorySetupsSection section : sections)
@@ -97,40 +120,6 @@ public class InventorySetupsPersistentDataManager
 			cache.addSection(section);
 		}
 
-		newTest();
-		newTest2();
-
-	}
-
-	private void newTest()
-	{
-		List<InventorySetupSerializable> issList = new ArrayList<>();
-		for (final InventorySetup setup : inventorySetups)
-		{
-			issList.add(InventorySetupSerializable.convertFromInventorySetup(setup));
-		}
-
-		final String data = gson.toJson(issList);
-		configManager.setConfiguration(CONFIG_GROUP, "setupsV2", data);
-	}
-
-	private void newTest2()
-	{
-		Type setupType = new TypeToken<ArrayList<InventorySetupSerializable>>()
-		{
-
-		}.getType();
-
-		List<InventorySetupSerializable> issList = new ArrayList<>(loadData("setupsV2", setupType));
-
-		List<InventorySetup> invSetups = new ArrayList<>();
-		for (final InventorySetupSerializable iss : issList)
-		{
-			invSetups.add(InventorySetupSerializable.convertToInventorySetup(iss));
-		}
-
-		return;
-
 	}
 
 	public void updateConfig(boolean updateSetups, boolean updateSections)
@@ -138,8 +127,14 @@ public class InventorySetupsPersistentDataManager
 		if (updateSetups)
 		{
 			// update setups
-			final String jsonSetups = gson.toJson(inventorySetups);
-			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS, jsonSetups);
+			List<InventorySetupSerializable> issList = new ArrayList<>();
+			for (final InventorySetup setup : inventorySetups)
+			{
+				issList.add(InventorySetupSerializable.convertFromInventorySetup(setup));
+			}
+
+			final String data = gson.toJson(issList);
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2, data);
 		}
 
 		if (updateSections)
@@ -150,7 +145,6 @@ public class InventorySetupsPersistentDataManager
 		}
 
 	}
-
 
 	private <T> List<T> loadData(final String configKey, Type type)
 	{
