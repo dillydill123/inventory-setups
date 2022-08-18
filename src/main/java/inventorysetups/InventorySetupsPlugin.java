@@ -961,8 +961,15 @@ public class InventorySetupsPlugin extends Plugin
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
-			InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.RUNE_POUCH, i) ? config.stackCompareType() : InventorySetupsStackCompareID.None;
-			runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false, stackCompareType));
+			if (runeItemId == -1)
+			{
+				runePouchData.add(InventorySetupsItem.getDummyItem());
+			}
+			else
+			{
+				InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.RUNE_POUCH, i) ? config.stackCompareType() : InventorySetupsStackCompareID.None;
+				runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false, stackCompareType));
+			}
 		}
 
 		return runePouchData;
@@ -981,10 +988,17 @@ public class InventorySetupsPlugin extends Plugin
 			String boltName = boltNotFound ? "" : itemManager.getItemComposition(bolt.getItemId()).getName();
 			int boltItemId = boltNotFound ? -1 : bolt.getItemId();
 
-			InventorySetupsStackCompareID stackCompareType =
-				panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.BOLT_POUCH, i)
-					? config.stackCompareType() : InventorySetupsStackCompareID.None;
-			boltPouchData.add(new InventorySetupsItem(boltItemId, boltName, boltAmount, false, stackCompareType));
+			if (boltItemId == -1)
+			{
+				boltPouchData.add(InventorySetupsItem.getDummyItem());
+			}
+			else
+			{
+				InventorySetupsStackCompareID stackCompareType =
+						panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.BOLT_POUCH, i)
+								? config.stackCompareType() : InventorySetupsStackCompareID.None;
+				boltPouchData.add(new InventorySetupsItem(boltItemId, boltName, boltAmount, false, stackCompareType));
+			}
 		}
 
 		return boltPouchData;
@@ -1713,7 +1727,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
-				newContainer.add(new InventorySetupsItem(-1, "", 0, config.fuzzy(), stackCompareType));
+				newContainer.add(InventorySetupsItem.getDummyItem());
 			}
 			else
 			{

@@ -50,8 +50,6 @@ public class InventorySetupsItem
 		fuzzy = !fuzzy;
 	}
 
-	public static InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, false, InventorySetupsStackCompareID.None);
-
 	public static InventorySetupsItem getDummyItem()
 	{
 		return new InventorySetupsItem(-1, "", 0, false, InventorySetupsStackCompareID.None);
