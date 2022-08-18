@@ -108,6 +108,14 @@ public class InventorySetupsCache
 		sectionSetupsMap.get(section.getName()).remove(setup.getName());
 	}
 
+	public void clearAll()
+	{
+		inventorySetupNames.clear();
+		sectionNames.clear();
+		setupSectionsMap.clear();
+		sectionSetupsMap.clear();
+	}
+
 	// Mapping from inventory setup name -> inventory setup object
 	@Getter
 	private final Map<String, InventorySetup> inventorySetupNames;

@@ -613,7 +613,9 @@ public class InventorySetupsPlugin extends Plugin
 		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 
 		this.cache = new InventorySetupsCache();
-		this.dataManager = new InventorySetupsPersistentDataManager(this, panel, configManager, cache, gson);
+		this.inventorySetups = new ArrayList<>();
+		this.sections = new ArrayList<>();
+		this.dataManager = new InventorySetupsPersistentDataManager(this, panel, configManager, cache, gson, inventorySetups, sections);
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -628,8 +630,6 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
-				inventorySetups = dataManager.getInventorySetups();
-				sections = dataManager.getSections();
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
@@ -1616,6 +1616,7 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 				return true;
 			});
 		}
@@ -1628,6 +1629,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			dataManager.loadConfig();
+			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			return true;
 		});
 	}

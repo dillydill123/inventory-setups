@@ -40,7 +40,13 @@ public class InventorySetupsPersistentDataManager
 	private List<InventorySetupsSection> sections;
 
 	@Inject
-	public InventorySetupsPersistentDataManager(final InventorySetupsPlugin plugin, final InventorySetupsPluginPanel panel, final ConfigManager manager, final InventorySetupsCache cache, final Gson gson)
+	public InventorySetupsPersistentDataManager(final InventorySetupsPlugin plugin,
+												final InventorySetupsPluginPanel panel,
+												final ConfigManager manager,
+												final InventorySetupsCache cache,
+												final Gson gson,
+												List<InventorySetup> inventorySetups,
+												List<InventorySetupsSection> sections)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
@@ -53,6 +59,10 @@ public class InventorySetupsPersistentDataManager
 
 	public void loadConfig()
 	{
+		inventorySetups = new ArrayList<>();
+		sections = new ArrayList<>();
+		cache.clearAll();
+
 		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
 		{
 
