@@ -3,7 +3,6 @@ package inventorysetups.serialization;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import lombok.Value;
-import net.runelite.api.ItemID;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -70,7 +69,7 @@ public class InventorySetupSerializable
 		Boolean uh = inventorySetup.isUnorderedHighlight() ? Boolean.TRUE : null;
 		Integer sb = inventorySetup.getSpellBook() != 0 ? inventorySetup.getSpellBook() : null;
 		Boolean fv = inventorySetup.isFavorite() ? Boolean.TRUE : null;
-		Integer iId = inventorySetup.getIconID() != ItemID.CAKE_OF_GUIDANCE && inventorySetup.getIconID() != 0 ? inventorySetup.getIconID() : null;
+		Integer iId = inventorySetup.getIconID() <= 0 ? inventorySetup.getIconID() : null;
 
 		return new InventorySetupSerializable(inv, eq, rp, bp, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId);
 	}
@@ -129,7 +128,7 @@ public class InventorySetupSerializable
 		boolean uh = iss.getUh() != null ? iss.getUh() : Boolean.FALSE;
 		int sb = iss.getSb() != null ? iss.getSb() : 0;
 		boolean fv = iss.getFv() != null ? iss.getFv() : Boolean.FALSE;
-		int iId = iss.getIId() != null ? iss.getIId() : ItemID.CAKE_OF_GUIDANCE;
+		int iId = iss.getIId() != null ? iss.getIId() : -1;
 
 		return new InventorySetup(inv, eq, rp, bp, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId);
 	}

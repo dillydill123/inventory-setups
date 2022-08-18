@@ -24,7 +24,6 @@
  */
 package inventorysetups;
 
-import joptsimple.internal.Strings;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

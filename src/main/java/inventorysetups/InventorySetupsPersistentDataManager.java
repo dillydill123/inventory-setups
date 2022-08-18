@@ -126,7 +126,6 @@ public class InventorySetupsPersistentDataManager
 	{
 		if (updateSetups)
 		{
-			// update setups
 			List<InventorySetupSerializable> issList = new ArrayList<>();
 			for (final InventorySetup setup : inventorySetups)
 			{
@@ -139,7 +138,6 @@ public class InventorySetupsPersistentDataManager
 
 		if (updateSections)
 		{
-			// update setups
 			final String jsonSections = gson.toJson(sections);
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SECTIONS, jsonSections);
 		}
