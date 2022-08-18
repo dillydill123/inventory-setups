@@ -340,7 +340,10 @@ public class InventorySetupsPlugin extends Plugin
 				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
 				event.getKey().equals(CONFIG_KEY_UNASSIGNED_MAXIMIZED))
 			{
-				panel.redrawOverviewPanel(false);
+				SwingUtilities.invokeLater(() ->
+				{
+					panel.redrawOverviewPanel(false);
+				});
 			}
 			else if (event.getKey().equals(CONFIG_KEY_MANUAL_BANK_FILTER))
 			{

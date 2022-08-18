@@ -34,10 +34,8 @@ public class InventorySetupsPersistentDataManager
 
 	private Gson gson;
 
-	@Getter
-	private List<InventorySetup> inventorySetups;
-	@Getter
-	private List<InventorySetupsSection> sections;
+	private final List<InventorySetup> inventorySetups;
+	private final List<InventorySetupsSection> sections;
 
 	@Inject
 	public InventorySetupsPersistentDataManager(final InventorySetupsPlugin plugin,
@@ -45,22 +43,24 @@ public class InventorySetupsPersistentDataManager
 												final ConfigManager manager,
 												final InventorySetupsCache cache,
 												final Gson gson,
-												List<InventorySetup> inventorySetups,
-												List<InventorySetupsSection> sections)
+												final List<InventorySetup> inventorySetups,
+												final List<InventorySetupsSection> sections)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.configManager = manager;
 		this.cache = cache;
 		this.gson = gson;
+		this.inventorySetups = inventorySetups;
+		this.sections = sections;
 
 		this.gson = this.gson.newBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
 	}
 
 	public void loadConfig()
 	{
-		inventorySetups = new ArrayList<>();
-		sections = new ArrayList<>();
+		inventorySetups.clear();
+		sections.clear();
 		cache.clearAll();
 
 		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
@@ -72,8 +72,8 @@ public class InventorySetupsPersistentDataManager
 
 		}.getType();
 
-		inventorySetups = loadData(CONFIG_KEY_SETUPS, setupType);
-		sections = loadData(CONFIG_KEY_SECTIONS, sectionType);
+		inventorySetups.addAll(loadData(CONFIG_KEY_SETUPS, setupType));
+		sections.addAll(loadData(CONFIG_KEY_SECTIONS, sectionType));
 		// Fix names of setups from config if there are duplicate names
 		for (final InventorySetupsSection section : sections)
 		{
