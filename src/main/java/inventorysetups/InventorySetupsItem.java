@@ -34,7 +34,8 @@ public class InventorySetupsItem
 	@Getter
 	private final int id;
 	@Getter
-	private final String name;
+	@Setter
+	private String name;
 	@Getter
 	private final int quantity;
 	@Getter

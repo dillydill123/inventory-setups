@@ -36,6 +36,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+
+import joptsimple.internal.Strings;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.runelite.client.game.ItemManager;

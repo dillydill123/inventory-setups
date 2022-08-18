@@ -172,8 +172,35 @@ public class InventorySetupsPersistentDataManager
 			final String newName = InventorySetupUtilities.findNewName(setup.getName(), cache.getInventorySetupNames().keySet());
 			setup.setName(newName);
 			cache.addSetup(setup);
+
+			// add Item names
+			addItemNames(setup.getInventory());
+			addItemNames(setup.getEquipment());
+			addItemNames(setup.getRune_pouch());
+			addItemNames(setup.getBoltPouch());
+			for (final Integer key : setup.getAdditionalFilteredItems().keySet())
+			{
+				addItemName(setup.getAdditionalFilteredItems().get(key));
+			}
+
 		}
 
+	}
+
+	private void addItemNames(final List<InventorySetupsItem> items)
+	{
+		if (items != null)
+		{
+			for (final InventorySetupsItem item : items)
+			{
+				addItemName(item);
+			}
+		}
+	}
+
+	private void addItemName(final InventorySetupsItem item)
+	{
+		item.setName(plugin.getItemManager().getItemComposition(item.getId()).getName());
 	}
 
 	private void handleMigrationOfOldData()
