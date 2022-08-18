@@ -25,9 +25,6 @@
 package inventorysetups;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupsPluginPanel;
@@ -50,14 +47,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import joptsimple.internal.Strings;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -132,7 +127,6 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP = "inventorysetups";
 	public static final String CONFIG_KEY_SETUPS = "setups";
 	public static final String CONFIG_KEY_SECTIONS = "sections";
-
 	public static final String CONFIG_KEY_SECTION_MODE = "sectionMode";
 	public static final String CONFIG_KEY_PANEL_VIEW = "panelView";
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
@@ -227,6 +221,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	// current version of the plugin
 	private String currentVersion;
+
+	@Getter
+	private InventorySetupsPersistentDataManager dataManager;
 
 	@Setter
 	@Getter
@@ -615,7 +612,8 @@ public class InventorySetupsPlugin extends Plugin
 
 		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 
-		this.gson = this.gson.newBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
+		this.cache = new InventorySetupsCache();
+		this.dataManager = new InventorySetupsPersistentDataManager(this, panel, configManager, cache, gson);
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -627,7 +625,13 @@ public class InventorySetupsPlugin extends Plugin
 					return false;
 			}
 
-			loadConfig();
+			clientThread.invokeLater(() ->
+			{
+				dataManager.loadConfig();
+				inventorySetups = dataManager.getInventorySetups();
+				sections = dataManager.getSections();
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
+			});
 
 			return true;
 		});
@@ -696,7 +700,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			cache.addSetup(invSetup);
 			inventorySetups.add(invSetup);
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		});
@@ -735,7 +739,7 @@ public class InventorySetupsPlugin extends Plugin
 		cache.addSection(newSection);
 		sections.add(newSection);
 
-		updateConfig(false, true);
+		dataManager.updateConfig(false, true);
 		SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 	}
@@ -753,7 +757,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
-		updateConfig(false, true);
+		dataManager.updateConfig(false, true);
 		panel.redrawOverviewPanel(false);
 	}
 
@@ -769,7 +773,7 @@ public class InventorySetupsPlugin extends Plugin
 				section.getSetups().add(setupName);
 			}
 		}
-		updateConfig(false, true);
+		dataManager.updateConfig(false, true);
 		panel.redrawOverviewPanel(false);
 	}
 
@@ -783,7 +787,7 @@ public class InventorySetupsPlugin extends Plugin
 		InventorySetup setup = inventorySetups.remove(invIndex);
 		inventorySetups.add(newPosition, setup);
 		panel.redrawOverviewPanel(false);
-		updateConfig(true, false);
+		dataManager.updateConfig(true, false);
 	}
 
 	public void moveSection(int sectionIndex, int newPosition)
@@ -796,7 +800,7 @@ public class InventorySetupsPlugin extends Plugin
 		InventorySetupsSection section = sections.remove(sectionIndex);
 		sections.add(newPosition, section);
 		panel.redrawOverviewPanel(false);
-		updateConfig(false, true);
+		dataManager.updateConfig(false, true);
 	}
 
 	public void moveSetupWithinSection(final InventorySetupsSection section, int invIndex, int newPosition)
@@ -809,7 +813,7 @@ public class InventorySetupsPlugin extends Plugin
 		final String setupName = section.getSetups().remove(invIndex);
 		section.getSetups().add(newPosition, setupName);
 		panel.redrawOverviewPanel(false);
-		updateConfig(false, true);
+		dataManager.updateConfig(false, true);
 	}
 
 	private boolean isNewPositionInvalid(int oldPosition, int newPosition, int size)
@@ -912,7 +916,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), stackCompareType);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
@@ -1213,7 +1217,7 @@ public class InventorySetupsPlugin extends Plugin
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
@@ -1254,7 +1258,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			container.set(slot.getIndexInSlot(), newItem);
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 
@@ -1294,7 +1298,7 @@ public class InventorySetupsPlugin extends Plugin
 							{
 								clientThread.invokeLater(() ->
 								{
-									int quantity = parseTextInputAmount(input);
+									int quantity = InventorySetupUtilities.parseTextInputAmount(input);
 
 									final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
@@ -1314,7 +1318,7 @@ public class InventorySetupsPlugin extends Plugin
 									}
 
 									container.set(slot.getIndexInSlot(), newItem);
-									updateConfig(true, false);
+									dataManager.updateConfig(true, false);
 									panel.refreshCurrentSetup();
 
 								});
@@ -1352,7 +1356,7 @@ public class InventorySetupsPlugin extends Plugin
 							container.set(slot.getIndexInSlot(), newItem);
 						}
 
-						updateConfig(true, false);
+						dataManager.updateConfig(true, false);
 						panel.refreshCurrentSetup();
 					}
 
@@ -1398,7 +1402,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				int finalId = itemManager.canonicalize(itemId);
 				setup.setIconID(finalId);
-				updateConfig(true, false);
+				dataManager.updateConfig(true, false);
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 			}).build();
 	}
@@ -1421,7 +1425,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
 				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
-				updateConfig(true, false);
+				dataManager.updateConfig(true, false);
 				panel.refreshCurrentSetup();
 				return;
 			}
@@ -1443,7 +1447,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			container.set(slot.getIndexInSlot(), dummyItem);
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
@@ -1484,7 +1488,7 @@ public class InventorySetupsPlugin extends Plugin
 			container.get(slot.getIndexInSlot()).toggleIsFuzzy();
 		}
 
-		updateConfig(true, false);
+		dataManager.updateConfig(true, false);
 		panel.refreshCurrentSetup();
 	}
 
@@ -1498,7 +1502,7 @@ public class InventorySetupsPlugin extends Plugin
 		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 		container.get(slot.getIndexInSlot()).setStackCompare(newStackCompare);
 
-		updateConfig(true, false);
+		dataManager.updateConfig(true, false);
 		panel.refreshCurrentSetup();
 	}
 
@@ -1539,7 +1543,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			panel.getCurrentSelectedSetup().updateSpellbook(newSpellbook);
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 
@@ -1550,7 +1554,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			setup.updateNotes(text);
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 		});
 	}
 
@@ -1569,7 +1573,7 @@ public class InventorySetupsPlugin extends Plugin
 			cache.removeSetup(setup);
 			inventorySetups.remove(setup);
 			panel.redrawOverviewPanel(false);
-			updateConfig(true, true);
+			dataManager.updateConfig(true, true);
 		}
 	}
 
@@ -1580,7 +1584,7 @@ public class InventorySetupsPlugin extends Plugin
 			cache.removeSection(section);
 			sections.remove(section);
 			panel.redrawOverviewPanel(false);
-			updateConfig(false, true);
+			dataManager.updateConfig(false, true);
 		}
 	}
 
@@ -1591,7 +1595,7 @@ public class InventorySetupsPlugin extends Plugin
 		section.getSetups().remove(setup.getName());
 
 		panel.redrawOverviewPanel(false);
-		updateConfig(false, true);
+		dataManager.updateConfig(false, true);
 	}
 
 	private boolean isDeletionConfirmed(final String message, final String title)
@@ -1600,24 +1604,6 @@ public class InventorySetupsPlugin extends Plugin
 				message, title, JOptionPane.OK_CANCEL_OPTION);
 
 		return confirm == JOptionPane.YES_OPTION;
-	}
-
-	public void updateConfig(boolean updateSetups, boolean updateSections)
-	{
-		if (updateSetups)
-		{
-			// update setups
-			final String jsonSetups = gson.toJson(inventorySetups);
-			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS, jsonSetups);
-		}
-
-		if (updateSections)
-		{
-			// update setups
-			final String jsonSections = gson.toJson(sections);
-			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SECTIONS, jsonSections);
-		}
-
 	}
 
 	@Subscribe
@@ -1629,7 +1615,7 @@ public class InventorySetupsPlugin extends Plugin
 			// config will have changed to new account, load it up
 			clientThread.invokeLater(() ->
 			{
-				loadConfig();
+				dataManager.loadConfig();
 				return true;
 			});
 		}
@@ -1641,7 +1627,7 @@ public class InventorySetupsPlugin extends Plugin
 		// config will have changed to local file
 		clientThread.invokeLater(() ->
 		{
-			loadConfig();
+			dataManager.loadConfig();
 			return true;
 		});
 	}
@@ -1839,7 +1825,7 @@ public class InventorySetupsPlugin extends Plugin
 			cache.addSetup(newSetup);
 			inventorySetups.add(newSetup);
 
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		}
@@ -1889,7 +1875,7 @@ public class InventorySetupsPlugin extends Plugin
 				inventorySetups.add(inventorySetup);
 			}
 			
-			updateConfig(true, false);
+			dataManager.updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		}
@@ -1939,7 +1925,7 @@ public class InventorySetupsPlugin extends Plugin
 			cache.addSection(newSection);
 			sections.add(newSection);
 
-			updateConfig(false, true);
+			dataManager.updateConfig(false, true);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 		}
 		catch (Exception e)
@@ -1988,7 +1974,7 @@ public class InventorySetupsPlugin extends Plugin
 				sections.add(section);
 			}
 
-			updateConfig(false, true);
+			dataManager.updateConfig(false, true);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		}
@@ -2009,7 +1995,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void preProcessNewSection(final InventorySetupsSection newSection)
 	{
-		final String newName = findNewName(newSection.getName(), cache.getSectionNames().keySet());
+		final String newName = InventorySetupUtilities.findNewName(newSection.getName(), cache.getSectionNames().keySet());
 		newSection.setName(newName);
 
 		// Remove any duplicates that came in when importing
@@ -2022,7 +2008,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void preProcessNewSetup(final InventorySetup newSetup)
 	{
-		final String newName = findNewName(newSetup.getName(), cache.getInventorySetupNames().keySet());
+		final String newName = InventorySetupUtilities.findNewName(newSetup.getName(), cache.getInventorySetupNames().keySet());
 		newSetup.setName(newName);
 	}
 
@@ -2083,69 +2069,6 @@ public class InventorySetupsPlugin extends Plugin
 			default:
 				assert false : "Invalid ID given";
 				return null;
-		}
-	}
-
-	private void loadConfig()
-	{
-		this.cache = new InventorySetupsCache();
-
-		Type setupType = new TypeToken<ArrayList<InventorySetup>>()
-		{
-
-		}.getType();
-		Type sectionType = new TypeToken<ArrayList<InventorySetupsSection>>()
-		{
-
-		}.getType();
-
-		inventorySetups = loadData(CONFIG_KEY_SETUPS, setupType);
-		sections = loadData(CONFIG_KEY_SECTIONS, sectionType);
-		// Fix names of setups from config if there are duplicate names
-		for (final InventorySetupsSection section : sections)
-		{
-			final String newName = findNewName(section.getName(), cache.getSectionNames().keySet());
-			section.setName(newName);
-
-			// Remove any duplicates that exist
-			List<String> uniqueSetups = section.getSetups().stream().distinct().collect(Collectors.toList());
-			section.setSetups(uniqueSetups);
-		}
-
-		clientThread.invokeLater(() ->
-		{
-			processSetupsFromConfig();
-
-			for (final InventorySetupsSection section : sections)
-			{
-				// Remove setups which don't exist in a section
-				section.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
-				cache.addSection(section);
-			}
-
-			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
-		});
-	}
-
-	private <T> List<T> loadData(final String configKey, Type type)
-	{
-		final String storedData = configManager.getConfiguration(CONFIG_GROUP, configKey);
-		if (Strings.isNullOrEmpty(storedData))
-		{
-			return new ArrayList<>();
-		}
-		else
-		{
-			try
-			{
-				// serialize the internal data structure from the json in the configuration
-				return gson.fromJson(storedData, type);
-			}
-			catch (Exception e)
-			{
-				log.error("Exception occurred while loading data", e);
-				return new ArrayList<>();
-			}
 		}
 	}
 
@@ -2309,13 +2232,13 @@ public class InventorySetupsPlugin extends Plugin
 		return itemId == ItemID.BOLT_POUCH;
 	}
 
-	private boolean containerContainsRunePouch(final List<InventorySetupsItem> container)
+	public boolean containerContainsRunePouch(final List<InventorySetupsItem> container)
 	{
 		return checkIfContainerContainsItem(ItemID.RUNE_POUCH, container) ||
 			checkIfContainerContainsItem(ItemID.RUNE_POUCH_L, container);
 	}
 
-	private boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
+	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
 	{
 		return checkIfContainerContainsItem(ItemID.BOLT_POUCH, container);
 	}
@@ -2337,75 +2260,11 @@ public class InventorySetupsPlugin extends Plugin
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				updateConfig(true, true);
+				dataManager.updateConfig(true, true);
 			}
 		});
 
 		colorPicker.setVisible(true);
-	}
-
-	public int parseTextInputAmount(String input)
-	{
-		// only take the first 10 characters (max amount is 2.147B which is only 10 digits)
-		if (input.length() > 10)
-		{
-			return Integer.MAX_VALUE;
-		}
-		input = input.toLowerCase();
-
-		char finalChar = input.charAt(input.length() - 1);
-		int factor = 1;
-		if (Character.isLetter(finalChar))
-		{
-			input = input.substring(0, input.length() - 1);
-			switch (finalChar)
-			{
-				case 'k':
-					factor = 1000;
-					break;
-				case 'm':
-					factor = 1000000;
-					break;
-				case 'b':
-					factor = 1000000000;
-					break;
-			}
-		}
-
-		// limit to max int value
-		long quantityLong = Long.parseLong(input) * factor;
-		int quantity = (int) Math.min(quantityLong, Integer.MAX_VALUE);
-		quantity = Math.max(quantity, 1);
-
-		return quantity;
-	}
-
-	private void processSetupsFromConfig()
-	{
-		for (final InventorySetup setup : inventorySetups)
-		{
-			if (setup.getRune_pouch() == null && containerContainsRunePouch(setup.getInventory()))
-			{
-				setup.updateRunePouch(getRunePouchData());
-			}
-			if (setup.getBoltPouch() == null && containerContainsBoltPouch(setup.getInventory()))
-			{
-				setup.updateBoltPouch(getBoltPouchData());
-			}
-			if (setup.getNotes() == null)
-			{
-				setup.updateNotes("");
-			}
-			if (setup.getAdditionalFilteredItems() == null)
-			{
-				setup.updateAdditionalItems(new HashMap<>());
-			}
-
-			final String newName = findNewName(setup.getName(), cache.getInventorySetupNames().keySet());
-			setup.setName(newName);
-			cache.addSetup(setup);
-		}
-
 	}
 
 	public void updateSetupName(final InventorySetup setup, final String newName)
@@ -2432,53 +2291,6 @@ public class InventorySetupsPlugin extends Plugin
 		cache.updateSectionName(section, newName);
 		section.setName(newName);
 		// config will already be updated by caller so no need to update it here
-	}
-
-	private String findNewName(String originalName, final Set<String> objects)
-	{
-		// Do not allow names of more than MAX_SETUP_NAME_LENGTH chars
-		if (originalName.length() > MAX_SETUP_NAME_LENGTH)
-		{
-			originalName = originalName.substring(0, MAX_SETUP_NAME_LENGTH);
-		}
-
-		// Fix duplicate name by adding an incrementing number to the duplicate
-		String newName = originalName;
-		int i = 1;
-		while (objects.contains(newName) || newName.isEmpty())
-		{
-			String i_str = String.valueOf(i);
-			if (originalName.length() + i_str.length() > MAX_SETUP_NAME_LENGTH)
-			{
-				int chars_to_cut_off = i_str.length() - (MAX_SETUP_NAME_LENGTH - originalName.length());
-				newName = originalName.substring(0, MAX_SETUP_NAME_LENGTH - chars_to_cut_off) + i++;
-			}
-			else
-			{
-				newName = originalName + i++;
-			}
-		}
-		return newName;
-	}
-
-	private String fixOldJSONData(final String json)
-	{
-		final Gson gson = new Gson();
-		JsonElement je = gson.fromJson(json, JsonElement.class);
-		JsonArray ja = je.getAsJsonArray();
-		for (JsonElement elem : ja)
-		{
-			JsonObject setup = elem.getAsJsonObject();
-
-			// Example if needed in the future
-//			if (setup.getAsJsonPrimitive("stackDifference").isBoolean())
-//			{
-//				int stackDiff = setup.get("stackDifference").getAsBoolean() ? 1 : 0;
-//				setup.remove("stackDifference");
-//				setup.addProperty("stackDifference", stackDiff);
-//			}
-		}
-		return je.toString();
 	}
 
 }

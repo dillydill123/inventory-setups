@@ -71,18 +71,18 @@ public class InventorySetupsUnitTest
 	@Test
 	public void testInputText()
 	{
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1"), 1);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("0"), 1);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1K"), 1000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("10K"), 10000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1k"), 1000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1m"), 1000000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1M"), 1000000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1b"), 1000000000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("1B"), 1000000000);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("10b"), 2147483647);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("10000M"), 2147483647);
-		assertEquals(inventorySetupsPlugin.parseTextInputAmount("102391273213291"), 2147483647);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1"), 1);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("0"), 1);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1K"), 1000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("10K"), 10000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1k"), 1000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1m"), 1000000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1M"), 1000000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1b"), 1000000000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("1B"), 1000000000);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("10b"), 2147483647);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("10000M"), 2147483647);
+		assertEquals(InventorySetupUtilities.parseTextInputAmount("102391273213291"), 2147483647);
 	}
 
 	@Test

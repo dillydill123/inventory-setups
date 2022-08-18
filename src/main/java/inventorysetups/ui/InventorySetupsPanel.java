@@ -28,8 +28,6 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsPlugin;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JMenuItem;

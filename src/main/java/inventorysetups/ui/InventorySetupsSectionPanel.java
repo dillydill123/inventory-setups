@@ -117,7 +117,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 					if (allowEditable && !forceMaximization)
 					{
 						section.setMaximized(!section.isMaximized());
-						plugin.updateConfig(false, true);
+						plugin.getDataManager().updateConfig(false, true);
 						panel.redrawOverviewPanel(false);
 					}
 					else
