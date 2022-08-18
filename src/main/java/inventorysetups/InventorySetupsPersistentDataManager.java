@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTIONS;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SETUPS;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SETUPS_V2;
 
 @Slf4j
 public class InventorySetupsPersistentDataManager
@@ -39,6 +36,11 @@ public class InventorySetupsPersistentDataManager
 
 	private final List<InventorySetup> inventorySetups;
 	private final List<InventorySetupsSection> sections;
+
+	public static final String CONFIG_KEY_SETUPS_MIGRATED_V2 = "migratedV2";
+	public static final String CONFIG_KEY_SETUPS = "setups";
+	public static final String CONFIG_KEY_SETUPS_V2 = "setupsV2";
+	public static final String CONFIG_KEY_SECTIONS = "sections";
 
 	@Inject
 	public InventorySetupsPersistentDataManager(final InventorySetupsPlugin plugin,
@@ -67,23 +69,8 @@ public class InventorySetupsPersistentDataManager
 		sections.clear();
 		cache.clearAll();
 
-		String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
-		if (oldData != null)
-		{
-			// Perform migration of old data
-			String newData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
-			if (Strings.isNullOrEmpty(newData))
-			{
-				Type setupType = new TypeToken<ArrayList<InventorySetup>>()
-				{
-
-				}.getType();
-				inventorySetups.addAll(loadData(CONFIG_KEY_SETUPS, setupType));
-				updateConfig(true, false);
-			}
-
-			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
-		}
+		// Handles migration of old setup data
+		handleMigrationOfOldData();
 
 		Type setupTypeV2 = new TypeToken<ArrayList<InventorySetupSerializable>>()
 		{
@@ -94,13 +81,13 @@ public class InventorySetupsPersistentDataManager
 		{
 			inventorySetups.add(InventorySetupSerializable.convertToInventorySetup(iss));
 		}
+		processSetupsFromConfig();
 
 		Type sectionType = new TypeToken<ArrayList<InventorySetupsSection>>()
 		{
 
 		}.getType();
 		sections.addAll(loadData(CONFIG_KEY_SECTIONS, sectionType));
-		// Fix names of setups from config if there are duplicate names
 		for (final InventorySetupsSection section : sections)
 		{
 			final String newName = InventorySetupUtilities.findNewName(section.getName(), cache.getSectionNames().keySet());
@@ -109,12 +96,7 @@ public class InventorySetupsPersistentDataManager
 			// Remove any duplicates that exist
 			List<String> uniqueSetups = section.getSetups().stream().distinct().collect(Collectors.toList());
 			section.setSetups(uniqueSetups);
-		}
 
-		processSetupsFromConfig();
-
-		for (final InventorySetupsSection section : sections)
-		{
 			// Remove setups which don't exist in a section
 			section.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
 			cache.addSection(section);
@@ -192,6 +174,29 @@ public class InventorySetupsPersistentDataManager
 			cache.addSetup(setup);
 		}
 
+	}
+
+	private void handleMigrationOfOldData()
+	{
+		String hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
+		if (Strings.isNullOrEmpty(hasMigratedToV2))
+		{
+			// Perform migration of old data
+			Type setupType = new TypeToken<ArrayList<InventorySetup>>()
+			{
+
+			}.getType();
+			inventorySetups.addAll(loadData(CONFIG_KEY_SETUPS, setupType));
+			updateConfig(true, false);
+			inventorySetups.clear();
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2, "True");
+		}
+
+		if (Strings.isNullOrEmpty(hasMigratedToV2))
+		{
+			// Don't unset configuration until new version is stable
+			//configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+		}
 	}
 
 	private String fixOldJSONData(final String json)
