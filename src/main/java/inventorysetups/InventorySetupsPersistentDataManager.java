@@ -5,14 +5,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import inventorysetups.serialization.InventorySetupItemSerializable;
+import inventorysetups.serialization.InventorySetupItemSerializableTypeAdapter;
+import inventorysetups.serialization.InventorySetupSerializable;
+import inventorysetups.serialization.LongTypeAdapter;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import joptsimple.internal.Strings;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
 
 import javax.inject.Inject;
-import javax.swing.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +57,7 @@ public class InventorySetupsPersistentDataManager
 		this.sections = sections;
 
 		this.gson = this.gson.newBuilder().registerTypeAdapter(long.class, new LongTypeAdapter()).create();
+		this.gson = this.gson.newBuilder().registerTypeAdapter(InventorySetupItemSerializable.class, new InventorySetupItemSerializableTypeAdapter()).create();
 	}
 
 	public void loadConfig()
@@ -93,6 +96,23 @@ public class InventorySetupsPersistentDataManager
 			section.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
 			cache.addSection(section);
 		}
+
+		newTest();
+
+	}
+
+	private void newTest()
+	{
+		List<InventorySetupSerializable> issList = new ArrayList<>();
+		for (final InventorySetup setup : inventorySetups)
+		{
+			issList.add(InventorySetupSerializable.convertFromInventorySetup(setup));
+		}
+		//https://stackoverflow.com/questions/58782291/using-gson-how-can-i-serialize-nulls-in-maps-but-not-in-other-classes
+		//https://stackoverflow.com/questions/35477267/gson-serialize-null-for-specific-class-or-field
+
+		final String data = gson.toJson(issList);
+		configManager.setConfiguration(CONFIG_GROUP, "setupsV2", data);
 	}
 
 	public void updateConfig(boolean updateSetups, boolean updateSections)

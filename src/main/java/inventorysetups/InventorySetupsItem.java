@@ -24,6 +24,7 @@
  */
 package inventorysetups;
 
+import jdk.internal.joptsimple.internal.Strings;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,9 +50,19 @@ public class InventorySetupsItem
 		fuzzy = !fuzzy;
 	}
 
+	public static InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, false, InventorySetupsStackCompareID.None);
+
 	public static InventorySetupsItem getDummyItem()
 	{
 		return new InventorySetupsItem(-1, "", 0, false, InventorySetupsStackCompareID.None);
+	}
+
+	public static boolean itemIsDummy(final InventorySetupsItem item)
+	{
+		return item.getId() == -1 &&
+				Strings.isNullOrEmpty(item.getName()) &&
+				item.getQuantity() == 0 &&
+				item.getStackCompare() == InventorySetupsStackCompareID.None;
 	}
 
 }
