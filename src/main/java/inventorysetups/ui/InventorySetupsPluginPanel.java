@@ -82,10 +82,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private static ImageIcon HELP_ICON;
 	private static ImageIcon HELP_HOVER_ICON;
+	private static ImageIcon STANDARD_VIEW_ICON;
+	private static ImageIcon STANDARD_VIEW_HOVER_ICON;
 	private static ImageIcon COMPACT_VIEW_ICON;
 	private static ImageIcon COMPACT_VIEW_HOVER_ICON;
-	private static ImageIcon NO_COMPACT_VIEW_ICON;
-	private static ImageIcon NO_COMPACT_VIEW_HOVER_ICON;
+	private static ImageIcon ICON_VIEW_ICON;
+	private static ImageIcon ICON_VIEW_HOVER_ICON;
 	private static ImageIcon SECTION_VIEW_ICON;
 	private static ImageIcon SECTION_VIEW_HOVER_ICON;
 	private static ImageIcon NO_SECTION_VIEW_ICON;
@@ -160,13 +162,17 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		NO_SECTION_VIEW_ICON = new ImageIcon(sectionIconHover);
 		NO_SECTION_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(sectionIconHover, -100));
 
+		final BufferedImage standardIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/standard_mode_icon.png");
+		STANDARD_VIEW_ICON = new ImageIcon(standardIcon);
+		STANDARD_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(standardIcon, -100));
+
 		final BufferedImage compactIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/compact_mode_icon.png");
-		final BufferedImage compactIconHover = ImageUtil.luminanceOffset(compactIcon, -150);
 		COMPACT_VIEW_ICON = new ImageIcon(compactIcon);
 		COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIcon, 0.53f));
 
-		NO_COMPACT_VIEW_ICON = new ImageIcon(compactIconHover);
-		NO_COMPACT_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(compactIconHover, -100));
+		final BufferedImage iconIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/icon_mode_icon.png");
+		ICON_VIEW_ICON = new ImageIcon(iconIcon);
+		ICON_VIEW_HOVER_ICON = new ImageIcon(ImageUtil.alphaOffset(iconIcon, 0.53f));
 
 		final BufferedImage alphabeticalIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/alphabetical_icon.png");
 		final BufferedImage alphabeticalIconHover = ImageUtil.luminanceOffset(alphabeticalIcon, -150);
@@ -274,8 +280,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			}
 		});
 
-		List<ImageIcon> icons = new ArrayList<>(Arrays.asList(NO_COMPACT_VIEW_ICON, COMPACT_VIEW_ICON, COMPACT_VIEW_HOVER_ICON));
-		List<ImageIcon> hoverIcons = new ArrayList<>(Arrays.asList(NO_COMPACT_VIEW_ICON, COMPACT_VIEW_HOVER_ICON, COMPACT_VIEW_HOVER_ICON));
+		List<ImageIcon> icons = new ArrayList<>(Arrays.asList(STANDARD_VIEW_ICON, COMPACT_VIEW_ICON, ICON_VIEW_ICON));
+		List<ImageIcon> hoverIcons = new ArrayList<>(Arrays.asList(STANDARD_VIEW_HOVER_ICON, COMPACT_VIEW_HOVER_ICON, ICON_VIEW_HOVER_ICON));
 		List<String> tooltips = new ArrayList<>(Arrays.asList("Switch to compact mode", "Switch to icon mode", "Switch to standard mode"));
 		this.panelViewMarker = new InventorySetupsCycleButton<>(plugin, InventorySetupsPanelViewID.getValues(), icons, hoverIcons, tooltips);
 		Runnable r = () -> plugin.setConfigValue(CONFIG_KEY_PANEL_VIEW, panelViewMarker.getCurrentState().toString());
