@@ -52,6 +52,55 @@ public class InventorySetupsVariationMapping
 		mappings.put(ItemID.IMBUED_GUTHIX_MAX_CAPE, itemIDImbuedGodMaxCape);
 		mappings.put(ItemID.IMBUED_ZAMORAK_MAX_CAPE, itemIDImbuedGodMaxCape);
 
+		// Make god d'hides the same
+		final int itemIDGodCoif = 1000000005;
+		mappings.put(ItemID.ANCIENT_COIF, itemIDGodCoif);
+		mappings.put(ItemID.ARMADYL_COIF, itemIDGodCoif);
+		mappings.put(ItemID.BANDOS_COIF, itemIDGodCoif);
+		mappings.put(ItemID.GUTHIX_COIF, itemIDGodCoif);
+		mappings.put(ItemID.SARADOMIN_COIF, itemIDGodCoif);
+		mappings.put(ItemID.ZAMORAK_COIF, itemIDGodCoif);
+
+		final int itemIDGodDhideBody = 1000000006;
+		mappings.put(ItemID.ANCIENT_DHIDE_BODY, itemIDGodDhideBody);
+		mappings.put(ItemID.ARMADYL_DHIDE_BODY, itemIDGodDhideBody);
+		mappings.put(ItemID.BANDOS_DHIDE_BODY, itemIDGodDhideBody);
+		mappings.put(ItemID.GUTHIX_DHIDE_BODY, itemIDGodDhideBody);
+		mappings.put(ItemID.SARADOMIN_DHIDE_BODY, itemIDGodDhideBody);
+		mappings.put(ItemID.ZAMORAK_DHIDE_BODY, itemIDGodDhideBody);
+
+		final int itemIDGodChaps = 1000000007;
+		mappings.put(ItemID.ANCIENT_CHAPS, itemIDGodChaps);
+		mappings.put(ItemID.ARMADYL_CHAPS, itemIDGodChaps);
+		mappings.put(ItemID.BANDOS_CHAPS, itemIDGodChaps);
+		mappings.put(ItemID.GUTHIX_CHAPS, itemIDGodChaps);
+		mappings.put(ItemID.SARADOMIN_CHAPS, itemIDGodChaps);
+		mappings.put(ItemID.ZAMORAK_CHAPS, itemIDGodChaps);
+
+		final int itemIDGodBracers = 1000000008;
+		mappings.put(ItemID.ANCIENT_BRACERS, itemIDGodBracers);
+		mappings.put(ItemID.ARMADYL_BRACERS, itemIDGodBracers);
+		mappings.put(ItemID.BANDOS_BRACERS, itemIDGodBracers);
+		mappings.put(ItemID.GUTHIX_BRACERS, itemIDGodBracers);
+		mappings.put(ItemID.SARADOMIN_BRACERS, itemIDGodBracers);
+		mappings.put(ItemID.ZAMORAK_BRACERS, itemIDGodBracers);
+
+		final int itemIDGodDhideBoots = 1000000009;
+		mappings.put(ItemID.ANCIENT_DHIDE_BOOTS, itemIDGodDhideBoots);
+		mappings.put(ItemID.ARMADYL_DHIDE_BOOTS, itemIDGodDhideBoots);
+		mappings.put(ItemID.BANDOS_DHIDE_BOOTS, itemIDGodDhideBoots);
+		mappings.put(ItemID.GUTHIX_DHIDE_BOOTS, itemIDGodDhideBoots);
+		mappings.put(ItemID.SARADOMIN_DHIDE_BOOTS, itemIDGodDhideBoots);
+		mappings.put(ItemID.ZAMORAK_DHIDE_BOOTS, itemIDGodDhideBoots);
+
+		final int itemIDGodDhideShield = 1000000010;
+		mappings.put(ItemID.ANCIENT_DHIDE_SHIELD, itemIDGodDhideShield);
+		mappings.put(ItemID.ARMADYL_DHIDE_SHIELD, itemIDGodDhideShield);
+		mappings.put(ItemID.BANDOS_DHIDE_SHIELD, itemIDGodDhideShield);
+		mappings.put(ItemID.GUTHIX_DHIDE_SHIELD, itemIDGodDhideShield);
+		mappings.put(ItemID.SARADOMIN_DHIDE_SHIELD, itemIDGodDhideShield);
+		mappings.put(ItemID.ZAMORAK_DHIDE_SHIELD, itemIDGodDhideShield);
+
 		// Twisted Ancestral -> Regular Ancestral
 		mappings.put(ItemID.TWISTED_ANCESTRAL_HAT, ItemID.ANCESTRAL_HAT);
 		mappings.put(ItemID.TWISTED_ANCESTRAL_ROBE_BOTTOM, ItemID.ANCESTRAL_ROBE_BOTTOM);
