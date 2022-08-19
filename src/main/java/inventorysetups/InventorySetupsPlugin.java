@@ -1722,7 +1722,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			final InventorySetupsStackCompareID stackCompareType = panel != null && panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.fromInventoryID(id), i) ?
 				config.stackCompareType() : InventorySetupsStackCompareID.None;
-			if (items == null || i >= items.length)
+			if (items == null || i >= items.length || items[i].getId() == -1)
 			{
 				// add a "dummy" item to fill the normalized container to the right size
 				// this will be useful to compare when no item is in a slot
@@ -2242,7 +2242,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	private boolean isItemRunePouch(final int itemId)
 	{
-		return itemId == ItemID.RUNE_POUCH || itemId == ItemID.RUNE_POUCH_L;
+		// 23650 is what shows up when selecting a RunePouch from ChatBoxItemSearch
+		// 27086 is likely lms
+		return itemId == ItemID.RUNE_POUCH || itemId == ItemID.RUNE_POUCH_L || itemId == ItemID.RUNE_POUCH_23650 || itemId == ItemID.RUNE_POUCH_27086;
 	}
 
 	private boolean isItemBoltPouch(final int itemId)
