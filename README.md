@@ -7,10 +7,12 @@ Save gear setups for specific activities.
 Contents
 - [Creating a New Setup](#Creating-a-New-Setup)
 - [Overview Panel](#Overview-Panel)
-  - [Viewing a Setup](#viewing-a-setup)
-  - [Sorting Modes](#sorting-modes)
-  - [Moving a Setup](#moving-a-setup)
-  - [Favorites](#favorites)
+  - [Viewing a Setup](#Viewing-a-Setup)
+    - [Compact Mode](#Compact-Mode)
+    - [Icon Mode](#Icon-Mode)
+  - [Sorting Modes](#Sorting-Modes)
+  - [Moving a Setup](#Moving-a-Setup)
+  - [Favorites](#Favorites)
 - [Editing a Setup](#Editing-a-Setup)
 - [Bank Filtering](#Bank-Filtering)
 - [Highlighting](#Highlighting)
@@ -73,15 +75,19 @@ You can also search for setups using the search bar. When typing in the search b
 
 ![Search Bar](readme_images_and_gifs/search_bar.gif)
 
+#### Compact Mode
+
 You can switch the overview panel to "compact" mode by clicking on the switch view button at the top. Compact mode will only show the names of the setups on a shorter panel with no options so more can be seen without needing to scroll.
 
 ![Compact Mode](readme_images_and_gifs/compact_mode.gif)
+
+#### Icon Mode
 
 Clicking the switch view button again will move you to Icon view. Icon mode will only show a small icon so you can fit even more setups.
 
 ![Icon Mode](readme_images_and_gifs/icon_mode.gif)
 
-You can update an icon by right clicking a setup in Icon view and clicking "Update icon.."
+You can update an icon by right clicking a setup in Icon view and clicking "Update Icon..". By default, setups will try to use your weapon if no icon is provided. If there is no weapon, it will use a default icon (Cake of Guidance).
 
 ![Update Icon](readme_images_and_gifs/update_icon.gif)
 
