@@ -114,11 +114,12 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Fixed bug where moving setups in a section was adjusting the global position instead of the position within a section.\n\n" +
-								"Added an uneditable \"Unassigned\" section that will appear at the bottom in section view and will contain all setups that aren't assigned to a section. You can still add these setups to sections by right clicking them.\n\n" +
-								"When searching in section mode, section headers will not appear anymore if they don't have any matching setups. If a section does have a matching setup, it will be maximized during the search\n\n" +
-								"The dialogs for adding setups to sections now display setups/sections in alphabetical order.\n\n" +
-								"Added a right click menu with options to add a new setup or section to the plus button.";
+		String updateText =     "Added Icon view. Icon view is a new way to view your setups. Check out the guide to learn more.\n\n" +
+								"Optimized how inventory setup data is stored. This fixes the issue described below.\n\n" +
+								"Fixed an issue where modifying/adding/removing setups would not save to RuneLite profiles if a player had too many setups. Before, the setup limit was ~70. It will now be over 300.\n\n" +
+								"Fuzzy now works on God D'Hide.\n\n" +
+								"Fuzzy now works on Smithing Gloves (i), making them the same as Ice Gloves.\n\n" +
+								"You can now click on the entire section panel to maximize/minimize a section instead of just the arrow.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
