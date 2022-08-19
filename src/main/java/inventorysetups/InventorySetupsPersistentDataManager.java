@@ -208,6 +208,7 @@ public class InventorySetupsPersistentDataManager
 		String hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
 		if (Strings.isNullOrEmpty(hasMigratedToV2))
 		{
+			log.info("Migrating data to V2");
 			// Perform migration of old data
 			Type setupType = new TypeToken<ArrayList<InventorySetup>>()
 			{
@@ -219,11 +220,17 @@ public class InventorySetupsPersistentDataManager
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2, "True");
 		}
 
-		if (Strings.isNullOrEmpty(hasMigratedToV2))
-		{
-			// Don't unset configuration until new version is stable
-			//configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
-		}
+		// TODO Don't unset configuration until new version is stable
+//		hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
+//		if (!Strings.isNullOrEmpty(hasMigratedToV2))
+//		{
+//			String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+//			if (oldData != null)
+//			{
+//				log.info("Removing old data key");
+//				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+//			}
+//		}
 	}
 
 	private String fixOldJSONData(final String json)
