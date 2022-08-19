@@ -73,6 +73,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	private static final ImageIcon NO_MIN_MAX_SECTION_ICON;
 	private static final ImageIcon NO_MIN_MAX_SECTION_HOVER_ICON;
 	private boolean forceMaximization;
+	private boolean allowEditable;
 
 	public static final int MAX_ICONS_PER_ROW = 4;
 
@@ -92,13 +93,14 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	InventorySetupsSectionPanel(InventorySetupsPlugin plugin,
 								InventorySetupsPluginPanel panel,
 								InventorySetupsSection section,
-								boolean forceMaximization, boolean allowEditable,
+								boolean forceMaximization, boolean allowEdits,
 								final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
 		this.section = section;
 		this.forceMaximization = forceMaximization;
+		this.allowEditable = allowEdits;
 		this.panelWithSetups = new JPanel();
 
 		this.setLayout(new BorderLayout());
@@ -112,20 +114,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
-				if (SwingUtilities.isLeftMouseButton(mouseEvent))
-				{
-					if (allowEditable && !forceMaximization)
-					{
-						section.setMaximized(!section.isMaximized());
-						plugin.getDataManager().updateConfig(false, true);
-						panel.redrawOverviewPanel(false);
-					}
-					else
-					{
-						// This is for the unassigned section.
-						plugin.setConfigValue(CONFIG_KEY_UNASSIGNED_MAXIMIZED, !section.isMaximized());
-					}
-				}
+				maximizationRequest(mouseEvent);
 			}
 
 			@Override
@@ -192,6 +181,14 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 																					plugin, panel, this,
 																					popupMenu, MAX_SETUP_NAME_LENGTH,
 																					nameWrapperColor, allowEditable);
+		nameActions.getNameInput().getTextField().addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent mouseEvent)
+			{
+				maximizationRequest(mouseEvent);
+			}
+		});
 		final JPanel westNameActions = new JPanel(new BorderLayout());
 		westNameActions.setBackground(nameWrapperColor);
 		westNameActions.add(Box.createRigidArea(new Dimension(6, 0)), BorderLayout.WEST);
@@ -215,7 +212,25 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 	}
 
-	public void addSetups(final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups, boolean allowEditable)
+	private void maximizationRequest(MouseEvent e)
+	{
+		if (SwingUtilities.isLeftMouseButton(e))
+		{
+			if (allowEditable && !forceMaximization)
+			{
+				section.setMaximized(!section.isMaximized());
+				plugin.getDataManager().updateConfig(false, true);
+				panel.redrawOverviewPanel(false);
+			}
+			else
+			{
+				// This is for the unassigned section.
+				plugin.setConfigValue(CONFIG_KEY_UNASSIGNED_MAXIMIZED, !section.isMaximized());
+			}
+		}
+	}
+
+	private void addSetups(final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups, boolean allowEditable)
 	{
 		// Only add the setups if it's maximized. If we are searching, force maximization.
 		if (section.isMaximized() || forceMaximization)

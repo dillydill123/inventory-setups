@@ -36,6 +36,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+
+import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.JagexColors;
@@ -69,6 +71,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 	private final JLabel cancel = new JLabel("Cancel");
 	private final JLabel edit = new JLabel("Edit");
 	private final JLabel displayColorIndicator = new JLabel();
+	@Getter
 	private final FlatTextField nameInput = new FlatTextField();
 
 	private final InventorySetupsValidName validNameImplementer;
