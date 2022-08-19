@@ -25,7 +25,7 @@ Contents
   - [Remove Setups from a Section](#Remove-Setups-from-a-Section)
   - [Moving Setups in a Section](#Moving-Setups-in-a-Section)
   - [The Unassigned Section](#Unassigned-Section)
-- [Importing and Exporting](#Exporting-and-Importing-Setups-and-Sections)
+- [Exporting and Importing](#Exporting-and-Importing-Setups-and-Sections)
 - [Configuration Settings](#Configuration-Settings)
 - [Other Plugin Compatibilities](#Other-Plugin-Compatibilities)
   - [Bank Tag Layouts Plugin](#Bank-Tag-Layouts-Plugin)
@@ -265,7 +265,7 @@ The "Unassigned" section contains all setups which are not assigned to a section
 
 With this section, you do not need to switch from section mode to normal mode when attempting to view or modify a setup that is not in a section, and will give you an easy way to identify setups that may need a section. You can also minimize and maximize it just like any other section.
 
-### Exporting and Importing Setups and Sections
+## Exporting and Importing Setups and Sections
 
 It is possible to import and export inventory setups and sections. This is useful if you would like to share your setups with your friends. To export an inventory setup, click on the export button next to the view setup button. This will copy the setup to your clipboard. You can then send this to your friends.
 
