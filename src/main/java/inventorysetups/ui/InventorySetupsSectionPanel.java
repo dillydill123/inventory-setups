@@ -56,6 +56,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
 
@@ -94,7 +95,9 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 								InventorySetupsPluginPanel panel,
 								InventorySetupsSection section,
 								boolean forceMaximization, boolean allowEdits,
-								final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups)
+								final Set<String> setupNamesToBeDisplayed,
+								Set<String> setupsInSection,
+								final List<InventorySetup> originalFilteredSetups)
 	{
 		this.plugin = plugin;
 		this.panel = panel;
@@ -208,7 +211,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		}
 
 		add(nameWrapper, BorderLayout.NORTH);
-		addSetups(setupNamesToBeIncluded, setupsInSection, setups, allowEditable);
+		addSetups(setupNamesToBeDisplayed, setupsInSection, originalFilteredSetups, allowEditable);
 
 	}
 
@@ -230,7 +233,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		}
 	}
 
-	private void addSetups(final Set<String> setupNamesToBeIncluded, Set<String> setupsInSection, final List<InventorySetup> setups, boolean allowEditable)
+	private void addSetups(final Set<String> setupNamesToBeDisplayed, Set<String> setupsInSection, final List<InventorySetup> originalFilteredSetups, boolean allowEditable)
 	{
 		// Only add the setups if it's maximized. If we are searching, force maximization.
 		if (section.isMaximized() || forceMaximization)
@@ -248,7 +251,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 			{
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
-					final JPanel iconGridPanel = createIconPanelGridFromNames(plugin, panel, section.getSetups(), MAX_ICONS_PER_ROW, setupNamesToBeIncluded, section, allowEditable);
+					List<InventorySetup> setupObjectsInSection = section.getSetups().stream().map(setupName -> plugin.getCache().getInventorySetupNames().get(setupName)).collect(Collectors.toList());
+					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, setupObjectsInSection, MAX_ICONS_PER_ROW, setupNamesToBeDisplayed, section, allowEditable);
 					panelWithSetups.add(iconGridPanel, constraints);
 					constraints.gridy++;
 				}
@@ -259,7 +263,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 					for (final String name : section.getSetups())
 					{
 						// If we are searching and the setup doesn't match the search, don't add setup
-						if (setupNamesToBeIncluded != null && !setupNamesToBeIncluded.contains(name))
+						if (!setupNamesToBeDisplayed.contains(name))
 						{
 							continue;
 						}
@@ -273,7 +277,8 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				// Sorting mode is being used, so use the original setup array to determine the order.
 				if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 				{
-					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, setups, MAX_ICONS_PER_ROW, setupsInSection, section, allowEditable);
+					// Use the original list of setups because this contains the order of the sorting mode
+					final JPanel iconGridPanel = createIconPanelGrid(plugin, panel, originalFilteredSetups, MAX_ICONS_PER_ROW, setupsInSection, section, allowEditable);
 					panelWithSetups.add(iconGridPanel, constraints);
 					constraints.gridy++;
 				}
@@ -281,9 +286,10 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 				{
 					panelWithSetups.add(Box.createRigidArea(new Dimension(0, 10)), constraints);
 					constraints.gridy++;
-					for (final InventorySetup setup : setups)
+					// Use the original list of setups because this contains the order of the sorting mode
+					for (final InventorySetup setup : originalFilteredSetups)
 					{
-						if (setupsInSection != null && !setupsInSection.contains(setup.getName()))
+						if (!setupsInSection.contains(setup.getName()))
 						{
 							continue;
 						}
@@ -322,7 +328,7 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		constraints.gridy++;
 	}
 
-	public static JPanel createIconPanelGrid(final InventorySetupsPlugin plugin, final InventorySetupsPluginPanel panel, final List<InventorySetup> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
+	public static JPanel createIconPanelGrid(final InventorySetupsPlugin plugin, final InventorySetupsPluginPanel panel, final List<InventorySetup> setups, int maxColSize, final Set<String> whitelistedNames, final InventorySetupsSection section, boolean allowEditable)
 	{
 		int added = 0;
 		int width = 0;
@@ -330,32 +336,11 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
 		for (final InventorySetup setup : setups)
 		{
-			if (includedNames != null && !includedNames.contains(setup.getName()))
+			// if whitelistedNames is null, don't attempt to filter at all
+			if (whitelistedNames != null && !whitelistedNames.contains(setup.getName()))
 			{
 				continue;
 			}
-			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, panel, setup, section, allowEditable);
-			width = newPanel.getWidth();
-			height = newPanel.getHeight();
-			wrapperPanel.add(newPanel);
-			added++;
-		}
-		return addExtraIconSlotsAndExpansionStopper(wrapperPanel, added, maxColSize, width, height);
-	}
-
-	public static JPanel createIconPanelGridFromNames(final InventorySetupsPlugin plugin, final InventorySetupsPluginPanel panel, final List<String> setups, int maxColSize, final Set<String> includedNames, final InventorySetupsSection section, boolean allowEditable)
-	{
-		int added = 0;
-		int width = 0;
-		int height = 0;
-		JPanel wrapperPanel = new JPanel(new GridLayout(0, maxColSize, 5, 5));
-		for (final String setupName : setups)
-		{
-			if (includedNames != null && !includedNames.contains(setupName))
-			{
-				continue;
-			}
-			final InventorySetup setup = plugin.getCache().getInventorySetupNames().get(setupName);
 			InventorySetupsPanel newPanel = new InventorySetupsIconPanel(plugin, panel, setup, section, allowEditable);
 			width = newPanel.getWidth();
 			height = newPanel.getHeight();

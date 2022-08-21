@@ -621,23 +621,23 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		updatePanelViewMarker();
 		updateSortingMarker();
 
-		List<InventorySetup> setupsToAdd = null;
+		List<InventorySetup> filteredSetups = null;
 		if (!searchBar.getText().isEmpty())
 		{
-			setupsToAdd = plugin.filterSetups(searchBar.getText());
+			filteredSetups = plugin.filterSetups(searchBar.getText());
 		}
 		else
 		{
-			setupsToAdd = new ArrayList<>(plugin.getInventorySetups());
-			moveFavoriteSetupsToTopOfList(setupsToAdd);
+			filteredSetups = new ArrayList<>(plugin.getInventorySetups());
+			moveFavoriteSetupsToTopOfList(filteredSetups);
 		}
 
 		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL)
 		{
-			setupsToAdd.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
+			filteredSetups.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
 
-		layoutSetups(setupsToAdd);
+		layoutSetups(filteredSetups);
 
 		revalidate();
 		repaint();
@@ -847,7 +847,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	}
 
 	// Layout setups according
-	private void layoutSetups(List<InventorySetup> setups)
+	private void layoutSetups(List<InventorySetup> originalFilteredSetups)
 	{
 		overviewPanel.setLayout(new GridBagLayout());
 		overviewPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
@@ -860,19 +860,20 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		if (plugin.getConfig().sectionMode())
 		{
-			layoutSections(setups, constraints);
+			layoutSections(originalFilteredSetups, constraints);
 		}
 		else
 		{
 			if (plugin.getConfig().panelView() == InventorySetupsPanelViewID.ICON)
 			{
-				JPanel iconGridPanel = InventorySetupsSectionPanel.createIconPanelGrid(plugin, this, setups, InventorySetupsSectionPanel.MAX_ICONS_PER_ROW, null, null, true);
+				// Don't pass a whitelist to indicate we want to include all of the filtered setups given
+				JPanel iconGridPanel = InventorySetupsSectionPanel.createIconPanelGrid(plugin, this, originalFilteredSetups, InventorySetupsSectionPanel.MAX_ICONS_PER_ROW, null, null, true);
 				overviewPanel.add(iconGridPanel, constraints);
 				constraints.gridy++;
 			}
 			else
 			{
-				for (final InventorySetup setup : setups)
+				for (final InventorySetup setup : originalFilteredSetups)
 				{
 					constraints.fill = GridBagConstraints.HORIZONTAL;
 					InventorySetupsPanel newPanel = null;
@@ -935,7 +936,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	}
 
-	private void createUnassignedSection(final List<InventorySetup> setups, final GridBagConstraints constraints, final Set<String> setupNamesToBeIncluded)
+	private void createUnassignedSection(final List<InventorySetup> setups, final GridBagConstraints constraints, final Set<String> setupNamesToBeDisplayed)
 	{
 		InventorySetupsSection unassignedSection = new InventorySetupsSection("Unassigned");
 		unassignedSection.setMaximized(plugin.getBooleanConfigValue(CONFIG_KEY_UNASSIGNED_MAXIMIZED));
@@ -953,14 +954,14 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		// don't show the unassigned section if there are no unassigned setups
-		if (unassignedSection.getSetups().isEmpty() || sectionShouldBeHidden(setupNamesToBeIncluded, setupsInSection))
+		if (unassignedSection.getSetups().isEmpty() || sectionShouldBeHidden(setupNamesToBeDisplayed, setupsInSection))
 		{
 			return;
 		}
 
 		boolean forceMaximization = !searchBar.getText().isEmpty();
 
-		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, forceMaximization, false, null, null, setups);
+		InventorySetupsSectionPanel sectionPanel = new InventorySetupsSectionPanel(plugin, this, unassignedSection, forceMaximization, false, setupNamesToBeDisplayed, setupsInSection, setups);
 		overviewPanel.add(sectionPanel, constraints);
 		constraints.gridy++;
 	}
