@@ -178,20 +178,20 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 		popupMenu.add(exportSection);
 		popupMenu.add(deleteSection);
 
-		// Add the button to nameActions so the color border will reach it as well
-		final Color nameWrapperColor = new Color(20, 20, 20);
-		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section,
-																					plugin, panel, this,
-																					popupMenu, MAX_SETUP_NAME_LENGTH,
-																					nameWrapperColor, allowEditable);
-		nameActions.getNameInput().getTextField().addMouseListener(new MouseAdapter()
+		final MouseAdapter flatTextFieldMouseAdapter = new MouseAdapter()
 		{
 			@Override
 			public void mousePressed(MouseEvent mouseEvent)
 			{
 				maximizationRequest(mouseEvent);
 			}
-		});
+		};
+		// Add the button to nameActions so the color border will reach it as well
+		final Color nameWrapperColor = new Color(20, 20, 20);
+		final InventorySetupsNameActions<InventorySetupsSection> nameActions = new InventorySetupsNameActions<>(section,
+																					plugin, panel, this,
+																					popupMenu, MAX_SETUP_NAME_LENGTH,
+																					nameWrapperColor, allowEditable, flatTextFieldMouseAdapter);
 		final JPanel westNameActions = new JPanel(new BorderLayout());
 		westNameActions.setBackground(nameWrapperColor);
 		westNameActions.add(Box.createRigidArea(new Dimension(6, 0)), BorderLayout.WEST);

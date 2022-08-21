@@ -76,17 +76,21 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
 	private final InventorySetupsValidName validNameImplementer;
 
+	private final MouseAdapter mouseAdapter;
+
 	public InventorySetupsNameActions(final T datum,
 										final InventorySetupsPlugin plugin,
 										final InventorySetupsPluginPanel panel,
 										final InventorySetupsValidName validNameImplementer,
 										final JPopupMenu movePopupMenu, int maxLength,
-										final Color panelColor, boolean allowEditable)
+										final Color panelColor, boolean allowEditable,
+										final MouseAdapter flatTextFieldMouseAdapter)
 	{
 		setLayout(new BorderLayout());
 
 		this.datum = datum;
 		this.validNameImplementer = validNameImplementer;
+		this.mouseAdapter = flatTextFieldMouseAdapter;
 
 		setBackground(panelColor);
 
@@ -157,6 +161,8 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 				updateSaveButtonDuringEditing();
 			}
 		});
+		
+		nameInput.getTextField().addMouseListener(flatTextFieldMouseAdapter);
 
 		save.setVisible(false);
 		save.setFont(FontManager.getRunescapeSmallFont());
@@ -169,6 +175,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent) && save.isEnabled())
 				{
+					nameInput.getTextField().addMouseListener(flatTextFieldMouseAdapter);
 					validNameImplementer.updateName(nameInput.getText());
 					Color newDisplayColor = null;
 					if (displayColorIndicator.getBorder() != null)
@@ -229,6 +236,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
+					nameInput.getTextField().addMouseListener(flatTextFieldMouseAdapter);
 					nameInput.setEditable(false);
 					nameInput.setText(datum.getName());
 					nameInput.getTextField().setCaretPosition(0);
@@ -261,6 +269,8 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			{
 				if (SwingUtilities.isLeftMouseButton(mouseEvent))
 				{
+					// Remove the mouse listener so clicking it doesn't exit the edit screen
+					nameInput.getTextField().removeMouseListener(flatTextFieldMouseAdapter);
 					nameInput.setEditable(true);
 					updateNameActions(true);
 				}
