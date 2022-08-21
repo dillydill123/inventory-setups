@@ -76,8 +76,6 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
 	private final InventorySetupsValidName validNameImplementer;
 
-	private final MouseAdapter mouseAdapter;
-
 	public InventorySetupsNameActions(final T datum,
 										final InventorySetupsPlugin plugin,
 										final InventorySetupsPluginPanel panel,
@@ -90,7 +88,6 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
 		this.datum = datum;
 		this.validNameImplementer = validNameImplementer;
-		this.mouseAdapter = flatTextFieldMouseAdapter;
 
 		setBackground(panelColor);
 
