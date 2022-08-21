@@ -101,8 +101,8 @@ public class InventorySetupsMoveMenu<T> extends JPopupMenu
 		if (plugin.getConfig().sortingMode() != InventorySetupsSortingID.DEFAULT)
 		{
 			JOptionPane.showMessageDialog(panel,
-					"You cannot move setups while a sorting mode is enabled.",
-					"Move Setup Failed",
+					"You cannot move this while a sorting mode is enabled.",
+					"Move Failed",
 					JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
