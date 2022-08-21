@@ -231,11 +231,11 @@ public class InventorySetupsPlugin extends Plugin
 
 	private static final int[] RUNE_POUCH_AMOUNT_VARBITS =
 		{
-			Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3
+			Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3, Varbits.RUNE_POUCH_AMOUNT4
 		};
 	private static final int[] RUNE_POUCH_RUNE_VARBITS =
 		{
-			Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3
+			Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3, Varbits.RUNE_POUCH_RUNE4
 		};
 
 	private static final int BOLT_POUCH_AMOUNT1 = 2469;
