@@ -114,12 +114,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =     "Added Icon view. Icon view is a new way to view your setups. Check out the guide to learn more.\n\n" +
-								"Optimized how inventory setup data is stored. This fixes the issue described below.\n\n" +
-								"Fixed an issue where modifying or adding/removing setups would not save to RuneLite profiles if a player had too many setups. Before, the setup limit was ~70. It will now be over 300.\n\n" +
-								"Fuzzy now works on God D'Hide and Smithing Gloves (i), making them the same as Ice Gloves.\n\n" +
-								"Updated section and standard view icons.\n\n" +
-								"You can now click on the entire section panel to maximize/minimize a section instead of just the arrow.";
+		String updateText =     "Fixed an issue where alphabetical mode would cause setups to show up in the Unassigned section incorrectly.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
