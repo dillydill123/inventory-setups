@@ -28,11 +28,26 @@ import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSlotID;
+
+import java.util.Arrays;
 import java.util.List;
 import net.runelite.client.game.ItemManager;
 
 public class InventorySetupsBoltPouchPanel extends InventorySetupsAmmunitionPanel
 {
+	public static final int BOLT_POUCH_AMOUNT1 = 2469;
+	public static final int BOLT_POUCH_AMOUNT2 = 2470;
+	public static final int BOLT_POUCH_AMOUNT3 = 2471;
+	public static final int BOLT_POUCH_EXTRA_AMMO_AMOUNT = 2472;
+	public static final int BOLT_POUCH_BOLT1 = 2473;
+	public static final int BOLT_POUCH_BOLT2 = 2474;
+	public static final int BOLT_POUCH_BOLT3 = 2475;
+	public static final int BOLT_POUCH_EXTRA_AMMO = 2476;
+
+	public static final List<Integer> BOLT_POUCH_AMOUNT_VARBIT_IDS = Arrays.asList(BOLT_POUCH_AMOUNT1, BOLT_POUCH_AMOUNT2, BOLT_POUCH_AMOUNT3, BOLT_POUCH_EXTRA_AMMO_AMOUNT);
+
+	public static final List<Integer> BOLT_POUCH_BOLT_VARBIT_IDS = Arrays.asList(BOLT_POUCH_BOLT1, BOLT_POUCH_BOLT2, BOLT_POUCH_BOLT3, BOLT_POUCH_EXTRA_AMMO);
+
 	InventorySetupsBoltPouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Bolt Pouch");

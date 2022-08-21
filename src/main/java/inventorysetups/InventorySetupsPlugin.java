@@ -115,6 +115,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_AMOUNT_VARBIT_IDS;
+import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_BOLT_VARBIT_IDS;
+import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_AMOUNT_VARBITS;
+import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_RUNE_VARBITS;
+
 
 @PluginDescriptor(
 	name = "Inventory Setups",
@@ -228,33 +233,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Setter
 	@Getter
 	private InventorySetupsFilteringModeID bankFilteringMode;
-
-	private static final int[] RUNE_POUCH_AMOUNT_VARBITS =
-		{
-			Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3, Varbits.RUNE_POUCH_AMOUNT4
-		};
-	private static final int[] RUNE_POUCH_RUNE_VARBITS =
-		{
-			Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3, Varbits.RUNE_POUCH_RUNE4
-		};
-
-	private static final int BOLT_POUCH_AMOUNT1 = 2469;
-	private static final int BOLT_POUCH_AMOUNT2 = 2470;
-	private static final int BOLT_POUCH_AMOUNT3 = 2471;
-	private static final int BOLT_POUCH_EXTRA_AMMO_AMOUNT = 2472;
-	private static final int BOLT_POUCH_BOLT1 = 2473;
-	private static final int BOLT_POUCH_BOLT2 = 2474;
-	private static final int BOLT_POUCH_BOLT3 = 2475;
-	private static final int BOLT_POUCH_EXTRA_AMMO = 2476;
-
-	private static final int[] BOLT_POUCH_AMOUNT_VARBIT_IDS =
-		{
-			BOLT_POUCH_AMOUNT1, BOLT_POUCH_AMOUNT2, BOLT_POUCH_AMOUNT3, BOLT_POUCH_EXTRA_AMMO_AMOUNT
-		};
-	private static final int[] BOLT_POUCH_BOLT_VARBIT_IDS =
-		{
-			BOLT_POUCH_BOLT1, BOLT_POUCH_BOLT2, BOLT_POUCH_BOLT3, BOLT_POUCH_EXTRA_AMMO
-		};
 
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
@@ -955,9 +933,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (int i = 0; i < runePouchType.getSize(); i++)
 		{
-			int runeId = client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS[i]);
+			int runeId = client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS.get(i));
 			RunepouchRune rune = RunepouchRune.getRune(runeId);
-			int runeAmount = rune == null ? 0 : client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS[i]);
+			int runeAmount = rune == null ? 0 : client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS.get(i));
 			String runeName = rune == null ? "" : rune.getName();
 			int runeItemId = rune == null ? -1 : rune.getItemId();
 
@@ -979,12 +957,12 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		List<InventorySetupsItem> boltPouchData = new ArrayList<>();
 
-		for (int i = 0; i < BOLT_POUCH_BOLT_VARBIT_IDS.length; i++)
+		for (int i = 0; i < BOLT_POUCH_BOLT_VARBIT_IDS.size(); i++)
 		{
-			int boltVarbitId = client.getVarbitValue(BOLT_POUCH_BOLT_VARBIT_IDS[i]);
+			int boltVarbitId = client.getVarbitValue(BOLT_POUCH_BOLT_VARBIT_IDS.get(i));
 			Bolts bolt = Bolts.getBolt(boltVarbitId);
 			boolean boltNotFound = bolt == null;
-			int boltAmount = boltNotFound ? 0 : client.getVarbitValue(BOLT_POUCH_AMOUNT_VARBIT_IDS[i]);
+			int boltAmount = boltNotFound ? 0 : client.getVarbitValue(BOLT_POUCH_AMOUNT_VARBIT_IDS.get(i));
 			String boltName = boltNotFound ? "" : itemManager.getItemComposition(bolt.getItemId()).getName();
 			int boltItemId = boltNotFound ? -1 : bolt.getItemId();
 

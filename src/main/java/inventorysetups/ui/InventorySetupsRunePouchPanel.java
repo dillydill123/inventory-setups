@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.runelite.api.ItemID;
+import net.runelite.api.Varbits;
 import net.runelite.client.game.ItemManager;
 
 public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPanel
@@ -42,6 +43,10 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPane
 
 	// TODO: Update IDs here
 	public static final List<Integer> RUNE_POUCH_ELIDINIS_IDS = Arrays.asList();
+
+	public static final List<Integer> RUNE_POUCH_AMOUNT_VARBITS = Arrays.asList(Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3, Varbits.RUNE_POUCH_AMOUNT4);
+
+	public static final List<Integer> RUNE_POUCH_RUNE_VARBITS = Arrays.asList(Varbits.RUNE_POUCH_RUNE1, Varbits.RUNE_POUCH_RUNE2, Varbits.RUNE_POUCH_RUNE3, Varbits.RUNE_POUCH_RUNE4);
 
 	InventorySetupsRunePouchPanel(ItemManager itemManager, InventorySetupsPlugin plugin)
 	{
