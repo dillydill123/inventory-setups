@@ -116,7 +116,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 		String updateText =		"Fixed an issue where alphabetical mode would cause setups to show up in the Unassigned section incorrectly.\n\n" +
 								"Clicking on a section panel while editing the name will no longer minimize or maximize the section and cancel the edit.\n\n" +
-								"Fixed an issue where icons for a setup were not being saved.";
+								"Fixed an issue where the icons for a setup in Icon View was not being saved.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
