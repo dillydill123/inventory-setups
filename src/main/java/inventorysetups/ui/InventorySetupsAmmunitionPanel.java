@@ -30,7 +30,6 @@ import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSlotID;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.JPanel;
 import net.runelite.client.game.ItemManager;
