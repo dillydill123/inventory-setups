@@ -37,6 +37,9 @@ public class InventorySetupsVariationMapping
 		// Smith Gloves (i) act as ice gloves
 		mappings.put(ItemID.SMITHS_GLOVES_I, ItemID.ICE_GLOVES);
 
+		// Divine rune pouch -> Rune Pouch
+		mappings.put(ItemID.DIVINE_RUNE_POUCH, ItemID.RUNE_POUCH);
+
 		// Make god capes the same
 		final int itemIDGodCape = 1000000001;
 		mappings.put(ItemID.SARADOMIN_CAPE, itemIDGodCape);
