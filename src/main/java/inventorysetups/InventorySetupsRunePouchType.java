@@ -13,7 +13,7 @@ public enum InventorySetupsRunePouchType
 	NORMAL(3),
 
 	// 4 slots
-	ELIDINIS(4);
+	DIVINE(4);
 
 	private final int size;
 

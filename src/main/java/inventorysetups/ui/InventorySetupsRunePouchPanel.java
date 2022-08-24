@@ -42,7 +42,7 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPane
 	public static final List<Integer> RUNE_POUCH_IDS = Arrays.asList(ItemID.RUNE_POUCH, ItemID.RUNE_POUCH_L, ItemID.RUNE_POUCH_23650, ItemID.RUNE_POUCH_27086);
 
 	// TODO: Update IDs here
-	public static final List<Integer> RUNE_POUCH_ELIDINIS_IDS = Arrays.asList();
+	public static final List<Integer> RUNE_POUCH_DIVINE_IDS = Arrays.asList(ItemID.DIVINE_RUNE_POUCH);
 
 	public static final List<Integer> RUNE_POUCH_AMOUNT_VARBITS = Arrays.asList(Varbits.RUNE_POUCH_AMOUNT1, Varbits.RUNE_POUCH_AMOUNT2, Varbits.RUNE_POUCH_AMOUNT3, Varbits.RUNE_POUCH_AMOUNT4);
 

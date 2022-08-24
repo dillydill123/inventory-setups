@@ -2225,9 +2225,9 @@ public class InventorySetupsPlugin extends Plugin
 			return InventorySetupsRunePouchType.NORMAL;
 		}
 
-		if (InventorySetupsRunePouchPanel.RUNE_POUCH_ELIDINIS_IDS.contains(itemId))
+		if (InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS.contains(itemId))
 		{
-			return InventorySetupsRunePouchType.ELIDINIS;
+			return InventorySetupsRunePouchType.DIVINE;
 		}
 
 		return InventorySetupsRunePouchType.NONE;
@@ -2248,7 +2248,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_ELIDINIS_IDS)
+		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
 		{
 			if (checkIfContainerContainsItem(id, container))
 			{
