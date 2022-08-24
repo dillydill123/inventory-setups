@@ -30,6 +30,7 @@ import inventorysetups.InventorySetupsPlugin;
 import inventorysetups.InventorySetupsSlotID;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.JPanel;
 import net.runelite.client.game.ItemManager;
@@ -98,14 +99,28 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 
 		final List<InventorySetupsItem> ammoContainer = getContainer(inventorySetup);
 
+		List<InventorySetupsItem> currentContainerReference = currentContainer;
+
+		if (currentContainer.size() < ammoContainer.size())
+		{
+			// Fill the current container to the size of the saved container for easier comparison
+			final List<InventorySetupsItem> currentContainerCopy = new ArrayList<>(currentContainer);
+			for (int i = currentContainerCopy.size(); i < ammoContainer.size(); i++)
+			{
+				currentContainerCopy.add(InventorySetupsItem.getDummyItem());
+			}
+			currentContainerReference = currentContainerCopy;
+		}
+
+
 		for (int i = 0; i < ammoContainer.size(); i++)
 		{
 			boolean shouldHighlightSlot = false;
 			boolean foundAmmo = false;
 			int currentContainerIndex = -1;
-			for (int j = 0; j < currentContainer.size(); j++)
+			for (int j = 0; j < currentContainerReference.size(); j++)
 			{
-				if (ammoContainer.get(i).getId() == currentContainer.get(j).getId())
+				if (ammoContainer.get(i).getId() == currentContainerReference.get(j).getId())
 				{
 					foundAmmo = true;
 					currentContainerIndex = j;
@@ -116,7 +131,7 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 			if (foundAmmo)
 			{
 				int savedQuantity = ammoContainer.get(i).getQuantity();
-				int currentQuantity = currentContainer.get(currentContainerIndex).getQuantity();
+				int currentQuantity = currentContainerReference.get(currentContainerIndex).getQuantity();
 				if (shouldHighlightSlotBasedOnStack(ammoContainer.get(i).getStackCompare(), savedQuantity, currentQuantity))
 				{
 					shouldHighlightSlot = true;
@@ -137,6 +152,7 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 			}
 
 		}
+
 	}
 
 	protected abstract List<InventorySetupsItem> getContainer(InventorySetup inventorySetup);

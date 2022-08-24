@@ -115,7 +115,10 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			InventorySetupsItem currInvItem = currInventory.get(i);
-			rpType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(currInvItem.getId()));
+			if (rpType == InventorySetupsRunePouchType.NONE)
+			{
+				rpType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(currInvItem.getId()));
+			}
 			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
 
@@ -172,7 +175,10 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		for (final InventorySetupsItem item : currInventory)
 		{
 			// Use fuzzy mapping
-			runePouchType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(item.getId()));
+			if (runePouchType == InventorySetupsRunePouchType.NONE)
+			{
+				runePouchType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(item.getId()));
+			}
 			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.BOLT_POUCH)
 			{
 				currInvHasBoltPouch = true;
