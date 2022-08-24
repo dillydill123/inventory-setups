@@ -59,6 +59,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.EnumComposition;
 import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
@@ -97,7 +98,6 @@ import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.game.RunepouchRune;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.NavigationButton;
@@ -930,23 +930,21 @@ public class InventorySetupsPlugin extends Plugin
 	public List<InventorySetupsItem> getRunePouchData(final InventorySetupsRunePouchType runePouchType)
 	{
 		List<InventorySetupsItem> runePouchData = new ArrayList<>();
-
+		EnumComposition runepouchEnum = client.getEnum(982);
 		for (int i = 0; i < runePouchType.getSize(); i++)
 		{
-			int runeId = client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS.get(i));
-			RunepouchRune rune = RunepouchRune.getRune(runeId);
-			int runeAmount = rune == null ? 0 : client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS.get(i));
-			String runeName = rune == null ? "" : rune.getName();
-			int runeItemId = rune == null ? -1 : rune.getItemId();
-
-			if (runeItemId == -1)
+			final int varbitVal = client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS.get(i));
+			if (varbitVal == 0)
 			{
 				runePouchData.add(InventorySetupsItem.getDummyItem());
 			}
 			else
 			{
+				final int runeId = runepouchEnum.getIntValue(varbitVal);
+				int runeAmount = client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS.get(i));
+				String runeName = itemManager.getItemComposition(runeId).getName();
 				InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.RUNE_POUCH, i) ? config.stackCompareType() : InventorySetupsStackCompareID.None;
-				runePouchData.add(new InventorySetupsItem(runeItemId, runeName, runeAmount, false, stackCompareType));
+				runePouchData.add(new InventorySetupsItem(runeId, runeName, runeAmount, false, stackCompareType));
 			}
 		}
 
@@ -1011,18 +1009,18 @@ public class InventorySetupsPlugin extends Plugin
 							boolean runePouchContainsItem = false;
 							if (currentSetup.getRune_pouch() != null)
 							{
-								runePouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getRune_pouch());
+								runePouchContainsItem = containerContainsItem(itemId, currentSetup.getRune_pouch());
 							}
 							boolean boltPouchContainsItem = false;
 							if (currentSetup.getBoltPouch() != null)
 							{
-								boltPouchContainsItem = checkIfContainerContainsItem(itemId, currentSetup.getBoltPouch());
+								boltPouchContainsItem = containerContainsItem(itemId, currentSetup.getBoltPouch());
 							}
 							containsItem = runePouchContainsItem || boltPouchContainsItem ||
-								checkIfContainerContainsItem(itemId, currentSetup.getInventory());
+								containerContainsItem(itemId, currentSetup.getInventory());
 							break;
 						case EQUIPMENT:
-							containsItem = checkIfContainerContainsItem(itemId, currentSetup.getEquipment());
+							containsItem = containerContainsItem(itemId, currentSetup.getEquipment());
 							break;
 						case ADDITIONAL_FILTERED_ITEMS:
 							containsItem = additionalFilteredItemsHasItem(itemId, currentSetup.getAdditionalFilteredItems());
@@ -1203,7 +1201,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			List<InventorySetupsItem> boltPouchData = null;
-			if (checkIfContainerContainsItem(ItemID.BOLT_POUCH, inv))
+			if (containerContainsItem(ItemID.BOLT_POUCH, inv))
 			{
 				boltPouchData = getBoltPouchData();
 			}
@@ -2084,7 +2082,7 @@ public class InventorySetupsPlugin extends Plugin
 		// check the rune pouch to see if it has the item (runes in this case)
 		if (setup.getRune_pouch() != null)
 		{
-			if (checkIfContainerContainsItem(itemID, setup.getRune_pouch()))
+			if (containerContainsItem(itemID, setup.getRune_pouch()))
 			{
 				return true;
 			}
@@ -2093,17 +2091,22 @@ public class InventorySetupsPlugin extends Plugin
 		// check the bolt pouch to see if it has the item (bolts in this case)
 		if (setup.getBoltPouch() != null)
 		{
-			if (checkIfContainerContainsItem(itemID, setup.getBoltPouch()))
+			if (containerContainsItem(itemID, setup.getBoltPouch()))
 			{
 				return true;
 			}
 		}
 
-		return checkIfContainerContainsItem(itemID, setup.getInventory()) ||
-			checkIfContainerContainsItem(itemID, setup.getEquipment());
+		return containerContainsItem(itemID, setup.getInventory()) ||
+			containerContainsItem(itemID, setup.getEquipment());
 	}
 
-	private boolean checkIfContainerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
+	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
+	{
+		return containerContainsItem(itemID, setupContainer, true);
+	}
+
+	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy)
 	{
 		// So place holders will show up in the bank.
 		itemID = itemManager.canonicalize(itemID);
@@ -2112,7 +2115,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// For equipped weight reducing items or noted items in the inventory
 			int setupItemId = itemManager.canonicalize(item.getId());
-			if (getProcessedID(item.isFuzzy(), itemID) == getProcessedID(item.isFuzzy(), setupItemId))
+			if (getProcessedID(item.isFuzzy() && allowFuzzy, itemID) == getProcessedID(item.isFuzzy() && allowFuzzy, setupItemId))
 			{
 				return true;
 			}
@@ -2244,9 +2247,10 @@ public class InventorySetupsPlugin extends Plugin
 
 	public InventorySetupsRunePouchType getRunePouchTypeFromContainer(final List<InventorySetupsItem> container)
 	{
+		// Don't allow fuzzy when checking because it will incorrectly assume the type
 		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
 		{
-			if (checkIfContainerContainsItem(id, container))
+			if (containerContainsItem(id, container, false))
 			{
 				return InventorySetupsRunePouchType.NORMAL;
 			}
@@ -2254,9 +2258,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
 		{
-			if (checkIfContainerContainsItem(id, container))
+			if (containerContainsItem(id, container, false))
 			{
-				return InventorySetupsRunePouchType.NORMAL;
+				return InventorySetupsRunePouchType.DIVINE;
 			}
 		}
 
@@ -2265,7 +2269,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
 	{
-		return checkIfContainerContainsItem(ItemID.BOLT_POUCH, container);
+		return containerContainsItem(ItemID.BOLT_POUCH, container, false);
 	}
 
 	public void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)
