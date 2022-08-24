@@ -114,7 +114,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
-		String updateText =		"Fixed an issue where alphabetical mode would cause setups to show up in the Unassigned section incorrectly.\n\n" +
+
+		String updateText =		"Added support for the new divine rune pouch.\n\n" +
+								"Fixed an issue where alphabetical mode would cause setups to show up in the Unassigned section incorrectly.\n\n" +
 								"Clicking on a section panel while editing the name will no longer minimize or maximize the section and cancel the edit.\n\n" +
 								"Fixed an issue where the icon for a setup in Icon View was not being saved.";
 
