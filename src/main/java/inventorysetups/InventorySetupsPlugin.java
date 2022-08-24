@@ -1671,6 +1671,10 @@ public class InventorySetupsPlugin extends Plugin
 				return getNormalizedContainer(InventoryID.INVENTORY);
 			case EQUIPMENT:
 				return getNormalizedContainer(InventoryID.EQUIPMENT);
+			case RUNE_POUCH:
+				return getRunePouchData(InventorySetupsRunePouchType.DIVINE);
+			case BOLT_POUCH:
+				return getBoltPouchData();
 			default:
 				assert false : "Wrong slot ID!";
 				return null;
