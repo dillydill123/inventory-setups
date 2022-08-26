@@ -117,7 +117,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			InventorySetupsItem currInvItem = currInventory.get(i);
 			if (rpType == InventorySetupsRunePouchType.NONE)
 			{
-				rpType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(currInvItem.getId()));
+				rpType = plugin.getRunePouchType(currInvItem.getId());
 			}
 			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
