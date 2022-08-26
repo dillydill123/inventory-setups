@@ -177,7 +177,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			// Use fuzzy mapping
 			if (runePouchType == InventorySetupsRunePouchType.NONE)
 			{
-				runePouchType = plugin.getRunePouchType(InventorySetupsVariationMapping.map(item.getId()));
+				runePouchType = plugin.getRunePouchType(item.getId());
 			}
 			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.BOLT_POUCH)
 			{
