@@ -112,6 +112,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		}
 
 		InventorySetupsRunePouchType rpType = InventorySetupsRunePouchType.NONE;
+		boolean currInvHasBoltPouch = false;
 		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
 		{
 			InventorySetupsItem currInvItem = currInventory.get(i);
@@ -119,22 +120,15 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			{
 				rpType = plugin.getRunePouchType(currInvItem.getId());
 			}
-			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
-		}
-
-		final InventorySetupsRunePouchType rpTypeFinal = rpType;
-		plugin.getClientThread().invokeLater(() -> handleRunePouchHighlighting(inventorySetup, rpTypeFinal));
-
-		boolean currInvHasBoltPouch = false;
-		for (int i = 0; i < NUM_INVENTORY_ITEMS; i++)
-		{
-			InventorySetupsItem currInvItem = currInventory.get(i);
-			if (!currInvHasBoltPouch && InventorySetupsVariationMapping.map(currInvItem.getId()) == ItemID.BOLT_POUCH)
+			if (!currInvHasBoltPouch && plugin.isItemBoltPouch(currInvItem.getId()))
 			{
 				currInvHasBoltPouch = true;
 			}
 			super.highlightSlot(inventorySetup, inventoryToCheck.get(i), currInventory.get(i), inventorySlots.get(i));
 		}
+
+		final InventorySetupsRunePouchType rpTypeFinal = rpType;
+		plugin.getClientThread().invokeLater(() -> handleRunePouchHighlighting(inventorySetup, rpTypeFinal));
 
 		final boolean currInvHasBoltPouchFinal = currInvHasBoltPouch;
 		plugin.getClientThread().invokeLater(() -> handleBoltPouchHighlighting(inventorySetup, currInvHasBoltPouchFinal));
@@ -174,12 +168,11 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		boolean currInvHasBoltPouch = false;
 		for (final InventorySetupsItem item : currInventory)
 		{
-			// Use fuzzy mapping
 			if (runePouchType == InventorySetupsRunePouchType.NONE)
 			{
 				runePouchType = plugin.getRunePouchType(item.getId());
 			}
-			if (InventorySetupsVariationMapping.map(item.getId()) == ItemID.BOLT_POUCH)
+			if (!currInvHasBoltPouch && plugin.isItemBoltPouch(item.getId()))
 			{
 				currInvHasBoltPouch = true;
 			}

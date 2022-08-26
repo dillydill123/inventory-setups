@@ -2240,7 +2240,7 @@ public class InventorySetupsPlugin extends Plugin
 		return InventorySetupsRunePouchType.NONE;
 	}
 
-	private boolean isItemBoltPouch(final int itemId)
+	public boolean isItemBoltPouch(final int itemId)
 	{
 		return itemId == ItemID.BOLT_POUCH;
 	}
