@@ -51,7 +51,7 @@ public class InventorySetupSerializable
 		List<InventorySetupItemSerializable> bp = convertListFromInventorySetup(inventorySetup.getBoltPouch());
 
 		Map<Integer, InventorySetupItemSerializable> afi = null;
-		if (!inventorySetup.getAdditionalFilteredItems().isEmpty())
+		if (inventorySetup.getAdditionalFilteredItems() != null && !inventorySetup.getAdditionalFilteredItems().isEmpty())
 		{
 			afi = new HashMap<>();
 			for (final Integer key : inventorySetup.getAdditionalFilteredItems().keySet())
