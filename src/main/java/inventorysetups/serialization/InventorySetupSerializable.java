@@ -2,6 +2,7 @@ package inventorysetups.serialization;
 
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
+import joptsimple.internal.Strings;
 import lombok.Value;
 
 import javax.annotation.Nullable;
@@ -61,7 +62,7 @@ public class InventorySetupSerializable
 		}
 
 		String name = inventorySetup.getName();
-		String notes = !inventorySetup.getNotes().isEmpty() ? inventorySetup.getNotes() : null;
+		String notes = !Strings.isNullOrEmpty(inventorySetup.getNotes()) ? inventorySetup.getNotes() : null;
 		Color hc = inventorySetup.getHighlightColor();
 		Boolean hd = inventorySetup.isHighlightDifference() ? Boolean.TRUE : null;
 		Color dc = inventorySetup.getDisplayColor();
