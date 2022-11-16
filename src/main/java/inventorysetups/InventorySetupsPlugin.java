@@ -692,7 +692,7 @@ public class InventorySetupsPlugin extends Plugin
 		final String msg = "Enter the name of this section (max " + MAX_SETUP_NAME_LENGTH + " chars).";
 		String name = JOptionPane.showInputDialog(panel,
 				msg,
-				"Add New Setup",
+				"Add New Section",
 				JOptionPane.PLAIN_MESSAGE);
 
 		// cancel button was clicked
