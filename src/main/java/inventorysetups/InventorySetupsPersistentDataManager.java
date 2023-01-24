@@ -236,8 +236,7 @@ public class InventorySetupsPersistentDataManager
 
 	private String fixOldJSONData(final String json)
 	{
-		final Gson gson = new Gson();
-		JsonElement je = gson.fromJson(json, JsonElement.class);
+		JsonElement je = this.gson.fromJson(json, JsonElement.class);
 		JsonArray ja = je.getAsJsonArray();
 		for (JsonElement elem : ja)
 		{
