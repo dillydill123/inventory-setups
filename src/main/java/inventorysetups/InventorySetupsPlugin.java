@@ -78,10 +78,12 @@ import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.api.widgets.WidgetModalMode;
 import net.runelite.client.account.AccountSession;
 import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
@@ -489,13 +491,25 @@ public class InventorySetupsPlugin extends Plugin
 	}
 
 	@Subscribe
+	private void onWidgetClosed(WidgetClosed event)
+	{
+		if (event.getGroupId() == WidgetID.BANK_GROUP_ID)
+		{
+			keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
+			keyManager.unregisterKeyListener(filterBankHotkeyListener);
+			keyManager.unregisterKeyListener(filterInventoryHotkeyListener);
+			keyManager.unregisterKeyListener(filterEquipmentHotkeyListener);
+			keyManager.unregisterKeyListener(filterAddItemsHotkeyListener);
+		}
+	}
+
+	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
 		// when the bank is loaded up allowing filtering again
 		// this is to make it so the bank will refilter if a tab was clicked and then the player exited the bank
 		if (event.getGroupId() == WidgetID.BANK_GROUP_ID)
 		{
-
 			// If manual bank filter is selected, don't allow filtering when the bank is opened
 			// filtering will only occur if the user selects a setup or uses a filtering hotkey
 			// while the bank is already open
@@ -506,6 +520,12 @@ public class InventorySetupsPlugin extends Plugin
 				// start a bank search so the bank is filtered when it's opened
 				doBankSearch();
 			}
+
+			keyManager.registerKeyListener(returnToSetupsHotkeyListener);
+			keyManager.registerKeyListener(filterBankHotkeyListener);
+			keyManager.registerKeyListener(filterInventoryHotkeyListener);
+			keyManager.registerKeyListener(filterEquipmentHotkeyListener);
+			keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 		}
 	}
 
@@ -586,11 +606,6 @@ public class InventorySetupsPlugin extends Plugin
 		navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
 
 		clientToolbar.addNavigation(navButton);
-		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
-		keyManager.registerKeyListener(filterBankHotkeyListener);
-		keyManager.registerKeyListener(filterInventoryHotkeyListener);
-		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
-		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 
 		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 
