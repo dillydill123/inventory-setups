@@ -88,6 +88,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
@@ -1601,23 +1602,28 @@ public class InventorySetupsPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onProfileChanged(ProfileChanged e)
+	{
+		switchProfile();
+	}
+
+	@Subscribe
 	public void onSessionOpen(SessionOpen event)
 	{
 		final AccountSession session = sessionManager.getAccountSession();
 		if (session != null && session.getUsername() != null)
 		{
-			// config will have changed to new account, load it up
-			clientThread.invokeLater(() ->
-			{
-				dataManager.loadConfig();
-				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
-				return true;
-			});
+			switchProfile();
 		}
 	}
 
 	@Subscribe
 	public void onSessionClose(SessionClose event)
+	{
+		switchProfile();
+	}
+
+	private void switchProfile()
 	{
 		// config will have changed to local file
 		clientThread.invokeLater(() ->
