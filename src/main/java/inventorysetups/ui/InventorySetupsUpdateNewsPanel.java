@@ -115,8 +115,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Added support for the locked divine rune pouch.\n\n" +
-								"Fixed an issue where really old setup data was causing the plugin to be unusable.";
+		String updateText =		"Hotkeys will only be active when the bank is opened.\n\n" +
+								"Added support for usage of multiple RuneLite Config profiles.\n\n" +
+								"Added Ghommal's avernic hilt to regular avernic hilt fuzzy mapping.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
