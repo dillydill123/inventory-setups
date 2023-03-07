@@ -142,6 +142,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_VERSION_STR = "version";
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
+	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -286,6 +287,24 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	};
 
+	private void registerHotkeys()
+	{
+		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
+		keyManager.registerKeyListener(filterBankHotkeyListener);
+		keyManager.registerKeyListener(filterInventoryHotkeyListener);
+		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
+		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
+	}
+
+	private void unregisterHotkeys()
+	{
+		keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
+		keyManager.unregisterKeyListener(filterBankHotkeyListener);
+		keyManager.unregisterKeyListener(filterInventoryHotkeyListener);
+		keyManager.unregisterKeyListener(filterEquipmentHotkeyListener);
+		keyManager.unregisterKeyListener(filterAddItemsHotkeyListener);
+	}
+
 	private void triggerBankSearchFromHotKey()
 	{
 		// you must wait at least one game tick otherwise
@@ -329,6 +348,18 @@ public class InventorySetupsPlugin extends Plugin
 			else if (event.getKey().equals(CONFIG_KEY_MANUAL_BANK_FILTER))
 			{
 				navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
+			}
+			else if (event.getKey().equals(CONFIG_KEY_PERSIST_HOTKEYS))
+			{
+				boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
+				if (config.persistHotKeysOutsideBank())
+				{
+					registerHotkeys();
+				}
+				else if (!bankOpen)
+				{
+					unregisterHotkeys();
+				}
 			}
 		}
 	}
@@ -494,13 +525,9 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	private void onWidgetClosed(WidgetClosed event)
 	{
-		if (event.getGroupId() == WidgetID.BANK_GROUP_ID)
+		if (event.getGroupId() == WidgetID.BANK_GROUP_ID && !config.persistHotKeysOutsideBank())
 		{
-			keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
-			keyManager.unregisterKeyListener(filterBankHotkeyListener);
-			keyManager.unregisterKeyListener(filterInventoryHotkeyListener);
-			keyManager.unregisterKeyListener(filterEquipmentHotkeyListener);
-			keyManager.unregisterKeyListener(filterAddItemsHotkeyListener);
+			unregisterHotkeys();
 		}
 	}
 
@@ -522,11 +549,11 @@ public class InventorySetupsPlugin extends Plugin
 				doBankSearch();
 			}
 
-			keyManager.registerKeyListener(returnToSetupsHotkeyListener);
-			keyManager.registerKeyListener(filterBankHotkeyListener);
-			keyManager.registerKeyListener(filterInventoryHotkeyListener);
-			keyManager.registerKeyListener(filterEquipmentHotkeyListener);
-			keyManager.registerKeyListener(filterAddItemsHotkeyListener);
+			if (!config.persistHotKeysOutsideBank())
+			{
+				registerHotkeys();
+			}
+
 		}
 	}
 

@@ -27,6 +27,7 @@ package inventorysetups;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 import java.awt.Color;
@@ -250,6 +251,18 @@ public interface InventorySetupsConfig extends Config
 	default Keybind filterAddItemsHotkey()
 	{
 		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_PERSIST_HOTKEYS,
+			name = "Persist Hotkeys Outside Bank",
+			description = "Configures hotkeys to persist even outside the bank",
+			position = 11,
+			section = hotkeySection
+	)
+	default boolean persistHotKeysOutsideBank()
+	{
+		return false;
 	}
 
 	@ConfigItem(
