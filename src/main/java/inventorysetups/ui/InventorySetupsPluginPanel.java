@@ -37,6 +37,8 @@ import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -63,12 +65,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -300,41 +296,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		massImportExportMenu.add(massExportSetupsMenu);
 		massImportExportMenu.add(massImportSectionsMenu);
 		massImportExportMenu.add(massExportSectionsMenu);
-
-		this.importMarker = new JLabel(IMPORT_ICON);
-		importMarker.setComponentPopupMenu(massImportExportMenu);
-		updateImportMarker();
-		importMarker.addMouseListener(new MouseAdapter()
-		{
-			@Override
-			public void mousePressed(MouseEvent e)
-			{
-				if (SwingUtilities.isLeftMouseButton(e))
-				{
-					if (plugin.getConfig().sectionMode())
-					{
-						plugin.importSection();
-					}
-					else
-					{
-						plugin.importSetup();
-					}
-				}
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e)
-			{
-				importMarker.setIcon(IMPORT_HOVER_ICON);
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e)
-			{
-				importMarker.setIcon(IMPORT_ICON);
-			}
-		});
-
 		// set mass export/import options
 		massImportSetupsMenu.addActionListener(e ->
 		{
@@ -353,9 +314,68 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			plugin.massExport(plugin.getSections(), "Sections", "sections");
 		});
 
-		// set up the add marker (+ sign in the top right)
+		JPopupMenu singleImportExportMenu = new JPopupMenu();
+		JMenuItem singleImportSetupMenu = new JMenuItem("Import setup..");
+		JMenuItem singleImportSectionMenu = new JMenuItem("Import section..");
+		singleImportExportMenu.add(singleImportSetupMenu);
+		singleImportExportMenu.add(singleImportSectionMenu);
+		// set single import options
+		singleImportSetupMenu.addActionListener(e ->
+		{
+			plugin.importSetup();
+		});
+		singleImportSectionMenu.addActionListener(e ->
+		{
+			plugin.importSection();
+		});
+
+		this.importMarker = new JLabel(IMPORT_ICON);
+		importMarker.setToolTipText("Import a new setup or section");
+		importMarker.setComponentPopupMenu(massImportExportMenu);
+		importMarker.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				if (SwingUtilities.isLeftMouseButton(e))
+				{
+					final Point location = MouseInfo.getPointerInfo().getLocation();
+					SwingUtilities.convertPointFromScreen(location, importMarker);
+					singleImportExportMenu.show(importMarker, location.x, location.y);
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e)
+			{
+				importMarker.setIcon(IMPORT_HOVER_ICON);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e)
+			{
+				importMarker.setIcon(IMPORT_ICON);
+			}
+		});
+
+		
+		// set up the add marker (+ sign)
 		this.addMarker = new JLabel(ADD_ICON);
-		updateAddMarker();
+		addMarker.setToolTipText("Add new setup or section");
+		final JPopupMenu addMarkerMenu = new JPopupMenu();
+		final JMenuItem addMarkerAddNewSetup = new JMenuItem("Add new setup..");
+		final JMenuItem addMarkerAddNewSection = new JMenuItem("Add new section..");
+		addMarkerMenu.add(addMarkerAddNewSetup);
+		addMarkerMenu.add(addMarkerAddNewSection);
+		addMarkerAddNewSetup.addActionListener(e ->
+		{
+			plugin.addInventorySetup();
+		});
+		addMarkerAddNewSection.addActionListener(e ->
+		{
+			plugin.addSection();
+		});
+
 		addMarker.addMouseListener(new MouseAdapter()
 		{
 			@Override
@@ -363,14 +383,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					if (plugin.getConfig().sectionMode())
-					{
-						plugin.addSection();
-					}
-					else
-					{
-						plugin.addInventorySetup();
-					}
+					final Point location = MouseInfo.getPointerInfo().getLocation();
+					SwingUtilities.convertPointFromScreen(location, addMarker);
+					addMarkerMenu.show(addMarker, location.x, location.y);
 				}
 			}
 
@@ -386,22 +401,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				addMarker.setIcon(ADD_ICON);
 			}
 		});
-
-		// Add right click menu to addmarker for convenience
-		final JPopupMenu addMarkerMenu = new JPopupMenu();
-		final JMenuItem addMarkerAddNewSetup = new JMenuItem("Add new setup..");
-		final JMenuItem addMarkerAddNewSection = new JMenuItem("Add new section..");
-		addMarkerMenu.add(addMarkerAddNewSetup);
-		addMarkerMenu.add(addMarkerAddNewSection);
-		addMarkerAddNewSetup.addActionListener(e ->
-		{
-			plugin.addInventorySetup();
-		});
-		addMarkerAddNewSection.addActionListener(e ->
-		{
-			plugin.addSection();
-		});
-		addMarker.setComponentPopupMenu(addMarkerMenu);
 
 		this.updateMarker = new JLabel(UPDATE_ICON);
 		updateMarker.setToolTipText("Update setup with current inventory and equipment");
@@ -619,8 +618,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		returnToOverviewPanel(resetScrollBar);
 		InventorySetupUtilities.fastRemoveAll(overviewPanel);
-		updateAddMarker();
-		updateImportMarker();
 		updateSectionViewMarker();
 		updatePanelViewMarker();
 		updateSortingMarker();
@@ -838,16 +835,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		validate();
 		repaint();
 		contentWrapperPane.getVerticalScrollBar().setValue(scrollbarValue);
-	}
-
-	private void updateAddMarker()
-	{
-		addMarker.setToolTipText(plugin.getConfig().sectionMode() ? "Add a new section" : "Add a new inventory setup");
-	}
-
-	private void updateImportMarker()
-	{
-		importMarker.setToolTipText(plugin.getConfig().sectionMode() ? "Import a new section" : "Import a new inventory setup");
 	}
 
 	// Layout setups according
