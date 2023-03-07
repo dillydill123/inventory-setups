@@ -353,6 +353,7 @@ public class InventorySetupsPlugin extends Plugin
 				Integer index;
 			};
 
+			List<InventorySetup> filteredSetups = panel.getFilteredInventorysetups();
 			List<ShowWornItemsPair> setupsToShowOnWornItemsList;
 			switch (config.showWornItemsFilter())
 			{
@@ -369,8 +370,8 @@ public class InventorySetupsPlugin extends Plugin
 						.collect(Collectors.toList());
 					break;
 				default:
-					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-						.mapToObj(i -> new ShowWornItemsPair(inventorySetups.get(i), i))
+					setupsToShowOnWornItemsList = filteredSetups.stream()
+						.map(filteredSetup -> new ShowWornItemsPair(filteredSetup, inventorySetups.indexOf(filteredSetup)))
 						.collect(Collectors.toList());
 					break;
 			}

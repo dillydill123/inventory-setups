@@ -148,6 +148,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private final InventorySetupsPlugin plugin;
 
+	@Getter
+	private List<InventorySetup> filteredInventorysetups;
+
 	static
 	{
 		final BufferedImage helpIcon = ImageUtil.loadImageResource(InventorySetupsPlugin.class, "/help_button.png");
@@ -219,6 +222,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		this.overviewPanel = new JPanel();
 		this.overviewTopPanel = new JPanel();
 		this.overviewPanelScrollPosition = 0;
+		this.filteredInventorysetups = new ArrayList<>();
 
 		// setup the title
 		this.mainTitle = new JLabel();
@@ -621,23 +625,23 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		updatePanelViewMarker();
 		updateSortingMarker();
 
-		List<InventorySetup> filteredSetups = null;
+		filteredInventorysetups.clear();
 		if (!searchBar.getText().isEmpty())
 		{
-			filteredSetups = plugin.filterSetups(searchBar.getText());
+			filteredInventorysetups = plugin.filterSetups(searchBar.getText());
 		}
 		else
 		{
-			filteredSetups = new ArrayList<>(plugin.getInventorySetups());
-			moveFavoriteSetupsToTopOfList(filteredSetups);
+			filteredInventorysetups = new ArrayList<>(plugin.getInventorySetups());
+			moveFavoriteSetupsToTopOfList(filteredInventorysetups);
 		}
 
 		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL)
 		{
-			filteredSetups.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
+			filteredInventorysetups.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
 
-		layoutSetups(filteredSetups);
+		layoutSetups(filteredInventorysetups);
 
 		revalidate();
 		repaint();
