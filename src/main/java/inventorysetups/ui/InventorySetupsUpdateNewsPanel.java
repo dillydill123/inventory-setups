@@ -115,9 +115,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Hotkeys will only be active when the bank is opened.\n\n" +
-								"Added support for usage of multiple RuneLite Config profiles.\n\n" +
-								"Added Ghommal's avernic hilt to regular avernic hilt fuzzy mapping.";
+		String updateText =		"Hotkeys can now persist outside the bank via config option.\n\n" +
+								"Show Worn Items right click menu will now match the setup order on the panel if no filtering option from the config is selected.\n\n" +
+								"Add and import buttons now open a menu to select between setup or section.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
