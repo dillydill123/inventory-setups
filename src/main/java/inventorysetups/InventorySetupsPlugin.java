@@ -58,18 +58,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.EnumComposition;
-import net.runelite.api.GameState;
-import net.runelite.api.InventoryID;
-import net.runelite.api.Item;
-import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
-import net.runelite.api.KeyCode;
-import net.runelite.api.MenuAction;
-import net.runelite.api.ScriptID;
-import net.runelite.api.SpriteID;
-import net.runelite.api.Varbits;
+import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
@@ -147,6 +136,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final int NUM_INVENTORY_ITEMS = 28;
 	public static final int NUM_EQUIPMENT_ITEMS = 14;
 	public static final int MAX_SETUP_NAME_LENGTH = 50;
+	private static final String OPEN_SECTION_MENU_ENTRY = "Open Section";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
 	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
@@ -406,20 +396,50 @@ public class InventorySetupsPlugin extends Plugin
 					break;
 			}
 
-			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
-			{
-				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
-				Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
-				client.createMenuEntry(-1)
-						.setOption(OPEN_SETUP_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
-						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
-						.setType(MenuAction.RUNELITE)
-						.onClick(e ->
-						{
-							resetBankSearch(true);
-							panel.setCurrentInventorySetup(inventorySetups.get(setupIndexPair.index), true);
-						});
+			if(config.sectionMode()) {
+				log.debug("Setting up bank menu. {} sections found", sections.size());
+
+				IntStream.range(0, sections.size()).forEach(i -> {
+					log.debug("Creating section {}", sections.get(i));
+					Color sectionMenuTargetColor = sections.get(i).getDisplayColor() == null ? JagexColors.MENU_TARGET : sections.get(i).getDisplayColor();
+					MenuEntry menuEntry = client.createMenuEntry(-1)
+							.setOption(OPEN_SECTION_MENU_ENTRY)
+							.setTarget(ColorUtil.prependColorTag(sections.get(i).getName(), sectionMenuTargetColor))
+							.setType(MenuAction.RUNELITE_SUBMENU);
+					List<String> setups = sections.get(i).getSetups();
+					IntStream.range(0, setups.size()).forEach(j -> {
+						Color setupMenuTargetColor = cache.getInventorySetupNames().get(setups.get(j)).getDisplayColor() == null ? JagexColors.MENU_TARGET : cache.getInventorySetupNames().get(setups.get(j)).getDisplayColor();
+
+						client.createMenuEntry(-1)
+										.setOption(OPEN_SETUP_MENU_ENTRY)
+										.setTarget(ColorUtil.prependColorTag(setups.get(j), setupMenuTargetColor))
+										.setParent(menuEntry)
+										.setType(MenuAction.RUNELITE)
+										.onClick(e ->
+										{
+											resetBankSearch(true);
+											panel.setCurrentInventorySetup(cache.getInventorySetupNames().get(setups.get(j)), true);
+										});;
+							}
+					);
+				});
+				;
+			} else {
+				for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
+				{
+					final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+					Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
+					client.createMenuEntry(-1)
+							.setOption(OPEN_SETUP_MENU_ENTRY)
+							.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
+							.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
+							.setType(MenuAction.RUNELITE)
+							.onClick(e ->
+							{
+								resetBankSearch(true);
+								panel.setCurrentInventorySetup(inventorySetups.get(setupIndexPair.index), true);
+							});
+				}
 			}
 
 			if (panel.getCurrentSelectedSetup() != null)
@@ -1918,7 +1938,7 @@ public class InventorySetupsPlugin extends Plugin
 				cache.addSetup(inventorySetup);
 				inventorySetups.add(inventorySetup);
 			}
-			
+
 			dataManager.updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
