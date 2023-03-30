@@ -396,7 +396,7 @@ public class InventorySetupsPlugin extends Plugin
 					break;
 			}
 
-			if(config.sectionMode()) {
+			if(config.sectionMode() && config.wornItemSelectionSubmenu()) {
 
 				List<InventorySetup> unassignedSetups = new ArrayList<>();
 				Map<String, List<InventorySetup>> sectionMap = sections.stream()
