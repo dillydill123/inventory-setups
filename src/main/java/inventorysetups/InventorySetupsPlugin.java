@@ -397,33 +397,72 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			if(config.sectionMode()) {
-				log.debug("Setting up bank menu. {} sections found", sections.size());
 
-				IntStream.range(0, sections.size()).forEach(i -> {
-					log.debug("Creating section {}", sections.get(i));
-					Color sectionMenuTargetColor = sections.get(i).getDisplayColor() == null ? JagexColors.MENU_TARGET : sections.get(i).getDisplayColor();
-					MenuEntry menuEntry = client.createMenuEntry(-1)
+				List<InventorySetup> unassignedSetups = new ArrayList<>();
+				Map<String, List<InventorySetup>> sectionMap = sections.stream()
+						.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<InventorySetup>()));
+
+				setupsToShowOnWornItemsList.stream().forEach(showWornItemsPair -> {
+					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(showWornItemsPair.setup.getName());
+					if(sectionsOfSetup.size() == 0){
+						unassignedSetups.add(showWornItemsPair.setup);
+					}
+					sectionsOfSetup.values().stream().forEach(section -> {
+						sectionMap.get(section.getName()).add(showWornItemsPair.setup);
+
+					});
+				});
+
+				sections.stream().forEach(section -> {
+					if(sectionMap.get(section.getName()).size() == 0){
+						return;
+					}
+					log.debug("Doing section : {}", section.getName());
+
+					Color sectionMenuTargetColor = section == null || section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
+					MenuEntry menuEntry = client.createMenuEntry(1)
 							.setOption(OPEN_SECTION_MENU_ENTRY)
-							.setTarget(ColorUtil.prependColorTag(sections.get(i).getName(), sectionMenuTargetColor))
+							.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
 							.setType(MenuAction.RUNELITE_SUBMENU);
-					List<String> setups = sections.get(i).getSetups();
-					IntStream.range(0, setups.size()).forEach(j -> {
-						Color setupMenuTargetColor = cache.getInventorySetupNames().get(setups.get(j)).getDisplayColor() == null ? JagexColors.MENU_TARGET : cache.getInventorySetupNames().get(setups.get(j)).getDisplayColor();
+
+					sectionMap.get(section.getName()).stream().forEach(setup -> {
+						Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
 
 						client.createMenuEntry(-1)
-										.setOption(OPEN_SETUP_MENU_ENTRY)
-										.setTarget(ColorUtil.prependColorTag(setups.get(j), setupMenuTargetColor))
-										.setParent(menuEntry)
-										.setType(MenuAction.RUNELITE)
-										.onClick(e ->
-										{
-											resetBankSearch(true);
-											panel.setCurrentInventorySetup(cache.getInventorySetupNames().get(setups.get(j)), true);
-										});;
-							}
-					);
+								.setOption(OPEN_SETUP_MENU_ENTRY)
+								.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
+								.setParent(menuEntry)
+								.setType(MenuAction.RUNELITE)
+								.onClick(e ->
+								{
+									resetBankSearch(true);
+									panel.setCurrentInventorySetup(setup, true);
+								});
+					});
 				});
-				;
+
+				if(unassignedSetups.size() > 0) {
+					MenuEntry menuEntry = client.createMenuEntry(1)
+							.setOption(OPEN_SECTION_MENU_ENTRY)
+							.setTarget(ColorUtil.prependColorTag("Unassigned", JagexColors.MENU_TARGET))
+							.setType(MenuAction.RUNELITE_SUBMENU);
+
+					unassignedSetups.forEach(setup -> {
+						Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
+
+						client.createMenuEntry(-1)
+								.setOption(OPEN_SETUP_MENU_ENTRY)
+								.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
+								.setParent(menuEntry)
+								.setType(MenuAction.RUNELITE)
+								.onClick(e ->
+								{
+									resetBankSearch(true);
+									panel.setCurrentInventorySetup(setup, true);
+								});
+					});
+				}
+
 			} else {
 				for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
 				{
