@@ -58,7 +58,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.*;
+import net.runelite.api.Client;
+import net.runelite.api.EnumComposition;
+import net.runelite.api.GameState;
+import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
+import net.runelite.api.ItemID;
+import net.runelite.api.KeyCode;
+import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
+import net.runelite.api.ScriptID;
+import net.runelite.api.SpriteID;
+import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
@@ -144,6 +156,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String FILTER_INVENTORY_ENTRY = "Filter inventory";
 	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
+	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
 	private static final int SPELLBOOK_VARBIT = 4070;
 	private static final int ITEMS_PER_ROW = 8;
 	private static final int ITEM_VERTICAL_SPACING = 36;
@@ -406,61 +419,32 @@ public class InventorySetupsPlugin extends Plugin
 					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(showWornItemsPair.setup.getName());
 					if(sectionsOfSetup.size() == 0){
 						unassignedSetups.add(showWornItemsPair.setup);
+					} else {
+						sectionsOfSetup.values().stream().forEach(section -> sectionMap.get(section.getName()).add(showWornItemsPair.setup));
 					}
-					sectionsOfSetup.values().stream().forEach(section -> {
-						sectionMap.get(section.getName()).add(showWornItemsPair.setup);
-
-					});
 				});
 
 				sections.stream().forEach(section -> {
 					if(sectionMap.get(section.getName()).size() == 0){
 						return;
 					}
-					log.debug("Doing section : {}", section.getName());
 
-					Color sectionMenuTargetColor = section == null || section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
+					Color sectionMenuTargetColor = section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
 					MenuEntry menuEntry = client.createMenuEntry(1)
 							.setOption(OPEN_SECTION_MENU_ENTRY)
 							.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
 							.setType(MenuAction.RUNELITE_SUBMENU);
 
-					sectionMap.get(section.getName()).stream().forEach(setup -> {
-						Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
-
-						client.createMenuEntry(-1)
-								.setOption(OPEN_SETUP_MENU_ENTRY)
-								.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
-								.setParent(menuEntry)
-								.setType(MenuAction.RUNELITE)
-								.onClick(e ->
-								{
-									resetBankSearch(true);
-									panel.setCurrentInventorySetup(setup, true);
-								});
-					});
+					sectionMap.get(section.getName()).stream().forEach(setup -> createSetupSubmenu(setup, menuEntry));
 				});
 
 				if(unassignedSetups.size() > 0) {
 					MenuEntry menuEntry = client.createMenuEntry(1)
 							.setOption(OPEN_SECTION_MENU_ENTRY)
-							.setTarget(ColorUtil.prependColorTag("Unassigned", JagexColors.MENU_TARGET))
+							.setTarget(ColorUtil.prependColorTag(UNASSIGNED_SECTION_SETUP_MENU_ENTRY, JagexColors.MENU_TARGET))
 							.setType(MenuAction.RUNELITE_SUBMENU);
 
-					unassignedSetups.forEach(setup -> {
-						Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
-
-						client.createMenuEntry(-1)
-								.setOption(OPEN_SETUP_MENU_ENTRY)
-								.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
-								.setParent(menuEntry)
-								.setType(MenuAction.RUNELITE)
-								.onClick(e ->
-								{
-									resetBankSearch(true);
-									panel.setCurrentInventorySetup(setup, true);
-								});
-					});
+					unassignedSetups.forEach(setup -> createSetupSubmenu(setup, menuEntry));
 				}
 
 			} else {
@@ -556,6 +540,21 @@ public class InventorySetupsPlugin extends Plugin
 						}
 					});
 		}
+	}
+
+	private void createSetupSubmenu(InventorySetup setup, MenuEntry menuEntry) {
+		Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
+
+		client.createMenuEntry(-1)
+				.setOption(OPEN_SETUP_MENU_ENTRY)
+				.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
+				.setParent(menuEntry)
+				.setType(MenuAction.RUNELITE)
+				.onClick(e ->
+				{
+					resetBankSearch(true);
+					panel.setCurrentInventorySetup(setup, true);
+				});
 	}
 
 	// Retrieve an item from a selected menu entry in the bank
