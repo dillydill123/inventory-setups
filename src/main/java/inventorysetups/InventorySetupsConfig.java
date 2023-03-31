@@ -366,9 +366,9 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = CONFIG_KEY_SECTION_MODE,
-			name = "Submenu in Section mode",
-			description = "Enable submenus when selection mode is enabled",
+			keyName = "showSectionSubmenusWornItems",
+			name = "Show Section Submenus in Worn Items",
+			description = "Enable section submenus on the worn items button when section mode is enabled",
 			position = 19
 	)
 	default boolean wornItemSelectionSubmenu()
