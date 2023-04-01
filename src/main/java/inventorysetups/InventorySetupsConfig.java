@@ -367,7 +367,7 @@ public interface InventorySetupsConfig extends Config
 
 	@ConfigItem(
 			keyName = "showSectionSubmenusWornItems",
-			name = "Show Section Submenus in Worn Items",
+			name = "Worn Items Section Submenus",
 			description = "Enable section submenus on the worn items button when section mode is enabled",
 			position = 19
 	)

@@ -409,16 +409,17 @@ public class InventorySetupsPlugin extends Plugin
 					break;
 			}
 
-			if(config.sectionMode() && config.wornItemSelectionSubmenu())
+			if (config.sectionMode() && config.wornItemSelectionSubmenu())
 			{
 
 				List<InventorySetup> unassignedSetups = new ArrayList<>();
 				Map<String, List<InventorySetup>> sectionMap = sections.stream()
 						.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<InventorySetup>()));
 
-				setupsToShowOnWornItemsList.stream().forEach(showWornItemsPair -> {
+				setupsToShowOnWornItemsList.stream().forEach(showWornItemsPair ->
+				{
 					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(showWornItemsPair.setup.getName());
-					if(sectionsOfSetup.isEmpty())
+					if (sectionsOfSetup.isEmpty())
 					{
 						unassignedSetups.add(showWornItemsPair.setup);
 					}
@@ -428,8 +429,9 @@ public class InventorySetupsPlugin extends Plugin
 					}
 				});
 
-				sections.stream().forEach(section -> {
-					if(sectionMap.get(section.getName()).isEmpty())
+				sections.stream().forEach(section ->
+				{
+					if (sectionMap.get(section.getName()).isEmpty())
 					{
 						return;
 					}
@@ -443,7 +445,7 @@ public class InventorySetupsPlugin extends Plugin
 					sectionMap.get(section.getName()).stream().forEach(setup -> createSectionSubMenuOnWornItems(setup, menuEntry));
 				});
 
-				if(unassignedSetups.size() > 0)
+				if (unassignedSetups.size() > 0)
 				{
 					MenuEntry unassignedSectionMenuEntry = client.createMenuEntry(1)
 							.setOption(OPEN_SECTION_MENU_ENTRY)
@@ -550,7 +552,8 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	private void createSectionSubMenuOnWornItems(InventorySetup setup, MenuEntry menuEntry) {
+	private void createSectionSubMenuOnWornItems(InventorySetup setup, MenuEntry menuEntry)
+	{
 		Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
 
 		client.createMenuEntry(-1)
