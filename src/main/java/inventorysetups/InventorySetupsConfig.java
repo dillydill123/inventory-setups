@@ -366,10 +366,22 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "showSectionSubmenusWornItems",
+			name = "Worn Items Section Submenus",
+			description = "Enable section submenus on the worn items button when section mode is enabled",
+			position = 19
+	)
+	default boolean wornItemSelectionSubmenu()
+	{
+		return true;
+	}
+
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_MANUAL_BANK_FILTER,
 			name = "Manual Bank Filter",
 			description = "Disable automatic bank filtering when opening the bank",
-			position = 19
+			position = 20
 	)
 	default boolean manualBankFilter()
 	{

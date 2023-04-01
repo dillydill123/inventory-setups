@@ -67,6 +67,7 @@ import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
+import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
@@ -147,6 +148,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final int NUM_INVENTORY_ITEMS = 28;
 	public static final int NUM_EQUIPMENT_ITEMS = 14;
 	public static final int MAX_SETUP_NAME_LENGTH = 50;
+	private static final String OPEN_SECTION_MENU_ENTRY = "Open Section";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
 	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
@@ -154,6 +156,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String FILTER_INVENTORY_ENTRY = "Filter inventory";
 	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
+	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
 	private static final int SPELLBOOK_VARBIT = 4070;
 	private static final int ITEMS_PER_ROW = 8;
 	private static final int ITEM_VERTICAL_SPACING = 36;
@@ -406,20 +409,70 @@ public class InventorySetupsPlugin extends Plugin
 					break;
 			}
 
-			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
+			if (config.sectionMode() && config.wornItemSelectionSubmenu())
 			{
-				final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
-				Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
-				client.createMenuEntry(-1)
-						.setOption(OPEN_SETUP_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
-						.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
-						.setType(MenuAction.RUNELITE)
-						.onClick(e ->
-						{
-							resetBankSearch(true);
-							panel.setCurrentInventorySetup(inventorySetups.get(setupIndexPair.index), true);
-						});
+
+				List<InventorySetup> unassignedSetups = new ArrayList<>();
+				Map<String, List<InventorySetup>> sectionMap = sections.stream()
+						.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<InventorySetup>()));
+
+				setupsToShowOnWornItemsList.stream().forEach(showWornItemsPair ->
+				{
+					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(showWornItemsPair.setup.getName());
+					if (sectionsOfSetup.isEmpty())
+					{
+						unassignedSetups.add(showWornItemsPair.setup);
+					}
+					else
+					{
+						sectionsOfSetup.values().stream().forEach(section -> sectionMap.get(section.getName()).add(showWornItemsPair.setup));
+					}
+				});
+
+				sections.stream().forEach(section ->
+				{
+					if (sectionMap.get(section.getName()).isEmpty())
+					{
+						return;
+					}
+
+					Color sectionMenuTargetColor = section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
+					MenuEntry menuEntry = client.createMenuEntry(1)
+							.setOption(OPEN_SECTION_MENU_ENTRY)
+							.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
+							.setType(MenuAction.RUNELITE_SUBMENU);
+
+					sectionMap.get(section.getName()).stream().forEach(setup -> createSectionSubMenuOnWornItems(setup, menuEntry));
+				});
+
+				if (unassignedSetups.size() > 0)
+				{
+					MenuEntry unassignedSectionMenuEntry = client.createMenuEntry(1)
+							.setOption(OPEN_SECTION_MENU_ENTRY)
+							.setTarget(ColorUtil.prependColorTag(UNASSIGNED_SECTION_SETUP_MENU_ENTRY, JagexColors.MENU_TARGET))
+							.setType(MenuAction.RUNELITE_SUBMENU);
+
+					unassignedSetups.forEach(setup -> createSectionSubMenuOnWornItems(setup, unassignedSectionMenuEntry));
+				}
+
+			}
+			else
+			{
+				for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
+				{
+					final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+					Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
+					client.createMenuEntry(-1)
+							.setOption(OPEN_SETUP_MENU_ENTRY)
+							.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
+							.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
+							.setType(MenuAction.RUNELITE)
+							.onClick(e ->
+							{
+								resetBankSearch(true);
+								panel.setCurrentInventorySetup(inventorySetups.get(setupIndexPair.index), true);
+							});
+				}
 			}
 
 			if (panel.getCurrentSelectedSetup() != null)
@@ -497,6 +550,22 @@ public class InventorySetupsPlugin extends Plugin
 						}
 					});
 		}
+	}
+
+	private void createSectionSubMenuOnWornItems(InventorySetup setup, MenuEntry menuEntry)
+	{
+		Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
+
+		client.createMenuEntry(-1)
+				.setOption(OPEN_SETUP_MENU_ENTRY)
+				.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
+				.setParent(menuEntry)
+				.setType(MenuAction.RUNELITE)
+				.onClick(e ->
+				{
+					resetBankSearch(true);
+					panel.setCurrentInventorySetup(setup, true);
+				});
 	}
 
 	// Retrieve an item from a selected menu entry in the bank
@@ -1918,7 +1987,7 @@ public class InventorySetupsPlugin extends Plugin
 				cache.addSetup(inventorySetup);
 				inventorySetups.add(inventorySetup);
 			}
-			
+
 			dataManager.updateConfig(true, false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
