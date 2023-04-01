@@ -50,11 +50,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import javax.inject.Inject;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -378,145 +376,7 @@ public class InventorySetupsPlugin extends Plugin
 		// Adds menu entries to show worn items button
 		if (event.getOption().equals("Show worn items"))
 		{
-
-			@AllArgsConstructor
-			class ShowWornItemsPair
-			{
-				InventorySetup setup;
-				Integer index;
-			};
-
-			List<InventorySetup> filteredSetups = panel.getFilteredInventorysetups();
-			List<ShowWornItemsPair> setupsToShowOnWornItemsList;
-			switch (config.showWornItemsFilter())
-			{
-				case BANK_FILTERED:
-					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-						.mapToObj(i -> new ShowWornItemsPair(inventorySetups.get(i), i))
-						.filter(i -> inventorySetups.get(i.index).isFilterBank())
-						.collect(Collectors.toList());
-					break;
-				case FAVORITED:
-					setupsToShowOnWornItemsList = IntStream.range(0, inventorySetups.size())
-						.mapToObj(i -> new ShowWornItemsPair(inventorySetups.get(i), i))
-						.filter(i -> inventorySetups.get(i.index).isFavorite())
-						.collect(Collectors.toList());
-					break;
-				default:
-					setupsToShowOnWornItemsList = filteredSetups.stream()
-						.map(filteredSetup -> new ShowWornItemsPair(filteredSetup, inventorySetups.indexOf(filteredSetup)))
-						.collect(Collectors.toList());
-					break;
-			}
-
-			if (config.sectionMode() && config.wornItemSelectionSubmenu())
-			{
-
-				List<InventorySetup> unassignedSetups = new ArrayList<>();
-				Map<String, List<InventorySetup>> sectionMap = sections.stream()
-						.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<InventorySetup>()));
-
-				setupsToShowOnWornItemsList.stream().forEach(showWornItemsPair ->
-				{
-					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(showWornItemsPair.setup.getName());
-					if (sectionsOfSetup.isEmpty())
-					{
-						unassignedSetups.add(showWornItemsPair.setup);
-					}
-					else
-					{
-						sectionsOfSetup.values().stream().forEach(section -> sectionMap.get(section.getName()).add(showWornItemsPair.setup));
-					}
-				});
-
-				sections.stream().forEach(section ->
-				{
-					if (sectionMap.get(section.getName()).isEmpty())
-					{
-						return;
-					}
-
-					Color sectionMenuTargetColor = section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
-					MenuEntry menuEntry = client.createMenuEntry(1)
-							.setOption(OPEN_SECTION_MENU_ENTRY)
-							.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
-							.setType(MenuAction.RUNELITE_SUBMENU);
-
-					sectionMap.get(section.getName()).stream().forEach(setup -> createSectionSubMenuOnWornItems(setup, menuEntry));
-				});
-
-				if (unassignedSetups.size() > 0)
-				{
-					MenuEntry unassignedSectionMenuEntry = client.createMenuEntry(1)
-							.setOption(OPEN_SECTION_MENU_ENTRY)
-							.setTarget(ColorUtil.prependColorTag(UNASSIGNED_SECTION_SETUP_MENU_ENTRY, JagexColors.MENU_TARGET))
-							.setType(MenuAction.RUNELITE_SUBMENU);
-
-					unassignedSetups.forEach(setup -> createSectionSubMenuOnWornItems(setup, unassignedSectionMenuEntry));
-				}
-
-			}
-			else
-			{
-				for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
-				{
-					final ShowWornItemsPair setupIndexPair = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
-					Color menuTargetColor = setupIndexPair.setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupIndexPair.setup.getDisplayColor();
-					client.createMenuEntry(-1)
-							.setOption(OPEN_SETUP_MENU_ENTRY)
-							.setTarget(ColorUtil.prependColorTag(setupIndexPair.setup.getName(), menuTargetColor))
-							.setIdentifier(setupIndexPair.index) // The param will used to find the correct setup if a menu entry is clicked
-							.setType(MenuAction.RUNELITE)
-							.onClick(e ->
-							{
-								resetBankSearch(true);
-								panel.setCurrentInventorySetup(inventorySetups.get(setupIndexPair.index), true);
-							});
-				}
-			}
-
-			if (panel.getCurrentSelectedSetup() != null)
-			{
-				// add menu entry to filter add items
-				client.createMenuEntry(-1)
-						.setOption(FILTER_ADD_ITEMS_ENTRY)
-						.setType(MenuAction.RUNELITE)
-						.setTarget("")
-						.setIdentifier(0)
-						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS));
-
-				// add menu entry to filter equipment
-				client.createMenuEntry(-1)
-						.setOption(FILTER_EQUIPMENT_ENTRY)
-						.setType(MenuAction.RUNELITE)
-						.setTarget("")
-						.setIdentifier(0)
-						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.EQUIPMENT));
-
-				// add menu entry to filter inventory
-				client.createMenuEntry(-1)
-						.setOption(FILTER_INVENTORY_ENTRY)
-						.setType(MenuAction.RUNELITE)
-						.setTarget("")
-						.setIdentifier(0)
-						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.INVENTORY));
-
-				// add menu entry to filter all
-				client.createMenuEntry(-1)
-						.setOption(FILTER_ALL_ENTRY)
-						.setType(MenuAction.RUNELITE)
-						.setTarget("")
-						.setIdentifier(0)
-						.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ALL));
-
-				// add menu entry to close setup
-				client.createMenuEntry(-1)
-						.setOption(RETURN_TO_OVERVIEW_ENTRY)
-						.setType(MenuAction.RUNELITE)
-						.setTarget("")
-						.setIdentifier(0)
-						.onClick(e -> panel.returnToOverviewPanel(false));
-			}
+			createMenuEntriesForWornItems();
 		}
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
@@ -525,30 +385,128 @@ public class InventorySetupsPlugin extends Plugin
 			&& client.isKeyPressed(KeyCode.KC_SHIFT)
 			&& event.getOption().equals("Examine"))
 		{
+			createMenuEntryToAddAdditionalFilteredItem(event.getActionParam0());
+		}
+	}
+
+	private void createMenuEntriesForWornItems()
+	{
+		List<InventorySetup> filteredSetups = panel.getFilteredInventorysetups();
+		List<InventorySetup> setupsToShowOnWornItemsList;
+		switch (config.showWornItemsFilter())
+		{
+			case BANK_FILTERED:
+				setupsToShowOnWornItemsList = inventorySetups.stream()
+						.filter(InventorySetup::isFilterBank)
+						.collect(Collectors.toList());
+				break;
+			case FAVORITED:
+				setupsToShowOnWornItemsList = inventorySetups.stream()
+						.filter(InventorySetup::isFavorite)
+						.collect(Collectors.toList());
+				break;
+			default:
+				setupsToShowOnWornItemsList = filteredSetups;
+				break;
+		}
+
+		// Section mode creates the section entries and sub menus
+		if (config.sectionMode() && config.wornItemSelectionSubmenu())
+		{
+
+			List<InventorySetup> unassignedSetups = new ArrayList<>();
+			Map<String, List<InventorySetup>> sectionMap = sections.stream()
+					.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<InventorySetup>()));
+
+			setupsToShowOnWornItemsList.forEach(setupToShow ->
+			{
+				Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(setupToShow.getName());
+				if (sectionsOfSetup.isEmpty())
+				{
+					unassignedSetups.add(setupToShow);
+				}
+				else
+				{
+					sectionsOfSetup.values().forEach(section -> sectionMap.get(section.getName()).add(setupToShow));
+				}
+			});
+
+			sections.forEach(section ->
+			{
+				if (sectionMap.get(section.getName()).isEmpty())
+				{
+					return;
+				}
+
+				Color sectionMenuTargetColor = section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
+				MenuEntry menuEntry = client.createMenuEntry(1)
+						.setOption(OPEN_SECTION_MENU_ENTRY)
+						.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
+						.setType(MenuAction.RUNELITE_SUBMENU);
+
+				sectionMap.get(section.getName()).forEach(setup -> createSectionSubMenuOnWornItems(setup, menuEntry));
+			});
+
+			if (!unassignedSetups.isEmpty())
+			{
+				MenuEntry unassignedSectionMenuEntry = client.createMenuEntry(1)
+						.setOption(OPEN_SECTION_MENU_ENTRY)
+						.setTarget(ColorUtil.prependColorTag(UNASSIGNED_SECTION_SETUP_MENU_ENTRY, JagexColors.MENU_TARGET))
+						.setType(MenuAction.RUNELITE_SUBMENU);
+
+				unassignedSetups.forEach(setup -> createSectionSubMenuOnWornItems(setup, unassignedSectionMenuEntry));
+			}
+
+		}
+		else
+		{
+			for (int i = 0; i < setupsToShowOnWornItemsList.size(); i++)
+			{
+				final InventorySetup setupToShow = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
+				Color menuTargetColor = setupToShow.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupToShow.getDisplayColor();
+				client.createMenuEntry(-1)
+						.setOption(OPEN_SETUP_MENU_ENTRY)
+						.setTarget(ColorUtil.prependColorTag(setupToShow.getName(), menuTargetColor))
+						.setType(MenuAction.RUNELITE)
+						.onClick(e ->
+						{
+							resetBankSearch(true);
+							panel.setCurrentInventorySetup(setupToShow, true);
+						});
+			}
+		}
+
+		if (panel.getCurrentSelectedSetup() != null)
+		{
+			// add menu entry to filter add items
 			client.createMenuEntry(-1)
-					.setOption(ADD_TO_ADDITIONAL_ENTRY)
+					.setOption(FILTER_ADD_ITEMS_ENTRY)
 					.setType(MenuAction.RUNELITE)
-					.setTarget("")
-					.setIdentifier(0)
-					.setParam0(event.getActionParam0())
-					.setParam1(event.getActionParam1())
-					.onClick(e ->
-					{
-						final Item newItem = retrieveItemFromBankMenuEntry(e.getParam0());
-						if (newItem == null)
-						{
-							return;
-						}
+					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS));
 
-						final Map<Integer, InventorySetupsItem> additionalFilteredItems =
-								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+			// add menu entry to filter equipment
+			client.createMenuEntry(-1)
+					.setOption(FILTER_EQUIPMENT_ENTRY)
+					.setType(MenuAction.RUNELITE)
+					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.EQUIPMENT));
 
-						// Item already exists, don't add it again
-						if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
-						{
-							addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
-						}
-					});
+			// add menu entry to filter inventory
+			client.createMenuEntry(-1)
+					.setOption(FILTER_INVENTORY_ENTRY)
+					.setType(MenuAction.RUNELITE)
+					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.INVENTORY));
+
+			// add menu entry to filter all
+			client.createMenuEntry(-1)
+					.setOption(FILTER_ALL_ENTRY)
+					.setType(MenuAction.RUNELITE)
+					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ALL));
+
+			// add menu entry to close setup
+			client.createMenuEntry(-1)
+					.setOption(RETURN_TO_OVERVIEW_ENTRY)
+					.setType(MenuAction.RUNELITE)
+					.onClick(e -> panel.returnToOverviewPanel(false));
 		}
 	}
 
@@ -565,6 +523,29 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					resetBankSearch(true);
 					panel.setCurrentInventorySetup(setup, true);
+				});
+	}
+
+	private void createMenuEntryToAddAdditionalFilteredItem(int inventoryIndex)
+	{
+		client.createMenuEntry(-1)
+				.setOption(ADD_TO_ADDITIONAL_ENTRY)
+				.onClick(e ->
+				{
+					final Item newItem = retrieveItemFromBankMenuEntry(inventoryIndex);
+					if (newItem == null)
+					{
+						return;
+					}
+
+					final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+							panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+
+					// Item already exists, don't add it again
+					if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
+					{
+						addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+					}
 				});
 	}
 
