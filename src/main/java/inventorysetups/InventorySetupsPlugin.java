@@ -82,15 +82,12 @@ import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
-import net.runelite.client.account.AccountSession;
 import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ProfileChanged;
-import net.runelite.client.events.SessionClose;
-import net.runelite.client.events.SessionOpen;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.game.chatbox.ChatboxItemSearch;
@@ -416,7 +413,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			List<InventorySetup> unassignedSetups = new ArrayList<>();
 			Map<String, List<InventorySetup>> sectionMap = sections.stream()
-					.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<InventorySetup>()));
+					.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<>()));
 
 			setupsToShowOnWornItemsList.forEach(setupToShow ->
 			{
