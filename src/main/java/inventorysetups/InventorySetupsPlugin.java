@@ -1699,22 +1699,6 @@ public class InventorySetupsPlugin extends Plugin
 		switchProfile();
 	}
 
-	@Subscribe
-	public void onSessionOpen(SessionOpen event)
-	{
-		final AccountSession session = sessionManager.getAccountSession();
-		if (session != null && session.getUsername() != null)
-		{
-			switchProfile();
-		}
-	}
-
-	@Subscribe
-	public void onSessionClose(SessionClose event)
-	{
-		switchProfile();
-	}
-
 	private void switchProfile()
 	{
 		// config will have changed to local file
