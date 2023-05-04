@@ -115,9 +115,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Hotkeys can now persist outside the bank via config option.\n\n" +
-								"Show Worn Items right click menu will now match the setup order on the panel if no filtering option from the config is selected.\n\n" +
-								"Add and import buttons now open a menu to select between setup or section.";
+		String updateText =		"Right clicking show worn items button will now display sections if section mode is enabled.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
