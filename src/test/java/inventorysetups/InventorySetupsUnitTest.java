@@ -11,7 +11,6 @@ import net.runelite.api.Client;
 import net.runelite.api.InventoryID;
 import net.runelite.api.ItemID;
 import net.runelite.api.events.ScriptCallbackEvent;
-import net.runelite.client.account.SessionManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
@@ -34,10 +33,6 @@ public class InventorySetupsUnitTest
 	@Mock
 	@Bind
 	private ItemManager itemManager;
-
-	@Mock
-	@Bind
-	private SessionManager sessionManager;
 
 	@Mock
 	@Bind
