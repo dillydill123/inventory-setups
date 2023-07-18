@@ -522,24 +522,24 @@ public class InventorySetupsPlugin extends Plugin
 	private void createMenuEntryToAddAdditionalFilteredItem(int inventoryIndex)
 	{
 		client.createMenuEntry(-1)
-				.setOption(ADD_TO_ADDITIONAL_ENTRY)
-				.onClick(e ->
+			.setOption(ADD_TO_ADDITIONAL_ENTRY)
+			.onClick(e ->
+			{
+				final Item newItem = retrieveItemFromBankMenuEntry(inventoryIndex);
+				if (newItem == null)
 				{
-					final Item newItem = retrieveItemFromBankMenuEntry(inventoryIndex);
-					if (newItem == null)
-					{
-						return;
-					}
+					return;
+				}
 
-					final Map<Integer, InventorySetupsItem> additionalFilteredItems =
-							panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+				final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
 
-					// Item already exists, don't add it again
-					if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
-					{
-						addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
-					}
-				});
+				// Item already exists, don't add it again
+				if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
+				{
+					addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+				}
+			});
 	}
 
 	// Retrieve an item from a selected menu entry in the bank
