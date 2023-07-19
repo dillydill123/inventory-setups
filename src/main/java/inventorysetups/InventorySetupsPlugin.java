@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -408,25 +409,68 @@ public class InventorySetupsPlugin extends Plugin
 		{
 
 			List<InventorySetup> unassignedSetups = new ArrayList<>();
-			Map<String, List<InventorySetup>> sectionMap = sections.stream()
-					.collect(Collectors.toMap(InventorySetupsSection::getName, key -> new ArrayList<>()));
+			Set<String> setupsToShowOnWornItemsListCache = setupsToShowOnWornItemsList.stream()
+															.map(InventorySetup::getName)
+															.collect(Collectors.toSet());
+			HashMap<String, List<InventorySetup>> sectionsToDisplay = new HashMap<>();
 
-			setupsToShowOnWornItemsList.forEach(setupToShow ->
+			// If the sorting mode is default, then the order to appear on the worn items list
+			// should be the order they appear in the section, which may not be the filtered order.
+			if (config.sortingMode() == InventorySetupsSortingID.DEFAULT)
 			{
-				Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(setupToShow.getName());
-				if (sectionsOfSetup.isEmpty())
+				sections.forEach(section ->
 				{
-					unassignedSetups.add(setupToShow);
-				}
-				else
+					List<String> setupsInSection =  section.getSetups();
+					setupsInSection.forEach(setupName ->
+					{
+						if (setupsToShowOnWornItemsListCache.contains(setupName))
+						{
+							if (!sectionsToDisplay.containsKey(section.getName()))
+							{
+								sectionsToDisplay.put(section.getName(), new ArrayList<>());
+							}
+							final InventorySetup inventorySetup = cache.getInventorySetupNames().get(setupName);
+							sectionsToDisplay.get(section.getName()).add(inventorySetup);
+						}
+					});
+				});
+
+				setupsToShowOnWornItemsList.forEach(setupToShow ->
 				{
-					sectionsOfSetup.values().forEach(section -> sectionMap.get(section.getName()).add(setupToShow));
-				}
-			});
+					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(setupToShow.getName());
+					if (sectionsOfSetup.isEmpty())
+					{
+						unassignedSetups.add(setupToShow);
+					}
+				});
+			}
+			else
+			{
+				setupsToShowOnWornItemsList.forEach(setupToShow ->
+				{
+					Map<String, InventorySetupsSection> sectionsOfSetup = cache.getSetupSectionsMap().get(setupToShow.getName());
+					if (sectionsOfSetup.isEmpty())
+					{
+						unassignedSetups.add(setupToShow);
+					}
+					else
+					{
+						for (final InventorySetupsSection section : sectionsOfSetup.values())
+						{
+							if (!sectionsToDisplay.containsKey(section.getName()))
+							{
+								sectionsToDisplay.put(section.getName(), new ArrayList<>());
+							}
+							sectionsToDisplay.get(section.getName()).add(setupToShow);
+						}
+					}
+				});
+			}
 
 			sections.forEach(section ->
 			{
-				if (sectionMap.get(section.getName()).isEmpty())
+
+				if (!sectionsToDisplay.containsKey(section.getName()))
 				{
 					return;
 				}
@@ -437,7 +481,11 @@ public class InventorySetupsPlugin extends Plugin
 						.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
 						.setType(MenuAction.RUNELITE_SUBMENU);
 
-				sectionMap.get(section.getName()).forEach(setup -> createSectionSubMenuOnWornItems(setup, menuEntry));
+				for (final InventorySetup inventorySetup : sectionsToDisplay.get(section.getName()))
+				{
+					createSectionSubMenuOnWornItems(inventorySetup, menuEntry);
+				}
+
 			});
 
 			if (!unassignedSetups.isEmpty())
@@ -507,7 +555,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
 
-		client.createMenuEntry(-1)
+		client.createMenuEntry(1)
 				.setOption(OPEN_SETUP_MENU_ENTRY)
 				.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
 				.setParent(menuEntry)
