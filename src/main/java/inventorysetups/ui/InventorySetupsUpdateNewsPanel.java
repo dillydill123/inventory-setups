@@ -115,7 +115,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Right clicking show worn items button will now display sections if section mode is enabled.";
+		String updateText =		"Sections and their respective setups will now correctly match the order of the side panel in the Show Worn Items right click menu.\n\n" +
+								"Added a hotkey for toggling section mode.\n\n" +
+								"Fixed granite cannonball -> cannonball variation mapping.\n\n" +
+								"Added an option to replace an item in all setups with a new item. Shift + Right click an inventory or equipment slot on the side panel to access this option.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
