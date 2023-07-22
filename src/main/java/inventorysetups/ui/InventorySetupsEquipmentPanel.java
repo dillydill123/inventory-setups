@@ -68,11 +68,10 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 
 			// Shift menu
 			super.addUpdateFromContainerToAllInstancesMouseListenerToSlot(setupSlot);
+			super.addUpdateFromSearchToAllInstancesMouseListenerToSlot(setupSlot, true);
 
 			equipmentSlots.put(slot, setupSlot);
 		}
-
-
 
 		final GridLayout gridLayout = new GridLayout(5, 3, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);

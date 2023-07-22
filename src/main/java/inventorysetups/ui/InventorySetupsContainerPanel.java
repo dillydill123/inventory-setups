@@ -91,7 +91,7 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		});
 	}
 
-	// adds the menu option to update a slot from the container it presides in
+	// adds the option replace all slots containing the old item with the new item in all setups
 	protected void addUpdateFromContainerToAllInstancesMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
 		String updateContainerFrom = getContainerString(slot);
@@ -117,7 +117,25 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		slot.getRightClickMenu().add(updateFromSearch);
 		updateFromSearch.addActionListener(e ->
 		{
-			plugin.updateSlotFromSearch(slot, allowStackable);
+			plugin.updateSlotFromSearch(slot, allowStackable, false);
+		});
+	}
+
+	// adds the option replace all slots containing the old item with the newly searched item in all setups
+	protected void addUpdateFromSearchToAllInstancesMouseListenerToSlot(final InventorySetupsSlot slot, boolean allowStackable)
+	{
+		JMenuItem updateFromContainer = new JMenuItem("Update ALL Slots from Search");
+		slot.getShiftRightClickMenu().add(updateFromContainer);
+		updateFromContainer.addActionListener(e ->
+		{
+			int confirm = JOptionPane.showConfirmDialog(this,
+					"Do you want to update ALL setups which have this item to the new item?",
+					"Update ALL Setups", JOptionPane.OK_CANCEL_OPTION);
+
+			if (confirm == JOptionPane.YES_OPTION)
+			{
+				plugin.updateSlotFromSearch(slot, allowStackable, true);
+			}
 		});
 	}
 

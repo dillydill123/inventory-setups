@@ -37,7 +37,8 @@ public class InventorySetupsItem
 	@Setter
 	private String name;
 	@Getter
-	private final int quantity;
+	@Setter
+	private int quantity;
 	@Getter
 	@Setter
 	private boolean fuzzy;

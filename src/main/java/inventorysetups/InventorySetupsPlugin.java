@@ -1452,7 +1452,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-	public void updateSlotFromSearch(final InventorySetupsSlot slot, boolean allowStackable)
+	public void updateSlotFromSearch(final InventorySetupsSlot slot, boolean allowStackable, boolean updateAllInstances)
 	{
 
 		if (client.getGameState() != GameState.LOGGED_IN)
@@ -1472,85 +1472,78 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int finalId = itemManager.canonicalize(itemId);
 
+					final String itemName = itemManager.getItemComposition(finalId).getName();
+					final List<InventorySetupsItem> container = getContainerFromSlot(slot);
+					final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
+					final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
+
 					// NOTE: the itemSearch shows items from skill guides which can be selected, which may be highlighted
 
 					// if the item is stackable, ask for a quantity
 					if (allowStackable && itemManager.getItemComposition(finalId).isStackable())
 					{
-						final int finalIdCopy = finalId;
 						searchInput = chatboxPanelManager.openTextInput("Enter amount")
 							// only allow numbers and k, m, b (if 1 value is available)
 							// stop once k, m, or b is seen
 							.addCharValidator(this::validateCharFromItemSearch)
 							.onDone((input) ->
 							{
-								clientThread.invokeLater(() ->
-								{
-									int quantity = InventorySetupUtilities.parseTextInputAmount(input);
-
-									final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-									final String itemName = itemManager.getItemComposition(finalIdCopy).getName();
-									final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
-									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
-
-									// update the rune pouch data
-									if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
-									{
-										return;
-									}
-
-									// update the bolt pouch data
-									if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
-									{
-										return;
-									}
-
-									container.set(slot.getIndexInSlot(), newItem);
-									dataManager.updateConfig(true, false);
-									panel.refreshCurrentSetup();
-
-								});
+								int quantity = InventorySetupUtilities.parseTextInputAmount(input);
+								newItem.setQuantity(quantity);
+								updateSlotFromSearchHelper(slot, itemToBeReplaced, newItem, container, updateAllInstances);
 							}).build();
 					}
 					else
 					{
-						if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
-						{
-							final Map<Integer, InventorySetupsItem> additionalFilteredItems =
-								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
-							if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
-							{
-								removeAdditionalFilteredItem(slot, additionalFilteredItems);
-								addAdditionalFilteredItem(finalId, additionalFilteredItems);
-								// duplicate update config and refresh setup are being called here
-							}
-						}
-						else
-						{
-							final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-							final String itemName = itemManager.getItemComposition(finalId).getName();
-							final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
-							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
-							// update the rune pouch data
-							if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
-							{
-								return;
-							}
-							// update the bolt pouch data
-							if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
-							{
-								return;
-							}
-							container.set(slot.getIndexInSlot(), newItem);
-						}
-
-						dataManager.updateConfig(true, false);
-						panel.refreshCurrentSetup();
+						updateSlotFromSearchHelper(slot, itemToBeReplaced, newItem, container, updateAllInstances);
 					}
-
 				});
 			})
 			.build();
+	}
+
+	private void updateSlotFromSearchHelper(final InventorySetupsSlot slot, final InventorySetupsItem itemToBeReplaced,
+										final InventorySetupsItem newItem, final List<InventorySetupsItem> container,
+										boolean updateAllInstances)
+	{
+		clientThread.invokeLater(() ->
+		{
+			if (updateAllInstances)
+			{
+				updateAllInstancesInSetupWithNewItem(itemToBeReplaced, newItem);
+			}
+			else if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
+			{
+				final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+				if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
+				{
+					removeAdditionalFilteredItem(slot, additionalFilteredItems);
+					addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+					// duplicate update config and refresh setup are being called here
+				}
+			}
+			else
+			{
+				// update the rune pouch data
+				if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
+				{
+					return;
+				}
+				// update the bolt pouch data
+				if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
+				{
+					return;
+				}
+				container.set(slot.getIndexInSlot(), newItem);
+			}
+
+			SwingUtilities.invokeLater(() ->
+			{
+				dataManager.updateConfig(true, false);
+				panel.refreshCurrentSetup();
+			});
+		});
 	}
 
 	private boolean validateCharFromItemSearch(int arg)

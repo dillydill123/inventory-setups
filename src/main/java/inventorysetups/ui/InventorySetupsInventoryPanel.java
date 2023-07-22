@@ -83,6 +83,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 
 			// Shift menu
 			super.addUpdateFromContainerToAllInstancesMouseListenerToSlot(inventorySlots.get(i));
+			super.addUpdateFromSearchToAllInstancesMouseListenerToSlot(inventorySlots.get(i), true);
 		}
 	}
 
