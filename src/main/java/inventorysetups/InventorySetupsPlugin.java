@@ -409,15 +409,15 @@ public class InventorySetupsPlugin extends Plugin
 		{
 
 			List<InventorySetup> unassignedSetups = new ArrayList<>();
-			Set<String> setupsToShowOnWornItemsListCache = setupsToShowOnWornItemsList.stream()
-															.map(InventorySetup::getName)
-															.collect(Collectors.toSet());
 			HashMap<String, List<InventorySetup>> sectionsToDisplay = new HashMap<>();
 
 			// If the sorting mode is default, then the order to appear on the worn items list
 			// should be the order they appear in the section, which may not be the filtered order.
 			if (config.sortingMode() == InventorySetupsSortingID.DEFAULT)
 			{
+				Set<String> setupsToShowOnWornItemsListCache = setupsToShowOnWornItemsList.stream()
+						.map(InventorySetup::getName)
+						.collect(Collectors.toSet());
 				sections.forEach(section ->
 				{
 					List<String> setupsInSection =  section.getSetups();
