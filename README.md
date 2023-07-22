@@ -125,7 +125,11 @@ If you select from search, it will open a search menu where you can search for t
 
 ![Update Slot from Search](readme_images_and_gifs/update_slot_from_search.gif)
 
-There is an option to update all occurrences of an item with a new item via container or search
+There is an option to update all occurrences of an item with a new item via container or search. This will update **ALL** setups which contain this item.
+
+This is useful if you want to "upgrade" an item. For example, if you recently got an Infernal Cape, you can replace all instances of your Fire Cape in all setups to the Infernal Cape with this feature.
+
+To access this feature, SHIFT + Right Click an inventory or equipment slot and select one of the two options.
 
 ![Update All from Inventory Or Search](readme_images_and_gifs/update_item_in_all_setups.gif)
 
