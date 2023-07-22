@@ -281,6 +281,15 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	};
 
+	private final HotkeyListener sectionModeHotkeyListener = new HotkeyListener(() -> config.sectionModeHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			panel.toggleSectionMode();
+		}
+	};
+
 	private void registerHotkeys()
 	{
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
@@ -288,6 +297,7 @@ public class InventorySetupsPlugin extends Plugin
 		keyManager.registerKeyListener(filterInventoryHotkeyListener);
 		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
 		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
+		keyManager.registerKeyListener(sectionModeHotkeyListener);
 	}
 
 	private void unregisterHotkeys()
@@ -297,6 +307,7 @@ public class InventorySetupsPlugin extends Plugin
 		keyManager.unregisterKeyListener(filterInventoryHotkeyListener);
 		keyManager.unregisterKeyListener(filterEquipmentHotkeyListener);
 		keyManager.unregisterKeyListener(filterAddItemsHotkeyListener);
+		keyManager.unregisterKeyListener(sectionModeHotkeyListener);
 	}
 
 	private void triggerBankSearchFromHotKey()

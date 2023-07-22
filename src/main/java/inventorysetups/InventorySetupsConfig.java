@@ -254,10 +254,22 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "sectionModeHotkey",
+			name = "Toggle section mode",
+			description = "Configures the hotkey for toggling section mode",
+			position = 11,
+			section = hotkeySection
+	)
+	default Keybind sectionModeHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_PERSIST_HOTKEYS,
 			name = "Persist Hotkeys Outside Bank",
 			description = "Configures hotkeys to persist even outside the bank",
-			position = 11,
+			position = 12,
 			section = hotkeySection
 	)
 	default boolean persistHotKeysOutsideBank()

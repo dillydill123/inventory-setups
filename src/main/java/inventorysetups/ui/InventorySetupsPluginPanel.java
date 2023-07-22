@@ -463,8 +463,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					plugin.setConfigValue(CONFIG_KEY_SECTION_MODE, !plugin.getConfig().sectionMode());
-					updateSectionViewMarker();
+					toggleSectionMode();
 				}
 			}
 
@@ -810,6 +809,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			default:
 				return false;
 		}
+	}
+
+	public void toggleSectionMode()
+	{
+		plugin.setConfigValue(CONFIG_KEY_SECTION_MODE, !plugin.getConfig().sectionMode());
+		updateSectionViewMarker();
 	}
 
 	private void updateSectionViewMarker()
