@@ -5,35 +5,35 @@
 Save gear setups for specific activities.
 
 Contents
-- [Creating a New Setup](#Creating-a-New-Setup)
-- [Overview Panel](#Overview-Panel)
-  - [Viewing a Setup](#Viewing-a-Setup)
-    - [Compact Mode](#Compact-Mode)
-    - [Icon Mode](#Icon-Mode)
-  - [Sorting Modes](#Sorting-Modes)
-  - [Moving a Setup](#Moving-a-Setup)
-  - [Favorites](#Favorites)
-- [Editing a Setup](#Editing-a-Setup)
-- [Bank Filtering](#Bank-Filtering)
-- [Highlighting](#Highlighting)
-  - [Stack Difference](#Stack-Difference)
-  - [Fuzzy Difference](#Fuzzy-Difference)
-  - [Unordered Highlighting](#Unordered-Highlighting)
-- [Additional Filtered Items](#Additional-Filtered-Items)
-- [Sections](#Sections)
-  - [Adding Setups to a Section](#Adding-Setups-to-a-Section)
-  - [Remove Setups from a Section](#Remove-Setups-from-a-Section)
-  - [Moving Setups in a Section](#Moving-Setups-in-a-Section)
-  - [The Unassigned Section](#Unassigned-Section)
-- [Exporting and Importing](#Exporting-and-Importing-Setups-and-Sections)
-- [Configuration Settings](#Configuration-Settings)
-- [Other Plugin Compatibilities](#Other-Plugin-Compatibilities)
-  - [Bank Tag Layouts Plugin](#Bank-Tag-Layouts-Plugin)
-  - [Bank Tags Plugin](#Bank-Tags-Plugin)
-- [Data Storage](#Data-Storage)
-- [Support and Suggestions](#Support-and-Suggestions)
-  - [Donations](#Donations)
-- [Changelog](#Changelog)
+- [Creating a New Setup](#creating-a-new-setup)
+- [Overview Panel](#overview-panel)
+  - [Viewing a Setup](#viewing-a-setup)
+    - [Compact Mode](#compact-mode)
+    - [Icon Mode](#icon-mode)
+  - [Sorting Modes](#sorting-modes)
+  - [Moving a Setup](#moving-a-setup)
+  - [Favorites](#favorites)
+- [Editing a Setup](#editing-a-setup)
+- [Bank Filtering](#bank-filtering)
+- [Highlighting](#highlighting)
+  - [Stack Difference](#stack-difference)
+  - [Fuzzy Difference](#fuzzy-difference)
+  - [Unordered Highlighting](#unordered-highlighting)
+- [Additional Filtered Items](#additional-filtered-items)
+- [Sections](#sections)
+  - [Adding Setups to a Section](#adding-setups-to-a-section)
+  - [Remove Setups from a Section](#remove-setups-from-a-section)
+  - [Moving Setups in a Section](#moving-setups-in-a-section)
+  - [The Unassigned Section](#unassigned-section)
+- [Exporting and Importing](#exporting-and-importing-setups-and-sections)
+- [Configuration Settings](#configuration-settings)
+- [Other Plugin Compatibilities](#other-plugin-compatibilities)
+  - [Bank Tag Layouts Plugin](#bank-tag-layouts-plugin)
+  - [Bank Tags Plugin](#bank-tags-plugin)
+- [Data Storage](#data-storage)
+- [Support and Suggestions](#support-and-suggestions)
+  - [Donations](#donations)
+- [Changelog](#changelog)
 
 During this guide, some buttons/icons might look different compared to your client. This is because some pictures and gifs may be outdated.
 
@@ -124,6 +124,10 @@ When viewing a setup, you can right click individual slots to update them, eithe
 If you select from search, it will open a search menu where you can search for the item, and then ask for a quantity if applicable.
 
 ![Update Slot from Search](readme_images_and_gifs/update_slot_from_search.gif)
+
+There is an option to update all occurrences of an item with a new item via container or search
+
+![Update All from Inventory Or Search](readme_images_and_gifs/update_item_in_all_setups.gif)
 
 The Rune and Bolt Pouch can also be updated with these options.
 
