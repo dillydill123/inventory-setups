@@ -32,7 +32,7 @@ public class InventorySetupsVariationMapping
 		mappings = new HashMap<>();
 
 		// Granite Cannonball -> Cannonball
-		mappings.put(ItemID.GRANITE_CANNONBALL, ItemID.CANNON_BALL);
+		mappings.put(ItemID.GRANITE_CANNONBALL, ItemID.CANNONBALL);
 
 		// Smith Gloves (i) act as ice gloves
 		mappings.put(ItemID.SMITHS_GLOVES_I, ItemID.ICE_GLOVES);
