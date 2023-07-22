@@ -32,14 +32,14 @@ import lombok.Setter;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
 public class InventorySetupsSlot extends JPanel
@@ -63,6 +63,12 @@ public class InventorySetupsSlot extends JPanel
 	@Getter
 	private JLabel stackIndicator;
 
+	@Getter
+	private JPopupMenu rightClickMenu;
+
+	@Getter
+	private JPopupMenu shiftRightClickMenu;
+
 	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot)
 	{
 		this(color, id, indexInSlot, 46, 42);
@@ -78,6 +84,40 @@ public class InventorySetupsSlot extends JPanel
 		fuzzyIndicator.setFont(FontManager.getRunescapeSmallFont());
 		stackIndicator.setFont(FontManager.getRunescapeSmallFont());
 		this.indexInSlot = indexInSlot;
+		this.rightClickMenu = new JPopupMenu();
+		this.shiftRightClickMenu = new JPopupMenu();
+
+		MouseAdapter menuAdapter = new MouseAdapter()
+		{
+			@Override
+			public void mousePressed(MouseEvent e)
+			{
+				showPopupMenu(e);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+				showPopupMenu(e);
+			}
+
+			private void showPopupMenu(MouseEvent e)
+			{
+				if (e.isPopupTrigger())
+				{
+					if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) != 0)
+					{
+						shiftRightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+					}
+					else
+					{
+						rightClickMenu.show(e.getComponent(), e.getX(), e.getY());
+					}
+				}
+			}
+		};
+		this.addMouseListener(menuAdapter);
+		this.imageLabel.addMouseListener(menuAdapter);
 
 		setPreferredSize(new Dimension(width, height));
 		setBackground(color);

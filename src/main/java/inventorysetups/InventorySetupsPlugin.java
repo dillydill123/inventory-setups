@@ -1361,7 +1361,54 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	public void updateSlotFromContainer(final InventorySetupsSlot slot)
+	private void updateAllInstancesInContainerSetupWithNewItem(final InventorySetup inventorySetup, List<InventorySetupsItem> containerToUpdate,
+																final InventorySetupsItem oldItem, final InventorySetupsItem newItem, final InventorySetupsSlotID id)
+	{
+		for (int i = 0; i < containerToUpdate.size(); i++)
+		{
+			final InventorySetupsItem item = containerToUpdate.get(i);
+			if (item.getId() == oldItem.getId())
+			{
+				boolean runePouchValid = checkAndUpdateSlotIfRunePouchWasSelected(inventorySetup, id, containerToUpdate.get(i), newItem, false);
+				boolean boltPouchValid = checkAndUpdateSlotIfBoltPouchWasSelected(inventorySetup, id, containerToUpdate.get(i), newItem, false);
+				if (runePouchValid && boltPouchValid)
+				{
+					containerToUpdate.set(i, newItem);
+				}
+			}
+		}
+	}
+
+	private void updateAllInstancesInSetupWithNewItem(final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
+	{
+		if (oldItem.getId() == -1 || newItem.getId() == -1)
+		{
+			SwingUtilities.invokeLater(() ->
+					JOptionPane.showMessageDialog(panel,
+							"You cannot update empty slots or replace all slots with this item with an empty slot",
+							"Cannot Update Setups",
+							JOptionPane.ERROR_MESSAGE));
+
+			return;
+		}
+
+		for (final InventorySetup inventorySetup : inventorySetups)
+		{
+			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
+			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
+
+			final Map<Integer, InventorySetupsItem> additionalFilteredItems = inventorySetup.getAdditionalFilteredItems();
+			// Don't process the ID at all for this use case.
+			// The exact ID must match
+			if (additionalFilteredItems.containsKey(oldItem.getId()))
+			{
+				removeAdditionalFilteredItem(oldItem.getId(), additionalFilteredItems);
+				addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+			}
+		}
+	}
+
+	public void updateSlotFromContainer(final InventorySetupsSlot slot, boolean updateAllInstances)
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
@@ -1372,9 +1419,9 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-		final boolean isFuzzy = getContainerFromSlot(slot).get(slot.getIndexInSlot()).isFuzzy();
-		final InventorySetupsStackCompareID stackCompareType = getContainerFromSlot(slot).get(slot.getIndexInSlot()).getStackCompare();
+		final InventorySetupsItem oldItem = getContainerFromSlot(slot).get(slot.getIndexInSlot());
+		final boolean isFuzzy = oldItem.isFuzzy();
+		final InventorySetupsStackCompareID stackCompareType = oldItem.getStackCompare();
 
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
@@ -1384,19 +1431,21 @@ public class InventorySetupsPlugin extends Plugin
 			newItem.setFuzzy(isFuzzy);
 			newItem.setStackCompare(stackCompareType);
 
-			// update the rune pouch data
-			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+			if (updateAllInstances)
 			{
-				return;
+				updateAllInstancesInSetupWithNewItem(oldItem, newItem);
+			}
+			else
+			{
+				List<InventorySetupsItem> containerToUpdate =  getContainerFromID(slot.getParentSetup(), slot.getSlotID());
+				boolean runePouchValid = checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), oldItem, newItem, true);
+				boolean boltPouchValid = checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), oldItem, newItem, true);
+				if (runePouchValid && boltPouchValid)
+				{
+					containerToUpdate.set(slot.getIndexInSlot(), newItem);
+				}
 			}
 
-			// update the bolt pouch data
-			if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
-			{
-				return;
-			}
-
-			container.set(slot.getIndexInSlot(), newItem);
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
@@ -1445,13 +1494,13 @@ public class InventorySetupsPlugin extends Plugin
 									final InventorySetupsItem newItem = new InventorySetupsItem(finalIdCopy, itemName, quantity, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 
 									// update the rune pouch data
-									if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+									if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
 									{
 										return;
 									}
 
 									// update the bolt pouch data
-									if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+									if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
 									{
 										return;
 									}
@@ -1483,12 +1532,12 @@ public class InventorySetupsPlugin extends Plugin
 							final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 							final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 							// update the rune pouch data
-							if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+							if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
 							{
 								return;
 							}
 							// update the bolt pouch data
-							if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), newItem))
+							if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
 							{
 								return;
 							}
@@ -1574,13 +1623,13 @@ public class InventorySetupsPlugin extends Plugin
 			// update the rune pouch data
 			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
-			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot, container.get(slot.getIndexInSlot()), dummyItem))
+			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
 			}
 
 			// update the bolt pouch data
-			if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot, container.get(slot.getIndexInSlot()), dummyItem))
+			if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), dummyItem))
 			{
 				return;
 			}
@@ -1643,6 +1692,21 @@ public class InventorySetupsPlugin extends Plugin
 
 		dataManager.updateConfig(true, false);
 		panel.refreshCurrentSetup();
+	}
+
+	private void removeAdditionalFilteredItem(final int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
+	{
+		int j = 0;
+		Integer keyToDelete = null;
+		for (final Integer key : additionalFilteredItems.keySet())
+		{
+			if (additionalFilteredItems.get(key).getId() == itemId)
+			{
+				keyToDelete = key;
+				break;
+			}
+		}
+		additionalFilteredItems.remove(keyToDelete);
 	}
 
 	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
@@ -2185,17 +2249,21 @@ public class InventorySetupsPlugin extends Plugin
 	private List<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
 	{
 		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
+		return getContainerFromID(slot.getParentSetup(), slot.getSlotID());
+	}
 
-		switch (slot.getSlotID())
+	private List<InventorySetupsItem> getContainerFromID(final InventorySetup inventorySetup, InventorySetupsSlotID ID)
+	{
+		switch (ID)
 		{
 			case INVENTORY:
-				return slot.getParentSetup().getInventory();
+				return inventorySetup.getInventory();
 			case EQUIPMENT:
-				return slot.getParentSetup().getEquipment();
+				return inventorySetup.getEquipment();
 			case RUNE_POUCH:
-				return slot.getParentSetup().getRune_pouch();
+				return inventorySetup.getRune_pouch();
 			case BOLT_POUCH:
-				return slot.getParentSetup().getBoltPouch();
+				return inventorySetup.getBoltPouch();
 			default:
 				assert false : "Invalid ID given";
 				return null;
@@ -2269,7 +2337,15 @@ public class InventorySetupsPlugin extends Plugin
 		return itemId;
 	}
 
-	private boolean checkAndUpdateSlotIfRunePouchWasSelected(final InventorySetupsSlot slot, final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
+	private boolean checkAndUpdateSlotIfRunePouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
+															final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
+	{
+		return checkAndUpdateSlotIfRunePouchWasSelected(inventorySetup, ID, oldItem, newItem, true);
+	}
+
+	private boolean checkAndUpdateSlotIfRunePouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
+															final InventorySetupsItem oldItem, final InventorySetupsItem newItem,
+															boolean showMessageDialogue)
 	{
 
 		final InventorySetupsRunePouchType runePouchTypeNewItem = getRunePouchType(newItem.getId());
@@ -2277,83 +2353,102 @@ public class InventorySetupsPlugin extends Plugin
 		if (runePouchTypeNewItem != InventorySetupsRunePouchType.NONE)
 		{
 
-			if (slot.getSlotID() != InventorySetupsSlotID.INVENTORY)
+			if (ID != InventorySetupsSlotID.INVENTORY)
 			{
-
-				SwingUtilities.invokeLater(() ->
+				if (showMessageDialogue)
 				{
-					JOptionPane.showMessageDialog(panel,
-						"You can't have a Rune Pouch there.",
-						"Invalid Item",
-						JOptionPane.ERROR_MESSAGE);
-				});
+					SwingUtilities.invokeLater(() ->
+					{
+						JOptionPane.showMessageDialog(panel,
+								"You can't have a Rune Pouch there.",
+								"Invalid Item",
+								JOptionPane.ERROR_MESSAGE);
+					});
+				}
 
 				return false;
 			}
 
 			// only display this message if we aren't replacing a rune pouch with a new rune pouch
-			if (slot.getParentSetup().getRune_pouch() != null && runePouchTypeOldItem == InventorySetupsRunePouchType.NONE)
+			if (inventorySetup.getRune_pouch() != null && runePouchTypeOldItem == InventorySetupsRunePouchType.NONE)
 			{
-				SwingUtilities.invokeLater(() ->
+				if (showMessageDialogue)
 				{
-					JOptionPane.showMessageDialog(panel,
-						"You can't have two Rune Pouches.",
-						"Invalid Item",
-						JOptionPane.ERROR_MESSAGE);
-				});
+					SwingUtilities.invokeLater(() ->
+					{
+						JOptionPane.showMessageDialog(panel,
+								"You can't have two Rune Pouches.",
+								"Invalid Item",
+								JOptionPane.ERROR_MESSAGE);
+					});
+				}
 				return false;
 			}
 
-			slot.getParentSetup().updateRunePouch(getRunePouchData(runePouchTypeNewItem));
+			inventorySetup.updateRunePouch(getRunePouchData(runePouchTypeNewItem));
 		}
 		else if (runePouchTypeOldItem != InventorySetupsRunePouchType.NONE)
 		{
 			// if the old item is a rune pouch, need to update it to null 
-			slot.getParentSetup().updateRunePouch(null);
+			inventorySetup.updateRunePouch(null);
 		}
 
 		return true;
 	}
 
-	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetupsSlot slot, final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
+	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
+															final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
+	{
+		return checkAndUpdateSlotIfBoltPouchWasSelected(inventorySetup, ID, oldItem, newItem, true);
+	}
+
+	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
+															final InventorySetupsItem oldItem, final InventorySetupsItem newItem,
+															boolean showMessageDialogue)
 	{
 
 		if (isItemBoltPouch(newItem.getId()))
 		{
 
-			if (slot.getSlotID() != InventorySetupsSlotID.INVENTORY)
+			if (ID != InventorySetupsSlotID.INVENTORY)
 			{
 
-				SwingUtilities.invokeLater(() ->
+				if (showMessageDialogue)
 				{
-					JOptionPane.showMessageDialog(panel,
-						"You can't have a Bolt Pouch there.",
-						"Invalid Item",
-						JOptionPane.ERROR_MESSAGE);
-				});
+					SwingUtilities.invokeLater(() ->
+					{
+						JOptionPane.showMessageDialog(panel,
+								"You can't have a Bolt Pouch there.",
+								"Invalid Item",
+								JOptionPane.ERROR_MESSAGE);
+					});
+				}
 
 				return false;
 			}
 
 			// only display this message if we aren't replacing a bolt pouch with a new bolt pouch
-			if (slot.getParentSetup().getBoltPouch() != null && !isItemBoltPouch(oldItem.getId()))
+			if (inventorySetup.getBoltPouch() != null && !isItemBoltPouch(oldItem.getId()))
 			{
-				SwingUtilities.invokeLater(() ->
+				if (showMessageDialogue)
 				{
-					JOptionPane.showMessageDialog(panel,
-						"You can't have two Bolt Pouches.",
-						"Invalid Item",
-						JOptionPane.ERROR_MESSAGE);
-				});
+					SwingUtilities.invokeLater(() ->
+					{
+						JOptionPane.showMessageDialog(panel,
+								"You can't have two Bolt Pouches.",
+								"Invalid Item",
+								JOptionPane.ERROR_MESSAGE);
+					});
+				}
 				return false;
 			}
 
-			slot.getParentSetup().updateBoltPouch(getBoltPouchData());
+			inventorySetup.updateBoltPouch(getBoltPouchData());
 		}
 		else if (isItemBoltPouch(oldItem.getId()))
 		{
 			// if the old item is a bolt pouch, need to update it to null
-			slot.getParentSetup().updateBoltPouch(null);
+			inventorySetup.updateBoltPouch(null);
 		}
 
 		return true;

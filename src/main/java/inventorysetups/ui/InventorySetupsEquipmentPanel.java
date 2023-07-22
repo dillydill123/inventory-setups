@@ -65,6 +65,10 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 			super.addUpdateFromContainerMouseListenerToSlot(setupSlot);
 			super.addUpdateFromSearchMouseListenerToSlot(setupSlot, true);
 			super.addRemoveMouseListenerToSlot(setupSlot);
+
+			// Shift menu
+			super.addUpdateFromContainerToAllInstancesMouseListenerToSlot(setupSlot);
+
 			equipmentSlots.put(slot, setupSlot);
 		}
 

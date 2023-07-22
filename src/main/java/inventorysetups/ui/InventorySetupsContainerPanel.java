@@ -31,11 +31,7 @@ import inventorysetups.InventorySetupsStackCompareID;
 import inventorysetups.InventorySetupsVariationMapping;
 import java.awt.BorderLayout;
 import java.util.List;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -86,43 +82,39 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 	// adds the menu option to update a slot from the container it presides in
 	protected void addUpdateFromContainerMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setSlotComponentPopupMenu(slot);
-		JPopupMenu popupMenu = slot.getComponentPopupMenu();
-
-		String updateContainerFrom = "";
-		switch (slot.getSlotID())
-		{
-			case INVENTORY:
-				updateContainerFrom = "Inventory";
-				break;
-			case EQUIPMENT:
-				updateContainerFrom = "Equipment";
-				break;
-			case RUNE_POUCH:
-				updateContainerFrom = "Rune Pouch";
-				break;
-			case BOLT_POUCH:
-				updateContainerFrom = "Bolt Pouch";
-				break;
-			default:
-				assert false : "Wrong slot ID!";
-				break;
-		}
+		String updateContainerFrom = getContainerString(slot);
 		JMenuItem updateFromContainer = new JMenuItem("Update Slot from " + updateContainerFrom);
-		popupMenu.add(updateFromContainer);
+		slot.getRightClickMenu().add(updateFromContainer);
 		updateFromContainer.addActionListener(e ->
 		{
-			plugin.updateSlotFromContainer(slot);
+			plugin.updateSlotFromContainer(slot, false);
+		});
+	}
+
+	// adds the menu option to update a slot from the container it presides in
+	protected void addUpdateFromContainerToAllInstancesMouseListenerToSlot(final InventorySetupsSlot slot)
+	{
+		String updateContainerFrom = getContainerString(slot);
+		JMenuItem updateFromContainer = new JMenuItem("Update ALL Slots from " + updateContainerFrom);
+		slot.getShiftRightClickMenu().add(updateFromContainer);
+		updateFromContainer.addActionListener(e ->
+		{
+			int confirm = JOptionPane.showConfirmDialog(this,
+					"Do you want to update ALL setups which have this item to the new item?",
+					"Update ALL Setups", JOptionPane.OK_CANCEL_OPTION);
+
+			if (confirm == JOptionPane.YES_OPTION)
+			{
+				plugin.updateSlotFromContainer(slot, true);
+			}
 		});
 	}
 
 	// adds the menu option to update a slot from item search
 	protected void addUpdateFromSearchMouseListenerToSlot(final InventorySetupsSlot slot, boolean allowStackable)
 	{
-		setSlotComponentPopupMenu(slot);
-		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 		JMenuItem updateFromSearch = new JMenuItem("Update Slot from Search");
-		popupMenu.add(updateFromSearch);
+		slot.getRightClickMenu().add(updateFromSearch);
 		updateFromSearch.addActionListener(e ->
 		{
 			plugin.updateSlotFromSearch(slot, allowStackable);
@@ -132,10 +124,8 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 	// adds the menu option to clear a slot
 	protected void addRemoveMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setSlotComponentPopupMenu(slot);
-		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 		JMenuItem removeSlot = new JMenuItem("Remove Item from Slot");
-		popupMenu.add(removeSlot);
+		slot.getRightClickMenu().add(removeSlot);
 		removeSlot.addActionListener(e ->
 		{
 			plugin.removeItemFromSlot(slot);
@@ -145,10 +135,8 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 	// adds the menu option to update set a slot to fuzzy
 	protected void addFuzzyMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setSlotComponentPopupMenu(slot);
-		JPopupMenu popupMenu = slot.getComponentPopupMenu();
 		JMenuItem makeSlotFuzzy = new JMenuItem("Toggle Fuzzy");
-		popupMenu.add(makeSlotFuzzy);
+		slot.getRightClickMenu().add(makeSlotFuzzy);
 		makeSlotFuzzy.addActionListener(e ->
 		{
 			plugin.toggleFuzzyOnSlot(slot);
@@ -158,9 +146,6 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 	// adds the menu option to update set a slot to fuzzy
 	protected void addStackMouseListenerToSlot(final InventorySetupsSlot slot)
 	{
-		setSlotComponentPopupMenu(slot);
-		JPopupMenu popupMenu = slot.getComponentPopupMenu();
-
 		JMenuItem stackIndicatorNone = new JMenuItem("Stack Difference None");
 		stackIndicatorNone.addActionListener(e ->
 		{
@@ -190,20 +175,31 @@ public abstract class InventorySetupsContainerPanel extends JPanel
 		stackIndicatorMainMenu.add(stackIndicatorStandard);
 		stackIndicatorMainMenu.add(stackIndicatorLessThan);
 		stackIndicatorMainMenu.add(stackIndicatorGreaterThan);
-		popupMenu.add(stackIndicatorMainMenu);
+		slot.getRightClickMenu().add(stackIndicatorMainMenu);
 	}
 
-	// creates a new component slot menu if the slot does not have one already
-	private void setSlotComponentPopupMenu(final InventorySetupsSlot slot)
+	private String getContainerString(final InventorySetupsSlot slot)
 	{
-		if (slot.getComponentPopupMenu() == null)
+		String updateContainerFrom = "";
+		switch (slot.getSlotID())
 		{
-			// both the panel and image label need adapters
-			// because the image will cover the entire panel
-			JPopupMenu newMenu = new JPopupMenu();
-			slot.setComponentPopupMenu(newMenu);
-			slot.getImageLabel().setComponentPopupMenu(newMenu);
+			case INVENTORY:
+				updateContainerFrom = "Inventory";
+				break;
+			case EQUIPMENT:
+				updateContainerFrom = "Equipment";
+				break;
+			case RUNE_POUCH:
+				updateContainerFrom = "Rune Pouch";
+				break;
+			case BOLT_POUCH:
+				updateContainerFrom = "Bolt Pouch";
+				break;
+			default:
+				assert false : "Wrong slot ID!";
+				break;
 		}
+		return updateContainerFrom;
 	}
 
 	// Sets the image and tooltip text for a slot
