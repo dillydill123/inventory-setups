@@ -1396,15 +1396,6 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
 			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
-
-//			final Map<Integer, InventorySetupsItem> additionalFilteredItems = inventorySetup.getAdditionalFilteredItems();
-			// Don't process the ID at all for this use case.
-			// The exact ID must match
-//			if (additionalFilteredItems.containsKey(oldItem.getId()))
-//			{
-//				removeAdditionalFilteredItem(oldItem.getId(), additionalFilteredItems);
-//				addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
-//			}
 		}
 	}
 
@@ -1685,21 +1676,6 @@ public class InventorySetupsPlugin extends Plugin
 
 		dataManager.updateConfig(true, false);
 		panel.refreshCurrentSetup();
-	}
-
-	private void removeAdditionalFilteredItem(final int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
-	{
-		int j = 0;
-		Integer keyToDelete = null;
-		for (final Integer key : additionalFilteredItems.keySet())
-		{
-			if (additionalFilteredItems.get(key).getId() == itemId)
-			{
-				keyToDelete = key;
-				break;
-			}
-		}
-		additionalFilteredItems.remove(keyToDelete);
 	}
 
 	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
