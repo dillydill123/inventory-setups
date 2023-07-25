@@ -118,7 +118,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		String updateText =		"Sections and their respective setups will now correctly match the order of the side panel in the Show Worn Items right click menu.\n\n" +
 								"Added a hotkey for toggling section mode.\n\n" +
 								"Fixed granite cannonball -> cannonball variation mapping.\n\n" +
-								"Added an option to replace an item in all setups with a new item. Shift + Right click an inventory or equipment slot on the side panel to access this option.";
+								"Added an option to replace an item in all setups with a new item. Shift + Right click an inventory or equipment slot on the side panel to access this option. Keep in mind this will replace ALL occurrences of the old item in ALL setups with the new item.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
