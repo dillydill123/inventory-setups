@@ -1463,6 +1463,18 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int finalId = itemManager.canonicalize(itemId);
 
+					if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
+					{
+						final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+						if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
+						{
+							removeAdditionalFilteredItem(slot, additionalFilteredItems);
+							addAdditionalFilteredItem(finalId, additionalFilteredItems);
+						}
+						return;
+					}
+
 					final String itemName = itemManager.getItemComposition(finalId).getName();
 					final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 					final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
@@ -1502,17 +1514,6 @@ public class InventorySetupsPlugin extends Plugin
 			if (updateAllInstances)
 			{
 				updateAllInstancesInSetupWithNewItem(itemToBeReplaced, newItem);
-			}
-			else if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
-			{
-				final Map<Integer, InventorySetupsItem> additionalFilteredItems =
-						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
-				if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
-				{
-					removeAdditionalFilteredItem(slot, additionalFilteredItems);
-					addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
-					// duplicate update config and refresh setup are being called here
-				}
 			}
 			else
 			{
