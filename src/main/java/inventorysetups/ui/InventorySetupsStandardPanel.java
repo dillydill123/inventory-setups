@@ -314,9 +314,10 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 					plugin.openColorPicker("Choose a Highlight color", invSetup.getHighlightColor(),
 						c ->
 						{
-							inventorySetup.setHighlightColor(c);
+							// Don't consider the transparency component
+							Color newColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), 255);
+							inventorySetup.setHighlightColor(newColor);
 							updateHighlightColorLabel();
-							panel.redrawOverviewPanel(false);
 						}
 					);
 				}

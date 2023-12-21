@@ -328,7 +328,8 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 					plugin.openColorPicker("Choose a Display color", currentDisplayColor == null ? JagexColors.MENU_TARGET : currentDisplayColor,
 							c ->
 							{
-								updateDisplayColorLabel(c);
+								Color newColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), 255);
+								updateDisplayColorLabel(newColor);
 							}
 					);
 				}

@@ -222,6 +222,10 @@ public class InventorySetupsPlugin extends Plugin
 	// global filtering is allowed for any setup
 	private boolean internalFilteringIsAllowed;
 
+	@Setter
+	@Getter
+	private boolean navButtonIsSelected;
+
 	// current version of the plugin
 	private String currentVersion;
 
@@ -349,10 +353,6 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					panel.redrawOverviewPanel(false);
 				});
-			}
-			else if (event.getKey().equals(CONFIG_KEY_MANUAL_BANK_FILTER))
-			{
-				navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
 			}
 			else if (event.getKey().equals(CONFIG_KEY_PERSIST_HOTKEYS))
 			{
@@ -724,15 +724,13 @@ public class InventorySetupsPlugin extends Plugin
 		this.panel = new InventorySetupsPluginPanel(this, itemManager);
 		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/inventorysetups_icon.png");
 
+		this.navButtonIsSelected = false;
 		navButton = NavigationButton.builder()
 			.tooltip("Inventory Setups")
 			.icon(icon)
 			.priority(6)
 			.panel(panel)
 			.build();
-
-		// Clicking the nav button will do a bank search
-		navButton.setOnClick(config.manualBankFilter() ? null : this::doBankSearch);
 
 		clientToolbar.addNavigation(navButton);
 
@@ -2211,7 +2209,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean isFilteringAllowed()
 	{
-		boolean allowBasedOnActivePanel = navButton.isSelected() || !config.requireActivePanelFilter();
+		boolean allowBasedOnActivePanel = navButtonIsSelected || !config.requireActivePanelFilter();
 
 		return internalFilteringIsAllowed && allowBasedOnActivePanel;
 	}

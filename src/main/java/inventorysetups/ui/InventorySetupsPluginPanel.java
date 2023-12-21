@@ -612,6 +612,22 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		updateSortingMarker();
 	}
 
+	@Override
+	public void onActivate()
+	{
+		plugin.setNavButtonIsSelected(true);
+		if (!plugin.getConfig().manualBankFilter())
+		{
+			plugin.doBankSearch();
+		}
+	}
+
+	@Override
+	public void onDeactivate()
+	{
+		plugin.setNavButtonIsSelected(false);
+	}
+
 	// Redraw the entire overview panel, considering the text in the search bar
 	public void redrawOverviewPanel(boolean resetScrollBar)
 	{
