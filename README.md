@@ -20,6 +20,7 @@ Contents
   - [Fuzzy Difference](#fuzzy-difference)
   - [Unordered Highlighting](#unordered-highlighting)
 - [Additional Filtered Items](#additional-filtered-items)
+- [Ground Item Menu Options (For UIMs)](#ground-item-menu-options)
 - [Sections](#sections)
   - [Adding Setups to a Section](#adding-setups-to-a-section)
   - [Remove Setups from a Section](#remove-setups-from-a-section)
@@ -217,6 +218,16 @@ You can also add or update items by using the search option. The fuzzy indicator
 
 ![Additional Filtered Items](readme_images_and_gifs/additional_items_filter.gif)
 
+## Ground Item Menu Options
+
+Menu options on ground items can be swapped and highlighted for items in the current selected setup. This is particularly useful for UIMs when re-gearing from a death pile.
+
+First, configure this feature inside the Ground Item Menu Options section of the settings. If a setup is selected, menu entries corresponding to items in the setup will be highlighted. Entries can also be swapped to the top or the bottom of the menu entries based on the setting configuration.
+
+![Ground Item Menu Options](readme_images_and_gifs/ground_items_menu_entries.gif)
+
+To use this effectively as a UIM, set the priority of menu swapping to OUT. This will cause all items not in your setup (i.e., in your looting bag), to go to the top of the menu entries. From here you can quickly grab the items and store them in the looting bag. The remaining items on the floor will only be items in the setup that are not in the looting bags and that you would want to bring to your current activity.
+
 ## Sections
 
 Sections are a way to organize your setups into different categories. Here is a preview of what sections look like.
@@ -297,45 +308,66 @@ Duplicate names for setups or sections are not allowed in Inventory Setups. If y
 
 ## Configuration Settings
 
-In the settings of Inventory Setups, you can change default setup options, key binds, and other miscellaneous settings.
+In the settings of Inventory Setups, you can change default setup options, key binds, ground item menu options, and other miscellaneous settings.
 
 ![Configuration Settings](readme_images_and_gifs/config_settings.png)
 
+### Default Setup Options
+
 * **Default Filter Bank** - Enabling this will make it so all newly created setups will have bank filtering enabled
-* **Default Highlight Stack Difference** - The default stack difference option for all newly created setups
 * **Default Highlight Unordered Difference** - Enabling this will make it so all newly created setups will have unordered highlighting enabled
 * **Default Highlight** - Enabling this will make it so all newly created setups will have highlighting enabled
 * **Default Highlight Color** - The default highlighting color for newly created setups
-* **Default Enable Display Color** - Enabling this will make it so all newly created setups will have the default display color
+* **Default Enable Display Color** - Enabling this will make it so all newly created setups will have the default display color. The display color is the thin colored line on Standard and Compact setup panels
 * **Default Display Color** - The default color that will be used as a display color for new setups. The option above must be enabled
 
 ![Display Color Gif](readme_images_and_gifs/display_color.gif)
+
 Hint: You can right click the paint bucket to delete the color of a setup or section.
 
 * **Default Fuzzy** - Enabling this will make all slots fuzzy for newly created setups
 * **Default Stack Compare** - The default stack comparison type for all slots in newly created setups
+
+### HotKey Options
 
 * **Return To Setups Hotkey** - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
 * **Filter Bank Hotkey** - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
 * **Filter Inventory Hotkey** - Pressing this will cause the bank to filter only the inventory of a setup if one is selected and filtering is enabled for that setup
 * **Filter Equipment Hotkey** - Pressing this will cause the bank to filter only the equipment of a setup if one is selected and filtering is enabled for that setup
 * **Filter Additional Items Hotkey** - Pressing this will cause the bank to filter only the additional filtered items of a setup if one is selected and filtering is enabled for that setup
+* **Toggle section mode** - Pressing this will switch to section mode
+* **Persist Hotkeys Outside Bank** - Enabling this will cause hot keys to persist outside the bank
 
-* **Compact Mode** - Enabling this will change the setups to compact mode. It is equivalent to pressing the Compact Mode button on the overview panel
+### Ground Item Menu Options
+
+* **Highlight Menu Entries on Ground Items** - Highlights menu entries on ground items which exist in your current setup
+* **Highlight Menu Entries Color** - Changes the color of the menu entries that are highlighted if the above option is selected
+* **Swap Menu Entries on Ground Items** - Swaps menu entries for ground items which exist in your current setup
+* **Menu Entries Priority on Ground Items** - Sets which ground item menu entries appear the top if the above option is selected. Either IN - inside the setup, or OUT - not in the setup
+
+### Other Options
+
+* **Section Mode** - Toggles section mode. Can also be selected on the main window of Inventory Setups
+* **Panel View** - The type of panel view. Standard, Compact, or Icon
 * **Sorting Mode** - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
+* **Hide Help Button** - Hides the help button
 * **Disable Bank Tab Separator** - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
 
 ![Disable Bank Tab Bar](readme_images_and_gifs/disable_tab_bar.png)
 
-* **Remove Bank Tab Separator** - Enabling this causes the bank tab separators to be removed when the bank is filtered. This is just like the bank tags option.
+* **Remove Bank Tab Separator** - Enabling this causes the bank tab separators to be removed when the bank is filtered. This is just like the bank tags option
 
-![Disable Bank Tab Bar](readme_images_and_gifs/remote_tab_separator.png)
+![Remove Bank Tab Bar](readme_images_and_gifs/remote_tab_separator.png)
 
 * **Require Active Panel for Filtering** - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
 
-* **Show Worn Item Filter** - Changes which setups show up on the "show worn items" button when right clicked.
+* **Show Worn Item Filter** - Changes which setups show up on the "show worn items" button when right clicked
 
-* **Manual Bank Filter** - Enabling this causes the bank to not filter automatically when opened. You will need to manually trigger a bank filter by using a hot key or selecting a setup when the bank when it is already opened.
+* **Worn Items Section Submenus** - Allows section submenus when right clicking the "show worn items" button
+
+![Section Submenus](readme_images_and_gifs/section_submenus.png)
+
+* **Manual Bank Filter** - Enabling this causes the bank to not filter automatically when opened. You will need to manually trigger a bank filter by using a hot key or selecting a setup when the bank when it is already opened
 
 ## Other Plugin Compatibilities
 
