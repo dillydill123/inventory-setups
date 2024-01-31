@@ -115,10 +115,11 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Sections and their respective setups will now correctly match the order of the side panel in the Show Worn Items right click menu.\n\n" +
-								"Added a hotkey for toggling section mode.\n\n" +
-								"Fixed granite cannonball -> cannonball variation mapping.\n\n" +
-								"Added an option to replace an item in all setups with a new item. Shift + Right click an inventory or equipment slot on the side panel to access this option. Keep in mind this will replace ALL occurrences of the old item in ALL setups with the new item.";
+		String updateText =		"Added ground items menu entry highlighting and swapping based on items in the setup\n\n" +
+								"This feature will be useful for UIMs when re-gearing from a death pile\n\n" +
+								"Menu entries for items that are in the current setup can be highlighted and swapped to the top or bottom of the menu entries for easier re-gearing\n\n" +
+								"These options are off by default and can be configured in the settings under the Ground Item Menu Options section.\n\n" +
+								"You can find more information in the tutorial";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
