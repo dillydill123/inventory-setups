@@ -230,7 +230,7 @@ To use this effectively as a UIM, set the priority of menu swapping to OUT. This
 
 This is not a perfect solution, however. It's possible to have the same items in the looting bag and in the setup. One example is runes in a rune pouch. One might have a stack of blood runes in the looting bag and blood runes in the rune pouch. In these situations, the blood runes will be considered in the setup and be swapped/hightlighted.
 
-Additionally, the unnote/note conversion is disabled by default when considering the swapping/highlighting. If you wish to have this conversion, mark the item as fuzzy in your setup. This is useful if you want a noted stack of potions to appear IN your setup even if you plan to put it in the looting bag unnoting some at the bank.
+Additionally, the unnote/note conversion is disabled by default when considering the swapping/highlighting. If you wish to have this conversion, mark the item as fuzzy in your setup. This is useful if you want a noted stack of potions to appear IN your setup even if you plan to put it in the looting bag after unnoting some at the bank.
 
 ## Sections
 
