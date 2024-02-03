@@ -411,7 +411,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				MenuEntry oldEntry = clientEntries[i];
 				int itemID = oldEntry.getIdentifier();
-				boolean setupContainsItem = setupContainsItem(panel.getCurrentSelectedSetup(), itemID);
+				boolean setupContainsItem = setupContainsItem(panel.getCurrentSelectedSetup(), itemID, true, true);
 				if (setupContainsItem)
 				{
 					if (config.groundItemMenuHighlight())
@@ -1103,12 +1103,23 @@ public class InventorySetupsPlugin extends Plugin
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
-		final int canonicalizedId = itemManager.canonicalize(itemId);
+		return additionalFilteredItemsHasItem(itemId, additionalFilteredItems, true, false);
+	}
+
+	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems, boolean allowFuzzy, boolean fuzzyCanocalization)
+	{
 		for (final Integer additionalItemKey : additionalFilteredItems.keySet())
 		{
 			boolean isFuzzy = additionalFilteredItems.get(additionalItemKey).isFuzzy();
-			int addItemId = getProcessedID(isFuzzy, additionalFilteredItems.get(additionalItemKey).getId());
-			int finalItemId = getProcessedID(isFuzzy, canonicalizedId);
+			int addItemId = additionalFilteredItems.get(additionalItemKey).getId();
+			if (!fuzzyCanocalization || isFuzzy)
+			{
+				addItemId = itemManager.canonicalize(addItemId);
+				itemId = itemManager.canonicalize(itemId);
+			}
+
+			addItemId = getProcessedID(isFuzzy && allowFuzzy, addItemId);
+			int finalItemId = getProcessedID(isFuzzy && allowFuzzy, itemId);
 			if (addItemId == finalItemId)
 			{
 				return true;
@@ -2329,11 +2340,13 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean setupContainsItem(final InventorySetup setup, int itemID)
 	{
-		// So place holders will show up in the bank.
-		itemID = itemManager.canonicalize(itemID);
+		return setupContainsItem(setup, itemID, true, false);
+	}
 
+	public boolean setupContainsItem(final InventorySetup setup, int itemID, boolean allowFuzzy, boolean fuzzyCanocalization)
+	{
 		// Check if this item (inc. placeholder) is in the additional filtered items
-		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems()))
+		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems(), allowFuzzy, fuzzyCanocalization))
 		{
 			return true;
 		}
@@ -2341,7 +2354,7 @@ public class InventorySetupsPlugin extends Plugin
 		// check the rune pouch to see if it has the item (runes in this case)
 		if (setup.getRune_pouch() != null)
 		{
-			if (containerContainsItem(itemID, setup.getRune_pouch()))
+			if (containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, fuzzyCanocalization))
 			{
 				return true;
 			}
@@ -2350,30 +2363,33 @@ public class InventorySetupsPlugin extends Plugin
 		// check the bolt pouch to see if it has the item (bolts in this case)
 		if (setup.getBoltPouch() != null)
 		{
-			if (containerContainsItem(itemID, setup.getBoltPouch()))
+			if (containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, fuzzyCanocalization))
 			{
 				return true;
 			}
 		}
 
-		return containerContainsItem(itemID, setup.getInventory()) ||
-			containerContainsItem(itemID, setup.getEquipment());
+		return containerContainsItem(itemID, setup.getInventory(), allowFuzzy, fuzzyCanocalization) ||
+			containerContainsItem(itemID, setup.getEquipment(), allowFuzzy, fuzzyCanocalization);
 	}
 
 	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
 	{
-		return containerContainsItem(itemID, setupContainer, true);
+		return containerContainsItem(itemID, setupContainer, true, false);
 	}
 
-	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy)
+	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean fuzzyCanocalization)
 	{
-		// So place holders will show up in the bank.
-		itemID = itemManager.canonicalize(itemID);
-
 		for (final InventorySetupsItem item : setupContainer)
 		{
 			// For equipped weight reducing items or noted items in the inventory
-			int setupItemId = itemManager.canonicalize(item.getId());
+			int setupItemId = item.getId();
+			if (!fuzzyCanocalization || item.isFuzzy())
+			{
+				setupItemId = itemManager.canonicalize(setupItemId);
+				itemID = itemManager.canonicalize(itemID);
+			}
+
 			if (getProcessedID(item.isFuzzy() && allowFuzzy, itemID) == getProcessedID(item.isFuzzy() && allowFuzzy, setupItemId))
 			{
 				return true;
@@ -2536,7 +2552,7 @@ public class InventorySetupsPlugin extends Plugin
 		// Don't allow fuzzy when checking because it will incorrectly assume the type
 		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
 		{
-			if (containerContainsItem(id, container, false))
+			if (containerContainsItem(id, container, false, false))
 			{
 				return InventorySetupsRunePouchType.NORMAL;
 			}
@@ -2544,7 +2560,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
 		{
-			if (containerContainsItem(id, container, false))
+			if (containerContainsItem(id, container, false, false))
 			{
 				return InventorySetupsRunePouchType.DIVINE;
 			}
@@ -2555,7 +2571,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
 	{
-		return containerContainsItem(ItemID.BOLT_POUCH, container, false);
+		return containerContainsItem(ItemID.BOLT_POUCH, container, false, false);
 	}
 
 	public void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)
