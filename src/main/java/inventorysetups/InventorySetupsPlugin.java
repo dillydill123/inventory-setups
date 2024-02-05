@@ -41,14 +41,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -1036,10 +1029,29 @@ public class InventorySetupsPlugin extends Plugin
 
 	public List<InventorySetup> filterSetups(String textToFilter)
 	{
-		final String textToFilterLower = textToFilter.toLowerCase();
-		return inventorySetups.stream()
-			.filter(i -> i.getName().toLowerCase().contains(textToFilterLower))
-			.collect(Collectors.toList());
+    return inventorySetups.stream().filter(i -> setupContains(i, textToFilter.toLowerCase())).collect(Collectors.toList());
+	}
+
+	private static boolean setupContains(InventorySetup i, String textToFilterLower)
+	{
+		if (textToFilterLower.startsWith("item:") && textToFilterLower.length() >= 6)
+		{
+			String itemName = textToFilterLower.substring("item:".length());
+			// Find setups containing the given item name
+			return containsItem(i.getInventory(), itemName) || containsItem(i.getEquipment(), itemName)
+					|| containsItem(i.getBoltPouch(), itemName) || containsItem(i.getRune_pouch(), itemName);
+		}
+		// Find setups containing the given setup name (default behaviour)
+		return i.getName().toLowerCase().contains(textToFilterLower);
+	}
+
+	private static boolean containsItem(List<InventorySetupsItem> inventorySetupItems, String textToFilterLower) {
+		if (inventorySetupItems == null) {
+			return false;
+		}
+		return inventorySetupItems.stream().filter(Objects::nonNull)
+        .map(item -> item.getName().toLowerCase())
+        .anyMatch(itemName -> itemName.contains(textToFilterLower));
 	}
 
 	public void doBankSearch(final InventorySetupsFilteringModeID filteringModeID)
@@ -2446,7 +2458,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		else if (runePouchTypeOldItem != InventorySetupsRunePouchType.NONE)
 		{
-			// if the old item is a rune pouch, need to update it to null 
+			// if the old item is a rune pouch, need to update it to null
 			inventorySetup.updateRunePouch(null);
 		}
 
