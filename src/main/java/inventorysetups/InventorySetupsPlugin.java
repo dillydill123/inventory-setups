@@ -90,6 +90,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.game.chatbox.ChatboxItemSearch;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
@@ -411,7 +412,10 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				MenuEntry oldEntry = clientEntries[i];
 				int itemID = oldEntry.getIdentifier();
-				boolean setupContainsItem = setupContainsItem(panel.getCurrentSelectedSetup(), itemID, true, true);
+				// If the item is a graceful or weight reducing equipment, we must canonicalize.
+				// For items on the ground, it will be the inventory version of the item, so the inverse of worn items must be used.
+				boolean canonicalize = InventorySetupsVariationMapping.INVERTED_WORN_ITEMS.containsKey(itemID);
+				boolean setupContainsItem = setupContainsItem(panel.getCurrentSelectedSetup(), itemID, true, canonicalize);
 				if (setupContainsItem)
 				{
 					if (config.groundItemMenuHighlight())
