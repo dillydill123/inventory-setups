@@ -92,6 +92,6 @@ public class InventorySetupsUnitTest
 												"", inventorySetupsConfig.highlightColor(), false,
 												inventorySetupsConfig.displayColor(), false,false, 0, false, -1);
 
-		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL, true, false));
+		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL, true, true));
 	}
 }

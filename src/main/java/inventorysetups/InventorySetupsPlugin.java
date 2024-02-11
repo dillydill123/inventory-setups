@@ -1106,13 +1106,13 @@ public class InventorySetupsPlugin extends Plugin
 		return additionalFilteredItemsHasItem(itemId, additionalFilteredItems, true, false);
 	}
 
-	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems, boolean allowFuzzy, boolean fuzzyCanocalization)
+	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems, boolean allowFuzzy, boolean canonicalize)
 	{
 		for (final Integer additionalItemKey : additionalFilteredItems.keySet())
 		{
 			boolean isFuzzy = additionalFilteredItems.get(additionalItemKey).isFuzzy();
 			int addItemId = additionalFilteredItems.get(additionalItemKey).getId();
-			if (!fuzzyCanocalization || isFuzzy)
+			if (canonicalize || isFuzzy)
 			{
 				addItemId = itemManager.canonicalize(addItemId);
 				itemId = itemManager.canonicalize(itemId);
@@ -2340,13 +2340,13 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean setupContainsItem(final InventorySetup setup, int itemID)
 	{
-		return setupContainsItem(setup, itemID, true, false);
+		return setupContainsItem(setup, itemID, true, true);
 	}
 
-	public boolean setupContainsItem(final InventorySetup setup, int itemID, boolean allowFuzzy, boolean fuzzyCanocalization)
+	public boolean setupContainsItem(final InventorySetup setup, int itemID, boolean allowFuzzy, boolean canonicalize)
 	{
 		// Check if this item (inc. placeholder) is in the additional filtered items
-		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems(), allowFuzzy, fuzzyCanocalization))
+		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems(), allowFuzzy, canonicalize))
 		{
 			return true;
 		}
@@ -2354,7 +2354,7 @@ public class InventorySetupsPlugin extends Plugin
 		// check the rune pouch to see if it has the item (runes in this case)
 		if (setup.getRune_pouch() != null)
 		{
-			if (containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, fuzzyCanocalization))
+			if (containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, canonicalize))
 			{
 				return true;
 			}
@@ -2363,28 +2363,28 @@ public class InventorySetupsPlugin extends Plugin
 		// check the bolt pouch to see if it has the item (bolts in this case)
 		if (setup.getBoltPouch() != null)
 		{
-			if (containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, fuzzyCanocalization))
+			if (containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, canonicalize))
 			{
 				return true;
 			}
 		}
 
-		return containerContainsItem(itemID, setup.getInventory(), allowFuzzy, fuzzyCanocalization) ||
-			containerContainsItem(itemID, setup.getEquipment(), allowFuzzy, fuzzyCanocalization);
+		return containerContainsItem(itemID, setup.getInventory(), allowFuzzy, canonicalize) ||
+			containerContainsItem(itemID, setup.getEquipment(), allowFuzzy, canonicalize);
 	}
 
 	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
 	{
-		return containerContainsItem(itemID, setupContainer, true, false);
+		return containerContainsItem(itemID, setupContainer, true, true);
 	}
 
-	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean fuzzyCanocalization)
+	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean canonicalize)
 	{
 		for (final InventorySetupsItem item : setupContainer)
 		{
 			// For equipped weight reducing items or noted items in the inventory
 			int setupItemId = item.getId();
-			if (!fuzzyCanocalization || item.isFuzzy())
+			if (canonicalize || item.isFuzzy())
 			{
 				setupItemId = itemManager.canonicalize(setupItemId);
 				itemID = itemManager.canonicalize(itemID);
@@ -2552,7 +2552,7 @@ public class InventorySetupsPlugin extends Plugin
 		// Don't allow fuzzy when checking because it will incorrectly assume the type
 		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
 		{
-			if (containerContainsItem(id, container, false, false))
+			if (containerContainsItem(id, container, false, true))
 			{
 				return InventorySetupsRunePouchType.NORMAL;
 			}
@@ -2560,7 +2560,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
 		{
-			if (containerContainsItem(id, container, false, false))
+			if (containerContainsItem(id, container, false, true))
 			{
 				return InventorySetupsRunePouchType.DIVINE;
 			}
@@ -2571,7 +2571,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
 	{
-		return containerContainsItem(ItemID.BOLT_POUCH, container, false, false);
+		return containerContainsItem(ItemID.BOLT_POUCH, container, false, true);
 	}
 
 	public void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)
