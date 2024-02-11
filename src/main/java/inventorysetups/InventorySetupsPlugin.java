@@ -1107,7 +1107,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
-		return additionalFilteredItemsHasItem(itemId, additionalFilteredItems, true, false);
+		return additionalFilteredItemsHasItem(itemId, additionalFilteredItems, true, true);
 	}
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems, boolean allowFuzzy, boolean canonicalize)
