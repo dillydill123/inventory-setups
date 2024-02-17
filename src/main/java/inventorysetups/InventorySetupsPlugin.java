@@ -41,7 +41,15 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -147,6 +155,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
+	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final int SPELLBOOK_VARBIT = 4070;
 	private static final int ITEMS_PER_ROW = 8;
 	private static final int ITEM_VERTICAL_SPACING = 36;
@@ -1029,29 +1038,34 @@ public class InventorySetupsPlugin extends Plugin
 
 	public List<InventorySetup> filterSetups(String textToFilter)
 	{
-    return inventorySetups.stream().filter(i -> setupContains(i, textToFilter.toLowerCase())).collect(Collectors.toList());
+		return inventorySetups.stream()
+			.filter(inventorySetup -> setupContains(inventorySetup, textToFilter.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 
-	private static boolean setupContains(InventorySetup i, String textToFilterLower)
+	private static boolean setupContains(InventorySetup inventorySetup, String textToFilterLower)
 	{
-		if (textToFilterLower.startsWith("item:") && textToFilterLower.length() >= 6)
+		if (textToFilterLower.startsWith(ITEM_SEARCH_TAG) && textToFilterLower.length() > ITEM_SEARCH_TAG.length())
 		{
-			String itemName = textToFilterLower.substring("item:".length());
+			String itemName = textToFilterLower.trim().substring(ITEM_SEARCH_TAG.length());
 			// Find setups containing the given item name
-			return containsItem(i.getInventory(), itemName) || containsItem(i.getEquipment(), itemName)
-					|| containsItem(i.getBoltPouch(), itemName) || containsItem(i.getRune_pouch(), itemName);
+			return containerContainsItemByName(inventorySetup.getInventory(), itemName) || containerContainsItemByName(inventorySetup.getEquipment(), itemName)
+				|| containerContainsItemByName(inventorySetup.getBoltPouch(), itemName) || containerContainsItemByName(inventorySetup.getRune_pouch(), itemName)
+				|| containerContainsItemByName(inventorySetup.getAdditionalFilteredItems().values(), itemName);
 		}
 		// Find setups containing the given setup name (default behaviour)
-		return i.getName().toLowerCase().contains(textToFilterLower);
+		return inventorySetup.getName().toLowerCase().contains(textToFilterLower);
 	}
 
-	private static boolean containsItem(List<InventorySetupsItem> inventorySetupItems, String textToFilterLower) {
-		if (inventorySetupItems == null) {
+	private static boolean containerContainsItemByName(Collection<InventorySetupsItem> itemsInContainer, String textToFilterLower)
+	{
+		if (itemsInContainer == null)
+		{
 			return false;
 		}
-		return inventorySetupItems.stream().filter(Objects::nonNull)
-        .map(item -> item.getName().toLowerCase())
-        .anyMatch(itemName -> itemName.contains(textToFilterLower));
+		return itemsInContainer.stream()
+			.map(item -> item.getName().toLowerCase())
+			.anyMatch(itemName -> itemName.contains(textToFilterLower));
 	}
 
 	public void doBankSearch(final InventorySetupsFilteringModeID filteringModeID)
