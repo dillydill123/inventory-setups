@@ -1039,22 +1039,22 @@ public class InventorySetupsPlugin extends Plugin
 	public List<InventorySetup> filterSetups(String textToFilter)
 	{
 		return inventorySetups.stream()
-			.filter(inventorySetup -> setupContains(inventorySetup, textToFilter.toLowerCase()))
+			.filter(inventorySetup -> shouldDisplaySetup(inventorySetup, textToFilter.trim().toLowerCase()))
 			.collect(Collectors.toList());
 	}
 
-	private static boolean setupContains(InventorySetup inventorySetup, String textToFilterLower)
+	private static boolean shouldDisplaySetup(InventorySetup inventorySetup, String trimmedTextToFilterLower)
 	{
-		if (textToFilterLower.startsWith(ITEM_SEARCH_TAG) && textToFilterLower.length() > ITEM_SEARCH_TAG.length())
+		if (trimmedTextToFilterLower.startsWith(ITEM_SEARCH_TAG) && trimmedTextToFilterLower.length() > ITEM_SEARCH_TAG.length())
 		{
-			String itemName = textToFilterLower.trim().substring(ITEM_SEARCH_TAG.length());
+			String itemName = trimmedTextToFilterLower.substring(ITEM_SEARCH_TAG.length()).trim();
 			// Find setups containing the given item name
 			return containerContainsItemByName(inventorySetup.getInventory(), itemName) || containerContainsItemByName(inventorySetup.getEquipment(), itemName)
 				|| containerContainsItemByName(inventorySetup.getBoltPouch(), itemName) || containerContainsItemByName(inventorySetup.getRune_pouch(), itemName)
 				|| containerContainsItemByName(inventorySetup.getAdditionalFilteredItems().values(), itemName);
 		}
 		// Find setups containing the given setup name (default behaviour)
-		return inventorySetup.getName().toLowerCase().contains(textToFilterLower);
+		return inventorySetup.getName().toLowerCase().contains(trimmedTextToFilterLower);
 	}
 
 	private static boolean containerContainsItemByName(Collection<InventorySetupsItem> itemsInContainer, String textToFilterLower)
