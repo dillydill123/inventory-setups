@@ -1050,8 +1050,8 @@ public class InventorySetupsPlugin extends Plugin
 			String itemName = trimmedTextToFilterLower.substring(ITEM_SEARCH_TAG.length()).trim();
 			// Find setups containing the given item name
 			return containerContainsItemByName(inventorySetup.getInventory(), itemName) || containerContainsItemByName(inventorySetup.getEquipment(), itemName)
-				|| containerContainsItemByName(inventorySetup.getBoltPouch(), itemName) || containerContainsItemByName(inventorySetup.getRune_pouch(), itemName)
-				|| containerContainsItemByName(inventorySetup.getAdditionalFilteredItems().values(), itemName);
+				|| containerContainsItemByName(inventorySetup.getRune_pouch(), itemName) || containerContainsItemByName(inventorySetup.getAdditionalFilteredItems().values(), itemName)
+				|| containerContainsItemByName(inventorySetup.getBoltPouch(), itemName);
 		}
 		// Find setups containing the given setup name (default behaviour)
 		return inventorySetup.getName().toLowerCase().contains(trimmedTextToFilterLower);
