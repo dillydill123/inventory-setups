@@ -71,6 +71,7 @@ import net.runelite.api.ScriptID;
 import net.runelite.api.SpriteID;
 import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.MenuOptionClicked;
@@ -90,7 +91,6 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.game.SpriteManager;
 import net.runelite.client.game.chatbox.ChatboxItemSearch;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
@@ -239,6 +239,9 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsFilteringModeID bankFilteringMode;
 
+	// Used to defer highlighting to GameTick
+	private boolean shouldTriggerInventoryHighlightOnGameTick;
+
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
 		@Override
@@ -369,6 +372,16 @@ public class InventorySetupsPlugin extends Plugin
 					unregisterHotkeys();
 				}
 			}
+		}
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick gameTick)
+	{
+		if (shouldTriggerInventoryHighlightOnGameTick)
+		{
+			shouldTriggerInventoryHighlightOnGameTick = false;
+			clientThread.invokeLater(panel::highlightInventory);
 		}
 	}
 
@@ -829,6 +842,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
 
+		this.shouldTriggerInventoryHighlightOnGameTick = false;
 		this.cache = new InventorySetupsCache();
 		this.inventorySetups = new ArrayList<>();
 		this.sections = new ArrayList<>();
@@ -1152,16 +1166,24 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
-
-		if (event.getIndex() == 439 && client.getGameState() == GameState.LOGGED_IN)
+		// Spellbook changed
+		if (event.getVarpId() == 439 && client.getGameState() == GameState.LOGGED_IN)
 		{
 			// must be invoked later otherwise causes freezing.
-			clientThread.invokeLater(() ->
-			{
-				panel.highlightSpellbook();
-			});
+			clientThread.invokeLater(panel::highlightSpellbook);
+			return;
 		}
 
+		Widget bankContainer = client.getWidget(ComponentID.BANK_ITEM_CONTAINER);
+		boolean bankIsOpen = bankContainer != null && !bankContainer.isHidden();
+		// Avoid extra highlighting calls by deferring the highlighting to GameTick after a bunch of varbit changes come
+		// If the bank is closed, then onItemContainerChanged will handle the highlighting
+		if (bankIsOpen &&
+			(RUNE_POUCH_RUNE_VARBITS.contains(event.getVarbitId()) || RUNE_POUCH_AMOUNT_VARBITS.contains(event.getVarbitId())))
+		{
+			shouldTriggerInventoryHighlightOnGameTick = true;
+			return;
+		}
 	}
 
 	public void resetBankSearch(boolean closeChat)
