@@ -652,8 +652,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			filteredInventorysetups.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
 
-		returnToOverviewPanel(resetScrollBar);
 		layoutSetups(filteredInventorysetups);
+		returnToOverviewPanel(resetScrollBar);
 
 		revalidate();
 		repaint();
