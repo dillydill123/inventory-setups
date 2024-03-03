@@ -43,6 +43,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -155,6 +156,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
+	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final int SPELLBOOK_VARBIT = 4070;
 	private static final int ITEMS_PER_ROW = 8;
 	private static final int ITEM_VERTICAL_SPACING = 36;
@@ -1054,10 +1056,34 @@ public class InventorySetupsPlugin extends Plugin
 
 	public List<InventorySetup> filterSetups(String textToFilter)
 	{
-		final String textToFilterLower = textToFilter.toLowerCase();
 		return inventorySetups.stream()
-			.filter(i -> i.getName().toLowerCase().contains(textToFilterLower))
+			.filter(inventorySetup -> shouldDisplaySetup(inventorySetup, textToFilter.trim().toLowerCase()))
 			.collect(Collectors.toList());
+	}
+
+	private static boolean shouldDisplaySetup(InventorySetup inventorySetup, String trimmedTextToFilterLower)
+	{
+		if (trimmedTextToFilterLower.startsWith(ITEM_SEARCH_TAG) && trimmedTextToFilterLower.length() > ITEM_SEARCH_TAG.length())
+		{
+			String itemName = trimmedTextToFilterLower.substring(ITEM_SEARCH_TAG.length()).trim();
+			// Find setups containing the given item name
+			return containerContainsItemByName(inventorySetup.getInventory(), itemName) || containerContainsItemByName(inventorySetup.getEquipment(), itemName)
+				|| containerContainsItemByName(inventorySetup.getRune_pouch(), itemName) || containerContainsItemByName(inventorySetup.getAdditionalFilteredItems().values(), itemName)
+				|| containerContainsItemByName(inventorySetup.getBoltPouch(), itemName);
+		}
+		// Find setups containing the given setup name (default behaviour)
+		return inventorySetup.getName().toLowerCase().contains(trimmedTextToFilterLower);
+	}
+
+	private static boolean containerContainsItemByName(Collection<InventorySetupsItem> itemsInContainer, String textToFilterLower)
+	{
+		if (itemsInContainer == null)
+		{
+			return false;
+		}
+		return itemsInContainer.stream()
+			.map(item -> item.getName().toLowerCase())
+			.anyMatch(itemName -> itemName.contains(textToFilterLower));
 	}
 
 	public void doBankSearch(final InventorySetupsFilteringModeID filteringModeID)
@@ -2488,7 +2514,7 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		else if (runePouchTypeOldItem != InventorySetupsRunePouchType.NONE)
 		{
-			// if the old item is a rune pouch, need to update it to null 
+			// if the old item is a rune pouch, need to update it to null
 			inventorySetup.updateRunePouch(null);
 		}
 

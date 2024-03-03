@@ -73,6 +73,8 @@ You can go back to the overview panel by clicking on the back arrow in the top r
 ![Return to Overview Panel](readme_images_and_gifs/return_to_setups_button.png)
 
 You can also search for setups using the search bar. When typing in the search bar, setups will be filtered if they contain the search text.
+By default, the search criteria will filter the setups by their names. If you want to search for setups containing specific items, prefix
+your search with `item:`, e.g. `item:brew`.
 
 ![Search Bar](readme_images_and_gifs/search_bar.gif)
 

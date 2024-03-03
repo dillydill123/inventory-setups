@@ -437,7 +437,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			{
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
-					returnToOverviewPanel(false);
+					redrawOverviewPanel(false);
 				}
 			}
 
@@ -631,7 +631,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	// Redraw the entire overview panel, considering the text in the search bar
 	public void redrawOverviewPanel(boolean resetScrollBar)
 	{
-		returnToOverviewPanel(resetScrollBar);
 		InventorySetupUtilities.fastRemoveAll(overviewPanel);
 		updateSectionViewMarker();
 		updatePanelViewMarker();
@@ -653,6 +652,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			filteredInventorysetups.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
 		}
 
+		returnToOverviewPanel(resetScrollBar);
 		layoutSetups(filteredInventorysetups);
 
 		revalidate();
