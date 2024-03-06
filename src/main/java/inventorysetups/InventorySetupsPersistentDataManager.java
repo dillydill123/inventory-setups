@@ -1,5 +1,7 @@
 package inventorysetups;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -19,6 +21,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
@@ -37,9 +40,15 @@ public class InventorySetupsPersistentDataManager
 	private final List<InventorySetup> inventorySetups;
 	private final List<InventorySetupsSection> sections;
 
+
+	// Fast non-cryptographic hash with relatively short output. Could use murmur3_32_fixed instead; but being extra cautious of collisions.
+	public static final HashFunction hashFunction = Hashing.murmur3_128();
+
 	public static final String CONFIG_KEY_SETUPS_MIGRATED_V2 = "migratedV2";
+	public static final String CONFIG_KEY_SETUPS_MIGRATED_V3 = "migratedV3";
 	public static final String CONFIG_KEY_SETUPS = "setups";
 	public static final String CONFIG_KEY_SETUPS_V2 = "setupsV2";
+	public static final String CONFIG_KEY_SETUPS_V3_PREFIX = "setupsV3_";
 	public static final String CONFIG_KEY_SECTIONS = "sections";
 
 	@Inject
@@ -72,15 +81,8 @@ public class InventorySetupsPersistentDataManager
 		// Handles migration of old setup data
 		handleMigrationOfOldData();
 
-		Type setupTypeV2 = new TypeToken<ArrayList<InventorySetupSerializable>>()
-		{
-
-		}.getType();
-		List<InventorySetupSerializable> issList = new ArrayList<>(loadData(CONFIG_KEY_SETUPS_V2, setupTypeV2));
-		for (final InventorySetupSerializable iss : issList)
-		{
-			inventorySetups.add(InventorySetupSerializable.convertToInventorySetup(iss));
-		}
+		final List<InventorySetup> setupsFromConfig = loadV3Setups();
+		inventorySetups.addAll(setupsFromConfig);
 		processSetupsFromConfig();
 
 		Type sectionType = new TypeToken<ArrayList<InventorySetupsSection>>()
@@ -108,14 +110,27 @@ public class InventorySetupsPersistentDataManager
 	{
 		if (updateSetups)
 		{
-			List<InventorySetupSerializable> issList = new ArrayList<>();
+			// Rather than escaping the name to pick a config key, instead use hash of the name. Benefits:
+			//   Changes to the escaping function or supported characters in the name string don't affect config keys.
+			//   Standardizes length; preventing overflow issues from extremely long names
+			//   Keeps json as the single source of truth for names; other plugins won't try to grab names from config keys.
+			final String wholePrefix = ConfigManager.getWholeKey(CONFIG_GROUP, null, CONFIG_KEY_SETUPS_V3_PREFIX);
+			final List<String> oldSetupKeys = configManager.getConfigurationKeys(wholePrefix);
+			Set<String> oldSetupHashes = oldSetupKeys.stream().map(key -> key.substring(wholePrefix.length())).collect(Collectors.toSet());
+
 			for (final InventorySetup setup : inventorySetups)
 			{
-				issList.add(InventorySetupSerializable.convertFromInventorySetup(setup));
+				final String hash = hashFunction.hashUnencodedChars(setup.getName()).toString();
+				oldSetupHashes.remove(hash);
+				final String data = gson.toJson(InventorySetupSerializable.convertFromInventorySetup(setup));
+				configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V3_PREFIX + hash, data);
 			}
 
-			final String data = gson.toJson(issList);
-			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2, data);
+			for (final String removedSetupHash : oldSetupHashes)
+			{
+				// Any hashes still in the oldSetupHashes set were for setups that were either renamed (and saved to a new hash above) or deleted.
+				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V3_PREFIX + removedSetupHash);
+			}
 		}
 
 		if (updateSections)
@@ -146,6 +161,53 @@ public class InventorySetupsPersistentDataManager
 				return new ArrayList<>();
 			}
 		}
+	}
+
+	private List<InventorySetup> loadV1Setups() {
+		Type setupTypeV1 = new TypeToken<ArrayList<InventorySetup>>()
+		{
+
+		}.getType();
+		return loadData(CONFIG_KEY_SETUPS, setupTypeV1);
+	}
+
+	private List<InventorySetup> loadV2Setups() {
+		Type setupTypeV2 = new TypeToken<ArrayList<InventorySetupSerializable>>()
+		{
+
+		}.getType();
+		List<InventorySetupSerializable> issList = new ArrayList<>(loadData(CONFIG_KEY_SETUPS_V2, setupTypeV2));
+		List<InventorySetup> isList = new ArrayList<>();
+		for (final InventorySetupSerializable iss : issList)
+		{
+			isList.add(InventorySetupSerializable.convertToInventorySetup(iss));
+		}
+		return isList;
+	}
+
+	private List<InventorySetup> loadV3Setups() {
+		final String wholePrefix = ConfigManager.getWholeKey(CONFIG_GROUP, null, CONFIG_KEY_SETUPS_V3_PREFIX);
+		final List<String> loadedSetupWholeKeys = configManager.getConfigurationKeys(wholePrefix);
+		Set<String> loadedSetupKeys = loadedSetupWholeKeys.stream().map(
+			key -> key.substring(wholePrefix.length()-CONFIG_KEY_SETUPS_V3_PREFIX.length())
+		).collect(Collectors.toSet());
+
+		List<InventorySetup> loadedSetups = new ArrayList<>();
+		for (final String configKey : loadedSetupKeys)
+		{
+			final String storedData = configManager.getConfiguration(CONFIG_GROUP, configKey);
+
+			try
+			{
+				loadedSetups.add(InventorySetupSerializable.convertToInventorySetup(gson.fromJson(storedData, InventorySetupSerializable.class)));
+			}
+			catch (Exception e)
+			{
+				log.error(String.format("Exception occurred while loading %s", configKey), e);
+				throw e;
+			}
+		}
+		return loadedSetups;
 	}
 
 	private void processSetupsFromConfig()
@@ -210,26 +272,42 @@ public class InventorySetupsPersistentDataManager
 		if (Strings.isNullOrEmpty(hasMigratedToV2))
 		{
 			log.info("Migrating data to V2");
-			// Perform migration of old data
-			Type setupType = new TypeToken<ArrayList<InventorySetup>>()
-			{
-
-			}.getType();
-			inventorySetups.addAll(loadData(CONFIG_KEY_SETUPS, setupType));
+			inventorySetups.addAll(loadV1Setups());
 			updateConfig(true, false);
 			inventorySetups.clear();
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2, "True");
 		}
 
+		hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
+		if (!Strings.isNullOrEmpty(hasMigratedToV2))
+		{
+			String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+			if (oldData != null)
+			{
+				log.info("Removing old v1 data key");
+				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+			}
+		}
+
+		String hasMigratedToV3 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3);
+		if (Strings.isNullOrEmpty(hasMigratedToV3))
+		{
+			log.info("Migrating data to V3");
+			inventorySetups.addAll(loadV2Setups());
+			updateConfig(true, false);
+			inventorySetups.clear();
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3, "True");
+		}
+
 		// TODO Don't unset configuration until new version is stable
-//		hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
-//		if (!Strings.isNullOrEmpty(hasMigratedToV2))
+//		hasMigratedToV3 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3);
+//		if (!Strings.isNullOrEmpty(hasMigratedToV3))
 //		{
-//			String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+//			String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
 //			if (oldData != null)
 //			{
-//				log.info("Removing old data key");
-//				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+//				log.info("Removing old v2 data key");
+//				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
 //			}
 //		}
 	}
