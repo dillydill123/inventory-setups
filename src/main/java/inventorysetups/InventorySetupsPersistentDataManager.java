@@ -49,6 +49,7 @@ public class InventorySetupsPersistentDataManager
 	public static final String CONFIG_KEY_SETUPS = "setups";
 	public static final String CONFIG_KEY_SETUPS_V2 = "setupsV2";
 	public static final String CONFIG_KEY_SETUPS_V3_PREFIX = "setupsV3_";
+	public static final String CONFIG_KEY_SETUPS_ORDER_V3 = "setupsOrderV3_";
 	public static final String CONFIG_KEY_SECTIONS = "sections";
 
 	@Inject
@@ -92,9 +93,6 @@ public class InventorySetupsPersistentDataManager
 		sections.addAll(loadData(CONFIG_KEY_SECTIONS, sectionType));
 		for (final InventorySetupsSection section : sections)
 		{
-			final String newName = InventorySetupUtilities.findNewName(section.getName(), cache.getSectionNames().keySet());
-			section.setName(newName);
-
 			// Remove any duplicates that exist
 			List<String> uniqueSetups = section.getSetups().stream().distinct().collect(Collectors.toList());
 			section.setSetups(uniqueSetups);
@@ -118,9 +116,11 @@ public class InventorySetupsPersistentDataManager
 			final List<String> oldSetupKeys = configManager.getConfigurationKeys(wholePrefix);
 			Set<String> oldSetupHashes = oldSetupKeys.stream().map(key -> key.substring(wholePrefix.length())).collect(Collectors.toSet());
 
+			final List<String> setupsOrder = new ArrayList<>();
 			for (final InventorySetup setup : inventorySetups)
 			{
 				final String hash = hashFunction.hashUnencodedChars(setup.getName()).toString();
+				setupsOrder.add(hash);
 				oldSetupHashes.remove(hash);
 				final String data = gson.toJson(InventorySetupSerializable.convertFromInventorySetup(setup));
 				configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V3_PREFIX + hash, data);
@@ -131,6 +131,9 @@ public class InventorySetupsPersistentDataManager
 				// Any hashes still in the oldSetupHashes set were for setups that were either renamed (and saved to a new hash above) or deleted.
 				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V3_PREFIX + removedSetupHash);
 			}
+
+			final String setupsOrderJson = gson.toJson(setupsOrder);
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_ORDER_V3, setupsOrderJson);
 		}
 
 		if (updateSections)
@@ -185,6 +188,19 @@ public class InventorySetupsPersistentDataManager
 		return isList;
 	}
 
+	private InventorySetup loadV3Setup(String configKey) {
+		final String storedData = configManager.getConfiguration(CONFIG_GROUP, configKey);
+		try
+		{
+			return InventorySetupSerializable.convertToInventorySetup(gson.fromJson(storedData, InventorySetupSerializable.class));
+		}
+		catch (Exception e)
+		{
+			log.error(String.format("Exception occurred while loading %s", configKey), e);
+			throw e;
+		}
+	}
+
 	private List<InventorySetup> loadV3Setups() {
 		final String wholePrefix = ConfigManager.getWholeKey(CONFIG_GROUP, null, CONFIG_KEY_SETUPS_V3_PREFIX);
 		final List<String> loadedSetupWholeKeys = configManager.getConfigurationKeys(wholePrefix);
@@ -192,20 +208,25 @@ public class InventorySetupsPersistentDataManager
 			key -> key.substring(wholePrefix.length()-CONFIG_KEY_SETUPS_V3_PREFIX.length())
 		).collect(Collectors.toSet());
 
+		Type setupsOrderType = new TypeToken<ArrayList<String>>()
+		{
+
+		}.getType();
+		final String setupsOrderJson = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_ORDER_V3);
+		final List<String> setupsOrder = gson.fromJson(setupsOrderJson, setupsOrderType);
+
 		List<InventorySetup> loadedSetups = new ArrayList<>();
+		for (final String configHash : setupsOrder)
+		{
+			final String configKey = CONFIG_KEY_SETUPS_V3_PREFIX + configHash;
+			if (loadedSetupKeys.remove(configKey)) { // Handles if hash is present only in configOrder.
+				loadedSetups.add(loadV3Setup(configKey));
+			}
+		}
 		for (final String configKey : loadedSetupKeys)
 		{
-			final String storedData = configManager.getConfiguration(CONFIG_GROUP, configKey);
-
-			try
-			{
-				loadedSetups.add(InventorySetupSerializable.convertToInventorySetup(gson.fromJson(storedData, InventorySetupSerializable.class)));
-			}
-			catch (Exception e)
-			{
-				log.error(String.format("Exception occurred while loading %s", configKey), e);
-				throw e;
-			}
+			// Load any remaining setups not present in setupsOrder. Useful if updateConfig crashes midway.
+			loadedSetups.add(loadV3Setup(configKey));
 		}
 		return loadedSetups;
 	}
@@ -232,8 +253,6 @@ public class InventorySetupsPersistentDataManager
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 
-			final String newName = InventorySetupUtilities.findNewName(setup.getName(), cache.getInventorySetupNames().keySet());
-			setup.setName(newName);
 			cache.addSetup(setup);
 
 			// add Item names
@@ -276,17 +295,14 @@ public class InventorySetupsPersistentDataManager
 			updateConfig(true, false);
 			inventorySetups.clear();
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2, "True");
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3, "True");
 		}
 
-		hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
-		if (!Strings.isNullOrEmpty(hasMigratedToV2))
+		String oldV1Data = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
+		if (oldV1Data != null)
 		{
-			String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
-			if (oldData != null)
-			{
-				log.info("Removing old v1 data key");
-				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
-			}
+			log.info("Removing old v1 data key");
+			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS);
 		}
 
 		String hasMigratedToV3 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3);
@@ -300,15 +316,11 @@ public class InventorySetupsPersistentDataManager
 		}
 
 		// TODO Don't unset configuration until new version is stable
-//		hasMigratedToV3 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3);
-//		if (!Strings.isNullOrEmpty(hasMigratedToV3))
+//		String oldV2Data = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
+//		if (oldV2Data != null)
 //		{
-//			String oldData = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
-//			if (oldData != null)
-//			{
-//				log.info("Removing old v2 data key");
-//				configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
-//			}
+//			log.info("Removing old v2 data key");
+//			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
 //		}
 	}
 
