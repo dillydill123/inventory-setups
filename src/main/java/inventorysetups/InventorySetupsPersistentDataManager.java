@@ -220,13 +220,16 @@ public class InventorySetupsPersistentDataManager
 		{
 			final String configKey = CONFIG_KEY_SETUPS_V3_PREFIX + configHash;
 			if (loadedSetupKeys.remove(configKey)) { // Handles if hash is present only in configOrder.
-				loadedSetups.add(loadV3Setup(configKey));
+				final InventorySetup setup = loadV3Setup(configKey);
+				loadedSetups.add(setup);
 			}
 		}
 		for (final String configKey : loadedSetupKeys)
 		{
 			// Load any remaining setups not present in setupsOrder. Useful if updateConfig crashes midway.
-			loadedSetups.add(loadV3Setup(configKey));
+			log.info(String.format("Loading setup that was missing from Order key: %s"), configKey);
+			final InventorySetup setup = loadV3Setup(configKey);
+			loadedSetups.add(setup);
 		}
 		return loadedSetups;
 	}
