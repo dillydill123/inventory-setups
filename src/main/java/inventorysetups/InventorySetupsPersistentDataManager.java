@@ -166,7 +166,8 @@ public class InventorySetupsPersistentDataManager
 		}
 	}
 
-	private List<InventorySetup> loadV1Setups() {
+	private List<InventorySetup> loadV1Setups()
+	{
 		Type setupTypeV1 = new TypeToken<ArrayList<InventorySetup>>()
 		{
 
@@ -174,7 +175,8 @@ public class InventorySetupsPersistentDataManager
 		return loadData(CONFIG_KEY_SETUPS, setupTypeV1);
 	}
 
-	private List<InventorySetup> loadV2Setups() {
+	private List<InventorySetup> loadV2Setups()
+	{
 		Type setupTypeV2 = new TypeToken<ArrayList<InventorySetupSerializable>>()
 		{
 
@@ -188,7 +190,8 @@ public class InventorySetupsPersistentDataManager
 		return isList;
 	}
 
-	private InventorySetup loadV3Setup(String configKey) {
+	private InventorySetup loadV3Setup(String configKey)
+	{
 		final String storedData = configManager.getConfiguration(CONFIG_GROUP, configKey);
 		try
 		{
@@ -201,11 +204,12 @@ public class InventorySetupsPersistentDataManager
 		}
 	}
 
-	private List<InventorySetup> loadV3Setups() {
+	private List<InventorySetup> loadV3Setups()
+	{
 		final String wholePrefix = ConfigManager.getWholeKey(CONFIG_GROUP, null, CONFIG_KEY_SETUPS_V3_PREFIX);
 		final List<String> loadedSetupWholeKeys = configManager.getConfigurationKeys(wholePrefix);
 		Set<String> loadedSetupKeys = loadedSetupWholeKeys.stream().map(
-			key -> key.substring(wholePrefix.length()-CONFIG_KEY_SETUPS_V3_PREFIX.length())
+			key -> key.substring(wholePrefix.length() - CONFIG_KEY_SETUPS_V3_PREFIX.length())
 		).collect(Collectors.toSet());
 
 		Type setupsOrderType = new TypeToken<ArrayList<String>>()
@@ -213,13 +217,18 @@ public class InventorySetupsPersistentDataManager
 
 		}.getType();
 		final String setupsOrderJson = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_ORDER_V3);
-		final List<String> setupsOrder = gson.fromJson(setupsOrderJson, setupsOrderType);
+		List<String> setupsOrder = gson.fromJson(setupsOrderJson, setupsOrderType);
+		if (setupsOrder == null)
+		{
+			setupsOrder = new ArrayList<>();
+		}
 
 		List<InventorySetup> loadedSetups = new ArrayList<>();
 		for (final String configHash : setupsOrder)
 		{
 			final String configKey = CONFIG_KEY_SETUPS_V3_PREFIX + configHash;
-			if (loadedSetupKeys.remove(configKey)) { // Handles if hash is present only in configOrder.
+			if (loadedSetupKeys.remove(configKey))
+			{ // Handles if hash is present only in configOrder.
 				final InventorySetup setup = loadV3Setup(configKey);
 				loadedSetups.add(setup);
 			}
@@ -227,7 +236,7 @@ public class InventorySetupsPersistentDataManager
 		for (final String configKey : loadedSetupKeys)
 		{
 			// Load any remaining setups not present in setupsOrder. Useful if updateConfig crashes midway.
-			log.info(String.format("Loading setup that was missing from Order key: %s"), configKey);
+			log.info("Loading setup that was missing from Order key: " + configKey);
 			final InventorySetup setup = loadV3Setup(configKey);
 			loadedSetups.add(setup);
 		}
@@ -293,7 +302,7 @@ public class InventorySetupsPersistentDataManager
 		String hasMigratedToV2 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V2);
 		if (Strings.isNullOrEmpty(hasMigratedToV2))
 		{
-			log.info("Migrating data to V2");
+			log.info("Migrating data from V1 to V3");
 			inventorySetups.addAll(loadV1Setups());
 			updateConfig(true, false);
 			inventorySetups.clear();
@@ -311,7 +320,7 @@ public class InventorySetupsPersistentDataManager
 		String hasMigratedToV3 = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3);
 		if (Strings.isNullOrEmpty(hasMigratedToV3))
 		{
-			log.info("Migrating data to V3");
+			log.info("Migrating data from V2 to V3");
 			inventorySetups.addAll(loadV2Setups());
 			updateConfig(true, false);
 			inventorySetups.clear();
