@@ -157,6 +157,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
 	private static final String ITEM_SEARCH_TAG = "item:";
+	private static final String NOTES_SEARCH_TAG = "notes:";
 	private static final int SPELLBOOK_VARBIT = 4070;
 	private static final int ITEMS_PER_ROW = 8;
 	private static final int ITEM_VERTICAL_SPACING = 36;
@@ -1070,6 +1071,11 @@ public class InventorySetupsPlugin extends Plugin
 			return containerContainsItemByName(inventorySetup.getInventory(), itemName) || containerContainsItemByName(inventorySetup.getEquipment(), itemName)
 				|| containerContainsItemByName(inventorySetup.getRune_pouch(), itemName) || containerContainsItemByName(inventorySetup.getAdditionalFilteredItems().values(), itemName)
 				|| containerContainsItemByName(inventorySetup.getBoltPouch(), itemName);
+		}
+		else if (trimmedTextToFilterLower.startsWith(NOTES_SEARCH_TAG) && trimmedTextToFilterLower.length() > NOTES_SEARCH_TAG.length())
+		{
+			String noteText = trimmedTextToFilterLower.substring(NOTES_SEARCH_TAG.length()).trim();
+			return inventorySetup.getNotes().toLowerCase().contains(noteText);
 		}
 		// Find setups containing the given setup name (default behaviour)
 		return inventorySetup.getName().toLowerCase().contains(trimmedTextToFilterLower);
