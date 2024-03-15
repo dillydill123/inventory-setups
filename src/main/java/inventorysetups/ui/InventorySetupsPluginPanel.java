@@ -137,6 +137,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private final InventorySetupsAdditionalItemsPanel additionalFilteredItemsPanel;
 	private final InventorySetupsNotesPanel notesPanel;
 
+	private final JPanel updateNewsPanelWrapper;
+
 	@Getter
 	private InventorySetup currentSelectedSetup;
 
@@ -589,20 +591,29 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		contentPanel.setLayout(contentLayout);
 		contentPanel.add(setupDisplayPanel);
 		contentPanel.add(noSetupsPanel);
-		contentPanel.add(updateNewsPanel);
 		contentPanel.add(overviewPanel);
 
-		// wrapper for the main content panel to keep it from stretching
+		// wrapper for the main content panel to stop it from stretching
 		final JPanel contentWrapper = new JPanel(new BorderLayout());
-		contentWrapper.add(Box.createGlue(), BorderLayout.CENTER);
 		contentWrapper.add(contentPanel, BorderLayout.NORTH);
 		this.contentWrapperPane = new JScrollPane(contentWrapper);
 		this.contentWrapperPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
+		// Wrapper for the update news panel to stop it from stretching
+		this.updateNewsPanelWrapper = new JPanel(new BorderLayout());
+		updateNewsPanelWrapper.add(Box.createGlue(), BorderLayout.CENTER);
+		updateNewsPanelWrapper.add(updateNewsPanel, BorderLayout.NORTH);
+
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(10, 10, 10, 10));
+
 		add(northAnchoredPanel, BorderLayout.NORTH);
-		add(this.contentWrapperPane, BorderLayout.CENTER);
+
+		JPanel southPanel = new JPanel(new BorderLayout());
+		southPanel.add(updateNewsPanelWrapper, BorderLayout.NORTH);
+		southPanel.add(contentWrapperPane, BorderLayout.CENTER);
+
+		add(southPanel, BorderLayout.CENTER);
 
 		// make sure the invEq panel isn't visible upon startup
 		setupDisplayPanel.setVisible(false);
@@ -655,8 +666,26 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		layoutSetups(filteredInventorysetups);
 		returnToOverviewPanel(resetScrollBar);
 
+		showCorrectPanelBasedOnVersion();
+
 		revalidate();
 		repaint();
+	}
+
+	public void showCorrectPanelBasedOnVersion()
+	{
+		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
+		{
+			updateNewsPanelWrapper.setVisible(true);
+			northAnchoredPanel.setVisible(false);
+			contentWrapperPane.setVisible(false);
+		}
+		else
+		{
+			updateNewsPanelWrapper.setVisible(false);
+			northAnchoredPanel.setVisible(true);
+			contentWrapperPane.setVisible(true);
+		}
 	}
 
 	public void moveFavoriteSetupsToTopOfList(final List<InventorySetup> setupsToAdd)
@@ -907,21 +936,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		setupDisplayPanel.setVisible(false);
-
-		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
-		{
-			northAnchoredPanel.setVisible(false);
-			updateNewsPanel.setVisible(true);
-			overviewPanel.setVisible(false);
-			noSetupsPanel.setVisible(false);
-		}
-		else
-		{
-			northAnchoredPanel.setVisible(true);
-			updateNewsPanel.setVisible(false);
-			noSetupsPanel.setVisible(plugin.getInventorySetups().isEmpty() && !plugin.getConfig().sectionMode());
-			overviewPanel.setVisible(!plugin.getInventorySetups().isEmpty() || plugin.getConfig().sectionMode());
-		}
 	}
 
 	private void layoutSections(final List<InventorySetup> setups, final GridBagConstraints constraints)
