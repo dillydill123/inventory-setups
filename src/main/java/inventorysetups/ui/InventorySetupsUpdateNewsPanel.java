@@ -115,11 +115,11 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Added ground items menu entry highlighting and swapping based on items in the setup\n\n" +
-								"This feature will be useful for UIMs when re-gearing from a death pile\n\n" +
-								"Menu entries for items that are in the current setup can be highlighted and swapped to the top or bottom of the menu entries for easier re-gearing\n\n" +
-								"These options are off by default and can be configured in the settings under the Ground Item Menu Options section.\n\n" +
-								"You can find more information in the tutorial";
+		String updateText =		"Optimized data storage for setups. You can now have an \"unlimited\" amount of setups or really long notes for each setup. However, be warned that the plugin will still start to break at 450+ setups.\n\n" +
+								"If you experience any issues such as setups disappearing or not saving, please make a bug report.\n\n" +
+								"Added Blazing Blowpipe -> Toxic Blowpipe fuzzy mapping.\n\n" +
+								"You can now filter for setups with a specific item by using the text \"item:<name>\" in the search bar.\n\n" +
+								"You can now filter for setups with specific text in the notes by using the text \"notes:<text>\" in the search bar.\n\n";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
