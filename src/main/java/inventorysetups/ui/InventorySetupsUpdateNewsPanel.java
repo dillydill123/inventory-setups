@@ -24,6 +24,8 @@ import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 public class InventorySetupsUpdateNewsPanel extends JPanel
 {
 
+	private static final String DONATION_LINK = "https://www.buymeacoffee.com/dillydill123";
+
 	InventorySetupsUpdateNewsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel)
 	{
 		final JLabel welcomeText = new JLabel("Inventory Setups " + plugin.getCurrentVersionString());
@@ -88,21 +90,41 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		closePanel.add(clickButtonToLeave2, BorderLayout.CENTER);
 		closePanel.add(returnToSetups, BorderLayout.SOUTH);
 
+		final JLabel donations = new JLabel("Want to make a donation?");
+		final JLabel donations2 = new JLabel("Click here to buy me a coffee");
+		final JButton linkToDonations = new JButton("Donate");
+		linkToDonations.addActionListener(e ->
+		{
+			LinkBrowser.browse(DONATION_LINK);
+		});
+		donations.setFont(FontManager.getRunescapeSmallFont());
+		donations2.setFont(FontManager.getRunescapeSmallFont());
+		donations.setHorizontalAlignment(JLabel.CENTER);
+		donations2.setHorizontalAlignment(JLabel.CENTER);
+
+		final JPanel donationPanelInfo = new JPanel();
+		donationPanelInfo.setLayout(new BorderLayout());
+		donationPanelInfo.add(donations, BorderLayout.NORTH);
+		donationPanelInfo.add(donations2, BorderLayout.CENTER);
+		donationPanelInfo.add(linkToDonations, BorderLayout.SOUTH);
+
 		final JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 		contentPanel.add(welcomePanel);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 8)));
 		contentPanel.add(latestUpdatePanelInfo);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 8)));
 		contentPanel.add(closePanel);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 8)));
 		contentPanel.add(newUserPanelInfo);
-		contentPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 8)));
 		contentPanel.add(suggestionPanelInfo);
+		contentPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+		contentPanel.add(donationPanelInfo);
 
 		setLayout(new BorderLayout());
-		setBorder(new EmptyBorder(10, 10, 10, 10));
-		add(contentPanel, BorderLayout.CENTER);
+		setBorder(new EmptyBorder(5, 10, 5, 10));
+		add(contentPanel, BorderLayout.NORTH);
 	}
 
 
@@ -115,11 +137,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Optimized data storage for setups. You can now have an \"unlimited\" amount of setups or really long notes for each setup. However, be warned that the plugin will still start to break at 450+ setups.\n\n" +
-								"If you experience any issues such as setups disappearing or not saving, please make a bug report.\n\n" +
+		String updateText =		"Optimized data storage for setups. You can now have an \"unlimited\" amount of setups or really long notes for each setup. If you experience any issues, please make a bug report.\n\n" +
 								"Added Blazing Blowpipe -> Toxic Blowpipe fuzzy mapping.\n\n" +
-								"You can now filter for setups with a specific item by using the text \"item:<name>\" in the search bar.\n\n" +
-								"You can now filter for setups with specific text in the notes by using the text \"notes:<text>\" in the search bar.\n\n";
+								"You can now filter for setups with a specific item by using the text \"item:<name>\" in the search bar. Similarly, you can search for setups with specific notes using \"notes:<text>\".";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
