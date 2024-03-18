@@ -74,7 +74,7 @@ You can go back to the overview panel by clicking on the back arrow in the top r
 
 You can also search for setups using the search bar. When typing in the search bar, setups will be filtered if they contain the search text.
 By default, the search criteria will filter the setups by their names. If you want to search for setups containing specific items, prefix
-your search with `item:`, e.g. `item:brew`.
+your search with `item:`, e.g. `item:brew`. Similarly, you can search for setups containing specific notes with `notes:<text>`.
 
 ![Search Bar](readme_images_and_gifs/search_bar.gif)
 
@@ -389,9 +389,11 @@ Currently, there is one known compatibility issue with Bank Tags. If Bank Tags a
 
 ## Data Storage
 
-Data for inventory setups is stored in your `settings.properties` file. This will be found in your `.runelite` folder in your user directory. For example, in Windows, the path may look like `C:\Users\<username>\.runelite\settings.properties`. If you are signed in to RuneLite, the file will be in the `profiles` folder.
+Data for inventory setups is stored in your `<profile_name>.properties` file. This will be found in your `.runelite/profiles2` folder in your user directory. For example, in Windows, the path may look like `C:\Users\<username>\.runelite\profiles2\<profile_name>.properties`.
 
-Once you've found your `setting.properties` file, setup data can be found under the key `inventorySetups.setupsV2`. Section data can be found under the key `inventorySetups.sections`
+Once you've found your `<profile_name>.properties` file, a particular setup's data can be found under the key `inventorySetups.setupsV3_<setup_name_hash>`. The order of setups is found under `inventorysetups.setupsOrderV3_`.
+
+Section data can be found under the key `inventorySetups.sections`.
 
 Inventory Setups will sync your data to the cloud if you are signed in to RuneLite. It is still a good idea to mass export your setups every once in a while, especially if you aren't signed in to RuneLite.
 
