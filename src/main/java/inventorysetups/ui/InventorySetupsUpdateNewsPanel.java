@@ -137,7 +137,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Optimized data storage for setups. You can now have an \"unlimited\" amount of setups or really long notes for each setup. If you experience any issues, please make a bug report.\n\n" +
+		String updateText =		"Optimized data storage for setups. You can now have a larger amount of setups (400+ max) or really long notes for each setup. If you experience any issues, please make a bug report.\n\n" +
 								"Added Blazing Blowpipe -> Toxic Blowpipe fuzzy mapping.\n\n" +
 								"You can now filter for setups with a specific item by using the text \"item:<name>\" in the search bar. Similarly, you can search for setups with specific notes using \"notes:<text>\".";
 
