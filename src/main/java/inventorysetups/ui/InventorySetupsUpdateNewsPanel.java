@@ -157,7 +157,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel contentPanel = new JPanel();
 		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-		contentPanel.add(patchTitlePanel, BorderLayout.NORTH);
+		contentPanel.add(patchTitlePanel);
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 3)));
 		contentPanel.add(getJSeparator(ColorScheme.LIGHT_GRAY_COLOR));
 		contentPanel.add(Box.createRigidArea(new Dimension(0, 3)));
@@ -167,6 +167,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 		final JPanel updatePanel = new JPanel(new BorderLayout());
 		updatePanel.add(contentPanel, BorderLayout.CENTER);
+
+		// DO NOT TOUCH - For some reason this stops the panel from expanding
+		updatePanel.getPreferredSize();
 
 		return updatePanel;
 	}
