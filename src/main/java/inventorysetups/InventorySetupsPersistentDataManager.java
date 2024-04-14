@@ -247,14 +247,20 @@ public class InventorySetupsPersistentDataManager
 	{
 		for (final InventorySetup setup : inventorySetups)
 		{
-			final InventorySetupsRunePouchType runePouchType = plugin.getAmmoHandler().getRunePouchTypeFromContainer(setup.getInventory());
-			if (setup.getRune_pouch() == null && runePouchType != InventorySetupsRunePouchType.NONE)
+			final List<InventorySetupsItem> potentialRunePouch = plugin.getAmmoHandler().getRunePouchDataIfInContainer(setup.getInventory());
+			if (setup.getRune_pouch() == null && potentialRunePouch != null)
 			{
-				setup.updateRunePouch(plugin.getAmmoHandler().getRunePouchData(runePouchType));
+				setup.updateRunePouch(potentialRunePouch);
 			}
-			if (setup.getBoltPouch() == null && plugin.containerContainsBoltPouch(setup.getInventory()))
+			final List<InventorySetupsItem> potentialBoltPouch = plugin.getAmmoHandler().getBoltPouchDataIfInContainer(setup.getInventory());
+			if (setup.getBoltPouch() == null && potentialBoltPouch != null)
 			{
-				setup.updateBoltPouch(plugin.getAmmoHandler().getBoltPouchData());
+				setup.updateBoltPouch(potentialBoltPouch);
+			}
+			final List<InventorySetupsItem> potentialQuiver = plugin.getAmmoHandler().getQuiverDataIfInSetup(setup.getInventory(), setup.getEquipment());
+			if (setup.getQuiver() == null && potentialQuiver != null)
+			{
+				setup.updateQuiver(potentialQuiver);
 			}
 			if (setup.getNotes() == null)
 			{

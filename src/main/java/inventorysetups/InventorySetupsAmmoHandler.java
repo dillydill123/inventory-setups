@@ -73,7 +73,7 @@ public class InventorySetupsAmmoHandler
 			updateDataHandler.put(itemID, (setup) -> setup.updateRunePouch(getRunePouchData(InventorySetupsRunePouchType.NORMAL)));
 			removeDataHandler.put(itemID, (setup) -> setup.updateRunePouch(null));
 		}
-		
+
 		updateDataHandler.put(ItemID.BOLT_POUCH, (setup) -> setup.updateBoltPouch(getBoltPouchData()));
 		removeDataHandler.put(ItemID.BOLT_POUCH, (setup) -> setup.updateBoltPouch(null));
 
@@ -84,6 +84,7 @@ public class InventorySetupsAmmoHandler
 		}
 	}
 
+	// Checks when updating a slot in a setup that it is part of a special ammo. If so, handle it.
 	public void handleSpecialAmmo(final InventorySetup inventorySetup,
 									final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
 	{
@@ -97,6 +98,34 @@ public class InventorySetupsAmmoHandler
 		{
 			removeDataHandler.get(oldID).accept(inventorySetup);
 		}
+	}
+
+	public InventorySetupsRunePouchType getRunePouchTypeFromContainer(final List<InventorySetupsItem> container)
+	{
+		// Don't allow fuzzy when checking because it will incorrectly assume the type
+		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
+		{
+			if (plugin.containerContainsItem(id, container, false, true))
+			{
+				return InventorySetupsRunePouchType.NORMAL;
+			}
+		}
+
+		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
+		{
+			if (plugin.containerContainsItem(id, container, false, true))
+			{
+				return InventorySetupsRunePouchType.DIVINE;
+			}
+		}
+
+		return InventorySetupsRunePouchType.NONE;
+	}
+
+	public List<InventorySetupsItem> getRunePouchDataIfInContainer(final List<InventorySetupsItem> container)
+	{
+		InventorySetupsRunePouchType runePouchType = getRunePouchTypeFromContainer(container);
+		return runePouchType != InventorySetupsRunePouchType.NONE ? getRunePouchData(runePouchType) : null;
 	}
 
 	public List<InventorySetupsItem> getRunePouchData(final InventorySetupsRunePouchType runePouchType)
@@ -121,6 +150,16 @@ public class InventorySetupsAmmoHandler
 		}
 
 		return runePouchData;
+	}
+
+	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
+	{
+		return plugin.containerContainsItem(ItemID.BOLT_POUCH, container, false, true);
+	}
+
+	public List<InventorySetupsItem> getBoltPouchDataIfInContainer(final List<InventorySetupsItem> container)
+	{
+		return containerContainsBoltPouch(container) ? getBoltPouchData() : null;
 	}
 
 	public List<InventorySetupsItem> getBoltPouchData()
@@ -152,6 +191,25 @@ public class InventorySetupsAmmoHandler
 		return boltPouchData;
 	}
 
+	public boolean setupContainsQuiver(final List<InventorySetupsItem> inv, final List<InventorySetupsItem> eq)
+	{
+		for (Integer id : DIZANA_QUIVER_IDS)
+		{
+			final boolean inventoryHasQuiver = plugin.containerContainsItem(id, inv, false, true);
+			final boolean equipmentHasQuiver = plugin.containerContainsItem(id, eq, false, true);
+			if (inventoryHasQuiver || equipmentHasQuiver)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public List<InventorySetupsItem> getQuiverDataIfInSetup(final List<InventorySetupsItem> inv, final List<InventorySetupsItem> eq)
+	{
+		return setupContainsQuiver(inv, eq) ? getQuiverData() : null;
+	}
+
 	public List<InventorySetupsItem> getQuiverData()
 	{
 		// replace with VarPlayer when RL adds it.
@@ -174,28 +232,6 @@ public class InventorySetupsAmmoHandler
 		quiverData.add(quiverItem);
 
 		return quiverData;
-	}
-
-	public InventorySetupsRunePouchType getRunePouchTypeFromContainer(final List<InventorySetupsItem> container)
-	{
-		// Don't allow fuzzy when checking because it will incorrectly assume the type
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
-		{
-			if (plugin.containerContainsItem(id, container, false, true))
-			{
-				return InventorySetupsRunePouchType.NORMAL;
-			}
-		}
-
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
-		{
-			if (plugin.containerContainsItem(id, container, false, true))
-			{
-				return InventorySetupsRunePouchType.DIVINE;
-			}
-		}
-
-		return InventorySetupsRunePouchType.NONE;
 	}
 
 }

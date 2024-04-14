@@ -911,25 +911,16 @@ public class InventorySetupsPlugin extends Plugin
 			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
 			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
-			List<InventorySetupsItem> runePouchData = null;
-			final InventorySetupsRunePouchType inventoryRunePouchType = ammoHandler.getRunePouchTypeFromContainer(inv);
-			List<InventorySetupsItem> boltPouchData = null;
-			final boolean inventoryHasBoltPouch = containerContainsBoltPouch(inv);
-
-			if (inventoryRunePouchType != InventorySetupsRunePouchType.NONE)
-			{
-				runePouchData = ammoHandler.getRunePouchData(inventoryRunePouchType);
-			}
-
-			if (inventoryHasBoltPouch)
-			{
-				boltPouchData = ammoHandler.getBoltPouchData();
-			}
+			List<InventorySetupsItem> runePouchData = ammoHandler.getRunePouchDataIfInContainer(inv);
+			List<InventorySetupsItem> boltPouchData = ammoHandler.getBoltPouchDataIfInContainer(inv);
+			List<InventorySetupsItem> quiverData = ammoHandler.getQuiverDataIfInSetup(inv, eqp);
 
 			int spellbook = getCurrentSpellbook();
 
-			// TODO add quiver here
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, null, new HashMap<>(), newName, "",
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, quiverData,
+				new HashMap<>(),
+				newName,
+				"",
 				config.highlightColor(),
 				config.highlightDifference(),
 				config.enableDisplayColor() ? config.displayColor() : null,
@@ -1253,29 +1244,23 @@ public class InventorySetupsPlugin extends Plugin
 				{
 					int itemId = intStack[intStackSize - 1];
 					boolean containsItem = false;
+					boolean quiverContainsItem;
 					switch (bankFilteringMode)
 					{
 						case ALL:
 							containsItem = setupContainsItem(currentSetup, itemId);
 							break;
 						case INVENTORY:
-							boolean runePouchContainsItem = false;
-							if (currentSetup.getRune_pouch() != null)
-							{
-								runePouchContainsItem = containerContainsItem(itemId, currentSetup.getRune_pouch());
-							}
-							boolean boltPouchContainsItem = false;
-							if (currentSetup.getBoltPouch() != null)
-							{
-								boltPouchContainsItem = containerContainsItem(itemId, currentSetup.getBoltPouch());
-							}
-							// TODO quiver
-							containsItem = runePouchContainsItem || boltPouchContainsItem ||
+
+							boolean runePouchContainsItem = containerContainsItem(itemId, currentSetup.getRune_pouch());
+							boolean boltPouchContainsItem = containerContainsItem(itemId, currentSetup.getBoltPouch());
+							quiverContainsItem = containerContainsItem(itemId, currentSetup.getQuiver());
+							containsItem = runePouchContainsItem || boltPouchContainsItem || quiverContainsItem ||
 								containerContainsItem(itemId, currentSetup.getInventory());
 							break;
 						case EQUIPMENT:
-							// TODO quiver
-							containsItem = containerContainsItem(itemId, currentSetup.getEquipment());
+							quiverContainsItem = containerContainsItem(itemId, currentSetup.getQuiver());
+							containsItem = containerContainsItem(itemId, currentSetup.getEquipment()) || quiverContainsItem;
 							break;
 						case ADDITIONAL_FILTERED_ITEMS:
 							containsItem = additionalFilteredItemsHasItem(itemId, currentSetup.getAdditionalFilteredItems());
@@ -1448,21 +1433,13 @@ public class InventorySetupsPlugin extends Plugin
 				eqp.get(i).setStackCompare(setup.getEquipment().get(i).getStackCompare());
 			}
 
-			List<InventorySetupsItem> runePouchData = null;
-			final InventorySetupsRunePouchType inventoryRunePouchType = ammoHandler.getRunePouchTypeFromContainer(inv);
-			if (inventoryRunePouchType != InventorySetupsRunePouchType.NONE)
-			{
-				runePouchData = ammoHandler.getRunePouchData(inventoryRunePouchType);
-			}
-
-			List<InventorySetupsItem> boltPouchData = null;
-			if (containerContainsItem(ItemID.BOLT_POUCH, inv))
-			{
-				boltPouchData = ammoHandler.getBoltPouchData();
-			}
+			List<InventorySetupsItem> runePouchData = ammoHandler.getRunePouchDataIfInContainer(inv);
+			List<InventorySetupsItem> boltPouchData = ammoHandler.getBoltPouchDataIfInContainer(inv);
+			List<InventorySetupsItem> quiverData = ammoHandler.getQuiverDataIfInSetup(inv, eqp);
 
 			setup.updateRunePouch(runePouchData);
 			setup.updateBoltPouch(boltPouchData);
+			setup.updateQuiver(quiverData);
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
@@ -2335,32 +2312,31 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean setupContainsItem(final InventorySetup setup, int itemID, boolean allowFuzzy, boolean canonicalize)
 	{
-		// Check if this item (inc. placeholder) is in the additional filtered items
 		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems(), allowFuzzy, canonicalize))
 		{
 			return true;
 		}
-
-		// check the rune pouch to see if it has the item (runes in this case)
-		if (setup.getRune_pouch() != null)
+		if (containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, canonicalize))
 		{
-			if (containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, canonicalize))
-			{
-				return true;
-			}
+			return true;
 		}
-
-		// check the bolt pouch to see if it has the item (bolts in this case)
-		if (setup.getBoltPouch() != null)
+		if (containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, canonicalize))
 		{
-			if (containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, canonicalize))
-			{
-				return true;
-			}
+			return true;
 		}
-
-		return containerContainsItem(itemID, setup.getInventory(), allowFuzzy, canonicalize) ||
-			containerContainsItem(itemID, setup.getEquipment(), allowFuzzy, canonicalize);
+		if (containerContainsItem(itemID, setup.getQuiver(), allowFuzzy, canonicalize))
+		{
+			return true;
+		}
+		if (containerContainsItem(itemID, setup.getInventory(), allowFuzzy, canonicalize))
+		{
+			return true;
+		}
+		if (containerContainsItem(itemID, setup.getEquipment(), allowFuzzy, canonicalize))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
@@ -2370,6 +2346,11 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean canonicalize)
 	{
+		if (setupContainer == null)
+		{
+			return false;
+		}
+
 		for (final InventorySetupsItem item : setupContainer)
 		{
 			// For equipped weight reducing items or noted items in the inventory
@@ -2418,11 +2399,6 @@ public class InventorySetupsPlugin extends Plugin
 	public boolean isItemBoltPouch(final int itemId)
 	{
 		return itemId == ItemID.BOLT_POUCH;
-	}
-
-	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)
-	{
-		return containerContainsItem(ItemID.BOLT_POUCH, container, false, true);
 	}
 
 	public void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)
