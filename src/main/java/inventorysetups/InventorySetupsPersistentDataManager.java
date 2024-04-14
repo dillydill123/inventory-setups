@@ -247,14 +247,14 @@ public class InventorySetupsPersistentDataManager
 	{
 		for (final InventorySetup setup : inventorySetups)
 		{
-			final InventorySetupsRunePouchType runePouchType = plugin.getRunePouchTypeFromContainer(setup.getInventory());
+			final InventorySetupsRunePouchType runePouchType = plugin.getAmmoHandler().getRunePouchTypeFromContainer(setup.getInventory());
 			if (setup.getRune_pouch() == null && runePouchType != InventorySetupsRunePouchType.NONE)
 			{
-				setup.updateRunePouch(plugin.getRunePouchData(runePouchType));
+				setup.updateRunePouch(plugin.getAmmoHandler().getRunePouchData(runePouchType));
 			}
 			if (setup.getBoltPouch() == null && plugin.containerContainsBoltPouch(setup.getInventory()))
 			{
-				setup.updateBoltPouch(plugin.getBoltPouchData());
+				setup.updateBoltPouch(plugin.getAmmoHandler().getBoltPouchData());
 			}
 			if (setup.getNotes() == null)
 			{

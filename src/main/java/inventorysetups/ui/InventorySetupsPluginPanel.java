@@ -851,6 +851,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				return additionalFilteredItemsPanel.isStackCompareForSlotAllowed(slotId);
 			case SPELL_BOOK:
 				return spellbookPanel.isStackCompareForSlotAllowed(slotId);
+			case QUIVER:
+				return true;
 			default:
 				return false;
 		}

@@ -47,6 +47,9 @@ public class InventorySetup implements InventorySetupsDisplayAttributes
 	private List<InventorySetupsItem> boltPouch;
 
 	@Getter
+	private List<InventorySetupsItem> quiver;
+
+	@Getter
 	private Map<Integer, InventorySetupsItem> additionalFilteredItems;
 
 	@Getter
@@ -116,6 +119,11 @@ public class InventorySetup implements InventorySetupsDisplayAttributes
 	public void updateBoltPouch(final List<InventorySetupsItem> bp)
 	{
 		boltPouch = bp;
+	}
+
+	public void updateQuiver(final List<InventorySetupsItem> q)
+	{
+		quiver = q;
 	}
 
 	public void updateAdditionalItems(final Map<Integer, InventorySetupsItem> ai)

@@ -242,6 +242,9 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsFilteringModeID bankFilteringMode;
 
+	@Getter
+	private InventorySetupsAmmoHandler ammoHandler;
+
 	// Used to defer highlighting to GameTick
 	private boolean shouldTriggerInventoryHighlightOnGameTick;
 
@@ -850,6 +853,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.inventorySetups = new ArrayList<>();
 		this.sections = new ArrayList<>();
 		this.dataManager = new InventorySetupsPersistentDataManager(this, panel, configManager, cache, gson, inventorySetups, sections);
+		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -908,23 +912,24 @@ public class InventorySetupsPlugin extends Plugin
 			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
 
 			List<InventorySetupsItem> runePouchData = null;
-			final InventorySetupsRunePouchType inventoryRunePouchType = getRunePouchTypeFromContainer(inv);
+			final InventorySetupsRunePouchType inventoryRunePouchType = ammoHandler.getRunePouchTypeFromContainer(inv);
 			List<InventorySetupsItem> boltPouchData = null;
 			final boolean inventoryHasBoltPouch = containerContainsBoltPouch(inv);
 
 			if (inventoryRunePouchType != InventorySetupsRunePouchType.NONE)
 			{
-				runePouchData = getRunePouchData(inventoryRunePouchType);
+				runePouchData = ammoHandler.getRunePouchData(inventoryRunePouchType);
 			}
 
 			if (inventoryHasBoltPouch)
 			{
-				boltPouchData = getBoltPouchData();
+				boltPouchData = ammoHandler.getBoltPouchData();
 			}
 
 			int spellbook = getCurrentSpellbook();
 
-			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, new HashMap<>(), newName, "",
+			// TODO add quiver here
+			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, null, new HashMap<>(), newName, "",
 				config.highlightColor(),
 				config.highlightDifference(),
 				config.enableDisplayColor() ? config.displayColor() : null,
@@ -1228,59 +1233,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public List<InventorySetupsItem> getRunePouchData(final InventorySetupsRunePouchType runePouchType)
-	{
-		List<InventorySetupsItem> runePouchData = new ArrayList<>();
-		EnumComposition runepouchEnum = client.getEnum(982);
-		for (int i = 0; i < runePouchType.getSize(); i++)
-		{
-			final int varbitVal = client.getVarbitValue(RUNE_POUCH_RUNE_VARBITS.get(i));
-			if (varbitVal == 0)
-			{
-				runePouchData.add(InventorySetupsItem.getDummyItem());
-			}
-			else
-			{
-				final int runeId = runepouchEnum.getIntValue(varbitVal);
-				int runeAmount = client.getVarbitValue(RUNE_POUCH_AMOUNT_VARBITS.get(i));
-				String runeName = itemManager.getItemComposition(runeId).getName();
-				InventorySetupsStackCompareID stackCompareType = panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.RUNE_POUCH, i) ? config.stackCompareType() : InventorySetupsStackCompareID.None;
-				runePouchData.add(new InventorySetupsItem(runeId, runeName, runeAmount, false, stackCompareType));
-			}
-		}
-
-		return runePouchData;
-	}
-
-	public List<InventorySetupsItem> getBoltPouchData()
-	{
-		List<InventorySetupsItem> boltPouchData = new ArrayList<>();
-
-		for (int i = 0; i < BOLT_POUCH_BOLT_VARBIT_IDS.size(); i++)
-		{
-			int boltVarbitId = client.getVarbitValue(BOLT_POUCH_BOLT_VARBIT_IDS.get(i));
-			Bolts bolt = Bolts.getBolt(boltVarbitId);
-			boolean boltNotFound = bolt == null;
-			int boltAmount = boltNotFound ? 0 : client.getVarbitValue(BOLT_POUCH_AMOUNT_VARBIT_IDS.get(i));
-			String boltName = boltNotFound ? "" : itemManager.getItemComposition(bolt.getItemId()).getName();
-			int boltItemId = boltNotFound ? -1 : bolt.getItemId();
-
-			if (boltItemId == -1)
-			{
-				boltPouchData.add(InventorySetupsItem.getDummyItem());
-			}
-			else
-			{
-				InventorySetupsStackCompareID stackCompareType =
-						panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.BOLT_POUCH, i)
-								? config.stackCompareType() : InventorySetupsStackCompareID.None;
-				boltPouchData.add(new InventorySetupsItem(boltItemId, boltName, boltAmount, false, stackCompareType));
-			}
-		}
-
-		return boltPouchData;
-	}
-
 	@Subscribe
 	public void onScriptCallbackEvent(ScriptCallbackEvent event)
 	{
@@ -1317,10 +1269,12 @@ public class InventorySetupsPlugin extends Plugin
 							{
 								boltPouchContainsItem = containerContainsItem(itemId, currentSetup.getBoltPouch());
 							}
+							// TODO quiver
 							containsItem = runePouchContainsItem || boltPouchContainsItem ||
 								containerContainsItem(itemId, currentSetup.getInventory());
 							break;
 						case EQUIPMENT:
+							// TODO quiver
 							containsItem = containerContainsItem(itemId, currentSetup.getEquipment());
 							break;
 						case ADDITIONAL_FILTERED_ITEMS:
@@ -1495,16 +1449,16 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			List<InventorySetupsItem> runePouchData = null;
-			final InventorySetupsRunePouchType inventoryRunePouchType = getRunePouchTypeFromContainer(inv);
+			final InventorySetupsRunePouchType inventoryRunePouchType = ammoHandler.getRunePouchTypeFromContainer(inv);
 			if (inventoryRunePouchType != InventorySetupsRunePouchType.NONE)
 			{
-				runePouchData = getRunePouchData(inventoryRunePouchType);
+				runePouchData = ammoHandler.getRunePouchData(inventoryRunePouchType);
 			}
 
 			List<InventorySetupsItem> boltPouchData = null;
 			if (containerContainsItem(ItemID.BOLT_POUCH, inv))
 			{
-				boltPouchData = getBoltPouchData();
+				boltPouchData = ammoHandler.getBoltPouchData();
 			}
 
 			setup.updateRunePouch(runePouchData);
@@ -1525,12 +1479,9 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetupsItem item = containerToUpdate.get(i);
 			if (item.getId() == oldItem.getId())
 			{
-				boolean runePouchValid = checkAndUpdateSlotIfRunePouchWasSelected(inventorySetup, id, containerToUpdate.get(i), newItem, false);
-				boolean boltPouchValid = checkAndUpdateSlotIfBoltPouchWasSelected(inventorySetup, id, containerToUpdate.get(i), newItem, false);
-				if (runePouchValid && boltPouchValid)
-				{
-					containerToUpdate.set(i, newItem);
-				}
+				ammoHandler.handleSpecialAmmo(inventorySetup, containerToUpdate.get(i), newItem);
+				containerToUpdate.set(i, newItem);
+
 			}
 		}
 	}
@@ -1585,12 +1536,9 @@ public class InventorySetupsPlugin extends Plugin
 			else
 			{
 				List<InventorySetupsItem> containerToUpdate =  getContainerFromID(slot.getParentSetup(), slot.getSlotID());
-				boolean runePouchValid = checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), oldItem, newItem, true);
-				boolean boltPouchValid = checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), oldItem, newItem, true);
-				if (runePouchValid && boltPouchValid)
-				{
-					containerToUpdate.set(slot.getIndexInSlot(), newItem);
-				}
+				ammoHandler.handleSpecialAmmo(slot.getParentSetup(), oldItem, newItem);
+				containerToUpdate.set(slot.getIndexInSlot(), newItem);
+
 			}
 
 			dataManager.updateConfig(true, false);
@@ -1673,16 +1621,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			else
 			{
-				// update the rune pouch data
-				if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
-				{
-					return;
-				}
-				// update the bolt pouch data
-				if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), newItem))
-				{
-					return;
-				}
+				ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, newItem);
 				container.set(slot.getIndexInSlot(), newItem);
 			}
 
@@ -1706,7 +1645,7 @@ public class InventorySetupsPlugin extends Plugin
 		boolean letterIsInput = (arg == 'b' || arg == 'B' ||
 				arg == 'k' || arg == 'K' ||
 				arg == 'm' || arg == 'M') &&
-				searchInput.getValue().length() > 0 &&
+				!searchInput.getValue().isEmpty() &&
 				!searchInput.getValue().toLowerCase().contains("k") &&
 				!searchInput.getValue().toLowerCase().contains("m") &&
 				!searchInput.getValue().toLowerCase().contains("b");
@@ -1761,19 +1700,10 @@ public class InventorySetupsPlugin extends Plugin
 
 			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 
-			// update the rune pouch data
+			// update special containers
 			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
-			if (!checkAndUpdateSlotIfRunePouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), dummyItem))
-			{
-				return;
-			}
-
-			// update the bolt pouch data
-			if (!checkAndUpdateSlotIfBoltPouchWasSelected(slot.getParentSetup(), slot.getSlotID(), container.get(slot.getIndexInSlot()), dummyItem))
-			{
-				return;
-			}
+			ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, dummyItem);
 
 			container.set(slot.getIndexInSlot(), dummyItem);
 			dataManager.updateConfig(true, false);
@@ -1994,9 +1924,11 @@ public class InventorySetupsPlugin extends Plugin
 			case EQUIPMENT:
 				return getNormalizedContainer(InventoryID.EQUIPMENT);
 			case RUNE_POUCH:
-				return getRunePouchData(InventorySetupsRunePouchType.DIVINE);
+				return ammoHandler.getRunePouchData(InventorySetupsRunePouchType.DIVINE);
 			case BOLT_POUCH:
-				return getBoltPouchData();
+				return ammoHandler.getBoltPouchData();
+			case QUIVER:
+				return ammoHandler.getQuiverData();
 			default:
 				assert false : "Wrong slot ID!";
 				return null;
@@ -2436,7 +2368,7 @@ public class InventorySetupsPlugin extends Plugin
 		return containerContainsItem(itemID, setupContainer, true, true);
 	}
 
-	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean canonicalize)
+	public boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean canonicalize)
 	{
 		for (final InventorySetupsItem item : setupContainer)
 		{
@@ -2468,123 +2400,6 @@ public class InventorySetupsPlugin extends Plugin
 		return itemId;
 	}
 
-	private boolean checkAndUpdateSlotIfRunePouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
-															final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
-	{
-		return checkAndUpdateSlotIfRunePouchWasSelected(inventorySetup, ID, oldItem, newItem, true);
-	}
-
-	private boolean checkAndUpdateSlotIfRunePouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
-															final InventorySetupsItem oldItem, final InventorySetupsItem newItem,
-															boolean showMessageDialogue)
-	{
-
-		final InventorySetupsRunePouchType runePouchTypeNewItem = getRunePouchType(newItem.getId());
-		final InventorySetupsRunePouchType runePouchTypeOldItem = getRunePouchType(oldItem.getId());
-		if (runePouchTypeNewItem != InventorySetupsRunePouchType.NONE)
-		{
-
-			if (ID != InventorySetupsSlotID.INVENTORY)
-			{
-				if (showMessageDialogue)
-				{
-					SwingUtilities.invokeLater(() ->
-					{
-						JOptionPane.showMessageDialog(panel,
-								"You can't have a Rune Pouch there.",
-								"Invalid Item",
-								JOptionPane.ERROR_MESSAGE);
-					});
-				}
-
-				return false;
-			}
-
-			// only display this message if we aren't replacing a rune pouch with a new rune pouch
-			if (inventorySetup.getRune_pouch() != null && runePouchTypeOldItem == InventorySetupsRunePouchType.NONE)
-			{
-				if (showMessageDialogue)
-				{
-					SwingUtilities.invokeLater(() ->
-					{
-						JOptionPane.showMessageDialog(panel,
-								"You can't have two Rune Pouches.",
-								"Invalid Item",
-								JOptionPane.ERROR_MESSAGE);
-					});
-				}
-				return false;
-			}
-
-			inventorySetup.updateRunePouch(getRunePouchData(runePouchTypeNewItem));
-		}
-		else if (runePouchTypeOldItem != InventorySetupsRunePouchType.NONE)
-		{
-			// if the old item is a rune pouch, need to update it to null
-			inventorySetup.updateRunePouch(null);
-		}
-
-		return true;
-	}
-
-	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
-															final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
-	{
-		return checkAndUpdateSlotIfBoltPouchWasSelected(inventorySetup, ID, oldItem, newItem, true);
-	}
-
-	private boolean checkAndUpdateSlotIfBoltPouchWasSelected(final InventorySetup inventorySetup, final InventorySetupsSlotID ID,
-															final InventorySetupsItem oldItem, final InventorySetupsItem newItem,
-															boolean showMessageDialogue)
-	{
-
-		if (isItemBoltPouch(newItem.getId()))
-		{
-
-			if (ID != InventorySetupsSlotID.INVENTORY)
-			{
-
-				if (showMessageDialogue)
-				{
-					SwingUtilities.invokeLater(() ->
-					{
-						JOptionPane.showMessageDialog(panel,
-								"You can't have a Bolt Pouch there.",
-								"Invalid Item",
-								JOptionPane.ERROR_MESSAGE);
-					});
-				}
-
-				return false;
-			}
-
-			// only display this message if we aren't replacing a bolt pouch with a new bolt pouch
-			if (inventorySetup.getBoltPouch() != null && !isItemBoltPouch(oldItem.getId()))
-			{
-				if (showMessageDialogue)
-				{
-					SwingUtilities.invokeLater(() ->
-					{
-						JOptionPane.showMessageDialog(panel,
-								"You can't have two Bolt Pouches.",
-								"Invalid Item",
-								JOptionPane.ERROR_MESSAGE);
-					});
-				}
-				return false;
-			}
-
-			inventorySetup.updateBoltPouch(getBoltPouchData());
-		}
-		else if (isItemBoltPouch(oldItem.getId()))
-		{
-			// if the old item is a bolt pouch, need to update it to null
-			inventorySetup.updateBoltPouch(null);
-		}
-
-		return true;
-	}
-
 	public InventorySetupsRunePouchType getRunePouchType(final int itemId)
 	{
 		if (InventorySetupsRunePouchPanel.RUNE_POUCH_IDS.contains(itemId))
@@ -2603,28 +2418,6 @@ public class InventorySetupsPlugin extends Plugin
 	public boolean isItemBoltPouch(final int itemId)
 	{
 		return itemId == ItemID.BOLT_POUCH;
-	}
-
-	public InventorySetupsRunePouchType getRunePouchTypeFromContainer(final List<InventorySetupsItem> container)
-	{
-		// Don't allow fuzzy when checking because it will incorrectly assume the type
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
-		{
-			if (containerContainsItem(id, container, false, true))
-			{
-				return InventorySetupsRunePouchType.NORMAL;
-			}
-		}
-
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
-		{
-			if (containerContainsItem(id, container, false, true))
-			{
-				return InventorySetupsRunePouchType.DIVINE;
-			}
-		}
-
-		return InventorySetupsRunePouchType.NONE;
 	}
 
 	public boolean containerContainsBoltPouch(final List<InventorySetupsItem> container)

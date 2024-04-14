@@ -87,8 +87,9 @@ public class InventorySetupsUnitTest
 		List<InventorySetupsItem> equipment = inventorySetupsPlugin.getNormalizedContainer(InventoryID.EQUIPMENT);
 		List<InventorySetupsItem> runePouch = null;
 		List<InventorySetupsItem> boltPouch = null;
+		List<InventorySetupsItem> quiver = null;
 		Map<Integer, InventorySetupsItem> addItems = new HashMap<>();
-		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, boltPouch, addItems, "Test",
+		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, boltPouch, quiver, addItems, "Test",
 												"", inventorySetupsConfig.highlightColor(), false,
 												inventorySetupsConfig.displayColor(), false,false, 0, false, -1);
 

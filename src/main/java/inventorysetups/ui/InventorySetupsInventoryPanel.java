@@ -323,7 +323,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			// attempt to highlight if rune pouch is available
 			if (runePouchType != InventorySetupsRunePouchType.NONE)
 			{
-				List<InventorySetupsItem> runePouchToCheck = plugin.getRunePouchData(runePouchType);
+				List<InventorySetupsItem> runePouchToCheck = plugin.getAmmoHandler().getRunePouchData(runePouchType);
 				runePouchPanel.highlightSlots(runePouchToCheck, inventorySetup);
 			}
 			else // if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
@@ -345,7 +345,7 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 			// attempt to highlight if bolt pouch is available
 			if (doesCurrentInventoryHaveBoltPouch)
 			{
-				List<InventorySetupsItem> boltPouchToCheck = plugin.getBoltPouchData();
+				List<InventorySetupsItem> boltPouchToCheck = plugin.getAmmoHandler().getBoltPouchData();
 				boltPouchPanel.highlightSlots(boltPouchToCheck, inventorySetup);
 			}
 			else // if the current inventory doesn't have a bolt pouch but the setup does, highlight the pouch
