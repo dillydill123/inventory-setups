@@ -4,21 +4,15 @@ import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsRunePouchPanel;
 import net.runelite.api.Client;
 import net.runelite.api.EnumComposition;
-import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
 
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import net.runelite.api.VarPlayer;
 
 import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_AMOUNT_VARBIT_IDS;
 import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_BOLT_VARBIT_IDS;

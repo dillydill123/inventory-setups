@@ -733,9 +733,15 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
-		highlightInventory();
-		highlightEquipment();
-		highlightSpellbook();
+		final List<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
+		final List<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+
+		highlightContainerPanel(inv, inventoryPanel);
+		highlightContainerPanel(eqp, equipmentPanel);
+		// pass spellbook a dummy container because it only needs the current selected setup
+		highlightContainerPanel(null, spellbookPanel);
+
+		equipmentPanel.handleQuiverSlot(inv, eqp, currentSelectedSetup);
 
 		if (resetScrollBar)
 		{
@@ -751,7 +757,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	}
 
-	public void highlightInventory()
+	public void highlightContainerPanel(final List<InventorySetupsItem> container, final InventorySetupsContainerPanel containerPanel)
 	{
 		// if the panel itself isn't visible, don't waste time doing any highlighting logic
 		if (!setupDisplayPanel.isVisible())
@@ -763,51 +769,28 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		// if any of the two, reset the slots so they aren't highlighted
 		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
 		{
-			inventoryPanel.resetSlotColors();
+			containerPanel.resetSlotColors();
 			return;
 		}
 
+		containerPanel.highlightSlots(container, currentSelectedSetup);
+	}
+
+	public void highlightInventory()
+	{
 		final List<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
-		inventoryPanel.highlightSlots(inv, currentSelectedSetup);
+		highlightContainerPanel(inv, inventoryPanel);
 	}
 
 	public void highlightEquipment()
 	{
-		// if the panel itself isn't visible, don't waste time doing any highlighting logic
-		if (!setupDisplayPanel.isVisible())
-		{
-			return;
-		}
-
-		// if the panel is visible, check if highlighting is enabled on the setup and globally
-		// if any of the two, reset the slots so they aren't highlighted
-		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
-		{
-			equipmentPanel.resetSlotColors();
-			return;
-		}
-
 		final List<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-		equipmentPanel.highlightSlots(eqp, currentSelectedSetup);
+		highlightContainerPanel(eqp, equipmentPanel);
 	}
 
 	public void highlightSpellbook()
 	{
-		// if the panel itself isn't visible, don't waste time doing any highlighting logic
-		if (!setupDisplayPanel.isVisible())
-		{
-			return;
-		}
-
-		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
-		{
-			spellbookPanel.resetSlotColors();
-			return;
-		}
-
-		// pass it a dummy container because it only needs the current selected setup
-		spellbookPanel.highlightSlots(new ArrayList<InventorySetupsItem>(), currentSelectedSetup);
-
+		highlightContainerPanel(null, spellbookPanel);
 	}
 
 	// returns to the overview panel

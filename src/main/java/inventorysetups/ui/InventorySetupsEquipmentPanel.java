@@ -42,6 +42,10 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 {
 	private Map<EquipmentInventorySlot, InventorySetupsSlot> equipmentSlots;
 
+	// Shows up when a quiver is equipped or in inventory
+	private InventorySetupsSlot quiverSlot;
+	private final int QUIVER_SLOT_IDX = 0;
+
 	InventorySetupsEquipmentPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
 		super(itemManager, plugin, "Equipment");
@@ -73,13 +77,16 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 			equipmentSlots.put(slot, setupSlot);
 		}
 
+		quiverSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.QUIVER, QUIVER_SLOT_IDX);
+
 		final GridLayout gridLayout = new GridLayout(5, 3, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
 
 		// add the grid layouts, including invisible ones
 		containerSlotsPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, -1));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.HEAD));
-		containerSlotsPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, -1));
+		// This slot (to the right of the HEAD) is the quiver slot. It will only show up if a user has a quiver.
+		containerSlotsPanel.add(quiverSlot);
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.CAPE));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMULET));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMMO));
@@ -121,6 +128,34 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		{
 			int slotIdx = slot.getSlotIdx();
 			super.highlightSlot(inventorySetup, savedEquipmentFromSetup.get(slotIdx), currentEquipment.get(slotIdx), equipmentSlots.get(slot));
+		}
+	}
+
+	public void handleQuiverSlot(final List<InventorySetupsItem> currentInventory, final List<InventorySetupsItem> currentEquipment, final InventorySetup setup)
+	{
+		if (setup.getQuiver() != null)
+		{
+			super.setSlotImageAndText(quiverSlot, setup, setup.getQuiver().get(0));
+			super.addUpdateFromContainerMouseListenerToSlot(quiverSlot);
+			super.addUpdateFromSearchMouseListenerToSlot(quiverSlot, true);
+			super.addRemoveMouseListenerToSlot(quiverSlot);
+
+			List<InventorySetupsItem> currentQuiverDataInInvEqp = plugin.getAmmoHandler().getQuiverDataIfInSetup(currentInventory, currentEquipment);
+			if (currentQuiverDataInInvEqp != null)
+			{
+				final int indexInSlot = quiverSlot.getIndexInSlot();
+				super.highlightSlot(setup, setup.getQuiver().get(indexInSlot), currentQuiverDataInInvEqp.get(indexInSlot), quiverSlot);
+			}
+			else
+			{
+				quiverSlot.setBackground(setup.getHighlightColor());
+			}
+		}
+		else
+		{
+			super.setSlotImageAndText(quiverSlot, setup, InventorySetupsItem.getDummyItem());
+			quiverSlot.setBackground(ColorScheme.DARK_GRAY_COLOR);
+			quiverSlot.getRightClickMenu().removeAll();
 		}
 	}
 
