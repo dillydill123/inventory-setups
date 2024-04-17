@@ -1155,14 +1155,9 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			boolean isFuzzy = additionalFilteredItems.get(additionalItemKey).isFuzzy();
 			int addItemId = additionalFilteredItems.get(additionalItemKey).getId();
-			if (canonicalize || isFuzzy)
-			{
-				addItemId = itemManager.canonicalize(addItemId);
-				itemId = itemManager.canonicalize(itemId);
-			}
 
-			addItemId = getProcessedID(isFuzzy && allowFuzzy, addItemId);
-			int finalItemId = getProcessedID(isFuzzy && allowFuzzy, itemId);
+			addItemId = getProcessedID(isFuzzy, allowFuzzy, canonicalize, addItemId);
+			int finalItemId = getProcessedID(isFuzzy, allowFuzzy, canonicalize, itemId);
 			if (addItemId == finalItemId)
 			{
 				return true;
@@ -2352,15 +2347,11 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (final InventorySetupsItem item : setupContainer)
 		{
-			// For equipped weight reducing items or noted items in the inventory
-			int setupItemId = item.getId();
-			if (canonicalize || item.isFuzzy())
-			{
-				setupItemId = itemManager.canonicalize(setupItemId);
-				itemID = itemManager.canonicalize(itemID);
-			}
 
-			if (getProcessedID(item.isFuzzy() && allowFuzzy, itemID) == getProcessedID(item.isFuzzy() && allowFuzzy, setupItemId))
+			int processedSetupItemId = getProcessedID(item.isFuzzy(), allowFuzzy, canonicalize, item.getId());
+			int processedItemId = getProcessedID(item.isFuzzy(), allowFuzzy, canonicalize, itemID);
+
+			if (processedSetupItemId == processedItemId)
 			{
 				return true;
 			}
@@ -2369,10 +2360,37 @@ public class InventorySetupsPlugin extends Plugin
 		return false;
 	}
 
-	private int getProcessedID(boolean isFuzzy, int itemId)
+	public boolean containerContainsItemFromSet(final Set<Integer> itemIDs, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean canonicalize)
 	{
+		if (setupContainer == null)
+		{
+			return false;
+		}
+
+		for (final InventorySetupsItem item : setupContainer)
+		{
+
+			int processedSetupItemId = getProcessedID(item.isFuzzy(), allowFuzzy, canonicalize, item.getId());
+
+			if (itemIDs.contains(processedSetupItemId))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private int getProcessedID(boolean itemIsFuzzy, boolean allowFuzzy, boolean canonicalize, int itemId)
+	{
+		// For equipped weight reducing items or noted items in the inventory
+		if (canonicalize || itemIsFuzzy)
+		{
+			itemId = itemManager.canonicalize(itemId);
+		}
+
 		// use fuzzy mapping if needed
-		if (isFuzzy)
+		if (itemIsFuzzy && allowFuzzy)
 		{
 			return InventorySetupsVariationMapping.map(itemId);
 		}

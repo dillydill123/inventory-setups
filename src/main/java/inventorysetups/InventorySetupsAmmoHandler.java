@@ -10,13 +10,17 @@ import net.runelite.client.game.ItemManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_AMOUNT_VARBIT_IDS;
 import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_BOLT_VARBIT_IDS;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_AMOUNT_VARBITS;
+import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS_SET;
+import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_IDS_SET;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_RUNE_VARBITS;
 
 public class InventorySetupsAmmoHandler
@@ -34,6 +38,8 @@ public class InventorySetupsAmmoHandler
 																		ItemID.DIZANAS_MAX_CAPE_L,
 																		ItemID.BLESSED_DIZANAS_QUIVER,
 																		ItemID.BLESSED_DIZANAS_QUIVER_L);
+
+	public static final Set<Integer> DIZANA_QUIVER_IDS_SET = new HashSet<>(DIZANA_QUIVER_IDS);
 
 	private final InventorySetupsPlugin plugin;
 	private final Client client;
@@ -97,22 +103,14 @@ public class InventorySetupsAmmoHandler
 	public InventorySetupsRunePouchType getRunePouchTypeFromContainer(final List<InventorySetupsItem> container)
 	{
 		// Don't allow fuzzy when checking because it will incorrectly assume the type
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
+		if (plugin.containerContainsItemFromSet(RUNE_POUCH_IDS_SET, container, false, true))
 		{
-			if (plugin.containerContainsItem(id, container, false, true))
-			{
-				return InventorySetupsRunePouchType.NORMAL;
-			}
+			return InventorySetupsRunePouchType.NORMAL;
 		}
-
-		for (Integer id : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
+		if (plugin.containerContainsItemFromSet(RUNE_POUCH_DIVINE_IDS_SET, container, false, true))
 		{
-			if (plugin.containerContainsItem(id, container, false, true))
-			{
-				return InventorySetupsRunePouchType.DIVINE;
-			}
+			return InventorySetupsRunePouchType.DIVINE;
 		}
-
 		return InventorySetupsRunePouchType.NONE;
 	}
 
@@ -187,16 +185,8 @@ public class InventorySetupsAmmoHandler
 
 	public boolean setupContainsQuiver(final List<InventorySetupsItem> inv, final List<InventorySetupsItem> eq)
 	{
-		for (Integer id : DIZANA_QUIVER_IDS)
-		{
-			final boolean inventoryHasQuiver = plugin.containerContainsItem(id, inv, false, true);
-			final boolean equipmentHasQuiver = plugin.containerContainsItem(id, eq, false, true);
-			if (inventoryHasQuiver || equipmentHasQuiver)
-			{
-				return true;
-			}
-		}
-		return false;
+		boolean inventoryHasQuiver = plugin.containerContainsItemFromSet(DIZANA_QUIVER_IDS_SET, inv, false, true);
+		return inventoryHasQuiver || plugin.containerContainsItemFromSet(DIZANA_QUIVER_IDS_SET, eq, false, true);
 	}
 
 	public List<InventorySetupsItem> getQuiverDataIfInSetup(final List<InventorySetupsItem> inv, final List<InventorySetupsItem> eq)
