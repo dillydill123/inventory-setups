@@ -59,6 +59,7 @@ public class InventorySetupsQuiverPanel
 		if (!setup.isHighlightDifference() || !plugin.isHighlightingAllowed())
 		{
 			quiverSlot.setBackground(setup.getQuiver() != null ? ColorScheme.DARKER_GRAY_COLOR : ColorScheme.DARK_GRAY_COLOR);
+			quiverSlot.setComponentPopupMenu(setup.getQuiver() != null ? quiverSlotRightClickMenu : emptyJPopMenu);
 			return;
 		}
 

@@ -62,7 +62,7 @@ public class InventorySetupsAmmoHandler
 
 		for (final int itemID : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
 		{
-			updateDataHandler.put(itemID, (setup) -> setup.updateRunePouch(getRunePouchData(InventorySetupsRunePouchType.NORMAL)));
+			updateDataHandler.put(itemID, (setup) -> setup.updateRunePouch(getRunePouchData(InventorySetupsRunePouchType.DIVINE)));
 			removeDataHandler.put(itemID, (setup) -> setup.updateRunePouch(null));
 		}
 
