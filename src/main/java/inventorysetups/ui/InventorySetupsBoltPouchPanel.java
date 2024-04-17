@@ -70,4 +70,31 @@ public class InventorySetupsBoltPouchPanel extends InventorySetupsAmmunitionPane
 	{
 		return inventorySetup.getBoltPouch();
 	}
+
+	public void handleBoltPouchHighlighting(final InventorySetup inventorySetup, boolean doesCurrentInventoryHaveBoltPouch)
+	{
+		if (!inventorySetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
+		{
+			super.resetSlotColors();
+			return;
+		}
+
+		if (inventorySetup.getBoltPouch() != null)
+		{
+			// attempt to highlight if bolt pouch is available
+			if (doesCurrentInventoryHaveBoltPouch)
+			{
+				List<InventorySetupsItem> boltPouchToCheck = plugin.getAmmoHandler().getBoltPouchData();
+				super.highlightSlots(boltPouchToCheck, inventorySetup);
+			}
+			else // if the current inventory doesn't have a bolt pouch but the setup does, highlight the pouch
+			{
+				super.highlightAllSlots(inventorySetup);
+			}
+		}
+		else
+		{
+			super.resetSlotColors();
+		}
+	}
 }

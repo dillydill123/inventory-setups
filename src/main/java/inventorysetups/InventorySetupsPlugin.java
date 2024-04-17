@@ -28,7 +28,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 import inventorysetups.ui.InventorySetupsPluginPanel;
-import inventorysetups.ui.InventorySetupsRunePouchPanel;
 import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Color;
 import java.awt.Toolkit;
@@ -63,7 +62,6 @@ import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
 import net.runelite.api.KeyCode;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
@@ -384,7 +382,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (shouldTriggerInventoryHighlightOnGameTick)
 		{
 			shouldTriggerInventoryHighlightOnGameTick = false;
-			clientThread.invokeLater(panel::highlightInventory);
+			clientThread.invokeLater(panel::doHighlighting);
 		}
 	}
 
@@ -1190,7 +1188,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (event.getVarpId() == 439 && client.getGameState() == GameState.LOGGED_IN)
 		{
 			// must be invoked later otherwise causes freezing.
-			clientThread.invokeLater(panel::highlightSpellbook);
+			clientThread.invokeLater(panel::doHighlighting);
 			return;
 		}
 
@@ -1425,13 +1423,8 @@ public class InventorySetupsPlugin extends Plugin
 				eqp.get(i).setStackCompare(setup.getEquipment().get(i).getStackCompare());
 			}
 
-			List<InventorySetupsItem> runePouchData = ammoHandler.getRunePouchDataIfInContainer(inv);
-			List<InventorySetupsItem> boltPouchData = ammoHandler.getBoltPouchDataIfInContainer(inv);
-			List<InventorySetupsItem> quiverData = ammoHandler.getQuiverDataIfInSetup(inv, eqp);
+			ammoHandler.updateSpecialContainersInSetup(setup, inv, eqp);
 
-			setup.updateRunePouch(runePouchData);
-			setup.updateBoltPouch(boltPouchData);
-			setup.updateQuiver(quiverData);
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
@@ -1858,23 +1851,16 @@ public class InventorySetupsPlugin extends Plugin
 		// check to see that the container is the equipment or inventory
 		ItemContainer container = event.getItemContainer();
 
-		if (container == client.getItemContainer(InventoryID.INVENTORY))
+		if (container == client.getItemContainer(InventoryID.INVENTORY) || container == client.getItemContainer(InventoryID.EQUIPMENT))
 		{
-			panel.highlightInventory();
+			panel.doHighlighting();
 		}
-		else if (container == client.getItemContainer(InventoryID.EQUIPMENT))
-		{
-			panel.highlightEquipment();
-		}
-
 	}
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		panel.highlightInventory();
-		panel.highlightEquipment();
-		panel.highlightSpellbook();
+		panel.doHighlighting();
 	}
 
 	// Must be called on client thread!
@@ -1892,15 +1878,8 @@ public class InventorySetupsPlugin extends Plugin
 				return getNormalizedContainer(InventoryID.INVENTORY);
 			case EQUIPMENT:
 				return getNormalizedContainer(InventoryID.EQUIPMENT);
-			case RUNE_POUCH:
-				return ammoHandler.getRunePouchData(InventorySetupsRunePouchType.DIVINE);
-			case BOLT_POUCH:
-				return ammoHandler.getBoltPouchData();
-			case QUIVER:
-				return ammoHandler.getQuiverData();
 			default:
-				assert false : "Wrong slot ID!";
-				return null;
+				return ammoHandler.getNormalizedSpecialContainer(id);
 		}
 	}
 
@@ -2287,15 +2266,8 @@ public class InventorySetupsPlugin extends Plugin
 				return inventorySetup.getInventory();
 			case EQUIPMENT:
 				return inventorySetup.getEquipment();
-			case RUNE_POUCH:
-				return inventorySetup.getRune_pouch();
-			case BOLT_POUCH:
-				return inventorySetup.getBoltPouch();
-			case QUIVER:
-				return inventorySetup.getQuiver();
 			default:
-				assert false : "Invalid ID given";
-				return null;
+				return ammoHandler.getSpecialContainerFromID(inventorySetup, ID);
 		}
 	}
 
@@ -2310,15 +2282,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			return true;
 		}
-		if (containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, canonicalize))
-		{
-			return true;
-		}
-		if (containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, canonicalize))
-		{
-			return true;
-		}
-		if (containerContainsItem(itemID, setup.getQuiver(), allowFuzzy, canonicalize))
+		if (ammoHandler.specialContainersContainItem(setup, itemID, allowFuzzy, canonicalize))
 		{
 			return true;
 		}
@@ -2396,26 +2360,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		return itemId;
-	}
-
-	public InventorySetupsRunePouchType getRunePouchType(final int itemId)
-	{
-		if (InventorySetupsRunePouchPanel.RUNE_POUCH_IDS.contains(itemId))
-		{
-			return InventorySetupsRunePouchType.NORMAL;
-		}
-
-		if (InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS.contains(itemId))
-		{
-			return InventorySetupsRunePouchType.DIVINE;
-		}
-
-		return InventorySetupsRunePouchType.NONE;
-	}
-
-	public boolean isItemBoltPouch(final int itemId)
-	{
-		return itemId == ItemID.BOLT_POUCH;
 	}
 
 	public void openColorPicker(String title, Color startingColor, Consumer<Color> onColorChange)

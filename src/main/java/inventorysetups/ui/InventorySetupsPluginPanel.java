@@ -34,6 +34,7 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_UNASSIGNED_MAXIMIZED;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
+
 import inventorysetups.InventorySetupsSection;
 import inventorysetups.InventorySetupsSlotID;
 import inventorysetups.InventorySetupsSortingID;
@@ -131,9 +132,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private final InventorySetupsInventoryPanel inventoryPanel;
 	private final InventorySetupsEquipmentPanel equipmentPanel;
+	@Getter
 	private final InventorySetupsRunePouchPanel runePouchPanel;
+	@Getter
 	private final InventorySetupsBoltPouchPanel boltPouchPanel;
+
 	private final InventorySetupsSpellbookPanel spellbookPanel;
+
 	private final InventorySetupsAdditionalItemsPanel additionalFilteredItemsPanel;
 	private final InventorySetupsNotesPanel notesPanel;
 
@@ -672,6 +677,11 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		repaint();
 	}
 
+	public InventorySetupsQuiverPanel getQuiverPanel()
+	{
+		return equipmentPanel.getQuiverPanel();
+	}
+
 	public void showCorrectPanelBasedOnVersion()
 	{
 		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
@@ -733,15 +743,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
-		final List<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
-		final List<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
-
-		highlightContainerPanel(inv, inventoryPanel);
-		highlightContainerPanel(eqp, equipmentPanel);
-		// pass spellbook a dummy container because it only needs the current selected setup
-		highlightContainerPanel(null, spellbookPanel);
-
-		equipmentPanel.handleQuiverSlot(inv, eqp, currentSelectedSetup);
+		doHighlighting();
 
 		if (resetScrollBar)
 		{
@@ -757,14 +759,31 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	}
 
-	public void highlightContainerPanel(final List<InventorySetupsItem> container, final InventorySetupsContainerPanel containerPanel)
+	public void doHighlighting()
 	{
-		// if the panel itself isn't visible, don't waste time doing any highlighting logic
+		if (currentSelectedSetup == null)
+		{
+			return;
+		}
+
 		if (!setupDisplayPanel.isVisible())
 		{
 			return;
 		}
 
+		final List<InventorySetupsItem> inv = plugin.getNormalizedContainer(InventoryID.INVENTORY);
+		final List<InventorySetupsItem> eqp = plugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+
+		highlightContainerPanel(inv, inventoryPanel);
+		highlightContainerPanel(eqp, equipmentPanel);
+		// pass spellbook a dummy container because it only needs the current selected setup
+		highlightContainerPanel(null, spellbookPanel);
+		plugin.getAmmoHandler().handleSpecialHighlighting(currentSelectedSetup, inv, eqp);
+
+	}
+
+	public void highlightContainerPanel(final List<InventorySetupsItem> container, final InventorySetupsContainerPanel containerPanel)
+	{
 		// if the panel is visible, check if highlighting is enabled on the setup and globally
 		// if any of the two, reset the slots so they aren't highlighted
 		if (!currentSelectedSetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
@@ -826,18 +845,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				return inventoryPanel.isStackCompareForSlotAllowed(slotId);
 			case EQUIPMENT:
 				return equipmentPanel.isStackCompareForSlotAllowed(slotId);
-			case RUNE_POUCH:
-				return runePouchPanel.isStackCompareForSlotAllowed(slotId);
-			case BOLT_POUCH:
-				return boltPouchPanel.isStackCompareForSlotAllowed(slotId);
 			case ADDITIONAL_ITEMS:
 				return additionalFilteredItemsPanel.isStackCompareForSlotAllowed(slotId);
 			case SPELL_BOOK:
 				return spellbookPanel.isStackCompareForSlotAllowed(slotId);
-			case QUIVER:
-				return true;
 			default:
-				return false;
+				return plugin.getAmmoHandler().isStackCompareForSpecialSlotAllowed(inventoryID, slotId);
 		}
 	}
 

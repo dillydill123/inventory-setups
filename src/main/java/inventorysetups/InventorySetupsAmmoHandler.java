@@ -2,22 +2,25 @@ package inventorysetups;
 
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsRunePouchPanel;
+import inventorysetups.ui.InventorySetupsSlot;
 import net.runelite.api.Client;
 import net.runelite.api.EnumComposition;
 import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_AMOUNT_VARBIT_IDS;
 import static inventorysetups.ui.InventorySetupsBoltPouchPanel.BOLT_POUCH_BOLT_VARBIT_IDS;
+import static inventorysetups.ui.InventorySetupsQuiverPanel.DIZANA_QUIVER_IDS;
+import static inventorysetups.ui.InventorySetupsQuiverPanel.DIZANA_QUIVER_IDS_SET;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_AMOUNT_VARBITS;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS_SET;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_IDS_SET;
@@ -29,17 +32,6 @@ public class InventorySetupsAmmoHandler
 	private Map<Integer, Consumer<InventorySetup>> updateDataHandler;
 
 	private Map<Integer, Consumer<InventorySetup>> removeDataHandler;
-
-	public static final List<Integer> DIZANA_QUIVER_IDS = Arrays.asList(ItemID.DIZANAS_QUIVER,
-																		ItemID.DIZANAS_QUIVER_L,
-																		ItemID.DIZANAS_QUIVER_UNCHARGED,
-																		ItemID.DIZANAS_QUIVER_UNCHARGED_L,
-																		ItemID.DIZANAS_MAX_CAPE,
-																		ItemID.DIZANAS_MAX_CAPE_L,
-																		ItemID.BLESSED_DIZANAS_QUIVER,
-																		ItemID.BLESSED_DIZANAS_QUIVER_L);
-
-	public static final Set<Integer> DIZANA_QUIVER_IDS_SET = new HashSet<>(DIZANA_QUIVER_IDS);
 
 	private final InventorySetupsPlugin plugin;
 	private final Client client;
@@ -98,6 +90,41 @@ public class InventorySetupsAmmoHandler
 		{
 			removeDataHandler.get(oldID).accept(inventorySetup);
 		}
+	}
+
+	public void handleSpecialHighlighting(final InventorySetup setup, final List<InventorySetupsItem> inventory, final List<InventorySetupsItem> equipment)
+	{
+		Set<Integer> combinedIds = inventory.stream().map(InventorySetupsItem::getId).collect(Collectors.toSet());
+		combinedIds.addAll(equipment.stream().map(InventorySetupsItem::getId).collect(Collectors.toSet()));
+
+		Set<Integer> divine_rune_pouch_intersection = new HashSet<>(RUNE_POUCH_DIVINE_IDS_SET);
+		divine_rune_pouch_intersection.retainAll(combinedIds);
+		Set<Integer> rune_pouch_intersection = new HashSet<>(RUNE_POUCH_IDS_SET);
+		rune_pouch_intersection.retainAll(combinedIds);
+		if (!divine_rune_pouch_intersection.isEmpty())
+		{
+			plugin.getClientThread().invoke(() ->
+					panel.getRunePouchPanel().handleRunePouchHighlighting(setup, InventorySetupsRunePouchType.DIVINE));
+		}
+		else if (!rune_pouch_intersection.isEmpty())
+		{
+			plugin.getClientThread().invoke(() ->
+					panel.getRunePouchPanel().handleRunePouchHighlighting(setup, InventorySetupsRunePouchType.NORMAL));
+		}
+		else
+		{
+			plugin.getClientThread().invoke(() ->
+					panel.getRunePouchPanel().handleRunePouchHighlighting(setup, InventorySetupsRunePouchType.NONE));
+		}
+
+		Set<Integer> quiver_intersection = new HashSet<>(DIZANA_QUIVER_IDS_SET);
+		quiver_intersection.retainAll(combinedIds);
+		plugin.getClientThread().invoke(() ->
+				panel.getQuiverPanel().handleQuiverHighlighting(setup, !quiver_intersection.isEmpty()));
+
+		boolean currentInventoryHasBoltPouch = combinedIds.contains(ItemID.BOLT_POUCH);
+		plugin.getClientThread().invoke(() ->
+				panel.getBoltPouchPanel().handleBoltPouchHighlighting(setup, currentInventoryHasBoltPouch));
 	}
 
 	public InventorySetupsRunePouchType getRunePouchTypeFromContainer(final List<InventorySetupsItem> container)
@@ -224,4 +251,96 @@ public class InventorySetupsAmmoHandler
 		return quiverData;
 	}
 
+	public static String getSpecialContainerString(final InventorySetupsSlot slot)
+	{
+		String specialContainerString = "";
+		switch (slot.getSlotID())
+		{
+			case RUNE_POUCH:
+				specialContainerString = "Rune Pouch";
+				break;
+			case BOLT_POUCH:
+				specialContainerString = "Bolt Pouch";
+				break;
+			case QUIVER:
+				specialContainerString = "Quiver";
+				break;
+			default:
+				assert false : "Wrong slot ID!";
+				break;
+		}
+		return specialContainerString;
+	}
+
+	public boolean isStackCompareForSpecialSlotAllowed(final InventorySetupsSlotID inventoryID, final int slotId)
+	{
+		switch (inventoryID)
+		{
+			case RUNE_POUCH:
+				return panel.getRunePouchPanel().isStackCompareForSlotAllowed(slotId);
+			case BOLT_POUCH:
+				return panel.getBoltPouchPanel().isStackCompareForSlotAllowed(slotId);
+			case QUIVER:
+				return true;
+			default:
+				assert false : "Wrong Slot ID!";
+				return false;
+		}
+	}
+
+	public List<InventorySetupsItem> getNormalizedSpecialContainer(final InventorySetupsSlotID id)
+	{
+		switch (id)
+		{
+			case RUNE_POUCH:
+				return getRunePouchData(InventorySetupsRunePouchType.DIVINE);
+			case BOLT_POUCH:
+				return getBoltPouchData();
+			case QUIVER:
+				return getQuiverData();
+			default:
+				assert false : "Wrong slot ID!";
+				return null;
+		}
+	}
+
+	public List<InventorySetupsItem> getSpecialContainerFromID(final InventorySetup inventorySetup, InventorySetupsSlotID ID)
+	{
+		switch (ID)
+		{
+			case RUNE_POUCH:
+				return inventorySetup.getRune_pouch();
+			case BOLT_POUCH:
+				return inventorySetup.getBoltPouch();
+			case QUIVER:
+				return inventorySetup.getQuiver();
+			default:
+				assert false : "Invalid ID given";
+				return null;
+		}
+	}
+
+	public boolean specialContainersContainItem(final InventorySetup setup, int itemID, boolean allowFuzzy, boolean canonicalize)
+	{
+		if (plugin.containerContainsItem(itemID, setup.getRune_pouch(), allowFuzzy, canonicalize))
+		{
+			return true;
+		}
+		if (plugin.containerContainsItem(itemID, setup.getBoltPouch(), allowFuzzy, canonicalize))
+		{
+			return true;
+		}
+		return plugin.containerContainsItem(itemID, setup.getQuiver(), allowFuzzy, canonicalize);
+	}
+
+	public void updateSpecialContainersInSetup(final InventorySetup setup, final List<InventorySetupsItem> inv, final List<InventorySetupsItem> eqp)
+	{
+		List<InventorySetupsItem> runePouchData = getRunePouchDataIfInContainer(inv);
+		List<InventorySetupsItem> boltPouchData = getBoltPouchDataIfInContainer(inv);
+		List<InventorySetupsItem> quiverData = getQuiverDataIfInSetup(inv, eqp);
+
+		setup.updateRunePouch(runePouchData);
+		setup.updateBoltPouch(boltPouchData);
+		setup.updateQuiver(quiverData);
+	}
 }

@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 
+import lombok.Getter;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -44,13 +44,8 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 {
 	private Map<EquipmentInventorySlot, InventorySetupsSlot> equipmentSlots;
 
-	// Shows up when a quiver is equipped or in inventory
-	private InventorySetupsSlot quiverSlot;
-	private final int QUIVER_SLOT_IDX = 0;
-
-	private JPopupMenu quiverSlotRightClickMenu;
-
-	private JPopupMenu emptyJPopMenu = new JPopupMenu();
+	@Getter
+	private InventorySetupsQuiverPanel quiverPanel;
 
 	InventorySetupsEquipmentPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
@@ -64,40 +59,35 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			final InventorySetupsSlot setupSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, slot.getSlotIdx());
-			super.addFuzzyMouseListenerToSlot(setupSlot);
+			InventorySetupsSlot.addFuzzyMouseListenerToSlot(plugin, setupSlot);
 
 			// add stackable configurations for ammo and weapon slots
 			if (slot == EquipmentInventorySlot.AMMO || slot == EquipmentInventorySlot.WEAPON)
 			{
-				super.addStackMouseListenerToSlot(setupSlot);
+				InventorySetupsSlot.addStackMouseListenerToSlot(plugin, setupSlot);
 			}
 
-			super.addUpdateFromContainerMouseListenerToSlot(setupSlot);
-			super.addUpdateFromSearchMouseListenerToSlot(setupSlot, true);
-			super.addRemoveMouseListenerToSlot(setupSlot);
+			InventorySetupsSlot.addUpdateFromContainerMouseListenerToSlot(plugin, setupSlot);
+			InventorySetupsSlot.addUpdateFromSearchMouseListenerToSlot(plugin, setupSlot, true);
+			InventorySetupsSlot.addRemoveMouseListenerToSlot(plugin, setupSlot);
 
 			// Shift menu
-			super.addUpdateFromContainerToAllInstancesMouseListenerToSlot(setupSlot);
-			super.addUpdateFromSearchToAllInstancesMouseListenerToSlot(setupSlot, true);
+			InventorySetupsSlot.addUpdateFromContainerToAllInstancesMouseListenerToSlot(this, plugin, setupSlot);
+			InventorySetupsSlot.addUpdateFromSearchToAllInstancesMouseListenerToSlot(this, plugin, setupSlot, true);
 
 			equipmentSlots.put(slot, setupSlot);
 		}
 
-		quiverSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.QUIVER, QUIVER_SLOT_IDX);
-		super.addUpdateFromContainerMouseListenerToSlot(quiverSlot);
-		super.addUpdateFromSearchMouseListenerToSlot(quiverSlot, true);
-		super.addRemoveMouseListenerToSlot(quiverSlot);
-		this.quiverSlotRightClickMenu = quiverSlot.getRightClickMenu();
-		quiverSlot.setComponentPopupMenu(new JPopupMenu());
-
 		final GridLayout gridLayout = new GridLayout(5, 3, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
+
+		this.quiverPanel = new InventorySetupsQuiverPanel(itemManager, plugin);
 
 		// add the grid layouts, including invisible ones
 		containerSlotsPanel.add(new InventorySetupsSlot(ColorScheme.DARK_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, -1));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.HEAD));
 		// This slot (to the right of the HEAD) is the quiver slot. It will only show up if a user has a quiver.
-		containerSlotsPanel.add(quiverSlot);
+		containerSlotsPanel.add(quiverPanel.getQuiverSlot());
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.CAPE));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMULET));
 		containerSlotsPanel.add(equipmentSlots.get(EquipmentInventorySlot.AMMO));
@@ -119,7 +109,7 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			int i = slot.getSlotIdx();
-			super.setSlotImageAndText(equipmentSlots.get(slot), setup, setup.getEquipment().get(i));
+			InventorySetupsSlot.setSlotImageAndText(itemManager, equipmentSlots.get(slot), setup, setup.getEquipment().get(i));
 		}
 
 		validate();
@@ -138,34 +128,7 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		for (final EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			int slotIdx = slot.getSlotIdx();
-			super.highlightSlot(inventorySetup, savedEquipmentFromSetup.get(slotIdx), currentEquipment.get(slotIdx), equipmentSlots.get(slot));
-		}
-	}
-
-	public void handleQuiverSlot(final List<InventorySetupsItem> currentInventory, final List<InventorySetupsItem> currentEquipment, final InventorySetup setup)
-	{
-
-		if (setup.getQuiver() != null)
-		{
-			super.setSlotImageAndText(quiverSlot, setup, setup.getQuiver().get(0));
-			quiverSlot.setComponentPopupMenu(quiverSlotRightClickMenu);
-
-			List<InventorySetupsItem> currentQuiverDataInInvEqp = plugin.getAmmoHandler().getQuiverDataIfInSetup(currentInventory, currentEquipment);
-			if (currentQuiverDataInInvEqp != null)
-			{
-				final int indexInSlot = quiverSlot.getIndexInSlot();
-				super.highlightSlot(setup, setup.getQuiver().get(indexInSlot), currentQuiverDataInInvEqp.get(indexInSlot), quiverSlot);
-			}
-			else
-			{
-				quiverSlot.setBackground(setup.getHighlightColor());
-			}
-		}
-		else
-		{
-			super.setSlotImageAndText(quiverSlot, setup, InventorySetupsItem.getDummyItem());
-			quiverSlot.setBackground(ColorScheme.DARK_GRAY_COLOR);
-			quiverSlot.setComponentPopupMenu(emptyJPopMenu);
+			InventorySetupsSlot.highlightSlot(inventorySetup, savedEquipmentFromSetup.get(slotIdx), currentEquipment.get(slotIdx), equipmentSlots.get(slot));
 		}
 	}
 

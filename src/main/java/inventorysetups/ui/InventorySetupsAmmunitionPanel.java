@@ -75,10 +75,10 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 		for (final InventorySetupsSlot slot : ammoSlots)
 		{
 			containerSlotsPanel.add(slot);
-			super.addStackMouseListenerToSlot(slot);
-			super.addUpdateFromContainerMouseListenerToSlot(slot);
-			super.addUpdateFromSearchMouseListenerToSlot(slot, true);
-			super.addRemoveMouseListenerToSlot(slot);
+			InventorySetupsSlot.addStackMouseListenerToSlot(plugin, slot);
+			InventorySetupsSlot.addUpdateFromContainerMouseListenerToSlot(plugin, slot);
+			InventorySetupsSlot.addUpdateFromSearchMouseListenerToSlot(plugin, slot, true);
+			InventorySetupsSlot.addRemoveMouseListenerToSlot(plugin, slot);
 		}
 	}
 
@@ -131,7 +131,7 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 			{
 				int savedQuantity = ammoContainer.get(i).getQuantity();
 				int currentQuantity = currentContainerReference.get(currentContainerIndex).getQuantity();
-				if (shouldHighlightSlotBasedOnStack(ammoContainer.get(i).getStackCompare(), savedQuantity, currentQuantity))
+				if (InventorySetupsSlot.shouldHighlightSlotBasedOnStack(ammoContainer.get(i).getStackCompare(), savedQuantity, currentQuantity))
 				{
 					shouldHighlightSlot = true;
 				}
@@ -182,7 +182,7 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 						ammoSlotsAddedToPanel.set(i, Boolean.TRUE);
 						this.getContainerSlotsPanel().add(ammoSlots.get(i));
 					}
-					super.setSlotImageAndText(ammoSlots.get(i), setup, container.get(i));
+					InventorySetupsSlot.setSlotImageAndText(itemManager, ammoSlots.get(i), setup, container.get(i));
 				}
 			}
 		}
@@ -190,7 +190,7 @@ public abstract class InventorySetupsAmmunitionPanel extends InventorySetupsCont
 		{
 			for (int i = 0; i < ammoSlots.size(); i++)
 			{
-				super.setSlotImageAndText(ammoSlots.get(i), setup, InventorySetupsItem.getDummyItem());
+				InventorySetupsSlot.setSlotImageAndText(itemManager, ammoSlots.get(i), setup, InventorySetupsItem.getDummyItem());
 			}
 		}
 

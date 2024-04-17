@@ -27,6 +27,7 @@ package inventorysetups.ui;
 import inventorysetups.InventorySetup;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPlugin;
+import inventorysetups.InventorySetupsRunePouchType;
 import inventorysetups.InventorySetupsSlotID;
 
 import java.util.Arrays;
@@ -74,5 +75,33 @@ public class InventorySetupsRunePouchPanel extends InventorySetupsAmmunitionPane
 	protected List<InventorySetupsItem> getContainer(InventorySetup inventorySetup)
 	{
 		return inventorySetup.getRune_pouch();
+	}
+
+	public void handleRunePouchHighlighting(final InventorySetup inventorySetup, final InventorySetupsRunePouchType runePouchType)
+	{
+		if (!inventorySetup.isHighlightDifference() || !plugin.isHighlightingAllowed())
+		{
+			super.resetSlotColors();
+			return;
+		}
+
+		// This must be run on the client thread!
+		if (inventorySetup.getRune_pouch() != null)
+		{
+			// attempt to highlight if rune pouch is available
+			if (runePouchType != InventorySetupsRunePouchType.NONE)
+			{
+				List<InventorySetupsItem> runePouchToCheck = plugin.getAmmoHandler().getRunePouchData(runePouchType);
+				super.highlightSlots(runePouchToCheck, inventorySetup);
+			}
+			else // if the current inventory doesn't have a rune pouch but the setup does, highlight the RP pouch
+			{
+				super.highlightAllSlots(inventorySetup);
+			}
+		}
+		else
+		{
+			super.resetSlotColors();
+		}
 	}
 }
