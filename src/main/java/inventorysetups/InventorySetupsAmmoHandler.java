@@ -206,7 +206,7 @@ public class InventorySetupsAmmoHandler
 
 	public List<InventorySetupsItem> getQuiverData()
 	{
-		// replace with VarPlayer when RL adds it.
+		// TODO replace with VarPlayer when RL adds it.
 		final int DIZANAS_QUIVER_ITEM_ID = 4142;
 		final int DIZANAS_QUIVER_ITEM_COUNT = 4141;
 
@@ -214,16 +214,22 @@ public class InventorySetupsAmmoHandler
 		final int quiverAmmoId = client.getVarpValue(DIZANAS_QUIVER_ITEM_ID);
 		final int quiverAmmoCount = Math.max(0, client.getVarpValue(DIZANAS_QUIVER_ITEM_COUNT));
 
-		final String ammoName = quiverAmmoId == -1 ? "" : itemManager.getItemComposition(quiverAmmoId).getName();
+		if (quiverAmmoId == -1 || quiverAmmoCount == 0)
+		{
+			quiverData.add(InventorySetupsItem.getDummyItem());
+		}
+		else
+		{
+			final String ammoName = itemManager.getItemComposition(quiverAmmoId).getName();
 
-		InventorySetupsStackCompareID stackCompareType =
-				panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.QUIVER, 1)
-					? config.stackCompareType() : InventorySetupsStackCompareID.None;
+			InventorySetupsStackCompareID stackCompareType =
+					panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.QUIVER, 0)
+							? config.stackCompareType() : InventorySetupsStackCompareID.None;
 
-		final InventorySetupsItem quiverItem = new InventorySetupsItem(quiverAmmoId, ammoName,
-														quiverAmmoCount, false, stackCompareType);
-
-		quiverData.add(quiverItem);
+			final InventorySetupsItem quiverItem = new InventorySetupsItem(quiverAmmoId, ammoName,
+					quiverAmmoCount, false, stackCompareType);
+			quiverData.add(quiverItem);
+		}
 
 		return quiverData;
 	}

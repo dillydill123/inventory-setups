@@ -2296,6 +2296,8 @@ public class InventorySetupsPlugin extends Plugin
 				return inventorySetup.getRune_pouch();
 			case BOLT_POUCH:
 				return inventorySetup.getBoltPouch();
+			case QUIVER:
+				return inventorySetup.getQuiver();
 			default:
 				assert false : "Invalid ID given";
 				return null;

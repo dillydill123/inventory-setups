@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -45,6 +47,10 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 	// Shows up when a quiver is equipped or in inventory
 	private InventorySetupsSlot quiverSlot;
 	private final int QUIVER_SLOT_IDX = 0;
+
+	private JPopupMenu quiverSlotRightClickMenu;
+
+	private JPopupMenu emptyJPopMenu = new JPopupMenu();
 
 	InventorySetupsEquipmentPanel(final ItemManager itemManager, final InventorySetupsPlugin plugin)
 	{
@@ -78,6 +84,11 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		}
 
 		quiverSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.QUIVER, QUIVER_SLOT_IDX);
+		super.addUpdateFromContainerMouseListenerToSlot(quiverSlot);
+		super.addUpdateFromSearchMouseListenerToSlot(quiverSlot, true);
+		super.addRemoveMouseListenerToSlot(quiverSlot);
+		this.quiverSlotRightClickMenu = quiverSlot.getRightClickMenu();
+		quiverSlot.setComponentPopupMenu(new JPopupMenu());
 
 		final GridLayout gridLayout = new GridLayout(5, 3, 1, 1);
 		containerSlotsPanel.setLayout(gridLayout);
@@ -133,12 +144,11 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 
 	public void handleQuiverSlot(final List<InventorySetupsItem> currentInventory, final List<InventorySetupsItem> currentEquipment, final InventorySetup setup)
 	{
+
 		if (setup.getQuiver() != null)
 		{
 			super.setSlotImageAndText(quiverSlot, setup, setup.getQuiver().get(0));
-			super.addUpdateFromContainerMouseListenerToSlot(quiverSlot);
-			super.addUpdateFromSearchMouseListenerToSlot(quiverSlot, true);
-			super.addRemoveMouseListenerToSlot(quiverSlot);
+			quiverSlot.setComponentPopupMenu(quiverSlotRightClickMenu);
 
 			List<InventorySetupsItem> currentQuiverDataInInvEqp = plugin.getAmmoHandler().getQuiverDataIfInSetup(currentInventory, currentEquipment);
 			if (currentQuiverDataInInvEqp != null)
@@ -155,7 +165,7 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		{
 			super.setSlotImageAndText(quiverSlot, setup, InventorySetupsItem.getDummyItem());
 			quiverSlot.setBackground(ColorScheme.DARK_GRAY_COLOR);
-			quiverSlot.getRightClickMenu().removeAll();
+			quiverSlot.setComponentPopupMenu(emptyJPopMenu);
 		}
 	}
 
