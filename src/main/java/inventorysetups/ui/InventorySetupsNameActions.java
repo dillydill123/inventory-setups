@@ -395,17 +395,24 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
 		}
 
-		// If nothing has changed or name is invalid, disable the save button
-		if (datum.getDisplayColor() == newDisplayColor && !validNameImplementer.isNameValid(nameInput.getText()))
+		if (!validNameImplementer.isNameValid(nameInput.getText()))
 		{
 			save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 			save.setEnabled(false);
+			return;
 		}
-		else
+
+		// If nothing has changed or , disable the save button
+		if (datum.getDisplayColor() == newDisplayColor)
 		{
-			save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
-			save.setEnabled(true);
+			save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
+			save.setEnabled(false);
+			return;
 		}
+
+		save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
+		save.setEnabled(true);
+
 	}
 
 }
