@@ -47,6 +47,8 @@ public class InventorySetupsQuiverPanel
 		this.plugin = plugin;
 		this.itemManager = itemManager;
 		quiverSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.QUIVER, QUIVER_SLOT_IDX);
+		InventorySetupsSlot.addFuzzyMouseListenerToSlot(plugin, quiverSlot);
+		InventorySetupsSlot.addStackMouseListenerToSlot(plugin, quiverSlot);
 		InventorySetupsSlot.addUpdateFromContainerMouseListenerToSlot(plugin, quiverSlot);
 		InventorySetupsSlot.addUpdateFromSearchMouseListenerToSlot(plugin, quiverSlot, true);
 		InventorySetupsSlot.addRemoveMouseListenerToSlot(plugin, quiverSlot);
@@ -56,20 +58,18 @@ public class InventorySetupsQuiverPanel
 
 	public void handleQuiverHighlighting(final InventorySetup setup, boolean doesCurrentInventoryHaveQuiver)
 	{
-		if (!setup.isHighlightDifference() || !plugin.isHighlightingAllowed())
-		{
-			quiverSlot.setBackground(setup.getQuiver() != null ? ColorScheme.DARKER_GRAY_COLOR : ColorScheme.DARK_GRAY_COLOR);
-			quiverSlot.setComponentPopupMenu(setup.getQuiver() != null ? quiverSlotRightClickMenu : emptyJPopMenu);
-			return;
-		}
-
+		this.quiverSlot.setParentSetup(setup);
 		// This must be run on the client thread!
 		if (setup.getQuiver() != null)
 		{
 			InventorySetupsSlot.setSlotImageAndText(itemManager, quiverSlot, setup, setup.getQuiver().get(0));
 			quiverSlot.setComponentPopupMenu(quiverSlotRightClickMenu);
 
-			if (doesCurrentInventoryHaveQuiver)
+			if (!setup.isHighlightDifference() || !plugin.isHighlightingAllowed())
+			{
+				quiverSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+			}
+			else if (doesCurrentInventoryHaveQuiver)
 			{
 				List<InventorySetupsItem> currentQuiverDataInInvEqp = plugin.getAmmoHandler().getQuiverData();
 				final int indexInSlot = quiverSlot.getIndexInSlot();
