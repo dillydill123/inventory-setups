@@ -137,9 +137,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Optimized data storage for setups. You can now have a larger amount of setups (400+ max) or really long notes for each setup. If you experience any issues, please make a bug report.\n\n" +
-								"Added Blazing Blowpipe -> Toxic Blowpipe fuzzy mapping.\n\n" +
-								"You can now filter for setups with a specific item by using the text \"item:<name>\" in the search bar. Similarly, you can search for setups with specific notes using \"notes:<text>\".";
+		String updateText =		"Added support for Dizana's Quiver. If you had a quiver in an existing setup, you will need to update your setup after gearing up. Right click the new quiver slot above the ammo slot or refresh your setup.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);

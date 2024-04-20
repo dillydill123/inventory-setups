@@ -28,7 +28,7 @@ dependencies {
 }
 
 group = 'inventorysetups'
-version = 'v1.18'
+version = 'v1.19'
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
