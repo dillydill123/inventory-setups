@@ -137,7 +137,8 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =		"Added support for Dizana's Quiver. If you had a quiver in an existing setup, you will need to update your setup after gearing up. Right click the new quiver slot above the ammo slot or refresh your setup.";
+		String updateText =	"Fixed some bugs regarding the editing of names of existing setups or sections.\n\n" +
+				"Added support for Dizana's Quiver. If you had a quiver in an existing setup, you will need to update your setup after gearing up. Right click the new quiver slot above the ammo slot or refresh your setup.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
