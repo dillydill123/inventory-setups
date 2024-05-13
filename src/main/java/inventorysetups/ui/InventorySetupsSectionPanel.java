@@ -40,6 +40,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -365,11 +366,24 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 	}
 
 	@Override
-	public boolean isNameValid(final String name)
+	public boolean isNameValid(final String name, final Color displayColor)
 	{
-		return !name.isEmpty() &&
-				!plugin.getCache().getSectionNames().containsKey(name) &&
-				!section.getName().equals(name);
+		boolean nameExistsAlready = plugin.getCache().getSectionNames().containsKey(name);
+		boolean nameHasChanged = !section.getName().equals(name);
+		boolean displayColorHasChanged = !Objects.equals(section.getDisplayColor(), displayColor);
+		boolean nothingHasChanged = !nameHasChanged && !displayColorHasChanged;
+
+		if (nothingHasChanged || name.isEmpty())
+		{
+			return false;
+		}
+
+		if (nameHasChanged && nameExistsAlready)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override

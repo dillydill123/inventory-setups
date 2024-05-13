@@ -44,6 +44,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
 
@@ -443,11 +444,25 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 	}
 
 	@Override
-	public boolean isNameValid(final String name)
+	public boolean isNameValid(final String name, final Color displayColor)
 	{
-		return !name.isEmpty() &&
-				!plugin.getCache().getInventorySetupNames().containsKey(name) &&
-				!inventorySetup.getName().equals(name);
+
+		boolean nameExistsAlready = plugin.getCache().getInventorySetupNames().containsKey(name);
+		boolean nameHasChanged = !inventorySetup.getName().equals(name);
+		boolean displayColorHasChanged = !Objects.equals(inventorySetup.getDisplayColor(), displayColor);
+		boolean nothingHasChanged = !nameHasChanged && !displayColorHasChanged;
+
+		if (nothingHasChanged || name.isEmpty())
+		{
+			return false;
+		}
+
+		if (nameHasChanged && nameExistsAlready)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override

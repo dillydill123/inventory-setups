@@ -198,7 +198,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			@Override
 			public void mouseEntered(MouseEvent mouseEvent)
 			{
-				if (validNameImplementer.isNameValid(nameInput.getText()))
+				if (save.isEnabled())
 				{
 					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR.darker());
 				}
@@ -211,7 +211,7 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			@Override
 			public void mouseExited(MouseEvent mouseEvent)
 			{
-				if (validNameImplementer.isNameValid(nameInput.getText()))
+				if (save.isEnabled())
 				{
 					save.setForeground(ColorScheme.PROGRESS_COMPLETE_COLOR);
 				}
@@ -395,15 +395,8 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 			newDisplayColor = ((MatteBorder)((CompoundBorder) displayColorIndicator.getBorder()).getInsideBorder()).getMatteColor();
 		}
 
-		if (!validNameImplementer.isNameValid(nameInput.getText()))
-		{
-			save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
-			save.setEnabled(false);
-			return;
-		}
-
-		// If nothing has changed or , disable the save button
-		if (datum.getDisplayColor() == newDisplayColor)
+		// If nothing has changed or the name is invalid, disable the save button
+		if (!validNameImplementer.isNameValid(nameInput.getText(), newDisplayColor))
 		{
 			save.setForeground(ColorScheme.LIGHT_GRAY_COLOR.darker());
 			save.setEnabled(false);
