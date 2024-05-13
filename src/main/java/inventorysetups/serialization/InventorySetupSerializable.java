@@ -135,7 +135,6 @@ public class InventorySetupSerializable
 		boolean fv = iss.getFv() != null ? iss.getFv() : Boolean.FALSE;
 		int iId = iss.getIId() != null ? iss.getIId() : -1;
 
-		// Add quiver here
 		return new InventorySetup(inv, eq, rp, bp, qv, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId);
 	}
 

@@ -26,6 +26,7 @@ import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_IDS_SET;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_RUNE_VARBITS;
 
+// Handles special containers like rune pouches, bolt pouches, and quivers
 public class InventorySetupsAmmoHandler
 {
 
@@ -54,21 +55,23 @@ public class InventorySetupsAmmoHandler
 		this.updateDataHandler = new HashMap<>();
 		this.removeDataHandler = new HashMap<>();
 
+		// Handler for when an item being replaced is a rune pouch
 		for (final int itemID : InventorySetupsRunePouchPanel.RUNE_POUCH_IDS)
 		{
 			updateDataHandler.put(itemID, (setup) -> setup.updateRunePouch(getRunePouchData(InventorySetupsRunePouchType.NORMAL)));
 			removeDataHandler.put(itemID, (setup) -> setup.updateRunePouch(null));
 		}
-
 		for (final int itemID : InventorySetupsRunePouchPanel.RUNE_POUCH_DIVINE_IDS)
 		{
 			updateDataHandler.put(itemID, (setup) -> setup.updateRunePouch(getRunePouchData(InventorySetupsRunePouchType.DIVINE)));
 			removeDataHandler.put(itemID, (setup) -> setup.updateRunePouch(null));
 		}
 
+		// Handler for when an item being replaced is a bolt pouch
 		updateDataHandler.put(ItemID.BOLT_POUCH, (setup) -> setup.updateBoltPouch(getBoltPouchData()));
 		removeDataHandler.put(ItemID.BOLT_POUCH, (setup) -> setup.updateBoltPouch(null));
 
+		// Handler for when an item being replaced is a quiver
 		for (final int itemID : DIZANA_QUIVER_IDS)
 		{
 			updateDataHandler.put(itemID, (setup) -> setup.updateQuiver(getQuiverData()));
@@ -147,6 +150,7 @@ public class InventorySetupsAmmoHandler
 		return runePouchType != InventorySetupsRunePouchType.NONE ? getRunePouchData(runePouchType) : null;
 	}
 
+	// Must be run on client thread!
 	public List<InventorySetupsItem> getRunePouchData(final InventorySetupsRunePouchType runePouchType)
 	{
 		List<InventorySetupsItem> runePouchData = new ArrayList<>();
@@ -181,6 +185,7 @@ public class InventorySetupsAmmoHandler
 		return containerContainsBoltPouch(container) ? getBoltPouchData() : null;
 	}
 
+	// Must be run on client thread!
 	public List<InventorySetupsItem> getBoltPouchData()
 	{
 		List<InventorySetupsItem> boltPouchData = new ArrayList<>();
@@ -221,6 +226,7 @@ public class InventorySetupsAmmoHandler
 		return setupContainsQuiver(inv, eq) ? getQuiverData() : null;
 	}
 
+	// Must be run on client thread!
 	public List<InventorySetupsItem> getQuiverData()
 	{
 		// TODO replace with VarPlayer when RL adds it.
