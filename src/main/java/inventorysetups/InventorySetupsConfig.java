@@ -26,6 +26,7 @@ package inventorysetups;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_REMEMBER_LAST_SETUP;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
@@ -452,6 +453,17 @@ public interface InventorySetupsConfig extends Config
 			position = 27
 	)
 	default boolean manualBankFilter()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_REMEMBER_LAST_SETUP,
+			name = "Remember Last Setup",
+			description = "If a setup was active previously, it will be opened when the client or plugin starts",
+			position = 28
+	)
+	default boolean rememberLastSetup()
 	{
 		return false;
 	}
