@@ -136,6 +136,8 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_VERSION_STR = "version";
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
+	public static final String CONFIG_KEY_REMEMBER_LAST_SETUP = "rememberLastSetup";
+	public static final String CONFIG_KEY_LAST_SETUP_VALUE = "lastSetupValue";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
@@ -863,7 +865,22 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
-				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
+				SwingUtilities.invokeLater(() ->
+				{
+					panel.redrawOverviewPanel(true);
+					if (config.rememberLastSetup())
+					{
+						String lastSetupName = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_LAST_SETUP_VALUE);
+						if (!lastSetupName.isEmpty())
+						{
+							final InventorySetup lastSetup = getCache().getInventorySetupNames().get(lastSetupName);
+							if (lastSetup != null)
+							{
+								panel.setCurrentInventorySetup(lastSetup, true);
+							}
+						}
+					}
+				});
 			});
 
 			return true;
