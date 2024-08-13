@@ -63,6 +63,7 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.KeyCode;
+import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
@@ -398,7 +399,7 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() != null && (config.groundItemMenuSwap() || config.groundItemMenuHighlight()))
 		{
-			MenuEntry[] clientEntries = client.getMenuEntries();
+			MenuEntry[] clientEntries = client.getMenu().getMenuEntries();
 
 			// We want to be sure to preserve menu entry order while only sorting the "Take" menu options
 			int firstTakeIndex = IntStream.range(0, clientEntries.length)
@@ -469,7 +470,7 @@ public class InventorySetupsPlugin extends Plugin
 				}
 			}
 
-			client.setMenuEntries(clientEntries);
+			client.getMenu().setMenuEntries(clientEntries);
 
 		}
 	}
@@ -593,26 +594,13 @@ public class InventorySetupsPlugin extends Plugin
 				}
 
 				Color sectionMenuTargetColor = section.getDisplayColor() == null ? JagexColors.MENU_TARGET : section.getDisplayColor();
-				MenuEntry menuEntry = client.createMenuEntry(1)
-						.setOption(OPEN_SECTION_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(section.getName(), sectionMenuTargetColor))
-						.setType(MenuAction.RUNELITE_SUBMENU);
-
-				for (final InventorySetup inventorySetup : sectionsToDisplay.get(section.getName()))
-				{
-					createSectionSubMenuOnWornItems(inventorySetup, menuEntry);
-				}
+				createSectionSubMenuOnWornItems(sectionsToDisplay.get(section.getName()), section.getName(), sectionMenuTargetColor);
 
 			});
 
 			if (!unassignedSetups.isEmpty())
 			{
-				MenuEntry unassignedSectionMenuEntry = client.createMenuEntry(1)
-						.setOption(OPEN_SECTION_MENU_ENTRY)
-						.setTarget(ColorUtil.prependColorTag(UNASSIGNED_SECTION_SETUP_MENU_ENTRY, JagexColors.MENU_TARGET))
-						.setType(MenuAction.RUNELITE_SUBMENU);
-
-				unassignedSetups.forEach(setup -> createSectionSubMenuOnWornItems(setup, unassignedSectionMenuEntry));
+				createSectionSubMenuOnWornItems(unassignedSetups, UNASSIGNED_SECTION_SETUP_MENU_ENTRY, JagexColors.MENU_TARGET);
 			}
 
 		}
@@ -622,7 +610,8 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				final InventorySetup setupToShow = setupsToShowOnWornItemsList.get(setupsToShowOnWornItemsList.size() - 1 - i);
 				Color menuTargetColor = setupToShow.getDisplayColor() == null ? JagexColors.MENU_TARGET : setupToShow.getDisplayColor();
-				client.createMenuEntry(-1)
+				client.getMenu()
+						.createMenuEntry(-1)
 						.setOption(OPEN_SETUP_MENU_ENTRY)
 						.setTarget(ColorUtil.prependColorTag(setupToShow.getName(), menuTargetColor))
 						.setType(MenuAction.RUNELITE)
@@ -637,45 +626,75 @@ public class InventorySetupsPlugin extends Plugin
 		if (panel.getCurrentSelectedSetup() != null)
 		{
 			// add menu entry to filter add items
-			client.createMenuEntry(-1)
+			client.getMenu()
+					.createMenuEntry(-1)
 					.setOption(FILTER_ADD_ITEMS_ENTRY)
 					.setType(MenuAction.RUNELITE)
 					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS));
 
 			// add menu entry to filter equipment
-			client.createMenuEntry(-1)
+			client.getMenu()
+					.createMenuEntry(-1)
 					.setOption(FILTER_EQUIPMENT_ENTRY)
 					.setType(MenuAction.RUNELITE)
 					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.EQUIPMENT));
 
 			// add menu entry to filter inventory
-			client.createMenuEntry(-1)
+			client.getMenu()
+					.createMenuEntry(-1)
 					.setOption(FILTER_INVENTORY_ENTRY)
 					.setType(MenuAction.RUNELITE)
 					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.INVENTORY));
 
 			// add menu entry to filter all
-			client.createMenuEntry(-1)
+			client.getMenu()
+					.createMenuEntry(-1)
 					.setOption(FILTER_ALL_ENTRY)
 					.setType(MenuAction.RUNELITE)
 					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ALL));
 
 			// add menu entry to close setup
-			client.createMenuEntry(-1)
+			client.getMenu()
+					.createMenuEntry(-1)
 					.setOption(RETURN_TO_OVERVIEW_ENTRY)
 					.setType(MenuAction.RUNELITE)
 					.onClick(e -> panel.returnToOverviewPanel(false));
 		}
 	}
 
-	private void createSectionSubMenuOnWornItems(InventorySetup setup, MenuEntry menuEntry)
+	private void createSectionSubMenuOnWornItems(Collection<InventorySetup> setups, String name, Color color)
+	{
+		Menu subMenu = client.getMenu()
+			.createMenuEntry(1)
+			.setOption(OPEN_SECTION_MENU_ENTRY)
+			.setTarget(ColorUtil.prependColorTag(name, color))
+			.setType(MenuAction.RUNELITE_WIDGET)
+			.createSubMenu();
+
+		for (final InventorySetup inventorySetup : setups)
+		{
+			try
+			{
+				createSectionSubMenuEntryOnWornItems(inventorySetup, subMenu);
+			}
+			catch (IllegalStateException ignored)
+			{
+				// This can be thrown if the menu exceeds the menu entry limit,
+				// at which point we can just move on to the next section.
+				// Each submenu has its own internal limit, so hitting this once
+				// does not mean we cannot insert more menu entries elsewhere.
+				break;
+			}
+		}
+	}
+
+	private void createSectionSubMenuEntryOnWornItems(InventorySetup setup, Menu parentMenu)
 	{
 		Color setupMenuTargetColor = setup.getDisplayColor() == null ? JagexColors.MENU_TARGET : setup.getDisplayColor();
 
-		client.createMenuEntry(1)
+		parentMenu.createMenuEntry(0)
 				.setOption(OPEN_SETUP_MENU_ENTRY)
 				.setTarget(ColorUtil.prependColorTag(setup.getName(), setupMenuTargetColor))
-				.setParent(menuEntry)
 				.setType(MenuAction.RUNELITE)
 				.onClick(e ->
 				{
@@ -686,7 +705,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void createMenuEntryToAddAdditionalFilteredItem(int inventoryIndex)
 	{
-		client.createMenuEntry(-1)
+		client.getMenu()
+			.createMenuEntry(-1)
 			.setOption(ADD_TO_ADDITIONAL_ENTRY)
 			.onClick(e ->
 			{
