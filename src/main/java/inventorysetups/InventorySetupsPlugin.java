@@ -364,15 +364,18 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			else if (event.getKey().equals(CONFIG_KEY_PERSIST_HOTKEYS))
 			{
-				boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
-				if (config.persistHotKeysOutsideBank())
+				clientThread.invokeLater(() ->
 				{
-					registerHotkeys();
-				}
-				else if (!bankOpen)
-				{
-					unregisterHotkeys();
-				}
+					boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
+					if (config.persistHotKeysOutsideBank())
+					{
+						registerHotkeys();
+					}
+					else if (!bankOpen)
+					{
+						unregisterHotkeys();
+					}
+				});
 			}
 		}
 	}
