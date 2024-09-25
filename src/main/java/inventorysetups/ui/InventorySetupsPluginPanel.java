@@ -743,7 +743,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
-		doHighlighting();
+		plugin.getClientThread().invoke(this::doHighlighting);
 
 		if (resetScrollBar)
 		{
