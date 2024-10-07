@@ -1,6 +1,6 @@
 # Inventory Setups
 
-[![Active Installs](http://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/inventory-setups)](https://runelite.net/plugin-hub/dillydill123) [![Plugin Rank](http://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/inventory-setups)](https://runelite.net/plugin-hub)
+[![Active Installs](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/inventory-setups)](https://runelite.net/plugin-hub/dillydill123) [![Plugin Rank](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/inventory-setups)](https://runelite.net/plugin-hub)
 
 Save gear setups for specific activities.
 
