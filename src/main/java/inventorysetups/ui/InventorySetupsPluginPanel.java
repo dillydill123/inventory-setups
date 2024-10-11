@@ -33,6 +33,7 @@ import inventorysetups.InventorySetupsPlugin;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_UNASSIGNED_MAXIMIZED;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAST_SETUP_VALUE;
 import static inventorysetups.InventorySetupsPlugin.TUTORIAL_LINK;
 
 import inventorysetups.InventorySetupsSection;
@@ -445,6 +446,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 				if (SwingUtilities.isLeftMouseButton(e))
 				{
 					redrawOverviewPanel(false);
+					plugin.setConfigValue(CONFIG_KEY_LAST_SETUP_VALUE, "");
 				}
 			}
 
@@ -754,6 +756,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		plugin.setBankFilteringMode(InventorySetupsFilteringModeID.ALL);
 		plugin.doBankSearch();
 
+		plugin.setConfigValue(CONFIG_KEY_LAST_SETUP_VALUE, inventorySetup.getName());
 		validate();
 		repaint();
 
