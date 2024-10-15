@@ -26,7 +26,6 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupUtilities;
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPanelViewID;
 import inventorysetups.InventorySetupsPlugin;
@@ -751,7 +750,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			setScrollBarPosition(0);
 		}
 
-		plugin.setBankFilteringMode(InventorySetupsFilteringModeID.ALL);
 		plugin.doBankSearch();
 
 		validate();
@@ -834,7 +832,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		currentSelectedSetup = null;
-		plugin.resetBankSearch(true);
+		plugin.resetBankSearch();
 	}
 
 	public boolean isStackCompareForSlotAllowed(final InventorySetupsSlotID inventoryID, final int slotId)

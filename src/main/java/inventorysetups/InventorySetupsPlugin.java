@@ -99,6 +99,10 @@ import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.banktags.TagManager;
+import net.runelite.client.plugins.banktags.tabs.LayoutManager;
+import net.runelite.client.plugins.banktags.tabs.TabManager;
+import net.runelite.client.plugins.banktags.tabs.TagTab;
 import net.runelite.client.plugins.xptracker.XpTrackerPlugin;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
@@ -112,6 +116,7 @@ import net.runelite.client.plugins.banktags.BankTagsPlugin;
 import net.runelite.client.plugins.banktags.BankTagsService;
 import net.runelite.client.plugins.banktags.BankTag;
 import net.runelite.client.plugins.banktags.tabs.Layout;
+import sun.tools.jconsole.Tab;
 
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -164,10 +169,6 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final String NOTES_SEARCH_TAG = "notes:";
 	private static final int SPELLBOOK_VARBIT = 4070;
-	private static final int ITEMS_PER_ROW = 8;
-	private static final int ITEM_VERTICAL_SPACING = 36;
-	private static final int ITEM_HORIZONTAL_SPACING = 48;
-	private static final int ITEM_ROW_START = 51;
 
 	@Inject
 	@Getter
@@ -219,6 +220,9 @@ public class InventorySetupsPlugin extends Plugin
 	private BankTagsService bankTagsService;
 
 	@Inject
+	private LayoutManager layoutManager;
+
+	@Inject
 	private KeyManager keyManager;
 
 	@Inject
@@ -240,10 +244,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsPersistentDataManager dataManager;
 
-	@Setter
-	@Getter
-	private InventorySetupsFilteringModeID bankFilteringMode;
-
 	@Getter
 	private InventorySetupsAmmoHandler ammoHandler;
 
@@ -264,37 +264,6 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			bankFilteringMode = InventorySetupsFilteringModeID.ALL;
-			triggerBankSearchFromHotKey();
-		}
-	};
-
-	private final HotkeyListener filterInventoryHotkeyListener = new HotkeyListener(() -> config.filterInventoryHotkey())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			bankFilteringMode = InventorySetupsFilteringModeID.INVENTORY;
-			triggerBankSearchFromHotKey();
-		}
-	};
-
-	private final HotkeyListener filterEquipmentHotkeyListener = new HotkeyListener(() -> config.filterEquipmentHotkey())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			bankFilteringMode = InventorySetupsFilteringModeID.EQUIPMENT;
-			triggerBankSearchFromHotKey();
-		}
-	};
-
-	private final HotkeyListener filterAddItemsHotkeyListener = new HotkeyListener(() -> config.filterAddItemsHotkey())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			bankFilteringMode = InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS;
 			triggerBankSearchFromHotKey();
 		}
 	};
@@ -312,9 +281,6 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
 		keyManager.registerKeyListener(filterBankHotkeyListener);
-		keyManager.registerKeyListener(filterInventoryHotkeyListener);
-		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
-		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 		keyManager.registerKeyListener(sectionModeHotkeyListener);
 	}
 
@@ -322,9 +288,6 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
 		keyManager.unregisterKeyListener(filterBankHotkeyListener);
-		keyManager.unregisterKeyListener(filterInventoryHotkeyListener);
-		keyManager.unregisterKeyListener(filterEquipmentHotkeyListener);
-		keyManager.unregisterKeyListener(filterAddItemsHotkeyListener);
 		keyManager.unregisterKeyListener(sectionModeHotkeyListener);
 	}
 
@@ -630,34 +593,6 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() != null)
 		{
-			// add menu entry to filter add items
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_ADD_ITEMS_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS));
-
-			// add menu entry to filter equipment
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_EQUIPMENT_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.EQUIPMENT));
-
-			// add menu entry to filter inventory
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_INVENTORY_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.INVENTORY));
-
-			// add menu entry to filter all
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_ALL_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ALL));
-
 			// add menu entry to close setup
 			client.getMenu()
 					.createMenuEntry(-1)
@@ -703,7 +638,7 @@ public class InventorySetupsPlugin extends Plugin
 				.setType(MenuAction.RUNELITE)
 				.onClick(e ->
 				{
-					resetBankSearch(true);
+					resetBankSearch();
 					panel.setCurrentInventorySetup(setup, true);
 				});
 	}
@@ -866,8 +801,6 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientToolbar.addNavigation(navButton);
 
-		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
-
 		this.shouldTriggerInventoryHighlightOnGameTick = false;
 		this.cache = new InventorySetupsCache();
 		this.inventorySetups = new ArrayList<>();
@@ -882,18 +815,52 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				case STARTING:
 				case UNKNOWN:
+				case LOADING:
 					return false;
 			}
 
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
+				_test_add_tab();
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
 			return true;
 		});
 
+	}
+
+	private void _test_add_tab()
+	{
+		clientThread.invoke((() ->
+		{
+			// TODO: Ensure in client thread.
+			// TODO: Only create layouts for setups that don't have one?
+			for (InventorySetup invSetup : inventorySetups)
+			{
+				String tag = invSetup.getName();
+				Layout l = new Layout(tag);
+
+				// TODO: Add Equipment, RunePouch, Quiver, BoltPouch, Additional Filtered Items.
+				// TODO: Based on bankFilterMode, we can also decide what to show in the setup.
+
+				List<InventorySetupsItem> inv = invSetup.getInventory();
+				for (int i = 0; i < inv.size(); i++)
+				{
+					// We need to canocalize every Id as well so noted doesn't show in the bank.
+					int itemId = inv.get(i).getId();
+					int processedId = itemManager.canonicalize(itemId);
+
+					// TODO: If fuzzy, show all the variations using the reverse variation mapping
+					// TODO: Need to consider if the variation is already displayed.
+					l.setItemAtPos(processedId, i);
+				}
+
+				layoutManager.saveLayout(l);
+			}
+
+		}));
 	}
 
 	public void addInventorySetup()
@@ -1108,12 +1075,6 @@ public class InventorySetupsPlugin extends Plugin
 			.anyMatch(itemName -> itemName.contains(textToFilterLower));
 	}
 
-	public void doBankSearch(final InventorySetupsFilteringModeID filteringModeID)
-	{
-		bankFilteringMode = filteringModeID;
-		doBankSearch();
-	}
-
 	public void doBankSearch()
 	{
 		clientThread.invoke(() ->
@@ -1125,62 +1086,9 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			Layout l = new Layout();
-
-			// TODO: Add Equipment, RunePouch, Quiver, BoltPouch, Additional Filtered Items.
-			// TODO: Based on bankFilterMode, we can also decide what to show in the setup.
-
-			List<InventorySetupsItem> inv = panel.getCurrentSelectedSetup().getInventory();
-			for (int i = 0; i < inv.size(); i++)
-			{
-				// We need to canocalize every Id as well so noted doesn't show in the bank.
-				int itemId = inv.get(i).getId();
-				int processedId = itemManager.canonicalize(itemId);
-
-				// TODO: If fuzzy, show all the variations using the reverse variation mapping
-				// TODO: Need to consider if the variation is already displayed.
-				l.setItemAtPos(processedId, i);
-			}
-
-			BankTag bt = new BankTag()
-			{
-				public boolean contains(int itemId)
-				{
-					return l.count(itemId) > 0;
-				}
-
-				public Layout layout()
-				{
-					return l;
-				}
-			};
-
-			bankTagsService.openBankTag(bt);
+			// TODO: What happens the tag doesn't exist?
+			bankTagsService.openBankTag(currentSelectedSetup.getName());
 		});
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-
-		if (event.getMenuAction() == MenuAction.RUNELITE)
-		{
-			return;
-		}
-
-		if (panel.getCurrentSelectedSetup() == null)
-		{
-			return;
-		}
-
-		// TODO: This is probably not needed since we are just going to always have a layout.
-		if (event.getParam1() == ComponentID.BANK_ITEM_CONTAINER && event.getMenuOption().startsWith("View tab"))
-		{
-			if (config.disableBankTabBar())
-			{
-				event.consume();
-			}
-		}
 	}
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
@@ -1245,11 +1153,9 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public void resetBankSearch(boolean closeChat)
+	public void resetBankSearch()
 	{
-		// Only reset the bank automatically if filtering is allowed
-		// This makes it so that you click the search button again to cancel a filter
-		clientThread.invokeLater(() -> bankTagsService.openBankTag(null));
+		clientThread.invoke(() -> bankTagsService.openBankTag((BankTag)null));
 	}
 
 	@Subscribe(priority = -1) // Make sure this runs AFTER bank tags plugin.
@@ -1271,30 +1177,14 @@ public class InventorySetupsPlugin extends Plugin
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
 			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
 			{
-				String postTitle = " - ";
-				switch (bankFilteringMode)
-				{
-					case ALL:
-						postTitle += "All Items";
-						break;
-					case INVENTORY:
-						postTitle += "Inventory";
-						break;
-					case EQUIPMENT:
-						postTitle += "Equipment";
-						break;
-					case ADDITIONAL_FILTERED_ITEMS:
-						postTitle += "Additional Items";
-						break;
-				}
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
-				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + postTitle + "</col>");
+				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
 			}
 		}
 		else if (event.getScriptId() == ScriptID.BANKMAIN_SEARCH_TOGGLE)
 		{
 			// cancel the current filtering if the search button is clicked
-			resetBankSearch(true);
+			resetBankSearch();
 		}
 	}
 
@@ -2141,7 +2031,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Override
 	public void shutDown()
 	{
-		resetBankSearch(true);
+		resetBankSearch();
 		clientToolbar.removeNavigation(navButton);
 	}
 
