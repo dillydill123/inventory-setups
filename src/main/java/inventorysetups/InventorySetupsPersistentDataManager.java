@@ -25,13 +25,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
+import static inventorysetups.InventorySetupsPlugin.LAYOUT_PREFIX_MARKER;
+import net.runelite.client.plugins.banktags.BankTagsPlugin;
 
 @Slf4j
 public class InventorySetupsPersistentDataManager
 {
 
 	private final InventorySetupsPlugin plugin;
-	private final InventorySetupsPluginPanel panel;
 	private final ConfigManager configManager;
 	private final InventorySetupsCache cache;
 
@@ -54,7 +55,6 @@ public class InventorySetupsPersistentDataManager
 
 	@Inject
 	public InventorySetupsPersistentDataManager(final InventorySetupsPlugin plugin,
-												final InventorySetupsPluginPanel panel,
 												final ConfigManager manager,
 												final InventorySetupsCache cache,
 												final Gson gson,
@@ -62,7 +62,6 @@ public class InventorySetupsPersistentDataManager
 												final List<InventorySetupsSection> sections)
 	{
 		this.plugin = plugin;
-		this.panel = panel;
 		this.configManager = manager;
 		this.cache = cache;
 		this.gson = gson;
@@ -86,6 +85,7 @@ public class InventorySetupsPersistentDataManager
 		inventorySetups.addAll(setupsFromConfig);
 		processSetupsFromConfig();
 
+		cleanSetupLayouts();
 		Type sectionType = new TypeToken<ArrayList<InventorySetupsSection>>()
 		{
 
@@ -101,7 +101,6 @@ public class InventorySetupsPersistentDataManager
 			section.getSetups().removeIf(s -> !cache.getInventorySetupNames().containsKey(s));
 			cache.addSection(section);
 		}
-
 	}
 
 	public void updateConfig(boolean updateSetups, boolean updateSections)
@@ -285,6 +284,38 @@ public class InventorySetupsPersistentDataManager
 
 		}
 
+	}
+
+	public String getTagNameForLayout(final String inventorySetupName)
+	{
+		String hashOfName = hashFunction.hashUnencodedChars(inventorySetupName).toString();
+		return LAYOUT_PREFIX_MARKER + hashOfName;
+	}
+
+	private void cleanSetupLayouts()
+	{
+		final String layoutKeyPrefix = ConfigManager.getWholeKey(BankTagsPlugin.CONFIG_GROUP, null, BankTagsPlugin.TAG_LAYOUT_PREFIX);
+		final List<String> layoutKeys = configManager.getConfigurationKeys(layoutKeyPrefix);
+
+		Set<String> inventorySetupLayoutKeys = layoutKeys.stream()
+				.filter(key -> key.contains(LAYOUT_PREFIX_MARKER))
+				.collect(Collectors.toSet());
+
+		for (final InventorySetup setup: inventorySetups)
+		{
+			String key = layoutKeyPrefix + getTagNameForLayout(setup.getName());
+			inventorySetupLayoutKeys.remove(key);
+		}
+
+		// The remaining keys are those which have the inventory setup layout prefix but no setup exists for them.
+		// Meaning they are dangling layouts. Remove them.
+		int keyLengthMinusHash = (layoutKeyPrefix + LAYOUT_PREFIX_MARKER).length();
+		for (final String key : inventorySetupLayoutKeys)
+		{
+			String removedSetupHash = key.substring(keyLengthMinusHash);
+			String layoutKey = BankTagsPlugin.TAG_LAYOUT_PREFIX + LAYOUT_PREFIX_MARKER + removedSetupHash;
+			configManager.unsetConfiguration(BankTagsPlugin.CONFIG_GROUP, layoutKey);
+		}
 	}
 
 	private void addItemNames(final List<InventorySetupsItem> items)

@@ -152,6 +152,8 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
+	// Bank tags will standardize tag names so this must not be modified by that standardization.
+	public static final String LAYOUT_PREFIX_MARKER = "___inventorysetuplayout___";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -160,10 +162,6 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String OPEN_SECTION_MENU_ENTRY = "Open Section";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
-	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
-	private static final String FILTER_EQUIPMENT_ENTRY = "Filter equipment";
-	private static final String FILTER_INVENTORY_ENTRY = "Filter inventory";
-	private static final String FILTER_ALL_ENTRY = "Filter all";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
 	private static final String ITEM_SEARCH_TAG = "item:";
@@ -805,7 +803,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.cache = new InventorySetupsCache();
 		this.inventorySetups = new ArrayList<>();
 		this.sections = new ArrayList<>();
-		this.dataManager = new InventorySetupsPersistentDataManager(this, panel, configManager, cache, gson, inventorySetups, sections);
+		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
 
 		// load all the inventory setups from the config file
@@ -839,7 +837,7 @@ public class InventorySetupsPlugin extends Plugin
 			// TODO: Only create layouts for setups that don't have one?
 			for (InventorySetup invSetup : inventorySetups)
 			{
-				String tag = invSetup.getName();
+				String tag = this.dataManager.getTagNameForLayout(invSetup.getName());
 				Layout l = new Layout(tag);
 
 				// TODO: Add Equipment, RunePouch, Quiver, BoltPouch, Additional Filtered Items.
