@@ -221,6 +221,9 @@ public class InventorySetupsPlugin extends Plugin
 	private LayoutManager layoutManager;
 
 	@Inject
+	private TagManager tagManager;
+
+	@Inject
 	private KeyManager keyManager;
 
 	@Inject
@@ -820,7 +823,7 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
-				_test_add_tab();
+				//_test_add_tab(); // TODO: Remove
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
@@ -829,37 +832,37 @@ public class InventorySetupsPlugin extends Plugin
 
 	}
 
-	private void _test_add_tab()
-	{
-		clientThread.invoke((() ->
-		{
-			// TODO: Ensure in client thread.
-			// TODO: Only create layouts for setups that don't have one?
-			for (InventorySetup invSetup : inventorySetups)
-			{
-				String tag = this.dataManager.getTagNameForLayout(invSetup.getName());
-				Layout l = new Layout(tag);
-
-				// TODO: Add Equipment, RunePouch, Quiver, BoltPouch, Additional Filtered Items.
-				// TODO: Based on bankFilterMode, we can also decide what to show in the setup.
-
-				List<InventorySetupsItem> inv = invSetup.getInventory();
-				for (int i = 0; i < inv.size(); i++)
-				{
-					// We need to canocalize every Id as well so noted doesn't show in the bank.
-					int itemId = inv.get(i).getId();
-					int processedId = itemManager.canonicalize(itemId);
-
-					// TODO: If fuzzy, show all the variations using the reverse variation mapping
-					// TODO: Need to consider if the variation is already displayed.
-					l.setItemAtPos(processedId, i);
-				}
-
-				layoutManager.saveLayout(l);
-			}
-
-		}));
-	}
+//	private void _test_add_tab() // TODO: Remove
+//	{
+//		clientThread.invoke((() ->
+//		{
+//			// TODO: Ensure in client thread.
+//			// TODO: Only create layouts for setups that don't have one?
+//			for (InventorySetup invSetup : inventorySetups)
+//			{
+//				String tag = InventorySetupsPersistentDataManager.getTagNameForLayout(invSetup.getName());
+//				Layout l = new Layout(tag);
+//
+//				// TODO: Add Equipment, RunePouch, Quiver, BoltPouch, Additional Filtered Items.
+//				// TODO: Based on bankFilterMode, we can also decide what to show in the setup.
+//
+//				List<InventorySetupsItem> inv = invSetup.getInventory();
+//				for (int i = 0; i < inv.size(); i++)
+//				{
+//					// We need to canocalize every Id as well so noted doesn't show in the bank.
+//					int itemId = inv.get(i).getId();
+//					int processedId = itemManager.canonicalize(itemId);
+//
+//					// TODO: If fuzzy, show all the variations using the reverse variation mapping
+//					// TODO: Need to consider if the variation is already displayed.
+//					l.setItemAtPos(processedId, i);
+//				}
+//
+//				layoutManager.saveLayout(l);
+//			}
+//
+//		}));
+//	}
 
 	public void addInventorySetup()
 	{
@@ -1084,8 +1087,14 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			// TODO: What happens the tag doesn't exist?
-			bankTagsService.openBankTag(currentSelectedSetup.getName());
+			final String tagName = InventorySetupsPersistentDataManager.getTagNameForLayout(currentSelectedSetup.getName());
+			Layout setupLayout = layoutManager.loadLayout(tagName);
+			if (setupLayout == null)
+			{
+				setupLayout = InventorySetupUtilities.getPresetLayout(currentSelectedSetup, itemManager, tagManager);
+				layoutManager.saveLayout(setupLayout);
+			}
+			bankTagsService.openBankTag(tagName);
 		});
 	}
 

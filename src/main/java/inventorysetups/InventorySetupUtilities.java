@@ -2,11 +2,24 @@ package inventorysetups;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import javax.swing.SwingUtilities;
+
+import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.ItemComposition;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemVariationMapping;
+import net.runelite.client.plugins.banktags.TagManager;
+import net.runelite.client.plugins.banktags.tabs.Layout;
 import net.runelite.client.util.SwingUtil;
 
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
+import static net.runelite.api.ItemID.BLIGHTED_SUPER_RESTORE1;
+import static net.runelite.api.ItemID.IMBUED_GUTHIX_MAX_CAPE_L;
 
 public class InventorySetupUtilities
 {
@@ -116,5 +129,111 @@ public class InventorySetupUtilities
 			// Actually remove anything
 			c.removeAll();
 		}
+	}
+
+	public static Layout getZigZagLayout(final InventorySetup setup)
+	{
+		final String tag = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
+		final Layout layout = new Layout(tag);
+
+		return layout;
+	}
+
+	public static Layout getPresetLayout(final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
+	{
+		// This generates a "Preset" layout based on an InventorySetup
+		// It will have the equipment on the left and inventory on the right
+		// This must be called on the clientThread
+
+		// TODO: Need to create InventorySetupsVariationMapping helper to check both core and custom mappings
+		List<Integer> extraFuzzyItemsToDisplay = new ArrayList<>();
+
+		final String tag = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
+		final Layout layout = new Layout(tag);
+
+		// Determine size to help reduce amount of copy overs.
+		// Since the inventory will be a 4x7 on the right side of the bank, it will end at position 55.
+		int startOfAdditionalItems = 56;
+		int startOfBoltPouch = 48;
+		int startOfRunePouch = 40;
+
+		int newSizeGuess = setup.getAdditionalFilteredItems().size() + startOfAdditionalItems;
+		layout.resize(newSizeGuess);
+
+		// Layout the equipment on left side
+		// TODO: Add items to tag with fuzzy.
+		final List<InventorySetupsItem> eqp = setup.getEquipment();
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.HEAD.getSlotIdx()).getId(), 1);
+		if (setup.getQuiver() != null && !setup.getQuiver().isEmpty())
+		{
+			layout.setItemAtPos(setup.getQuiver().get(0).getId(), 2);
+		}
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.CAPE.getSlotIdx()).getId(), 8);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.AMULET.getSlotIdx()).getId(), 9);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.WEAPON.getSlotIdx()).getId(), 16);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.BODY.getSlotIdx()).getId(), 17);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.SHIELD.getSlotIdx()).getId(), 18);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.AMMO.getSlotIdx()).getId(), 10);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.LEGS.getSlotIdx()).getId(), 25);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.GLOVES.getSlotIdx()).getId(), 32);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.BOOTS.getSlotIdx()).getId(), 33);
+		layout.setItemAtPos(eqp.get(EquipmentInventorySlot.RING.getSlotIdx()).getId(), 34);
+
+		// Layout the inventory on the right side
+		int invRow = 0;
+		int invCol = 4;
+		int width = 8;
+		for (final InventorySetupsItem item: setup.getInventory())
+		{
+			int id = itemManager.canonicalize(item.getId());
+			layout.setItemAtPos(id, invCol + (invRow * width));
+			tagManager.addTag(id, tag, item.isFuzzy());
+			if (invCol == 7)
+			{
+				invCol = 4;
+				invRow++;
+			}
+			else
+			{
+				invCol++;
+			}
+		}
+
+		// Rune pouch below equipment
+		if (setup.getRune_pouch() != null)
+		{
+			for (int i = 0; i < setup.getRune_pouch().size(); i++)
+			{
+				final InventorySetupsItem item = setup.getRune_pouch().get(i);
+				int id = itemManager.canonicalize(item.getId());
+				tagManager.addTag(id, tag, item.isFuzzy());
+				layout.setItemAtPos(id, i + startOfRunePouch);
+			}
+		}
+
+		// Bolt pouch below the rune pouch
+		if (setup.getBoltPouch() != null)
+		{
+			for (int i = 0; i < setup.getBoltPouch().size(); i++)
+			{
+				final InventorySetupsItem item = setup.getBoltPouch().get(i);
+				int id = itemManager.canonicalize(item.getId());
+				tagManager.addTag(id, tag, item.isFuzzy());
+				layout.setItemAtPos(id, i + startOfBoltPouch);
+			}
+		}
+
+		// Additional items
+		int c = 0;
+		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
+		for (final InventorySetupsItem item : additionalItems)
+		{
+			int id = itemManager.canonicalize(item.getId());
+			tagManager.addTag(id, tag, item.isFuzzy());
+			layout.setItemAtPos(id, startOfAdditionalItems + c);
+			c++;
+		}
+
+		return layout;
 	}
 }

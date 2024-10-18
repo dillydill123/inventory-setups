@@ -286,7 +286,7 @@ public class InventorySetupsPersistentDataManager
 
 	}
 
-	public String getTagNameForLayout(final String inventorySetupName)
+	public static String getTagNameForLayout(final String inventorySetupName)
 	{
 		String hashOfName = hashFunction.hashUnencodedChars(inventorySetupName).toString();
 		return LAYOUT_PREFIX_MARKER + hashOfName;
