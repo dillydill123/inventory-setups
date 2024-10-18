@@ -693,7 +693,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	private void onWidgetClosed(WidgetClosed event)
 	{
-
 		if (event.getGroupId() == InterfaceID.BANK && !config.persistHotKeysOutsideBank())
 		{
 			unregisterHotkeys();
@@ -703,20 +702,8 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		// when the bank is loaded up allowing filtering again
-		// this is to make it so the bank will refilter if a tab was clicked and then the player exited the bank
 		if (event.getGroupId() == InterfaceID.BANK)
 		{
-			// If manual bank filter is selected, don't allow filtering when the bank is opened
-			// filtering will only occur if the user selects a setup or uses a filtering hotkey
-			// while the bank is already open
-
-//			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
-//			{
-//				// start a bank search so the bank is filtered when it's opened
-//				doBankSearch();
-//			}
-
 			if (!config.persistHotKeysOutsideBank())
 			{
 				registerHotkeys();
@@ -823,7 +810,6 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
-				//_test_add_tab(); // TODO: Remove
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
@@ -831,38 +817,6 @@ public class InventorySetupsPlugin extends Plugin
 		});
 
 	}
-
-//	private void _test_add_tab() // TODO: Remove
-//	{
-//		clientThread.invoke((() ->
-//		{
-//			// TODO: Ensure in client thread.
-//			// TODO: Only create layouts for setups that don't have one?
-//			for (InventorySetup invSetup : inventorySetups)
-//			{
-//				String tag = InventorySetupsPersistentDataManager.getTagNameForLayout(invSetup.getName());
-//				Layout l = new Layout(tag);
-//
-//				// TODO: Add Equipment, RunePouch, Quiver, BoltPouch, Additional Filtered Items.
-//				// TODO: Based on bankFilterMode, we can also decide what to show in the setup.
-//
-//				List<InventorySetupsItem> inv = invSetup.getInventory();
-//				for (int i = 0; i < inv.size(); i++)
-//				{
-//					// We need to canocalize every Id as well so noted doesn't show in the bank.
-//					int itemId = inv.get(i).getId();
-//					int processedId = itemManager.canonicalize(itemId);
-//
-//					// TODO: If fuzzy, show all the variations using the reverse variation mapping
-//					// TODO: Need to consider if the variation is already displayed.
-//					l.setItemAtPos(processedId, i);
-//				}
-//
-//				layoutManager.saveLayout(l);
-//			}
-//
-//		}));
-//	}
 
 	public void addInventorySetup()
 	{

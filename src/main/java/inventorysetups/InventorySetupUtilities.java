@@ -145,8 +145,8 @@ public class InventorySetupUtilities
 		// It will have the equipment on the left and inventory on the right
 		// This must be called on the clientThread
 
-		// TODO: Need to create InventorySetupsVariationMapping helper to check both core and custom mappings
-		List<Integer> extraFuzzyItemsToDisplay = new ArrayList<>();
+		// Note: Core Layout API does not support custom variation mappings, so even if fuzzy is marked,
+		// custom mappings will not work in the layout.
 
 		final String tag = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
 		final Layout layout = new Layout(tag);
