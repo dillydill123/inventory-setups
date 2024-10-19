@@ -131,12 +131,25 @@ public class InventorySetupUtilities
 		}
 	}
 
-	public static Layout getZigZagLayout(final InventorySetup setup)
+	public static Layout getZigZagLayout(final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
 	{
 		final String tag = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
 		final Layout layout = new Layout(tag);
 
 		return layout;
+	}
+
+	public static Layout getSetupLayout(String type, final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
+	{
+		// TODO: Use actual config option
+		if (type.equals("preset"))
+		{
+			return getPresetLayout(setup, itemManager, tagManager);
+		}
+		else
+		{
+			return getZigZagLayout(setup, itemManager, tagManager);
+		}
 	}
 
 	public static Layout getPresetLayout(final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
