@@ -17,9 +17,17 @@ import static inventorysetups.InventorySetupsPlugin.LAYOUT_PREFIX_MARKER;
 
 public class InventorySetupLayoutUtilities
 {
-	private InventorySetupLayoutUtilities()
-	{
+	private final ItemManager itemManager;
 
+	private final TagManager tagManager;
+
+	private final LayoutManager layoutManager;
+
+	public InventorySetupLayoutUtilities(final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager)
+	{
+		this.itemManager = itemManager;
+		this.tagManager = tagManager;
+		this.layoutManager = layoutManager;
 	}
 
 	public static String getTagNameForLayout(final String inventorySetupName)
@@ -28,7 +36,7 @@ public class InventorySetupLayoutUtilities
 		return LAYOUT_PREFIX_MARKER + hashOfName;
 	}
 
-	public static Layout getLayoutForSetup(final String inventorySetupName, final LayoutManager layoutManager)
+	public Layout getSetupLayout(final String inventorySetupName, final LayoutManager layoutManager)
 	{
 		final String tagName = getTagNameForLayout(inventorySetupName);
 		final Layout layout = layoutManager.loadLayout(tagName);
@@ -36,30 +44,30 @@ public class InventorySetupLayoutUtilities
 		return layout;
 	}
 
-	public static Layout createSetupLayout(String type, final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
+	public Layout createSetupLayout(String type, final InventorySetup setup)
 	{
 		// TODO: Use actual config option
 		if (type.equals("preset"))
 		{
-			return getPresetLayout(setup, itemManager, tagManager);
+			return getPresetLayout(setup);
 		}
 		else
 		{
-			return getZigZagLayout(setup, itemManager, tagManager);
+			return getZigZagLayout(setup);
 		}
 	}
 
 
-	public static Layout getZigZagLayout(final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
+	public Layout getZigZagLayout(final InventorySetup setup)
 	{
 		// TODO: Add this
-		final String tag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
+		final String tag = getTagNameForLayout(setup.getName());
 		final Layout layout = new Layout(tag);
 
 		return layout;
 	}
 
-	public static Layout getPresetLayout(final InventorySetup setup, final ItemManager itemManager, final TagManager tagManager)
+	public Layout getPresetLayout(final InventorySetup setup)
 	{
 		// This generates a "Preset" layout based on an InventorySetup
 		// It will have the equipment on the left and inventory on the right
@@ -68,7 +76,7 @@ public class InventorySetupLayoutUtilities
 		// Note: Core Layout API does not support custom variation mappings, so even if fuzzy is marked,
 		// custom mappings will not work in the layout.
 
-		final String tag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
+		final String tag = getTagNameForLayout(setup.getName());
 		final Layout layout = new Layout(tag);
 
 		// Determine size to help reduce amount of copy overs.
@@ -82,21 +90,21 @@ public class InventorySetupLayoutUtilities
 
 		// Layout the equipment on left side
 		final List<InventorySetupsItem> eqp = setup.getEquipment();
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.HEAD.getSlotIdx()), 1, itemManager, tagManager);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.HEAD.getSlotIdx()), 1);
 		if (setup.getQuiver() != null && !setup.getQuiver().isEmpty())
 		{
-			addEquipmentSlotToLayout(layout, tag, setup.getQuiver().get(0), 2, itemManager, tagManager);
+			addItemToLayout(layout, tag, setup.getQuiver().get(0), 2);
 		}
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.CAPE.getSlotIdx()), 8, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMULET.getSlotIdx()), 9, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMMO.getSlotIdx()), 10, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.WEAPON.getSlotIdx()), 16, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BODY.getSlotIdx()), 17, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.SHIELD.getSlotIdx()), 18, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.LEGS.getSlotIdx()), 25, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.GLOVES.getSlotIdx()), 32, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BOOTS.getSlotIdx()), 33, itemManager, tagManager);
-		addEquipmentSlotToLayout(layout, tag, eqp.get(EquipmentInventorySlot.RING.getSlotIdx()), 34, itemManager, tagManager);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.CAPE.getSlotIdx()), 8);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMULET.getSlotIdx()), 9);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMMO.getSlotIdx()), 10);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.WEAPON.getSlotIdx()), 16);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BODY.getSlotIdx()), 17);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.SHIELD.getSlotIdx()), 18);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.LEGS.getSlotIdx()), 25);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.GLOVES.getSlotIdx()), 32);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BOOTS.getSlotIdx()), 33);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.RING.getSlotIdx()), 34);
 
 		// Layout the inventory on the right side
 		int invRow = 0;
@@ -123,10 +131,7 @@ public class InventorySetupLayoutUtilities
 		{
 			for (int i = 0; i < setup.getRune_pouch().size(); i++)
 			{
-				final InventorySetupsItem item = setup.getRune_pouch().get(i);
-				int id = itemManager.canonicalize(item.getId());
-				tagManager.addTag(id, tag, item.isFuzzy());
-				layout.setItemAtPos(id, i + startOfRunePouch);
+				addItemToLayout(layout, tag, setup.getRune_pouch().get(i), i + startOfRunePouch);
 			}
 		}
 
@@ -135,90 +140,60 @@ public class InventorySetupLayoutUtilities
 		{
 			for (int i = 0; i < setup.getBoltPouch().size(); i++)
 			{
-				final InventorySetupsItem item = setup.getBoltPouch().get(i);
-				int id = itemManager.canonicalize(item.getId());
-				tagManager.addTag(id, tag, item.isFuzzy());
-				layout.setItemAtPos(id, i + startOfBoltPouch);
+				addItemToLayout(layout, tag, setup.getBoltPouch().get(i), i + startOfBoltPouch);
 			}
 		}
 
 		// Additional items
-		int c = 0;
+		int additionalItemsCounter = 0;
 		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
 		for (final InventorySetupsItem item : additionalItems)
 		{
-			int id = itemManager.canonicalize(item.getId());
-			tagManager.addTag(id, tag, item.isFuzzy());
-			layout.setItemAtPos(id, startOfAdditionalItems + c);
-			c++;
+			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems);
+			additionalItemsCounter++;
 		}
 
 		return layout;
 	}
 
-	private static void addEquipmentSlotToLayout(final Layout layout, final String tagName, final InventorySetupsItem item, final int pos, final ItemManager itemManager, final TagManager tagManager)
+	private void addItemToLayout(final Layout layout, final String tagName, final InventorySetupsItem item, final int pos)
 	{
 		int id = itemManager.canonicalize(item.getId());
 		layout.setItemAtPos(id, pos);
 		tagManager.addTag(id, tagName, item.isFuzzy());
 	}
 
-	public static HashMap<Integer, Integer> getSetupItemCounts(final InventorySetup setup, final ItemManager itemManager)
-	{
-		HashMap<Integer, Integer> itemsInSetup = new HashMap<>();
-		setup.getInventory().forEach(item ->
-				itemsInSetup.put(itemManager.canonicalize(item.getId()), itemsInSetup.getOrDefault(itemManager.canonicalize(item.getId()), 0) + 1)
-		);
-		setup.getEquipment().forEach(item ->
-				itemsInSetup.put(itemManager.canonicalize(item.getId()), itemsInSetup.getOrDefault(itemManager.canonicalize(item.getId()), 0) + 1)
-		);
-		setup.getAdditionalFilteredItems().values().forEach(item ->
-				itemsInSetup.put(itemManager.canonicalize(item.getId()), itemsInSetup.getOrDefault(itemManager.canonicalize(item.getId()), 0) + 1)
-		);
-		if (setup.getRune_pouch() != null)
-		{
-			setup.getRune_pouch().forEach(item ->
-					itemsInSetup.put(itemManager.canonicalize(item.getId()), itemsInSetup.getOrDefault(itemManager.canonicalize(item.getId()), 0) + 1)
-			);
-		}
-		if (setup.getBoltPouch() != null)
-		{
-			setup.getBoltPouch().forEach(item ->
-					itemsInSetup.put(itemManager.canonicalize(item.getId()), itemsInSetup.getOrDefault(itemManager.canonicalize(item.getId()), 0) + 1)
-			);
-		}
-		if (setup.getQuiver() != null)
-		{
-			setup.getQuiver().forEach(item ->
-					itemsInSetup.put(itemManager.canonicalize(item.getId()), itemsInSetup.getOrDefault(itemManager.canonicalize(item.getId()), 0) + 1)
-			);
-		}
-		// Remove empty if it's there.
-		itemsInSetup.remove(-1);
-		return itemsInSetup;
-	}
-
-	public static void recalculateLayout(final InventorySetup setup, final ItemManager itemManager, TagManager tagManager, final LayoutManager layoutManager)
+	public void recalculateLayout(final InventorySetup setup)
 	{
 		final List<InventorySetupsItem> itemsInSetup = InventorySetup.getSetupItems(setup);
 		final String tagName = getTagNameForLayout(setup.getName());
 		final Layout layout = layoutManager.loadLayout(tagName);
 		assert layout != null : "Setup " + setup.getName() + " has no layout.";
 
+		// Remove the tag entirely.
 		tagManager.removeTag(tagName);
+
+		// Re-add every item in the tag.
 		HashSet<Integer> idsInSetup = new HashSet<>();
 		for (InventorySetupsItem item : itemsInSetup)
 		{
 			int processedId = itemManager.canonicalize(item.getId());
+
+			// Fuzzy tags and non-fuzzy tags are actually stored separate, so a non-fuzzy item can't override
+			// The same fuzzy item that came before it (even though this would be a rare case).
+			// I don't know the effect of the fuzzy and non-fuzzy items being part of both tags.
 			tagManager.addTag(processedId, tagName, item.isFuzzy());
+
+			// Track all the IDs in the setup
 			idsInSetup.add(processedId);
 			if (item.isFuzzy())
 			{
-				Collection<Integer> variations = ItemVariationMapping.getVariations(ItemVariationMapping.map(processedId));
-				idsInSetup.addAll(variations);
+				idsInSetup.addAll(ItemVariationMapping.getVariations(ItemVariationMapping.map(processedId)));
 			}
 		}
 
+		// Remove any items that do not belong in the layout.
+		HashSet<Integer> idsInLayout = new HashSet<>();
 		for (int i = 0; i < layout.size(); i++)
 		{
 			int layoutId = layout.getItemAtPos(i);
@@ -230,102 +205,22 @@ public class InventorySetupLayoutUtilities
 			if (!idsInSetup.contains(layoutId))
 			{
 				layout.removeItemAtPos(i);
+				continue;
+			}
+
+			idsInLayout.add(layoutId);
+		}
+
+		// Add any items that should belong in the layout based on the setup.
+		for (final Integer idInSetup : idsInSetup)
+		{
+			if (!idsInLayout.contains(idInSetup))
+			{
+				layout.addItem(idInSetup);
 			}
 		}
 
 		layoutManager.saveLayout(layout);
 	}
 
-	public static void removeItemsFromLayoutNotInSetup(final InventorySetup setup, final List<InventorySetupsItem> itemsToRemove, final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager)
-	{
-		HashMap<Integer, Integer> itemsInSetup = getSetupItemCounts(setup, itemManager);
-		HashSet<Integer> itemsToRemoveSet = new HashSet<>();
-
-		itemsToRemove.forEach(item -> itemsToRemoveSet.add(item.getId()));
-
-		final String tagName = getTagNameForLayout(setup.getName());
-		final Layout layout = getLayoutForSetup(setup.getName(), layoutManager);
-		for (final InventorySetupsItem item : itemsToRemove)
-		{
-			int itemIdToRemove = item.getId();
-			if (itemsInSetup.getOrDefault(itemIdToRemove, 0) != 0)
-			{
-				continue;
-			}
-			for (int i = 0; i < layout.size(); i++)
-			{
-				int layoutId = layout.getItemAtPos(i);
-				if (itemsToRemoveSet.contains(layoutId))
-				{
-					layout.removeItemAtPos(i);
-					tagManager.removeTag(layoutId, tagName);
-				}
-			}
-		}
-	}
-
-
-
-	public static void removeItemFromLayout(final InventorySetup setup, final InventorySetupsItem item, final Layout layout, final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager)
-	{
-		if (item.getId() == -1)
-		{
-			return;
-		}
-
-		int processedId = itemManager.canonicalize(item.getId());
-		final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
-		final HashMap<Integer, Integer> itemsInSetup = getSetupItemCounts(setup, itemManager);
-		boolean removeAll = false;
-
-		if (itemsInSetup.getOrDefault(processedId, 0) < 1)
-		{
-			tagManager.removeTag(processedId, tagName);
-			removeAll = true;  // Remove all instances if the setup does not contain the item.
-		}
-
-		// Because we aren't checking if there is the same item that is fuzzy elsewhere in the setup.
-		// This will cause the variation mapped items to be moved to the first positions
-		// This is probably fine, since it's not common someone would have the same item variation mapped
-		// multiple times.
-		if (item.isFuzzy())
-		{
-			InventorySetupLayoutUtilities.removeVariationMappedItemsFromLayout(setup, processedId, layout, itemManager, tagManager, layoutManager);
-		}
-
-		for (int i = 0; i < layout.size(); i++)
-		{
-			if (layout.getItemAtPos(i) == processedId)
-			{
-				layout.removeItemAtPos(i);
-				if (!removeAll)
-				{
-					break;
-				}
-			}
-		}
-	}
-
-	public static void removeVariationMappedItemsFromLayout(final InventorySetup setup, final int itemId,  final Layout layout, ItemManager itemManager, TagManager tagManager, final LayoutManager layoutManager)
-	{
-		final String tagName = getTagNameForLayout(setup.getName());
-
-		int processedId = itemManager.canonicalize(itemId);
-		int baseId = ItemVariationMapping.map(processedId);
-		HashSet<Integer> variations = new HashSet<>(ItemVariationMapping.getVariations(baseId));
-
-		for (int i = 0; i < layout.size(); i++)
-		{
-			int layoutId = layout.getItemAtPos(i);
-			// We need to check the tag to ensure that we do not delete the item that is being marked fuzzy
-			// We also need to check that it is in the list of variations, so we do not delete
-			// other items that are variation mapped.
-
-			// Don't worry about the case that the same item might be fuzzy in another part of the setup, and that we should keep it in the layout. This is highly unlikely.
-			if (layoutId != -1 && variations.contains(layoutId) && !tagManager.findTag(layoutId, tagName))
-			{
-				layout.removeItemAtPos(i);
-			}
-		}
-	}
 }
