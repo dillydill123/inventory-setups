@@ -286,12 +286,6 @@ public class InventorySetupsPersistentDataManager
 
 	}
 
-	public static String getTagNameForLayout(final String inventorySetupName)
-	{
-		String hashOfName = hashFunction.hashUnencodedChars(inventorySetupName).toString();
-		return LAYOUT_PREFIX_MARKER + hashOfName;
-	}
-
 	private void cleanSetupLayouts()
 	{
 		final String layoutKeyPrefix = ConfigManager.getWholeKey(BankTagsPlugin.CONFIG_GROUP, null, BankTagsPlugin.TAG_LAYOUT_PREFIX);
@@ -303,7 +297,7 @@ public class InventorySetupsPersistentDataManager
 
 		for (final InventorySetup setup: inventorySetups)
 		{
-			String key = layoutKeyPrefix + getTagNameForLayout(setup.getName());
+			String key = layoutKeyPrefix + InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 			inventorySetupLayoutKeys.remove(key);
 		}
 

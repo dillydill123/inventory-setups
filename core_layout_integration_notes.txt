@@ -14,6 +14,18 @@ Setup Added
  - Create a layout with preset or zigzag and save it. Also create a tag.
 Setup name Changed
  - Get the layout, remove the old layout and tag, and save a new layout and tag with the new name.
+Helper function to remove all untagged items in a layout
+ - Variation mapped items will not be tagged in the setup, so we don't remove them.
+Helper function to remove items from a layout
+ - This will also remove the items from the tag.
+Item fuzzy toggled
+ - Remove the item from the tag and add it again with the new variation setting (done)
+ - If adding, that's it, can stop there.
+ - If removing, need to get all variations of that item and update the layout.
+  - Get all untagged items from a layout
+  - For each untagged item, check if it's in the variation mapping for the item that was toggled fuzzy in the layout.
+    - If both these conditions are true, delete item from the layout.
+    - Don't worry about the case that the same item might be fuzzy in another part of the setup and you should keep it in the layout. This is highly unlikely. Make a comment discussing this.
 
 ^^^ DONE ^^^
 vvv TODO VVV
@@ -27,24 +39,23 @@ Convert Bank Tag Layout data to core layout data.
   - How? Adam Layouts has a conversion.
   - Use a key to indicate if the conversion has happened before.
 Items Changed in a Setup
+  - Need to handle changed by slot and changed by search.
   - If someone changes an item in a setup by slot, we need to update the layout (and tag) as well.
+  - Recalculate function. Remove tag, re-add all items to tag?
   - Item added: Just add the new item to the first slot -1 in the layout, also update the tag. If the item is fuzzy, simply mark that in the tag.
-  - Item removed: Remove the first occurrence of that item in the layout, also update the tag. What if the item was fuzzy? Need to do the same algorithm as below for fuzzy toggled.
-  - Item Swapped: Basically the two above combined. Replace the first occurrence of the old item in the layout with the new item, also update the tag.
+    - I think I just need to add the item to the tag. The layout will be updated for me. For ammo container, add
+  - Item removed: Need to recalculate the items that should exist in the tag. This is because an ammo container may have been
+  - Item Swapped: Basically the two above combined. First remove the item, then add the new item.
+  - Need to handle ammo containers?
+  - Need a function to remove items from a layout that are not in a setup. Update the setup first then update the layout.
+    - When removing an item, do we need to worry about removing it from the tag as well?
+    - If removing a rune pouch, the runes were tagged. Those would need to be removed.
 Importing Setups
  - Maybe create an InventorySetupPortable? which has a layout object and a InventorySetup object. Can serialize that instead.
 Exporting Setups
  - Use InventorySetupPortable idea from above?
-Item fuzzy toggled
- - Update the tag with item and set variation
- - First, remove the tag and add it again with the new variation setting (done)
- - If adding, that's it, can stop there.
- - If removing, need to get all varations of that item and update the layout
-   - Keep original itemId, get it's baseID and then get the variations. Remove original itemId from that list of variations to get the items that should be removed from the layout.
-   - Iterate through the items in the layout and check (1) if it's in the list of variations and that it (2) is also not elsewhere in the setup (non fuzzy check).
-     - If both these conditions are true, delete item from the layout.
-     - Don't worry about the case that the same item might be fuzzy in another part of the setup and you should keep it in the layout. This is highly unlikely. Make a comment discussing this.
-     - Don't worry about the case that the same item might have been deleted from the layout before elsewhere in the setup. This is highly unlikely. Make a comment discussing this.
 Overwrite layout
  - Add option in additional worn items to overwrite layout. Also overwrite the tag.
+ - Remove tag and then recreate it. Save layout to overwrite it.
+Add ability to export tag that core bank tags can read.
 Make sure all TODOs are taken care of

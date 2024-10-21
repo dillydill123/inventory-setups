@@ -875,7 +875,7 @@ public class InventorySetupsPlugin extends Plugin
 			dataManager.updateConfig(true, false);
 
 			// TODO: Add config option instead of just "preset"
-			Layout setupLayout = InventorySetupUtilities.getSetupLayout("preset", invSetup, itemManager, tagManager);
+			Layout setupLayout = InventorySetupLayoutUtilities.createSetupLayout("preset", invSetup, itemManager, tagManager);
 			layoutManager.saveLayout(setupLayout);
 
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -1046,7 +1046,7 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			final String tagName = InventorySetupsPersistentDataManager.getTagNameForLayout(currentSelectedSetup.getName());
+			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
 			bankTagsService.openBankTag(tagName, BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
 		});
 	}
@@ -1187,11 +1187,11 @@ public class InventorySetupsPlugin extends Plugin
 			// Regenerate the layout and tag.
 			clientThread.invoke(() ->
 			{
-				String tagName = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
+				String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 				tagManager.removeTag(tagName);
 				layoutManager.removeLayout(tagName);
 
-				Layout newLayout = InventorySetupUtilities.getSetupLayout("preset", setup, itemManager, tagManager);
+				Layout newLayout = InventorySetupLayoutUtilities.createSetupLayout("preset", setup, itemManager, tagManager);
 				layoutManager.saveLayout(newLayout);
 			});
 
@@ -1434,6 +1434,13 @@ public class InventorySetupsPlugin extends Plugin
 			ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, dummyItem);
 
 			container.set(slot.getIndexInSlot(), dummyItem);
+
+			// Update the layout
+			// TODO this does not handle ammo containers.
+			final Layout layout = InventorySetupLayoutUtilities.getLayoutForSetup(slot.getParentSetup().getName(), layoutManager);
+			InventorySetupLayoutUtilities.removeItemFromLayout(slot.getParentSetup(), itemToBeReplaced, layout, itemManager, tagManager, layoutManager);
+			layoutManager.saveLayout(layout);
+
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
@@ -1481,15 +1488,23 @@ public class InventorySetupsPlugin extends Plugin
 		final boolean variation = item.isFuzzy();
 		clientThread.invoke(() ->
 		{
-			final String tagName = InventorySetupsPersistentDataManager.getTagNameForLayout(slot.getParentSetup().getName());
-			if (itemId != -1)
+			if (itemId == -1)
 			{
-				tagManager.removeTag(itemId, tagName);
-				tagManager.addTag(itemId, tagName, variation);
+				return;
 			}
-
-			// TODO: If fuzzy was removed, need to remove the variations.
-			// TODO: Create a remove variations helper function.
+//
+//			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(slot.getParentSetup().getName());
+//			final Layout layout = layoutManager.loadLayout(tagName);
+//			assert layout != null : "Setup " + slot.getParentSetup().getName() + " has no layout.";
+			InventorySetupLayoutUtilities.recalculateLayout(slot.getParentSetup(), itemManager, tagManager, layoutManager);
+//			if (!variation)
+//			{
+//				// If the item is not fuzzy anymore, we need to remove some items from the layout.
+//				// Variation added items will not be in the tag, so we can safely remove these untagged items
+//				// From the layout.
+//				InventorySetupLayoutUtilities.removeVariationMappedItemsFromLayout(slot.getParentSetup(), itemId, layout, itemManager, tagManager, layoutManager);
+//			}
+//			layoutManager.saveLayout(layout);
 		});
 
 		dataManager.updateConfig(true, false);
@@ -1581,7 +1596,7 @@ public class InventorySetupsPlugin extends Plugin
 			// Remove the layout and tag
 			clientThread.invoke(() ->
 			{
-				String tagName = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
+				String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 				tagManager.removeTag(tagName);
 				layoutManager.removeLayout(tagName);
 			});
@@ -2190,7 +2205,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 		// Make sure not to set the new name of the setup before allowing the cache to update
-		final String oldTag = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
+		final String oldTag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 		cache.updateSetupName(setup, newName);
 		setup.setName(newName);
 
@@ -2198,7 +2213,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invoke(() ->
 		{
 			// Rename the tag
-			String newTag = InventorySetupsPersistentDataManager.getTagNameForLayout(setup.getName());
+			String newTag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 			tagManager.renameTag(oldTag, newTag);
 
 			// Construct the new Layout using the new tag but the old layout info.
