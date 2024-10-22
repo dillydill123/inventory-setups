@@ -39,6 +39,9 @@ vvv TODO VVV
 
 Start Bank Tags Plugin on startup
   - What about Hub BTL? How should it be handled?
+  - Bug when turning on bank tags while tab is opened? Can't reproduce.
+  - Handle situations where Bank Tags isn't on
+    - Auto layout option hide.
 Add ZigZag default layout
 Migrate Bank Tag Layout data to core layout data on first time using the plugins.
   - How? Adam Layouts has a conversion.
@@ -49,6 +52,7 @@ Importing a Setup + Layout
 Exporting a Setup + Layout
  - Use InventorySetupPortable idea from above?
 Add ability to export tag that core bank tags can read.
+
 
 
 --- OTHER ---

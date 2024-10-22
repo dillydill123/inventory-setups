@@ -187,6 +187,7 @@ public class InventorySetupLayoutUtilities
 
 		// Re-add every item in the tag.
 		HashSet<Integer> idsInSetup = new HashSet<>();
+		HashSet<Integer> idsInSetupNoFuzzy = new HashSet<>();
 		for (InventorySetupsItem item : itemsInSetup)
 		{
 			int processedId = itemManager.canonicalize(item.getId());
@@ -198,6 +199,7 @@ public class InventorySetupLayoutUtilities
 
 			// Track all the IDs in the setup
 			idsInSetup.add(processedId);
+			idsInSetupNoFuzzy.add(processedId);
 			if (item.isFuzzy())
 			{
 				idsInSetup.addAll(ItemVariationMapping.getVariations(ItemVariationMapping.map(processedId)));
@@ -224,7 +226,9 @@ public class InventorySetupLayoutUtilities
 		}
 
 		// Add any items that should belong in the layout based on the setup.
-		for (final Integer idInSetup : idsInSetup)
+		// Do not include fuzzy items in the setup because the layoutManager will automatically
+		// Add those if they exist in the bank, otherwise we would add every possible variation which is not ideal.
+		for (final Integer idInSetup : idsInSetupNoFuzzy)
 		{
 			if (!idsInLayout.contains(idInSetup))
 			{
