@@ -41,9 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,22 +60,16 @@ import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
 import net.runelite.api.KeyCode;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
-import net.runelite.api.SpriteID;
-import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.PostMenuSort;
-import net.runelite.api.events.ScriptCallbackEvent;
-import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
@@ -99,11 +91,9 @@ import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.bank.BankSearch;
 import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.banktags.tabs.LayoutManager;
-import net.runelite.client.plugins.banktags.tabs.TabManager;
-import net.runelite.client.plugins.banktags.tabs.TagTab;
-import net.runelite.client.plugins.xptracker.XpTrackerPlugin;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.NavigationButton;
@@ -114,9 +104,7 @@ import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.plugins.banktags.BankTagsPlugin;
 import net.runelite.client.plugins.banktags.BankTagsService;
-import net.runelite.client.plugins.banktags.BankTag;
 import net.runelite.client.plugins.banktags.tabs.Layout;
-import sun.tools.jconsole.Tab;
 
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -129,7 +117,6 @@ import java.util.stream.IntStream;
 
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_AMOUNT_VARBITS;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_RUNE_VARBITS;
-import static net.runelite.api.ItemID.*;
 
 
 @PluginDescriptor(
@@ -152,6 +139,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
+	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
 	public static final String LAYOUT_PREFIX_MARKER = "___inventorysetuplayout___";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
@@ -162,11 +150,14 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String OPEN_SECTION_MENU_ENTRY = "Open Section";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
+	private static final String AUTO_LAYOUT_PRESET_ENTRY = "Auto layout: Preset";
+	private static final String AUTO_LAYOUT_ZIGZAG_ENTRY = "Auto layout: ZigZag";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
 	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final String NOTES_SEARCH_TAG = "notes:";
 	private static final int SPELLBOOK_VARBIT = 4070;
+	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME;
 
 	@Inject
 	@Getter
@@ -216,6 +207,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Inject
 	private BankTagsService bankTagsService;
+
+	@Inject
+	private BankSearch bankSearch;
 
 	@Inject
 	private LayoutManager layoutManager;
@@ -596,6 +590,9 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() != null)
 		{
+			// Add Auto layouts
+			createAutoLayoutSubMenuOnWornItems();
+
 			// add menu entry to close setup
 			client.getMenu()
 					.createMenuEntry(-1)
@@ -603,6 +600,55 @@ public class InventorySetupsPlugin extends Plugin
 					.setType(MenuAction.RUNELITE)
 					.onClick(e -> panel.returnToOverviewPanel(false));
 		}
+	}
+
+	private void createAutoLayoutSubMenuOnWornItems()
+	{
+		Menu parentMenu = client.getMenu()
+				.createMenuEntry(-1)
+				.setOption("Auto Layout")
+				.setType(MenuAction.RUNELITE_WIDGET)
+				.createSubMenu();
+		parentMenu.createMenuEntry(0)
+				.setOption(AUTO_LAYOUT_PRESET_ENTRY)
+				.setType(MenuAction.RUNELITE)
+				.onClick(e -> previewNewLayout(panel.getCurrentSelectedSetup(), InventorySetupLayoutType.PRESET));
+		parentMenu.createMenuEntry(0)
+				.setOption(AUTO_LAYOUT_ZIGZAG_ENTRY)
+				.setType(MenuAction.RUNELITE)
+				.onClick(e -> previewNewLayout(panel.getCurrentSelectedSetup(), InventorySetupLayoutType.ZIGZAG));
+
+	}
+
+	private void previewNewLayout(final InventorySetup setup, final InventorySetupLayoutType type)
+	{
+		clientThread.invoke(() ->
+		{
+			Layout old = bankTagsService.getActiveLayout();
+			assert old != null : "No active layout exists.";
+
+			Layout new_ = layoutUtilities.createSetupLayout(setup, type, false);
+
+			// Temporarily save the new layout to open the tag.
+			layoutManager.saveLayout(new_);
+			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+
+			// Save the old layout again in case the user hits escape on the menu.
+			layoutManager.saveLayout(old);
+
+			chatboxPanelManager.openTextMenuInput("Tab laid out using the '" + type.getName() + "' layout.")
+					.option("1. Keep", () ->
+					{
+						layoutManager.saveLayout(new_);
+					})
+					.option("2. Undo", () ->
+					{
+						// The old layout is already saved, no need to do anything.
+					})
+					// If this is not done with invokeLater, I get crashing...
+					.onClose(() -> clientThread.invokeLater(() -> bankTagsService.openBankTag(old.getTag(), BANK_TAG_OPTIONS)))
+					.build();
+		});
 	}
 
 	private void createSectionSubMenuOnWornItems(Collection<InventorySetup> setups, String name, Color color)
@@ -797,7 +843,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.sections = new ArrayList<>();
 		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
-		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager);
+		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, configManager);
 
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
@@ -877,8 +923,7 @@ public class InventorySetupsPlugin extends Plugin
 			inventorySetups.add(invSetup);
 			dataManager.updateConfig(true, false);
 
-			// TODO: Add config option instead of just "preset"
-			Layout setupLayout = layoutUtilities.createSetupLayout("preset", invSetup);
+			Layout setupLayout = layoutUtilities.createSetupLayout(invSetup);
 			layoutManager.saveLayout(setupLayout);
 
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -1049,8 +1094,8 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			final String tagName = layoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
-			bankTagsService.openBankTag(tagName, BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
+			bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
 		});
 	}
 
@@ -1189,11 +1234,11 @@ public class InventorySetupsPlugin extends Plugin
 			// Regenerate the layout and tag.
 			clientThread.invoke(() ->
 			{
-				String tagName = layoutUtilities.getTagNameForLayout(setup.getName());
+				String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 				tagManager.removeTag(tagName);
 				layoutManager.removeLayout(tagName);
 
-				Layout newLayout = layoutUtilities.createSetupLayout("preset", setup);
+				Layout newLayout = layoutUtilities.createSetupLayout(setup);
 				layoutManager.saveLayout(newLayout);
 			});
 

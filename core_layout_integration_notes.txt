@@ -6,6 +6,7 @@ Need to add a prefix to layouts
    - Go through all inventory setups. Check if a config key for banktags.layout_>>>invsetups<<<_<hash_of_name> exists. If so, remove from the list
    - Any remaining config keys with >>>invsetups<<< must be old ones and can be deleted.
  - Function to get layout key.
+Add Config Option for Default Layout
 Setup Deleted
  - Remove the layout with layoutManager, Remove the tag as well
 Setup Refreshed.
@@ -46,7 +47,7 @@ Exporting Setups
 Overwrite layout
  - Add option in additional worn items to overwrite layout. Also overwrite the tag.
  - Remove tag and then recreate it. Save layout to overwrite it.
- - Add confirm option? Look at example.
+ - Add confirm option
 Add ability to export tag that core bank tags can read.
 Item Removed from Setup
  - Should we remove the first occurrence of the item in the layout?

@@ -2,24 +2,11 @@ package inventorysetups;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import javax.swing.SwingUtilities;
-
-import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.ItemComposition;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemVariationMapping;
-import net.runelite.client.plugins.banktags.TagManager;
-import net.runelite.client.plugins.banktags.tabs.Layout;
 import net.runelite.client.util.SwingUtil;
-
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
-import static net.runelite.api.ItemID.BLIGHTED_SUPER_RESTORE1;
-import static net.runelite.api.ItemID.IMBUED_GUTHIX_MAX_CAPE_L;
+
 
 public class InventorySetupUtilities
 {

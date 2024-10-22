@@ -11,7 +11,6 @@ import inventorysetups.serialization.InventorySetupItemSerializable;
 import inventorysetups.serialization.InventorySetupItemSerializableTypeAdapter;
 import inventorysetups.serialization.InventorySetupSerializable;
 import inventorysetups.serialization.LongTypeAdapter;
-import inventorysetups.ui.InventorySetupsPluginPanel;
 import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.config.ConfigManager;
