@@ -7,6 +7,7 @@ Need to add a prefix to layouts
    - Any remaining config keys with >>>invsetups<<< must be old ones and can be deleted.
  - Function to get layout key.
 Add Config Option for Default Layout
+Add Preset Layout
 Setup Deleted
  - Remove the layout with layoutManager, Remove the tag as well
 Setup Refreshed.
@@ -27,28 +28,30 @@ Items Changed in a Setup
  - Need to handle removed and added.
  - Need to handle changed by slot and changed by search.
  - I think the helper function to recalculate items in the tag + layout will take care of this as well.
-   - For remove, should we remove the first instance of the item in the layout?
-
-^^^ DONE ^^^
-vvv TODO VVV
-
-Start Bank Tags Plugin
-  - What about Hub BTL? How should it be handled?
-Need to create default layouts
-  - Support two types - zigzag and preset.
-  - Add a config option for the default.
-Convert Bank Tag Layout data to core layout data.
-  - How? Adam Layouts has a conversion.
-  - Use a key to indicate if the conversion has happened before.
-Importing Setups
- - Maybe create an InventorySetupPortable? which has a layout object and a InventorySetup object. Can serialize that instead.
-Exporting Setups
- - Use InventorySetupPortable idea from above?
+   - For remove, should we remove the first instance of the item in the layout? Not currently done.
 Overwrite layout
  - Add option in additional worn items to overwrite layout. Also overwrite the tag.
  - Remove tag and then recreate it. Save layout to overwrite it.
  - Add confirm option
+
+^^^ DONE ^^^
+vvv TODO VVV
+
+Start Bank Tags Plugin on startup
+  - What about Hub BTL? How should it be handled?
+Add ZigZag default layout
+Migrate Bank Tag Layout data to core layout data on first time using the plugins.
+  - How? Adam Layouts has a conversion.
+  - Use a key to indicate if the conversion has happened before.
+Importing a Setup + Layout
+ - Maybe create an InventorySetupPortable? which has a layout object and a InventorySetup object. Can serialize that instead.
+ - Maybe could also support old format.
+Exporting a Setup + Layout
+ - Use InventorySetupPortable idea from above?
 Add ability to export tag that core bank tags can read.
+
+
+--- OTHER ---
+Make sure all TODOs are taken care of
 Item Removed from Setup
  - Should we remove the first occurrence of the item in the layout?
-Make sure all TODOs are taken care of
