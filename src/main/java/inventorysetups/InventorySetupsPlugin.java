@@ -607,7 +607,7 @@ public class InventorySetupsPlugin extends Plugin
 		Menu parentMenu = client.getMenu()
 				.createMenuEntry(-1)
 				.setOption("Auto Layout")
-				.setType(MenuAction.RUNELITE_WIDGET)
+				.setType(MenuAction.RUNELITE)
 				.createSubMenu();
 		parentMenu.createMenuEntry(0)
 				.setOption(AUTO_LAYOUT_PRESET_ENTRY)
@@ -657,7 +657,7 @@ public class InventorySetupsPlugin extends Plugin
 			.createMenuEntry(1)
 			.setOption(OPEN_SECTION_MENU_ENTRY)
 			.setTarget(ColorUtil.prependColorTag(name, color))
-			.setType(MenuAction.RUNELITE_WIDGET)
+			.setType(MenuAction.RUNELITE)
 			.createSubMenu();
 
 		for (final InventorySetup inventorySetup : setups)
