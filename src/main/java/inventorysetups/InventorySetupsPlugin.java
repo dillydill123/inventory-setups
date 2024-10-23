@@ -27,6 +27,7 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.serialization.InventorySetupPortable;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Color;
@@ -220,6 +221,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Inject
 	private KeyManager keyManager;
 
+	@Getter
 	private InventorySetupLayoutUtilities layoutUtilities;
 
 	@Inject
@@ -1776,7 +1778,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void exportSetup(final InventorySetup setup)
 	{
-		final String json = gson.toJson(setup);
+		InventorySetupPortable portableSetup = InventorySetupPortable.convertFromInventorySetup(setup, layoutUtilities);
+		final String json = gson.toJson(portableSetup);
 		final StringSelection contents = new StringSelection(json);
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
 
@@ -1855,26 +1858,34 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			Type type = new TypeToken<InventorySetup>()
+			Type type = new TypeToken<InventorySetupPortable>()
 			{
 
 			}.getType();
 
 
-			final InventorySetup newSetup = gson.fromJson(setup, type);
+			final InventorySetupPortable newSetupPortable = gson.fromJson(setup, type);
+			final InventorySetup newSetup = newSetupPortable.getSerializedSetup();
 
 			if (isImportedSetupInvalid(newSetup))
 			{
 				throw new RuntimeException("Imported setup was missing required fields");
 			}
 
-			preProcessNewSetup(newSetup);
-			cache.addSetup(newSetup);
-			inventorySetups.add(newSetup);
+			clientThread.invoke(() ->
+			{
+				preProcessNewSetup(newSetup);
+				cache.addSetup(newSetup);
+				inventorySetups.add(newSetup);
+				// This will tag all the items in the setup for us, but don't use the layout.
+				// Use what's stored in the import.
+				Layout temp_layout_ = layoutUtilities.createSetupLayout(newSetup);
+				Layout newLayout = new Layout(temp_layout_.getTag(), newSetupPortable.getLayout());
+				layoutManager.saveLayout(newLayout);
 
-			dataManager.updateConfig(true, false);
-			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
-
+				dataManager.updateConfig(true, false);
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+			});
 		}
 		catch (Exception e)
 		{
@@ -1897,33 +1908,46 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			final String json = new String(Files.readAllBytes(path));
 
-			Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
+			Type typeSetups = new TypeToken<ArrayList<InventorySetupPortable>>()
 			{
 
 			}.getType();
 
-			final ArrayList<InventorySetup> newSetups = gson.fromJson(json, typeSetups);
+			final ArrayList<InventorySetupPortable> newSetupPortables = gson.fromJson(json, typeSetups);
 
-			// It's possible that the gson call succeeds but returns setups that have basically nothing
-			// This can occur if trying to import a section file instead of a inventory setup file, since they share fields
-			// Therefore, do some additional checking for required fields
-			for (final InventorySetup setup : newSetups)
+			final ArrayList<InventorySetup> newUnprocessedSetups = new ArrayList<>();
+			final ArrayList<int[]> newUnprocessedLayouts = new ArrayList<>();
+			for (final InventorySetupPortable portable : newSetupPortables)
 			{
+				final InventorySetup setup = portable.getSerializedSetup();
+				// Do some additional checking for required fields
 				if (isImportedSetupInvalid(setup))
 				{
 					throw new RuntimeException("Mass import section file was missing required fields");
 				}
+				newUnprocessedSetups.add(setup);
+				newUnprocessedLayouts.add(portable.getLayout());
 			}
 
-			for (final InventorySetup inventorySetup : newSetups)
+			clientThread.invoke(() ->
 			{
-				preProcessNewSetup(inventorySetup);
-				cache.addSetup(inventorySetup);
-				inventorySetups.add(inventorySetup);
-			}
+				for (int i = 0; i < newUnprocessedSetups.size(); i++)
+				{
+					final InventorySetup inventorySetup = newUnprocessedSetups.get(i);
+					preProcessNewSetup(inventorySetup);
+					cache.addSetup(inventorySetup);
+					inventorySetups.add(inventorySetup);
 
-			dataManager.updateConfig(true, false);
-			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+					// This will tag all the items in the setup for us, but don't use the layout.
+					// Use what's stored in the import.
+					Layout temp_layout_ = layoutUtilities.createSetupLayout(inventorySetup);
+					Layout newLayout = new Layout(temp_layout_.getTag(), newUnprocessedLayouts.get(i));
+					layoutManager.saveLayout(newLayout);
+				}
+
+				dataManager.updateConfig(true, false);
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+			});
 
 		}
 		catch (Exception e)

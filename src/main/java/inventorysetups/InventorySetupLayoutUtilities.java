@@ -40,10 +40,9 @@ public class InventorySetupLayoutUtilities
 		return LAYOUT_PREFIX_MARKER + hashOfName;
 	}
 
-	public Layout getSetupLayout(final String inventorySetupName, final LayoutManager layoutManager)
+	public Layout getSetupLayout(final InventorySetup inventorySetupName)
 	{
-		// TODO remove if unsused.
-		final String tagName = getTagNameForLayout(inventorySetupName);
+		final String tagName = getTagNameForLayout(inventorySetupName.getName());
 		final Layout layout = layoutManager.loadLayout(tagName);
 		assert layout != null : "Layout for " + inventorySetupName + " is null.";
 		return layout;

@@ -45,6 +45,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import inventorysetups.serialization.InventorySetupPortable;
 import lombok.Getter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
@@ -309,7 +311,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		});
 		massExportSetupsMenu.addActionListener(e ->
 		{
-			plugin.massExport(plugin.getInventorySetups(), "Setups", "inventory_setups");
+			ArrayList<InventorySetupPortable> portables = InventorySetupPortable.convertFromListOfSetups(plugin.getInventorySetups(), plugin.getLayoutUtilities());
+			plugin.massExport(portables, "Setups", "inventory_setups");
 		});
 		massImportSectionsMenu.addActionListener(e ->
 		{

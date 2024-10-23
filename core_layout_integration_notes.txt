@@ -33,6 +33,15 @@ Overwrite layout
  - Add option in additional worn items to overwrite layout. Also overwrite the tag.
  - Remove tag and then recreate it. Save layout to overwrite it.
  - Add confirm option
+Mass importing setups + layout
+Exporting a Setup + Layout
+ - Use InventorySetupPortable
+Mass exporting setups + layouts
+ - Export list of InventorySetupPortables
+Importing a Setup + Layout
+ - Create an InventorySetupPortable which has inventory setup serializable and layout info.
+ - When importing, need to add items in the setup to the tag after it's been processed, since we are only saving the layout.
+ - Not supporting old format.
 
 ^^^ DONE ^^^
 vvv TODO VVV
@@ -44,15 +53,9 @@ Start Bank Tags Plugin on startup
     - Auto layout option hide.
 Add ZigZag default layout
 Migrate Bank Tag Layout data to core layout data on first time using the plugins.
-  - How? Adam Layouts has a conversion.
+  - How? Adam Layouts has a conversion. https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
   - Use a key to indicate if the conversion has happened before.
-Importing a Setup + Layout
- - Maybe create an InventorySetupPortable? which has a layout object and a InventorySetup object. Can serialize that instead.
- - Maybe could also support old format.
-Exporting a Setup + Layout
- - Use InventorySetupPortable idea from above?
 Add ability to export tag that core bank tags can read.
-
 
 
 --- OTHER ---
