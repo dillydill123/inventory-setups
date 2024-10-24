@@ -68,11 +68,92 @@ public class InventorySetupLayoutUtilities
 
 	public Layout getZigZagLayout(final InventorySetup setup, final boolean addToTag)
 	{
-		// TODO: Add this
 		final String tag = getTagNameForLayout(setup.getName());
 		final Layout layout = new Layout(tag);
 
+		int startOfEquipment = 0;
+		int startOfInventory = 16;
+		int startOfRunePouch = 48;
+		int startOfBoltPouch = 52;
+		int startOfAdditionalItems = 56;
+
+		int newSizeGuess = setup.getAdditionalFilteredItems().size() + startOfAdditionalItems;
+		layout.resize(newSizeGuess);
+
+		int nextPos = layoutZigZagContainer(setup.getEquipment(), layout, tag, addToTag, startOfEquipment);
+		if (setup.getQuiver() != null && !setup.getQuiver().isEmpty())
+		{
+			addItemToLayout(layout, tag, setup.getQuiver().get(0), nextPos, addToTag);
+		}
+		layoutZigZagContainer(setup.getInventory(), layout, tag, addToTag, startOfInventory);
+
+		// Layout the rune pouch
+		if (setup.getRune_pouch() != null)
+		{
+			for (int i = 0; i < setup.getRune_pouch().size(); i++)
+			{
+				addItemToLayout(layout, tag, setup.getRune_pouch().get(i), i + startOfRunePouch, addToTag);
+			}
+		}
+
+		// Bolt pouch below the rune pouch
+		if (setup.getBoltPouch() != null)
+		{
+			for (int i = 0; i < setup.getBoltPouch().size(); i++)
+			{
+				addItemToLayout(layout, tag, setup.getBoltPouch().get(i), i + startOfBoltPouch, addToTag);
+			}
+		}
+
+		// Additional items
+		int additionalItemsCounter = 0;
+		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
+		for (final InventorySetupsItem item : additionalItems)
+		{
+			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag);
+			additionalItemsCounter++;
+		}
+
+		trimLayout(layout);
+
 		return layout;
+	}
+
+	private int layoutZigZagContainer(final List<InventorySetupsItem> container, final Layout layout, final String tag, boolean addToTag, final int start)
+	{
+		// Note, this might not work if the start is not a multiple of the row size (8)...
+		// But this is not needed, so I won't spend time over engineering this function.
+
+		int doubleRowStart = 0;
+		int nextPos = 0;
+		final int rowSize = 8;
+
+		for (final InventorySetupsItem item : container)
+		{
+			if (item.getId() != -1)
+			{
+				addItemToLayout(layout, tag, item, nextPos + start, addToTag);
+				if (nextPos == (rowSize * 2) - 1)
+				{
+					// We hit the end of a double row, we need to start a new one.
+					doubleRowStart += 2;
+					nextPos = doubleRowStart * rowSize;
+				}
+				else if (nextPos < ((doubleRowStart * rowSize) + rowSize))
+				{
+					// We are in the top half of a double row. Go down directly one.
+					nextPos += rowSize;
+				}
+				else
+				{
+					// We are in the bottom half of a double. Go back up and add one to move to the right.
+					nextPos = (nextPos - rowSize) + 1;
+				}
+			}
+
+		}
+
+		return nextPos;
 	}
 
 	public Layout getPresetLayout(final InventorySetup setup, final boolean addToTag)
@@ -159,6 +240,8 @@ public class InventorySetupLayoutUtilities
 			additionalItemsCounter++;
 		}
 
+		trimLayout(layout);
+
 		return layout;
 	}
 
@@ -206,6 +289,10 @@ public class InventorySetupLayoutUtilities
 		}
 
 		// Remove any items that do not belong in the layout.
+		// This won't potentially remove an item if there are multiple copies of it in the setup.
+		// It's possible that some users would want one of the instances of the item to be replaced
+		// But for now, we avoid that. If this is needed, it's probably better to do it in the caller of this function
+		// Since it knows if an item was removed or not, while this is catch all recalculation of the layout.
 		HashSet<Integer> idsInLayout = new HashSet<>();
 		for (int i = 0; i < layout.size(); i++)
 		{
@@ -235,7 +322,26 @@ public class InventorySetupLayoutUtilities
 			}
 		}
 
+		trimLayout(layout);
+
 		layoutManager.saveLayout(layout);
+	}
+
+	private void trimLayout(final Layout layout)
+	{
+		// Remove all trailing `-1`s in a layout.
+		final int[] layoutArr = layout.getLayout();
+		if (layoutArr[layoutArr.length - 1] != -1)
+		{
+			return;
+		}
+
+		int indexToTrimTo = layoutArr.length - 2;
+		while (indexToTrimTo >= 0 && layoutArr[indexToTrimTo] == -1)
+		{
+			indexToTrimTo--;
+		}
+		layout.resize(indexToTrimTo + 1);
 	}
 
 }

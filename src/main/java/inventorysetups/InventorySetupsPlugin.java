@@ -713,7 +713,7 @@ public class InventorySetupsPlugin extends Plugin
 				// Item already exists, don't add it again
 				if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
 				{
-					addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+					addAdditionalFilteredItem(newItem.getId(), panel.getCurrentSelectedSetup(), additionalFilteredItems);
 				}
 			});
 	}
@@ -1123,7 +1123,7 @@ public class InventorySetupsPlugin extends Plugin
 		return false;
 	}
 
-	private void addAdditionalFilteredItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
+	private void addAdditionalFilteredItem(int itemId, final InventorySetup setup, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 		// un-noted, un-placeholdered ID
 		final int processedItemId = itemManager.canonicalize(itemId);
@@ -1135,6 +1135,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), stackCompareType);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
+			layoutUtilities.recalculateLayout(setup);
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
@@ -1281,8 +1282,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
 			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
-
-			// TODO: If this is removing, it does not remove the first occurrence of the item in the layout if multiple exists. Should this be done?
+			
 			layoutUtilities.recalculateLayout(inventorySetup);
 		}
 	}
@@ -1355,7 +1355,7 @@ public class InventorySetupsPlugin extends Plugin
 						if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
 						{
 							removeAdditionalFilteredItem(slot, additionalFilteredItems);
-							addAdditionalFilteredItem(finalId, additionalFilteredItems);
+							addAdditionalFilteredItem(finalId, slot.getParentSetup(), additionalFilteredItems);
 						}
 						return;
 					}
@@ -1475,6 +1475,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
 				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
+				layoutUtilities.recalculateLayout(panel.getCurrentSelectedSetup());
 				dataManager.updateConfig(true, false);
 				panel.refreshCurrentSetup();
 				return;
@@ -1592,6 +1593,9 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		additionalFilteredItems.remove(keyToDelete);
+		// None of the data functions are called here because the callee does it.
+		// If an item is swapped (removed + added) this would result in a double data process
+		// Which isn't bad, just a minor optimization
 
 	}
 

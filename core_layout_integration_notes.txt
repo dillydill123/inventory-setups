@@ -8,6 +8,7 @@ Need to add a prefix to layouts
  - Function to get layout key.
 Add Config Option for Default Layout
 Add Preset Layout
+Add ZigZag Layout
 Setup Deleted
  - Remove the layout with layoutManager, Remove the tag as well
 Setup Refreshed.
@@ -27,6 +28,7 @@ Item fuzzy toggled
 Items Changed in a Setup
  - Need to handle removed and added.
  - Need to handle changed by slot and changed by search.
+ - Additional filtered items need to be handled because they are a map instead of array.
  - I think the helper function to recalculate items in the tag + layout will take care of this as well.
    - For remove, should we remove the first instance of the item in the layout? Not currently done.
 Overwrite layout
@@ -43,22 +45,24 @@ Importing a Setup + Layout
  - When importing, need to add items in the setup to the tag after it's been processed, since we are only saving the layout.
  - Not supporting old format.
 
+
 ^^^ DONE ^^^
 vvv TODO VVV
 
+
+Add ability to export tag that core bank tags can read.
+Hub BTL disable
+  - "use with inventory setups" config option turn off programmatically 
 Start Bank Tags Plugin on startup
-  - What about Hub BTL? How should it be handled?
+  - Or alternatively add a panel saying bank tags is not on, please turn it on.
   - Bug when turning on bank tags while tab is opened? Can't reproduce.
-  - Handle situations where Bank Tags isn't on
-    - Auto layout option hide.
-Add ZigZag default layout
+Handle Situations where Bank Tags isn't on
+  - Auto layout option in worn items needs to be hidden.
+  - Chat message when trying to filter the bank.
+  - Panel indicating bank tags is off and is required to use some features of inventory setups on startup.
 Migrate Bank Tag Layout data to core layout data on first time using the plugins.
   - How? Adam Layouts has a conversion. https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
   - Use a key to indicate if the conversion has happened before.
-Add ability to export tag that core bank tags can read.
-
 
 --- OTHER ---
 Make sure all TODOs are taken care of
-Item Removed from Setup
- - Should we remove the first occurrence of the item in the layout?
