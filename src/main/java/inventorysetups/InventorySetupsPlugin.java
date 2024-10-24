@@ -1282,7 +1282,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
 			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
-			
+
 			layoutUtilities.recalculateLayout(inventorySetup);
 		}
 	}

@@ -23,6 +23,7 @@ Helper function to recalculate items in the tag + layout
  - Add each item to the recreated tag (be sure not to override fuzzy. If a previous item had it before we should make sure it does not get set to False)
  - Go through the existing layout and remove any IDs that are not part of the setup Ids.
  - Go through each of the setup IDs and make sure the layout has at least one copy. If not, add one to the layout.
+Trim Layout helper function
 Item fuzzy toggled
  - Use helper function to recalculate items in the layout as shown above.
 Items Changed in a Setup
@@ -44,25 +45,35 @@ Importing a Setup + Layout
  - Create an InventorySetupPortable which has inventory setup serializable and layout info.
  - When importing, need to add items in the setup to the tag after it's been processed, since we are only saving the layout.
  - Not supporting old format.
+Add ability to export tag that core bank tags can read.
 
 
 ^^^ DONE ^^^
 vvv TODO VVV
 
 
-Add ability to export tag that core bank tags can read.
-Hub BTL disable
-  - "use with inventory setups" config option turn off programmatically 
-Start Bank Tags Plugin on startup
-  - Or alternatively add a panel saying bank tags is not on, please turn it on.
-  - Bug when turning on bank tags while tab is opened? Can't reproduce.
+Disable Hub BTL
+ - "use with inventory setups" config option turn off programmatically 
 Handle Situations where Bank Tags isn't on
-  - Auto layout option in worn items needs to be hidden.
-  - Chat message when trying to filter the bank.
-  - Panel indicating bank tags is off and is required to use some features of inventory setups on startup.
-Migrate Bank Tag Layout data to core layout data on first time using the plugins.
-  - How? Adam Layouts has a conversion. https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
-  - Use a key to indicate if the conversion has happened before.
+ - Start Bank Tags Plugin on Startup?
+ - Or alternatively add a panel saying bank tags is not on, please turn it on.
+ - Bug when turning on bank tags while tab is opened? Can't reproduce. Not really a concern.
+ - Auto layout option in worn items needs to be hidden.
+ - Chat message when trying to filter the bank.
+ - Panel indicating bank tags is off and is required to use some features of inventory setups on startup.
+Startup of plugin
+ - Upon startup, go through each processed setup.
+ - If it doesn't have a layout, we will create one. Needs to be done on client thread.
+ - If this is the first time using the plugin after the update (with config key), check if there is a hub bank tag layout that we can use for the layout.
+ - Conversion from Hub BTL to core BTL: https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
+ - Use a config key to check if it is the first time using the plugin after BTL change.
+ - Test with a config that has not gone through the migration and therefore has no layouts.
 
 --- OTHER ---
 Make sure all TODOs are taken care of
+VarPlayer for quiver.
+
+--- Findings ---
+No custom mappings
+ItemManager WORN_ITEMS is not public
+Had to copy most of the export code for bank tag.

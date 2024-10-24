@@ -1,13 +1,21 @@
 package inventorysetups;
 
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.banktags.tabs.Layout;
 import net.runelite.client.plugins.banktags.tabs.LayoutManager;
+import net.runelite.client.util.Text;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -325,6 +333,53 @@ public class InventorySetupLayoutUtilities
 		trimLayout(layout);
 
 		layoutManager.saveLayout(layout);
+	}
+
+	public void exportSetupToBankTagTab(final InventorySetup setup, final Component component)
+	{
+		final List<String> data = new ArrayList<>();
+		final Layout layout = getSetupLayout(setup);
+		data.add("banktags");
+		data.add("1");
+
+		// Instead of the super long marked name, just use the standardized name for the setup.
+		data.add(Text.standardize(setup.getName()));
+		int icon = setup.getIconID();
+		if (icon <= 0)
+		{
+			icon = ItemID.SPADE;
+		}
+		data.add(String.valueOf(icon));
+
+		for (Integer item : tagManager.getItemsForTag(layout.getTag()))
+		{
+			if (layout.count(item) == 0)
+			{
+				data.add(String.valueOf(item));
+			}
+		}
+
+		data.add("layout");
+		int[] l = layout.getLayout();
+		for (int idx = 0; idx < l.length; ++idx)
+		{
+			if (l[idx] != -1)
+			{
+				data.add(String.valueOf(idx));
+				data.add(String.valueOf(l[idx]));
+			}
+		}
+
+		final StringSelection stringSelection = new StringSelection(Text.toCSV(data));
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
+
+		SwingUtilities.invokeLater(() ->
+		{
+			JOptionPane.showMessageDialog(component,
+					"Bank tag tab data was copied to clipboard.",
+					"Export Setup To Bank Tag Tab Succeeded",
+					JOptionPane.PLAIN_MESSAGE);
+		});
 	}
 
 	private void trimLayout(final Layout layout)

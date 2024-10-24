@@ -33,7 +33,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
@@ -372,8 +374,13 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 			}
 		});
 
+		JPopupMenu singleExportBankTagTabMenu = new JPopupMenu();
+		JMenuItem singleExportBankTagTabMenuItem = new JMenuItem("Export setup to Bank Tag Tab");
+		singleExportBankTagTabMenuItem.addActionListener(e -> plugin.getClientThread().invokeLater(() -> plugin.getLayoutUtilities().exportSetupToBankTagTab(inventorySetup, panel)));
+		singleExportBankTagTabMenu.add(singleExportBankTagTabMenuItem);
 		exportLabel.setToolTipText("Export setup");
 		exportLabel.setIcon(EXPORT_ICON);
+		exportLabel.setComponentPopupMenu(singleExportBankTagTabMenu);
 		exportLabel.addMouseListener(new MouseAdapter()
 		{
 			@Override
