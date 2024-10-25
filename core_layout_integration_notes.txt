@@ -57,11 +57,11 @@ Create function detecting if Hub BTL is on or CoreBTL is on - canUseLayouts()
  - banktaglayouts.useWithInventorySetups=true config key
  - pluginManager.isenabled
  - Hook into onPluginChanged and onConfigChanged to recalculate if you can use layouts
+Hide Auto layout option in worn items when BTL is off or hub BTL is configured.
 
 ^^^ DONE ^^^
 vvv TODO VVV
 
- 
 
 Handle Situations where Bank Tags isn't on
  - On startup, check if BTL is off or Hub BTL config key is set to true
@@ -69,9 +69,6 @@ Handle Situations where Bank Tags isn't on
  - Button 1: automatically configure BTL and hub key. If pressed, turn on BTL and set the key above to false
  - Button 2: Continue and do nothing.
  - Add config option to hide this warning (Explain this in the panel)
-Hide Auto layout option in worn items when BTL is off or hub BTL is configured.
-AutoLayout and Fuzzy - Variations are sent to the top. Ask about putting them in the bottom.
-Bug when turning on bank tags while tab is opened? Can't reproduce. Not really a concern.
 
 
 --- OTHER ---
@@ -82,7 +79,8 @@ VarPlayer for quiver.
 No custom mappings
 ItemManager WORN_ITEMS is not public
 Had to copy most of the export code for bank tag.
-
+Bug when turning on bank tags while bank is opened. Reproduce -> Bank tags is on. Log in, open bank, turn off bank tags and turn it on. Exception. Can't reproduce after.
+AutoLayout and Fuzzy - Variations are sent to the top. Ask about putting them in the bottom.
 
 --- Test Cases --- 
 Use a setup with quiver, bolt pouch, rune pouch, 4+ additional filtered items and potion stoarge. See if everything works. Fuzzy in spots
