@@ -18,6 +18,7 @@ import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
@@ -380,6 +381,27 @@ public class InventorySetupLayoutUtilities
 					"Export Setup To Bank Tag Tab Succeeded",
 					JOptionPane.PLAIN_MESSAGE);
 		});
+	}
+
+	public Layout convertHubBankTagLayoutToCoreBankTagLayout(final String hubBankTagLayoutData, final String tag)
+	{
+		try
+		{
+			final Layout layout = new Layout(tag);
+			final String[] pairs = hubBankTagLayoutData.split(",");
+			for (final String pair : pairs)
+			{
+				String[] numbers = pair.split(":");
+				int id = Integer.parseInt(numbers[0]);
+				int pos = Integer.parseInt(numbers[1]);
+				layout.setItemAtPos(id, pos);
+			}
+			return layout;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
 	}
 
 	private void trimLayout(final Layout layout)

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
 import static inventorysetups.InventorySetupsPlugin.LAYOUT_PREFIX_MARKER;
 import net.runelite.client.plugins.banktags.BankTagsPlugin;
+import net.runelite.client.plugins.banktags.tabs.Layout;
 
 @Slf4j
 public class InventorySetupsPersistentDataManager
@@ -46,6 +47,7 @@ public class InventorySetupsPersistentDataManager
 
 	public static final String CONFIG_KEY_SETUPS_MIGRATED_V2 = "migratedV2";
 	public static final String CONFIG_KEY_SETUPS_MIGRATED_V3 = "migratedV3";
+	public static final String CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL = "migratedCoreBTL";
 	public static final String CONFIG_KEY_SETUPS = "setups";
 	public static final String CONFIG_KEY_SETUPS_V2 = "setupsV2";
 	public static final String CONFIG_KEY_SETUPS_V3_PREFIX = "setupsV3_";
@@ -243,6 +245,7 @@ public class InventorySetupsPersistentDataManager
 
 	private void processSetupsFromConfig()
 	{
+		final boolean hasMigratedToCoreBTL = !Strings.isNullOrEmpty(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL));
 		for (final InventorySetup setup : inventorySetups)
 		{
 			final List<InventorySetupsItem> potentialRunePouch = plugin.getAmmoHandler().getRunePouchDataIfInContainer(setup.getInventory());
@@ -269,20 +272,76 @@ public class InventorySetupsPersistentDataManager
 				setup.updateAdditionalItems(new HashMap<>());
 			}
 
+			// Fix layouts
+			processSetupLayout(setup, hasMigratedToCoreBTL);
+
 			cache.addSetup(setup);
 
-			// add Item names
-			addItemNames(setup.getInventory());
-			addItemNames(setup.getEquipment());
-			addItemNames(setup.getRune_pouch());
-			addItemNames(setup.getBoltPouch());
-			for (final Integer key : setup.getAdditionalFilteredItems().keySet())
-			{
-				addItemName(setup.getAdditionalFilteredItems().get(key));
-			}
-
+			// add Item names to all the items in the setup.
+			InventorySetup.getSetupItems(setup).forEach(this::addItemName);
 		}
 
+		if (!hasMigratedToCoreBTL)
+		{
+			log.info("Completed migration to core BTL");
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL, "True");
+		}
+	}
+
+	private void processSetupLayout(final InventorySetup setup, final boolean hasMigratedToCoreBTL)
+	{
+		// Fix any issues with layouts this setup might have.
+		final String tag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
+		final Layout setupLayout = plugin.getLayoutManager().loadLayout(tag);
+		if (setupLayout != null)
+		{
+			return;
+		}
+
+		// No layout exists for this setup, let's create one. This will add the tag too.
+		final Layout newLayout = plugin.getLayoutUtilities().createSetupLayout(setup);
+
+		if (hasMigratedToCoreBTL)
+		{
+			// Somehow this setup doesn't have a layout even though it's not the first time using the plugin.
+			// This shouldn't be hit unless some config surgery was done. Save the layout and be done.
+			plugin.getLayoutManager().saveLayout(newLayout);
+			return;
+		}
+
+		// This is the first time using the plugin since the core BTL migration. Check for a BTL Layout in the config.
+		final String btlHubConfigGroup = "banktaglayouts";
+		// This was taken from bank tag layouts
+		final String sanitizedSetupName = setup.getName().replaceAll("&", "&amp;").replaceAll(":", "&#58;");
+		final String expectedHubBTLKey = "inventory_setups_layout_" + sanitizedSetupName;
+		final String btlHubLayoutData = configManager.getConfiguration(btlHubConfigGroup, expectedHubBTLKey);
+		if (Strings.isNullOrEmpty(btlHubLayoutData))
+		{
+			// No BTL Hub data found to migrate, just save the layout and finish.
+			plugin.getLayoutManager().saveLayout(newLayout);
+			return;
+		}
+
+		log.info("Found Hub Bank Tag Layout for setup " + setup.getName());
+
+		// A BTL hub layout was found, convert it!
+		final Layout hubBankTagLayout = plugin.getLayoutUtilities().convertHubBankTagLayoutToCoreBankTagLayout(btlHubLayoutData, tag);
+		if (hubBankTagLayout == null)
+		{
+			log.warn("Failed to convert Hub Bank Tag Layout for setup " + setup.getName());
+			// Some problem occurred during the conversion, just save the layout and finish.
+			plugin.getLayoutManager().saveLayout(newLayout);
+		}
+		else
+		{
+			log.info("Migrating Hub Bank Tag Layout for setup " + setup.getName());
+			// This could possibly have some weird items in the layout, but the recalculate method will fix these
+			// When a user updates the layout.
+			plugin.getLayoutManager().saveLayout(hubBankTagLayout);
+
+			// Someday we might want to delete the hubBTL config key, but not until the migration is stable.
+			// This could be done in the caller of this function. Not a huge priority.
+		}
 	}
 
 	private void cleanSetupLayouts()
@@ -308,17 +367,6 @@ public class InventorySetupsPersistentDataManager
 			String removedSetupHash = key.substring(keyLengthMinusHash);
 			String layoutKey = BankTagsPlugin.TAG_LAYOUT_PREFIX + LAYOUT_PREFIX_MARKER + removedSetupHash;
 			configManager.unsetConfiguration(BankTagsPlugin.CONFIG_GROUP, layoutKey);
-		}
-	}
-
-	private void addItemNames(final List<InventorySetupsItem> items)
-	{
-		if (items != null)
-		{
-			for (final InventorySetupsItem item : items)
-			{
-				addItemName(item);
-			}
 		}
 	}
 
@@ -357,13 +405,12 @@ public class InventorySetupsPersistentDataManager
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_V3, "True");
 		}
 
-		// TODO Don't unset configuration until new version is stable
-//		String oldV2Data = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
-//		if (oldV2Data != null)
-//		{
-//			log.info("Removing old v2 data key");
-//			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
-//		}
+		String oldV2Data = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
+		if (oldV2Data != null)
+		{
+			log.info("Removing old v2 data key");
+			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_V2);
+		}
 	}
 
 	private String fixOldJSONData(final String json)

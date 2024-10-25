@@ -213,9 +213,11 @@ public class InventorySetupsPlugin extends Plugin
 	private BankSearch bankSearch;
 
 	@Inject
+	@Getter
 	private LayoutManager layoutManager;
 
 	@Inject
+	@Getter
 	private TagManager tagManager;
 
 	@Inject
@@ -1641,7 +1643,7 @@ public class InventorySetupsPlugin extends Plugin
 			// Remove the layout and tag
 			clientThread.invoke(() ->
 			{
-				String tagName = layoutUtilities.getTagNameForLayout(setup.getName());
+				String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 				tagManager.removeTag(tagName);
 				layoutManager.removeLayout(tagName);
 			});
@@ -2272,7 +2274,7 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 		// Make sure not to set the new name of the setup before allowing the cache to update
-		final String oldTag = layoutUtilities.getTagNameForLayout(setup.getName());
+		final String oldTag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 		cache.updateSetupName(setup, newName);
 		setup.setName(newName);
 
@@ -2280,7 +2282,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invoke(() ->
 		{
 			// Rename the tag
-			String newTag = layoutUtilities.getTagNameForLayout(setup.getName());
+			String newTag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 			tagManager.renameTag(oldTag, newTag);
 
 			// Construct the new Layout using the new tag but the old layout info.

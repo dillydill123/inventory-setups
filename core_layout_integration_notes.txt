@@ -46,6 +46,13 @@ Importing a Setup + Layout
  - When importing, need to add items in the setup to the tag after it's been processed, since we are only saving the layout.
  - Not supporting old format.
 Add ability to export tag that core bank tags can read.
+Startup of plugin
+ - Upon startup, go through each processed setup.
+ - If it doesn't have a layout, we will create one. Needs to be done on client thread.
+ - If this is the first time using the plugin after the update (with config key), check if there is a hub bank tag layout that we can use for the layout.
+ - Conversion from Hub BTL to core BTL: https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
+ - Use a config key to check if it is the first time using the plugin after BTL change.
+ - Test with a config that has not gone through the migration and therefore has no layouts.
 
 
 ^^^ DONE ^^^
@@ -61,13 +68,8 @@ Handle Situations where Bank Tags isn't on
  - Auto layout option in worn items needs to be hidden.
  - Chat message when trying to filter the bank.
  - Panel indicating bank tags is off and is required to use some features of inventory setups on startup.
-Startup of plugin
- - Upon startup, go through each processed setup.
- - If it doesn't have a layout, we will create one. Needs to be done on client thread.
- - If this is the first time using the plugin after the update (with config key), check if there is a hub bank tag layout that we can use for the layout.
- - Conversion from Hub BTL to core BTL: https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
- - Use a config key to check if it is the first time using the plugin after BTL change.
- - Test with a config that has not gone through the migration and therefore has no layouts.
+AutoLayout and Fuzzy don't play nice
+
 
 --- OTHER ---
 Make sure all TODOs are taken care of
@@ -77,3 +79,7 @@ VarPlayer for quiver.
 No custom mappings
 ItemManager WORN_ITEMS is not public
 Had to copy most of the export code for bank tag.
+
+
+--- Test Cases --- 
+Use a setup with quiver, bolt pouch, rune pouch, 4+ additional filtered items and potion stoarge. See if everything works. Fuzzy in spots
