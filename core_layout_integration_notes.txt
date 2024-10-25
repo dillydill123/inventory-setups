@@ -53,22 +53,25 @@ Startup of plugin
  - Conversion from Hub BTL to core BTL: https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/plugins/banktags/tabs/TabInterface.java#L521
  - Use a config key to check if it is the first time using the plugin after BTL change.
  - Test with a config that has not gone through the migration and therefore has no layouts.
-
+Create function detecting if Hub BTL is on or CoreBTL is on - canUseLayouts()
+ - banktaglayouts.useWithInventorySetups=true config key
+ - pluginManager.isenabled
+ - Hook into onPluginChanged and onConfigChanged to recalculate if you can use layouts
 
 ^^^ DONE ^^^
 vvv TODO VVV
 
+ 
 
-Disable Hub BTL
- - "use with inventory setups" config option turn off programmatically 
 Handle Situations where Bank Tags isn't on
- - Start Bank Tags Plugin on Startup?
- - Or alternatively add a panel saying bank tags is not on, please turn it on.
- - Bug when turning on bank tags while tab is opened? Can't reproduce. Not really a concern.
- - Auto layout option in worn items needs to be hidden.
- - Chat message when trying to filter the bank.
- - Panel indicating bank tags is off and is required to use some features of inventory setups on startup.
-AutoLayout and Fuzzy don't play nice
+ - On startup, check if BTL is off or Hub BTL config key is set to true
+ - If either is true, Add a panel warning the user with two buttons
+ - Button 1: automatically configure BTL and hub key. If pressed, turn on BTL and set the key above to false
+ - Button 2: Continue and do nothing.
+ - Add config option to hide this warning (Explain this in the panel)
+Hide Auto layout option in worn items when BTL is off or hub BTL is configured.
+AutoLayout and Fuzzy - Variations are sent to the top. Ask about putting them in the bottom.
+Bug when turning on bank tags while tab is opened? Can't reproduce. Not really a concern.
 
 
 --- OTHER ---
@@ -83,3 +86,4 @@ Had to copy most of the export code for bank tag.
 
 --- Test Cases --- 
 Use a setup with quiver, bolt pouch, rune pouch, 4+ additional filtered items and potion stoarge. See if everything works. Fuzzy in spots
+Test variation mapping

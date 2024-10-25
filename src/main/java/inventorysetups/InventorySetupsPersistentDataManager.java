@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP_HUB_BTL;
 import static inventorysetups.InventorySetupsPlugin.LAYOUT_PREFIX_MARKER;
 import net.runelite.client.plugins.banktags.BankTagsPlugin;
 import net.runelite.client.plugins.banktags.tabs.Layout;
@@ -310,11 +311,10 @@ public class InventorySetupsPersistentDataManager
 		}
 
 		// This is the first time using the plugin since the core BTL migration. Check for a BTL Layout in the config.
-		final String btlHubConfigGroup = "banktaglayouts";
-		// This was taken from bank tag layouts
+		// Sanitization code was taken from bank tag layouts
 		final String sanitizedSetupName = setup.getName().replaceAll("&", "&amp;").replaceAll(":", "&#58;");
 		final String expectedHubBTLKey = "inventory_setups_layout_" + sanitizedSetupName;
-		final String btlHubLayoutData = configManager.getConfiguration(btlHubConfigGroup, expectedHubBTLKey);
+		final String btlHubLayoutData = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, expectedHubBTLKey);
 		if (Strings.isNullOrEmpty(btlHubLayoutData))
 		{
 			// No BTL Hub data found to migrate, just save the layout and finish.

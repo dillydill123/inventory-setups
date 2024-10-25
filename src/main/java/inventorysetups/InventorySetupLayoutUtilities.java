@@ -18,7 +18,6 @@ import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
