@@ -735,18 +735,25 @@ public class InventorySetupsPlugin extends Plugin
 			Layout old = bankTagsService.getActiveLayout();
 			assert old != null : "No active layout exists.";
 
-			Layout new_ = layoutUtilities.createSetupLayout(setup, type, false);
+			// Don't add any items to the tag yet. We just want to display a layout
+			// We can add tags after if the user likes the layout.
+			// This stops the case that somebody removed a tag from the inventory setup
+			// And this layout won't accidentally bring it back if they decide not to use it.
+			final Layout new_ = layoutUtilities.createSetupLayout(setup, type, false);
 
 			// Temporarily save the new layout to open the tag.
 			layoutManager.saveLayout(new_);
 			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
 
 			// Save the old layout again in case the user hits escape on the menu.
+			// The bank will still show the temporary new layout.
 			layoutManager.saveLayout(old);
 
 			chatboxPanelManager.openTextMenuInput("Tab laid out using the '" + type.getName() + "' layout.")
 					.option("1. Keep", () ->
 					{
+						// Tag all the items in the setup now since the user likes it.
+						layoutUtilities.createSetupLayout(setup, type, true);
 						layoutManager.saveLayout(new_);
 					})
 					.option("2. Undo", () ->
