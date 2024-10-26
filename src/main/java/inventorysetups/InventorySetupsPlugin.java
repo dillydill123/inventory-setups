@@ -143,6 +143,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
 	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
+	public static final String CONFIG_KEY_ENABLE_LAYOUT_WARNING = "enableLayoutWarning";
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	public static final String CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS = "useWithInventorySetups";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
@@ -384,6 +385,31 @@ public class InventorySetupsPlugin extends Plugin
 		}
 		final Boolean hubBTLIsOn = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS, Boolean.class);
 		return hubBTLIsOn == null || !hubBTLIsOn;
+	}
+
+	public void enableLayouts()
+	{
+		// Turn on Bank Tags and configure hub plugin bank tag layouts setting to be off.
+		if (!pluginManager.isPluginEnabled(bankTagsPlugin))
+		{
+			log.info("Turning on Bank Tags plugin");
+			pluginManager.setPluginEnabled(bankTagsPlugin, true);
+			try
+			{
+				pluginManager.startPlugin(bankTagsPlugin);
+			}
+			catch (Exception e)
+			{
+				log.error("Failed to start Bank Tags plugin.");
+				log.error(e.toString());
+			}
+		}
+		final String hubBTLIsOn = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS);
+		if (hubBTLIsOn != null && hubBTLIsOn.equals("true"))
+		{
+			log.info("Setting Hub Bank Tag Layouts useWithInventorySetups to false");
+			configManager.setConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS, "false");
+		}
 	}
 
 	@Subscribe
@@ -1317,7 +1343,6 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				ammoHandler.handleSpecialAmmo(inventorySetup, containerToUpdate.get(i), newItem);
 				containerToUpdate.set(i, newItem);
-
 			}
 		}
 	}

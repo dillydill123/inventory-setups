@@ -24,6 +24,7 @@
  */
 package inventorysetups;
 
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ENABLE_LAYOUT_WARNING;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
@@ -457,6 +458,17 @@ public interface InventorySetupsConfig extends Config
 	default boolean manualBankFilter()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_ENABLE_LAYOUT_WARNING,
+			name = "Enable Layout Warning",
+			description = "Show a warning panel upon startup if layouts will not work",
+			section = otherSection
+	)
+	default boolean enableLayoutWarning()
+	{
+		return true;
 	}
 
 

@@ -58,30 +58,51 @@ Create function detecting if Hub BTL is on or CoreBTL is on - canUseLayouts()
  - pluginManager.isenabled
  - Hook into onPluginChanged and onConfigChanged to recalculate if you can use layouts
 Hide Auto layout option in worn items when BTL is off or hub BTL is configured.
-
-^^^ DONE ^^^
-vvv TODO VVV
-
-
 Handle Situations where Bank Tags isn't on
  - On startup, check if BTL is off or Hub BTL config key is set to true
  - If either is true, Add a panel warning the user with two buttons
  - Button 1: automatically configure BTL and hub key. If pressed, turn on BTL and set the key above to false
  - Button 2: Continue and do nothing.
  - Add config option to hide this warning (Explain this in the panel)
+ - Set chat message on DoBankSearch if canUseLayouts is false and config option for warning is set.
 
+^^^ DONE ^^^
+vvv TODO VVV
 
---- OTHER ---
-Make sure all TODOs are taken care of
-VarPlayer for quiver.
+Need to update news panel
+Need to update README
 
 --- Findings ---
-No custom mappings
+No custom variation mappings anymore
 ItemManager WORN_ITEMS is not public
 Had to copy most of the export code for bank tag.
 Bug when turning on bank tags while bank is opened. Reproduce -> Bank tags is on. Log in, open bank, turn off bank tags and turn it on. Exception. Can't reproduce after.
 AutoLayout and Fuzzy - Variations are sent to the top. Ask about putting them in the bottom.
 
---- Test Cases --- 
-Use a setup with quiver, bolt pouch, rune pouch, 4+ additional filtered items and potion stoarge. See if everything works. Fuzzy in spots
-Test variation mapping
+--- Test Cases ---
+On first time use, check if Hub BTL data properly got migrated.
+Use a setup with quiver, bolt pouch, rune pouch, 4+ additional filtered items and potion stoarge. See if everything works. Fuzzy in spots.
+ - Try preset layout preset
+ - Try zigzag layout preset
+ - Modify layout and log in and out and make sure it saves the layout
+ - Try right click export button export to bank tag tab and import it into normal bank tags
+ - Click export and import it into regular inventory setups and make sure layout is the same
+ - Make sure stuff from potion storage works
+Change setup name and make sure the layout is still the same
+Change an item in a setup
+Mark an item as fuzzy and unmark it as fuzzy
+Remove an item in a setup
+Remove a fuzzy item in a setup
+Remove a rune pouch, a quiver, a bolt pouch
+Replace an item with a rune pouch, with a quiver, with a bolt pouch
+Add additional filtered items
+Remove additional filtered items
+Make sure warning layout panel does not show up more than once
+Test using the rune pouch preset interface
+Check some locked items that fuzzy works if possible.
+
+--- Harder Tests ---
+Delete a setup and make sure tags for each of the items are removed
+Check that Update Panel shows up first before warning panel if layouts can't be used.
+Test that an empty config doesn't crash
+Remove all tags in the bank when a setup is opened and refresh it

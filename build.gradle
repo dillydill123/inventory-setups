@@ -11,15 +11,11 @@ repositories {
 	mavenCentral()
 }
 
-
-// def runeLiteVersion = 'latest.release'
+// TODO: Go back to latest.release after.
+//def runeLiteVersion = 'latest.release'
 def runeLiteVersion = '1.10.42-SNAPSHOT'
 
 dependencies {
-
-    // TODO: Remove this
-    implementation files('D:/Repos/adam_runelite/runelite-client/target/client-1.10.42-SNAPSHOT.jar')
-
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
 	compileOnly 'org.projectlombok:lombok:1.18.20'

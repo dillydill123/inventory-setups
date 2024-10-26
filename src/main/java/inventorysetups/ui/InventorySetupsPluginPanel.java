@@ -152,6 +152,10 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private final InventorySetupsPlugin plugin;
 
+	private boolean hasDisplayedLayoutWarning;
+
+	private final JPanel layoutWarningPanel;
+
 	@Getter
 	private List<InventorySetup> filteredInventorysetups;
 
@@ -222,11 +226,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		this.notesPanel = new InventorySetupsNotesPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.updateNewsPanel = new InventorySetupsUpdateNewsPanel(plugin, this);
+		this.layoutWarningPanel = new InventorySetupsLayoutWarningPanel(plugin, this);
 		this.setupDisplayPanel = new JPanel();
 		this.overviewPanel = new JPanel();
 		this.overviewTopPanel = new JPanel();
 		this.overviewPanelScrollPosition = 0;
 		this.filteredInventorysetups = new ArrayList<>();
+		this.hasDisplayedLayoutWarning = false;
 
 		// setup the title
 		this.mainTitle = new JLabel();
@@ -618,6 +624,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		JPanel southPanel = new JPanel(new BorderLayout());
 		southPanel.add(updateNewsPanelWrapper, BorderLayout.NORTH);
+		southPanel.add(layoutWarningPanel, BorderLayout.NORTH);
 		southPanel.add(contentWrapperPane, BorderLayout.CENTER);
 
 		add(southPanel, BorderLayout.CENTER);
@@ -673,7 +680,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		layoutSetups(filteredInventorysetups);
 		returnToOverviewPanel(resetScrollBar);
 
-		showCorrectPanelBasedOnVersion();
+		showCorrectPanel();
 
 		revalidate();
 		repaint();
@@ -684,19 +691,33 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		return equipmentPanel.getQuiverPanel();
 	}
 
-	public void showCorrectPanelBasedOnVersion()
+	public void showCorrectPanel()
 	{
+
 		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
 		{
+			layoutWarningPanel.setVisible(false);
 			updateNewsPanelWrapper.setVisible(true);
 			northAnchoredPanel.setVisible(false);
 			contentWrapperPane.setVisible(false);
 		}
+		else if (!hasDisplayedLayoutWarning && !plugin.getCanUseLayouts() && plugin.getConfig().enableLayoutWarning())
+		{
+			layoutWarningPanel.setVisible(true);
+			updateNewsPanelWrapper.setVisible(false);
+			northAnchoredPanel.setVisible(false);
+			contentWrapperPane.setVisible(false);
+			hasDisplayedLayoutWarning = true;
+		}
 		else
 		{
+			layoutWarningPanel.setVisible(false);
 			updateNewsPanelWrapper.setVisible(false);
 			northAnchoredPanel.setVisible(true);
 			contentWrapperPane.setVisible(true);
+
+			// We set this to true now because we only want this menu to show up on startup
+			hasDisplayedLayoutWarning = true;
 		}
 	}
 

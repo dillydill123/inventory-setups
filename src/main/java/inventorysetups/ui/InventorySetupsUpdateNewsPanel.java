@@ -78,7 +78,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		returnToSetups.addActionListener(e ->
 		{
 			plugin.setSavedVersionString(plugin.getCurrentVersionString());
-			panel.showCorrectPanelBasedOnVersion();
+			panel.showCorrectPanel();
 		});
 		final JLabel clickButtonToLeave = new JLabel("Click here to hide this window");
 		final JLabel clickButtonToLeave2 = new JLabel("until the next update");
