@@ -7,7 +7,6 @@ import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.NullItemID;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.banktags.tabs.Layout;
@@ -26,8 +25,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
-import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
 import static inventorysetups.InventorySetupsPlugin.LAYOUT_PREFIX_MARKER;
 
 public class InventorySetupLayoutUtilities
