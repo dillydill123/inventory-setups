@@ -328,7 +328,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.sections = new ArrayList<>();
 		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
-		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, configManager, client);
+		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, config, client);
 		this.canUseLayouts = canUseLayouts();
 
 		// load all the inventory setups from the config file

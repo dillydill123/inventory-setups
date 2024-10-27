@@ -231,7 +231,8 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankInventoryOnlyHotkey",
 			name = "Filter Inventory Hotkey",
 			description = "Configures the hotkey for filtering the inventory in the bank",
-			section = hotkeySection
+			section = hotkeySection,
+			hidden = true
 	)
 	default Keybind filterInventoryHotkey()
 	{
@@ -242,7 +243,8 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankEquipmentOnlyHotkey",
 			name = "Filter Equipment Hotkey",
 			description = "Configures the hotkey for filtering the equipment in the bank",
-			section = hotkeySection
+			section = hotkeySection,
+			hidden = true
 	)
 	default Keybind filterEquipmentHotkey()
 	{
@@ -253,7 +255,8 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankAddItemstOnlyHotkey",
 			name = "Filter Additional Items Hotkey",
 			description = "Configures the hotkey for filtering the additional items in the bank",
-			section = hotkeySection
+			section = hotkeySection,
+			hidden = true
 	)
 	default Keybind filterAddItemsHotkey()
 	{

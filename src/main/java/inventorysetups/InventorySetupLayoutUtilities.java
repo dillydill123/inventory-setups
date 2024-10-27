@@ -38,16 +38,16 @@ public class InventorySetupLayoutUtilities
 
 	private final LayoutManager layoutManager;
 
-	private final ConfigManager configManager;
+	private final InventorySetupsConfig config;
 
 	private final Client client;
 
-	public InventorySetupLayoutUtilities(final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager, final ConfigManager configManager, final Client client)
+	public InventorySetupLayoutUtilities(final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager, final InventorySetupsConfig config, final Client client)
 	{
 		this.itemManager = itemManager;
 		this.tagManager = tagManager;
 		this.layoutManager = layoutManager;
-		this.configManager = configManager;
+		this.config = config;
 		this.client = client;
 	}
 
@@ -67,11 +67,11 @@ public class InventorySetupLayoutUtilities
 
 	public Layout createSetupLayout(final InventorySetup setup)
 	{
-		InventorySetupLayoutType type = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_LAYOUT_DEFAULT, InventorySetupLayoutType.class);
+		InventorySetupLayoutType type = config.defaultLayout();
 		return createSetupLayout(setup, type, true);
 	}
 
-	public Layout createSetupLayout(final InventorySetup setup, final InventorySetupLayoutType type, final boolean addToTag)
+	public Layout createSetupLayout(final InventorySetup setup, InventorySetupLayoutType type, final boolean addToTag)
 	{
 		if (type.equals(InventorySetupLayoutType.PRESET))
 		{

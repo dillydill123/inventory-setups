@@ -622,9 +622,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		add(northAnchoredPanel, BorderLayout.NORTH);
 
+		JPanel extraPanelsWrapper = new JPanel();
+		extraPanelsWrapper.setLayout(new BoxLayout(extraPanelsWrapper, BoxLayout.Y_AXIS));
+		extraPanelsWrapper.add(updateNewsPanelWrapper);
+		extraPanelsWrapper.add(layoutWarningPanel);
+
 		JPanel southPanel = new JPanel(new BorderLayout());
-		southPanel.add(updateNewsPanelWrapper, BorderLayout.NORTH);
-		southPanel.add(layoutWarningPanel, BorderLayout.NORTH);
+		southPanel.add(extraPanelsWrapper, BorderLayout.NORTH);
 		southPanel.add(contentWrapperPane, BorderLayout.CENTER);
 
 		add(southPanel, BorderLayout.CENTER);
