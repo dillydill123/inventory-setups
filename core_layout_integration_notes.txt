@@ -68,6 +68,7 @@ Handle Situations where Bank Tags isn't on
 ^^^ DONE ^^^
 vvv TODO VVV
 
+Change when hasDisplayedLayoutWarning is set?
 Need to update news panel
 Need to update README
 
@@ -100,6 +101,7 @@ Make sure warning layout panel does not show up more than once
 Test using the rune pouch preset interface
 Check some locked items that fuzzy works if possible.
 Replace all items and check that all setups had their layouts adjusted.
+Refresh current setup
 
 --- Harder Tests ---
 Delete a setup and make sure tags for each of the items are removed

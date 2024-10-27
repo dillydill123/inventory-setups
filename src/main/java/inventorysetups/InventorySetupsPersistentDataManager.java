@@ -246,7 +246,8 @@ public class InventorySetupsPersistentDataManager
 
 	private void processSetupsFromConfig()
 	{
-		final boolean hasMigratedToCoreBTL = !Strings.isNullOrEmpty(configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL));
+		final String migratedCoreBTL = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL);
+		final boolean hasMigratedToCoreBTL = !Strings.isNullOrEmpty(migratedCoreBTL);
 		for (final InventorySetup setup : inventorySetups)
 		{
 			final List<InventorySetupsItem> potentialRunePouch = plugin.getAmmoHandler().getRunePouchDataIfInContainer(setup.getInventory());
@@ -285,7 +286,7 @@ public class InventorySetupsPersistentDataManager
 		if (!hasMigratedToCoreBTL)
 		{
 			log.info("Completed migration to core BTL");
-			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL, "True");
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_MIGRATED_CORE_BTL, "true");
 		}
 	}
 

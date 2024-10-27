@@ -1,10 +1,14 @@
 package inventorysetups;
 
+import net.runelite.api.Client;
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
+import net.runelite.api.NullItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemVariationMapping;
 import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.banktags.tabs.Layout;
 import net.runelite.client.plugins.banktags.tabs.LayoutManager;
@@ -18,7 +22,9 @@ import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static inventorysetups.InventorySetupsPlugin.CONFIG_GROUP;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
@@ -34,12 +40,15 @@ public class InventorySetupLayoutUtilities
 
 	private final ConfigManager configManager;
 
-	public InventorySetupLayoutUtilities(final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager, final ConfigManager configManager)
+	private final Client client;
+
+	public InventorySetupLayoutUtilities(final ItemManager itemManager, final TagManager tagManager, final LayoutManager layoutManager, final ConfigManager configManager, final Client client)
 	{
 		this.itemManager = itemManager;
 		this.tagManager = tagManager;
 		this.layoutManager = layoutManager;
 		this.configManager = configManager;
+		this.client = client;
 	}
 
 	public static String getTagNameForLayout(final String inventorySetupName)
@@ -48,11 +57,11 @@ public class InventorySetupLayoutUtilities
 		return LAYOUT_PREFIX_MARKER + hashOfName;
 	}
 
-	public Layout getSetupLayout(final InventorySetup inventorySetupName)
+	public Layout getSetupLayout(final InventorySetup setup)
 	{
-		final String tagName = getTagNameForLayout(inventorySetupName.getName());
+		final String tagName = getTagNameForLayout(setup.getName());
 		final Layout layout = layoutManager.loadLayout(tagName);
-		assert layout != null : "Layout for " + inventorySetupName + " is null.";
+		assert layout != null : "Layout for " + setup.getName() + " is null.";
 		return layout;
 	}
 
@@ -121,6 +130,8 @@ public class InventorySetupLayoutUtilities
 			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag);
 			additionalItemsCounter++;
 		}
+
+		addFuzzyItemsToEndOfLayout(layout, setup);
 
 		trimLayout(layout);
 
@@ -248,6 +259,8 @@ public class InventorySetupLayoutUtilities
 			additionalItemsCounter++;
 		}
 
+		addFuzzyItemsToEndOfLayout(layout, setup);
+
 		trimLayout(layout);
 
 		return layout;
@@ -267,6 +280,8 @@ public class InventorySetupLayoutUtilities
 
 	public void recalculateLayout(final InventorySetup setup)
 	{
+		// Recalculate all the items that should be in the layout
+
 		final List<InventorySetupsItem> itemsInSetup = InventorySetup.getSetupItems(setup);
 		final String tagName = getTagNameForLayout(setup.getName());
 		final Layout layout = layoutManager.loadLayout(tagName);
@@ -276,11 +291,15 @@ public class InventorySetupLayoutUtilities
 		tagManager.removeTag(tagName);
 
 		// Re-add every item in the tag.
-		HashSet<Integer> idsInSetup = new HashSet<>();
-		HashSet<Integer> idsInSetupNoFuzzy = new HashSet<>();
+		Set<Integer> idsInSetup = new LinkedHashSet<>();
+		Set<Integer> idsInSetupNoFuzzy = new LinkedHashSet<>();
 		for (InventorySetupsItem item : itemsInSetup)
 		{
 			int processedId = itemManager.canonicalize(item.getId());
+			if (processedId == -1)
+			{
+				continue;
+			}
 
 			// Fuzzy tags and non-fuzzy tags are actually stored separate, so a non-fuzzy item can't override
 			// The same fuzzy item that came before it (even though this would be a rare case).
@@ -292,7 +311,8 @@ public class InventorySetupLayoutUtilities
 			idsInSetupNoFuzzy.add(processedId);
 			if (item.isFuzzy())
 			{
-				idsInSetup.addAll(ItemVariationMapping.getVariations(ItemVariationMapping.map(processedId)));
+				final int baseProcessedId = InventorySetupsVariationMapping.map(processedId);
+				idsInSetup.addAll(InventorySetupsVariationMapping.getVariations(baseProcessedId));
 			}
 		}
 
@@ -301,7 +321,7 @@ public class InventorySetupLayoutUtilities
 		// It's possible that some users would want one of the instances of the item to be replaced
 		// But for now, we avoid that. If this is needed, it's probably better to do it in the caller of this function
 		// Since it knows if an item was removed or not, while this is catch all recalculation of the layout.
-		HashSet<Integer> idsInLayout = new HashSet<>();
+		Set<Integer> idsInLayout = new HashSet<>();
 		for (int i = 0; i < layout.size(); i++)
 		{
 			int layoutId = layout.getItemAtPos(i);
@@ -319,9 +339,9 @@ public class InventorySetupLayoutUtilities
 			idsInLayout.add(layoutId);
 		}
 
-		// Add any items that should belong in the layout based on the setup.
-		// Do not include fuzzy items in the setup because the layoutManager will automatically
-		// Add those if they exist in the bank, otherwise we would add every possible variation which is not ideal.
+		// Add any items that should belong in the layout based on the setup to the first available position
+		// So it's easy to find.
+		// Do not include fuzzy items in the setup because we can add those at the bottom.
 		for (final Integer idInSetup : idsInSetupNoFuzzy)
 		{
 			if (!idsInLayout.contains(idInSetup))
@@ -330,9 +350,70 @@ public class InventorySetupLayoutUtilities
 			}
 		}
 
+		addFuzzyItemsToEndOfLayout(layout, idsInSetup, idsInSetupNoFuzzy);
+
 		trimLayout(layout);
 
 		layoutManager.saveLayout(layout);
+	}
+
+	private void addFuzzyItemsToEndOfLayout(final Layout layout, final InventorySetup setup)
+	{
+		List<InventorySetupsItem> itemsInSetup = InventorySetup.getSetupItems(setup);
+		Set<Integer> idsInSetup = new LinkedHashSet<>();
+		Set<Integer> idsInSetupNoFuzzy = new LinkedHashSet<>();
+		for (InventorySetupsItem item : itemsInSetup)
+		{
+			int processedId = itemManager.canonicalize(item.getId());
+			if (processedId == -1)
+			{
+				continue;
+			}
+
+			idsInSetup.add(processedId);
+			idsInSetupNoFuzzy.add(processedId);
+			if (item.isFuzzy())
+			{
+				final int baseProcessedId = InventorySetupsVariationMapping.map(processedId);
+				idsInSetup.addAll(InventorySetupsVariationMapping.getVariations(baseProcessedId));
+			}
+		}
+
+		addFuzzyItemsToEndOfLayout(layout, idsInSetup, idsInSetupNoFuzzy);
+	}
+
+	private void addFuzzyItemsToEndOfLayout(final Layout layout, final Set<Integer> idsInSetup, final Set<Integer> idsInSetupNoFuzzy)
+	{
+		// Try our best at adding fuzzy items to the bottom of the layout
+		// Only add those that exist in the bank, otherwise we would add every possible variation which is not ideal.
+		// Any missed items will be added by the layout manager.
+		// This also adds the benefit that we can use our own custom mappings along with base item variation mappings.
+		// This will probably only work if the bank is open, but still worth doing for things like auto layouts.
+		ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
+		if (bankContainer != null)
+		{
+
+			Set<Integer> bankItems = new LinkedHashSet<>();
+			for (int i = 0; i < bankContainer.size(); i++)
+			{
+				Item item = bankContainer.getItem(i);
+				if (item != null && item.getId() > -1 && item.getId() != NullItemID.NULL_6512)
+				{
+					bankItems.add(item.getId());
+				}
+			}
+
+			Set<Integer> idsInSetupOnlyFuzzy = new LinkedHashSet<>(idsInSetup);
+			idsInSetupOnlyFuzzy.removeAll(idsInSetupNoFuzzy);
+
+			for (final Integer id : idsInSetupOnlyFuzzy)
+			{
+				if (bankItems.contains(id) && layout.count(id) < 1)
+				{
+					layout.addItemAfter(id, layout.size());
+				}
+			}
+		}
 	}
 
 	public void exportSetupToBankTagTab(final InventorySetup setup, final Component component)
@@ -393,7 +474,10 @@ public class InventorySetupLayoutUtilities
 				String[] numbers = pair.split(":");
 				int id = Integer.parseInt(numbers[0]);
 				int pos = Integer.parseInt(numbers[1]);
-				layout.setItemAtPos(id, pos);
+
+				// Bank Tag Layout setups might have item placeholder id which won't play nice with bank tags
+				int processedID = itemManager.canonicalize(id);
+				layout.setItemAtPos(processedID, pos);
 			}
 			return layout;
 		}

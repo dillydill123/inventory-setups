@@ -13,7 +13,7 @@ repositories {
 
 // TODO: Go back to latest.release after.
 //def runeLiteVersion = 'latest.release'
-def runeLiteVersion = '1.10.42-SNAPSHOT'
+def runeLiteVersion = '1.10.43-SNAPSHOT'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion

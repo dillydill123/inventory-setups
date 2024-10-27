@@ -328,7 +328,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.sections = new ArrayList<>();
 		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
-		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, configManager);
+		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, configManager, client);
 		this.canUseLayouts = canUseLayouts();
 
 		// load all the inventory setups from the config file
@@ -758,8 +758,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		clientThread.invoke(() ->
 		{
-			Layout old = bankTagsService.getActiveLayout();
-			assert old != null : "No active layout exists.";
+			final Layout old = layoutUtilities.getSetupLayout(setup);
 
 			// Don't add any items to the tag yet. We just want to display a layout
 			// We can add tags after if the user likes the layout.
@@ -1259,6 +1258,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// Do a bank search when the bank is opened
 			// This will set the proper layout
+			// TODO try this in onWidgetLoaded to see if setup comes back after potion storage.
 			if (!config.manualBankFilter())
 			{
 				// Only do the filter if manual bank filter is not set.

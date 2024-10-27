@@ -1,17 +1,27 @@
 package inventorysetups;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.runelite.api.ItemID.*;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import net.runelite.client.game.ItemVariationMapping;
 
 public class InventorySetupsVariationMapping
 {
 	private static final Map<Integer, Integer> mappings;
+
+	private static final Multimap<Integer, Integer> invertedMappings;
+
 
 	// Worn items with weight reducing property have a different worn and inventory ItemID
 	// Copy of ItemManger::WORN_ITEMS. Use that instead if it becomes a publicly usable member.
@@ -119,6 +129,15 @@ public class InventorySetupsVariationMapping
 		}
 
 		return mappedId;
+	}
+
+	public static Collection<Integer> getVariations(int itemId)
+	{
+		Collection<Integer> baseMappings = ItemVariationMapping.getVariations(itemId);
+		Collection<Integer> customMappings = invertedMappings.asMap().getOrDefault(itemId, Collections.singletonList(itemId));
+		Collection<Integer> allMappings = new LinkedHashSet<>(baseMappings);
+		allMappings.addAll(customMappings);
+		return allMappings;
 	}
 
 	static
@@ -242,6 +261,19 @@ public class InventorySetupsVariationMapping
 		// Locked fire/infernal cape -> regular capes
 		mappings.put(FIRE_CAPE_L, FIRE_CAPE);
 		mappings.put(INFERNAL_CAPE_L, INFERNAL_CAPE);
+
+		ImmutableMultimap.Builder<Integer, Integer> invertedBuilder = new ImmutableMultimap.Builder<>();
+		Set<Integer> addedValues = new HashSet<>();
+		for (Integer key : mappings.keySet())
+		{
+			Integer value = mappings.get(key);
+			invertedBuilder.put(value, key);
+			if (addedValues.add(value))
+			{
+				invertedBuilder.put(value, value);
+			}
+		}
+		invertedMappings = invertedBuilder.build();
 
 		// INVERTED_WORN_ITEMS mapping
 		INVERTED_WORN_ITEMS = WORN_ITEMS.entrySet()
