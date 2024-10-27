@@ -49,6 +49,7 @@ public class InventorySetupsLayoutWarningPanel extends JPanel
 		configureSettingsButton.addActionListener(e ->
 		{
 			plugin.enableLayouts();
+			panel.setHasDisplayedLayoutWarning(true);
 			panel.showCorrectPanel();
 		});
 		configureSettings.setFont(FontManager.getRunescapeSmallFont());
@@ -68,6 +69,7 @@ public class InventorySetupsLayoutWarningPanel extends JPanel
 		noConfigureSettingsButton.setForeground(Color.RED);
 		noConfigureSettingsButton.addActionListener(e ->
 		{
+			panel.setHasDisplayedLayoutWarning(true);
 			panel.showCorrectPanel();
 		});
 		noConfigureSettings.setFont(FontManager.getRunescapeSmallFont());

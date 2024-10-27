@@ -48,6 +48,7 @@ import java.util.Set;
 
 import inventorysetups.serialization.InventorySetupPortable;
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -152,6 +153,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 	private final InventorySetupsPlugin plugin;
 
+	@Getter
+	@Setter
 	private boolean hasDisplayedLayoutWarning;
 
 	private final JPanel layoutWarningPanel;
@@ -711,7 +714,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			updateNewsPanelWrapper.setVisible(false);
 			northAnchoredPanel.setVisible(false);
 			contentWrapperPane.setVisible(false);
-			hasDisplayedLayoutWarning = true;
 		}
 		else
 		{
@@ -720,7 +722,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			northAnchoredPanel.setVisible(true);
 			contentWrapperPane.setVisible(true);
 
-			// We set this to true now because we only want this menu to show up on startup
+			// We set this to true now because we only want this menu to show up on startup.
+			// If someone modifies settings after startup, just continue.
 			hasDisplayedLayoutWarning = true;
 		}
 	}
