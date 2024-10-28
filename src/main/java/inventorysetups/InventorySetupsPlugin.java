@@ -147,7 +147,8 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	public static final String CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS = "useWithInventorySetups";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
-	public static final String LAYOUT_PREFIX_MARKER = "___inventorysetuplayout___";
+	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
+	public static final String LAYOUT_PREFIX_MARKER = "_invSetup_";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -1333,9 +1334,10 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	private void updateAllInstancesInContainerSetupWithNewItem(final InventorySetup inventorySetup, List<InventorySetupsItem> containerToUpdate,
+	private boolean updateAllInstancesInContainerSetupWithNewItem(final InventorySetup inventorySetup, List<InventorySetupsItem> containerToUpdate,
 																final InventorySetupsItem oldItem, final InventorySetupsItem newItem, final InventorySetupsSlotID id)
 	{
+		boolean updated = false;
 		for (int i = 0; i < containerToUpdate.size(); i++)
 		{
 			final InventorySetupsItem item = containerToUpdate.get(i);
@@ -1343,8 +1345,10 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				ammoHandler.handleSpecialAmmo(inventorySetup, containerToUpdate.get(i), newItem);
 				containerToUpdate.set(i, newItem);
+				updated = true;
 			}
 		}
+		return updated;
 	}
 
 	private void updateAllInstancesInSetupWithNewItem(final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
@@ -1362,10 +1366,12 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (final InventorySetup inventorySetup : inventorySetups)
 		{
-			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
-			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
-
-			layoutUtilities.recalculateLayout(inventorySetup);
+			boolean invUpdated = updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
+			boolean eqpUpdated = updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
+			if (invUpdated || eqpUpdated)
+			{
+				layoutUtilities.recalculateLayout(inventorySetup);
+			}
 		}
 	}
 
@@ -1951,8 +1957,13 @@ public class InventorySetupsPlugin extends Plugin
 
 			}.getType();
 
-
 			final InventorySetupPortable newSetupPortable = gson.fromJson(setup, type);
+
+			if (isSetupPortableInvalid(newSetupPortable))
+			{
+				throw new RuntimeException("Setup has invalid data.");
+			}
+
 			final InventorySetup newSetup = newSetupPortable.getSerializedSetup();
 
 			if (isImportedSetupInvalid(newSetup))
@@ -2007,6 +2018,11 @@ public class InventorySetupsPlugin extends Plugin
 			final ArrayList<int[]> newUnprocessedLayouts = new ArrayList<>();
 			for (final InventorySetupPortable portable : newSetupPortables)
 			{
+				if (isSetupPortableInvalid(portable))
+				{
+					throw new RuntimeException("Setup has invalid data.");
+				}
+
 				final InventorySetup setup = portable.getSerializedSetup();
 				// Do some additional checking for required fields
 				if (isImportedSetupInvalid(setup))
@@ -2051,6 +2067,11 @@ public class InventorySetupsPlugin extends Plugin
 	private boolean isImportedSetupInvalid(final InventorySetup setup)
 	{
 		return setup.getName() == null || setup.getInventory() == null || setup.getEquipment() == null || setup.getAdditionalFilteredItems() == null;
+	}
+
+	private boolean isSetupPortableInvalid(final InventorySetupPortable portable)
+	{
+		return portable.getSetup() == null || portable.getLayout() == null;
 	}
 
 	public void importSection()

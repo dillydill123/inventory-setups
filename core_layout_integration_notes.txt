@@ -68,7 +68,6 @@ Handle Situations where Bank Tags isn't on
 ^^^ DONE ^^^
 vvv TODO VVV
 
-Change tag marker? It's pretty long right now. Maybe could do _invSetup_DEADBEEF?
 Need to update news panel
 
 --- Findings ---

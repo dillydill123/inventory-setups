@@ -487,6 +487,10 @@ public class InventorySetupLayoutUtilities
 	private void trimLayout(final Layout layout)
 	{
 		// Remove all trailing `-1`s in a layout.
+		if (layout.size() == 0)
+		{
+			return;
+		}
 		final int[] layoutArr = layout.getLayout();
 		if (layoutArr[layoutArr.length - 1] != -1)
 		{
