@@ -68,16 +68,12 @@ Handle Situations where Bank Tags isn't on
 ^^^ DONE ^^^
 vvv TODO VVV
 
-Change when hasDisplayedLayoutWarning is set?
+Change tag marker? It's pretty long right now. Maybe could do _invSetup_DEADBEEF?
 Need to update news panel
-Need to update README
 
 --- Findings ---
-No custom variation mappings anymore
 ItemManager WORN_ITEMS is not public
-Had to copy most of the export code for bank tag.
 Bug when turning on bank tags while bank is opened. Reproduce -> Bank tags is on. Log in, open bank, turn off bank tags and turn it on. Exception. Can't reproduce after.
-AutoLayout and Fuzzy - Variations are sent to the top. Ask about putting them in the bottom.
 
 --- Test Cases ---
 On first time use, check if Hub BTL data properly got migrated.
