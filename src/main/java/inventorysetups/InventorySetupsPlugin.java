@@ -1268,7 +1268,7 @@ public class InventorySetupsPlugin extends Plugin
 		else if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed() && bankTagsService.getActiveLayout() != null)
 			{
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
