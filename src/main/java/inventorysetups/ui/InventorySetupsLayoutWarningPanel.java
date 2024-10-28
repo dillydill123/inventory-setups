@@ -24,9 +24,9 @@ public class InventorySetupsLayoutWarningPanel extends JPanel
 	InventorySetupsLayoutWarningPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel)
 	{
 		final String warningText = "Inventory Setups has detected that layouts will not work with your current settings.\n\n" +
-				"Bank Tags Plugin must be ON and Hub Plugin Bank Tag Layouts 'Use with Inventory Setups' setting must be OFF.\n\n" +
+				"\"Bank Tags\" Plugin must be ON and Hub Plugin \"Bank Tag Layouts\" \"Use with Inventory Setups\" setting must be OFF.\n\n" +
 				"Inventory Setups can adjust your settings so bank layouts will work. This is HIGHLY recommended so you can use all features of Inventory Setups.\n\n" +
-				"Hub Plugin Bank Tag Layouts is not required anymore for layouts with Inventory Setups. You can disable this warning in the settings.";
+				"Hub Plugin \"Bank Tag Layouts\" is not required anymore for layouts with Inventory Setups. You can disable this warning in the settings.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(warningText);

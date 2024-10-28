@@ -64,11 +64,12 @@ Handle Situations where Bank Tags isn't on
  - Button 1: automatically configure BTL and hub key. If pressed, turn on BTL and set the key above to false
  - Button 2: Continue and do nothing.
  - Add config option to hide this warning (Explain this in the panel)
+Update news panel
 
 ^^^ DONE ^^^
 vvv TODO VVV
 
-Need to update news panel
+All done!
 
 --- Findings ---
 ItemManager WORN_ITEMS is not public
