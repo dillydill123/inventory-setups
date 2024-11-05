@@ -3,12 +3,17 @@ package inventorysetups;
 import com.google.inject.Guice;
 import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.client.config.ConfigManager;
@@ -16,10 +21,25 @@ import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
+import net.runelite.client.plugins.banktags.BankTagsConfig;
+import net.runelite.client.plugins.banktags.BankTagsPlugin;
+
+
+import net.runelite.client.plugins.PluginManager;
+import net.runelite.client.plugins.banktags.BankTagsService;
+import net.runelite.client.plugins.banktags.TagManager;
+import net.runelite.client.plugins.banktags.tabs.LayoutManager;
+import net.runelite.client.plugins.banktags.tabs.TabInterface;
+import net.runelite.client.ui.ClientToolbar;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -44,23 +64,48 @@ public class InventorySetupsUnitTest
 
 	@Mock
 	@Bind
+	private PluginManager pluginManager;
+
+	@Mock
+	@Bind
+	private ClientToolbar clientToolbar;
+
+	@Mock
+	@Bind
+	private BankTagsPlugin bankTagsPlugin;
+
+	@Mock
+	@Bind
+	private BankTagsConfig bankTagsConfig;
+
+	@Mock
+	@Bind
+	private TabInterface tabInterface;
+
+	@Mock
+	@Bind
+	private BankTagsService bankTagsService;
+
+	@Mock
+	@Bind
+	private LayoutManager layoutManager;
+
+	@Mock
+	@Bind
+	private TagManager tagManager;
+
+	@Mock
+	@Bind
 	private ConfigManager configManager;
 
 	@Inject
 	private InventorySetupsPlugin inventorySetupsPlugin;
 
-	private final ScriptCallbackEvent EVENT = new ScriptCallbackEvent();
-
 	@Before
 	public void before()
 	{
 		Guice.createInjector(BoundFieldModule.of(this)).injectMembers(this);
-
-		EVENT.setEventName("bankSearchFilter");
-
 		when(itemManager.canonicalize(ItemID.COAL)).thenReturn(ItemID.COAL);
-		//when(client.getIntStackSize()).thenReturn(2);
-		//when(client.getStringStackSize()).thenReturn(1);
 	}
 
 	@Test
@@ -83,8 +128,8 @@ public class InventorySetupsUnitTest
 	@Test
 	public void testSetupContainsItem()
 	{
-		List<InventorySetupsItem> inventory = inventorySetupsPlugin.getNormalizedContainer(InventoryID.INVENTORY);
-		List<InventorySetupsItem> equipment = inventorySetupsPlugin.getNormalizedContainer(InventoryID.EQUIPMENT);
+		List<InventorySetupsItem> inventory = new ArrayList<>(Collections.nCopies(28, InventorySetupsItem.getDummyItem()));
+		List<InventorySetupsItem> equipment = new ArrayList<>(Collections.nCopies(13, InventorySetupsItem.getDummyItem()));
 		List<InventorySetupsItem> runePouch = null;
 		List<InventorySetupsItem> boltPouch = null;
 		List<InventorySetupsItem> quiver = null;
@@ -92,7 +137,7 @@ public class InventorySetupsUnitTest
 		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, boltPouch, quiver, addItems, "Test",
 												"", inventorySetupsConfig.highlightColor(), false,
 												inventorySetupsConfig.displayColor(), false,false, 0, false, -1);
-
+		inventorySetupsPlugin.startUp();
 		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL, true, true));
 	}
 }

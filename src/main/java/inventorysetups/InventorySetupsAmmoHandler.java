@@ -6,6 +6,7 @@ import inventorysetups.ui.InventorySetupsSlot;
 import net.runelite.api.Client;
 import net.runelite.api.EnumComposition;
 import net.runelite.api.ItemID;
+import net.runelite.api.VarPlayer;
 import net.runelite.client.game.ItemManager;
 
 import java.util.ArrayList;
@@ -229,13 +230,9 @@ public class InventorySetupsAmmoHandler
 	// Must be run on client thread!
 	public List<InventorySetupsItem> getQuiverData()
 	{
-		// TODO replace with VarPlayer when RL adds it.
-		final int DIZANAS_QUIVER_ITEM_ID = 4142;
-		final int DIZANAS_QUIVER_ITEM_COUNT = 4141;
-
 		List<InventorySetupsItem> quiverData = new ArrayList<>();
-		final int quiverAmmoId = client.getVarpValue(DIZANAS_QUIVER_ITEM_ID);
-		final int quiverAmmoCount = Math.max(0, client.getVarpValue(DIZANAS_QUIVER_ITEM_COUNT));
+		final int quiverAmmoId = client.getVarpValue(VarPlayer.DIZANAS_QUIVER_ITEM_ID);
+		final int quiverAmmoCount = Math.max(0, client.getVarpValue(VarPlayer.DIZANAS_QUIVER_ITEM_COUNT));
 
 		if (quiverAmmoId == -1 || quiverAmmoCount == 0)
 		{

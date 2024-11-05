@@ -12,7 +12,7 @@ public enum InventorySetupsPanelViewID
 {
 	STANDARD("STANDARD", 0),
 	COMPACT("COMPACT", 1),
-	ICON("ICON", 1);
+	ICON("ICON", 2);
 
 	@Override
 	public String toString()

@@ -78,7 +78,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		returnToSetups.addActionListener(e ->
 		{
 			plugin.setSavedVersionString(plugin.getCurrentVersionString());
-			panel.showCorrectPanelBasedOnVersion();
+			panel.showCorrectPanel();
 		});
 		final JLabel clickButtonToLeave = new JLabel("Click here to hide this window");
 		final JLabel clickButtonToLeave2 = new JLabel("until the next update");
@@ -137,7 +137,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Fixed a bug where bank filtering would sometimes not work.";
+		String updateText =	"Inventory Setups now uses Bank Tags for Bank Layouts and Filtering.\n\n" +
+							"Some notable changes include Potion Storage support and Auto Layouts.\n\n" +
+							"Please see the newly updated Guide for examples and information.\n\n" +
+							"Hub Plugin \"Bank Tag Layouts\" is not required anymore. If you previously used it, your layout data was migrated to Inventory Setups. You can safely uninstall it if you only used the plugin with Inventory Setups.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);

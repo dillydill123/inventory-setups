@@ -27,6 +27,7 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.serialization.InventorySetupPortable;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
 import java.awt.Color;
@@ -41,9 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,16 +66,11 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
-import net.runelite.api.SpriteID;
-import net.runelite.api.Varbits;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.PostMenuSort;
-import net.runelite.api.events.ScriptCallbackEvent;
-import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
@@ -88,6 +82,7 @@ import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.PluginChanged;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
@@ -96,7 +91,12 @@ import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.game.chatbox.ChatboxTextInput;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginDependency;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.PluginManager;
+import net.runelite.client.plugins.bank.BankSearch;
+import net.runelite.client.plugins.banktags.TagManager;
+import net.runelite.client.plugins.banktags.tabs.LayoutManager;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.JagexColors;
 import net.runelite.client.ui.NavigationButton;
@@ -105,6 +105,9 @@ import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.HotkeyListener;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.plugins.banktags.BankTagsPlugin;
+import net.runelite.client.plugins.banktags.BankTagsService;
+import net.runelite.client.plugins.banktags.tabs.Layout;
 
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -124,6 +127,7 @@ import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_RUNE_V
 	description = "Save gear setups for specific activities"
 )
 
+@PluginDependency(BankTagsPlugin.class)
 @Slf4j
 public class InventorySetupsPlugin extends Plugin
 {
@@ -138,6 +142,13 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
+	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
+	public static final String CONFIG_KEY_ENABLE_LAYOUT_WARNING = "enableLayoutWarning";
+	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
+	public static final String CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS = "useWithInventorySetups";
+	// Bank tags will standardize tag names so this must not be modified by that standardization.
+	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
+	public static final String LAYOUT_PREFIX_MARKER = "_invSetup_";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -146,19 +157,14 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String OPEN_SECTION_MENU_ENTRY = "Open Section";
 	private static final String OPEN_SETUP_MENU_ENTRY = "Open setup";
 	private static final String RETURN_TO_OVERVIEW_ENTRY = "Close current setup";
-	private static final String FILTER_ADD_ITEMS_ENTRY = "Filter additional items";
-	private static final String FILTER_EQUIPMENT_ENTRY = "Filter equipment";
-	private static final String FILTER_INVENTORY_ENTRY = "Filter inventory";
-	private static final String FILTER_ALL_ENTRY = "Filter all";
+	private static final String AUTO_LAYOUT_PRESET_ENTRY = "Auto layout: Preset";
+	private static final String AUTO_LAYOUT_ZIGZAG_ENTRY = "Auto layout: ZigZag";
 	private static final String ADD_TO_ADDITIONAL_ENTRY = "Add to Additional Filtered Items";
 	private static final String UNASSIGNED_SECTION_SETUP_MENU_ENTRY = "Unassigned";
 	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final String NOTES_SEARCH_TAG = "notes:";
 	private static final int SPELLBOOK_VARBIT = 4070;
-	private static final int ITEMS_PER_ROW = 8;
-	private static final int ITEM_VERTICAL_SPACING = 36;
-	private static final int ITEM_HORIZONTAL_SPACING = 48;
-	private static final int ITEM_ROW_START = 51;
+	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME;
 
 	@Inject
 	@Getter
@@ -190,6 +196,9 @@ public class InventorySetupsPlugin extends Plugin
 	private Gson gson;
 
 	@Inject
+	private PluginManager pluginManager;
+
+	@Inject
 	@Getter
 	private ColorPickerManager colorPickerManager;
 
@@ -207,10 +216,30 @@ public class InventorySetupsPlugin extends Plugin
 	private NavigationButton navButton;
 
 	@Inject
-	private InventorySetupsBankSearch bankSearch;
+	private BankTagsService bankTagsService;
+
+	@Inject
+	private BankTagsPlugin bankTagsPlugin;
+
+	@Inject
+	private BankSearch bankSearch;
+
+	@Inject
+	@Getter
+	private LayoutManager layoutManager;
+
+	@Inject
+	@Getter
+	private TagManager tagManager;
 
 	@Inject
 	private KeyManager keyManager;
+
+	@Getter
+	private InventorySetupLayoutUtilities layoutUtilities;
+
+	@Getter
+	private Boolean canUseLayouts;
 
 	@Inject
 	@Getter
@@ -221,9 +250,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	private ChatboxTextInput searchInput;
 
-	// global filtering is allowed for any setup
-	private boolean internalFilteringIsAllowed;
-
 	@Setter
 	@Getter
 	private boolean navButtonIsSelected;
@@ -233,10 +259,6 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Getter
 	private InventorySetupsPersistentDataManager dataManager;
-
-	@Setter
-	@Getter
-	private InventorySetupsFilteringModeID bankFilteringMode;
 
 	@Getter
 	private InventorySetupsAmmoHandler ammoHandler;
@@ -258,37 +280,6 @@ public class InventorySetupsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			bankFilteringMode = InventorySetupsFilteringModeID.ALL;
-			triggerBankSearchFromHotKey();
-		}
-	};
-
-	private final HotkeyListener filterInventoryHotkeyListener = new HotkeyListener(() -> config.filterInventoryHotkey())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			bankFilteringMode = InventorySetupsFilteringModeID.INVENTORY;
-			triggerBankSearchFromHotKey();
-		}
-	};
-
-	private final HotkeyListener filterEquipmentHotkeyListener = new HotkeyListener(() -> config.filterEquipmentHotkey())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			bankFilteringMode = InventorySetupsFilteringModeID.EQUIPMENT;
-			triggerBankSearchFromHotKey();
-		}
-	};
-
-	private final HotkeyListener filterAddItemsHotkeyListener = new HotkeyListener(() -> config.filterAddItemsHotkey())
-	{
-		@Override
-		public void hotkeyPressed()
-		{
-			bankFilteringMode = InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS;
 			triggerBankSearchFromHotKey();
 		}
 	};
@@ -302,13 +293,139 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	};
 
+	@Override
+	public void startUp()
+	{
+		// get current version of the plugin using properties file generated by build.gradle
+		try
+		{
+			final Properties props = new Properties();
+			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/invsetups_version.txt");
+			props.load(is);
+			this.currentVersion = props.getProperty("version");
+		}
+		catch (Exception e)
+		{
+			log.warn("Could not determine current plugin version", e);
+			this.currentVersion = "";
+		}
+
+		this.panel = new InventorySetupsPluginPanel(this, itemManager);
+		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/inventorysetups_icon.png");
+
+		this.navButtonIsSelected = false;
+		navButton = NavigationButton.builder()
+				.tooltip("Inventory Setups")
+				.icon(icon)
+				.priority(6)
+				.panel(panel)
+				.build();
+
+		clientToolbar.addNavigation(navButton);
+
+		this.shouldTriggerInventoryHighlightOnGameTick = false;
+		this.cache = new InventorySetupsCache();
+		this.inventorySetups = new ArrayList<>();
+		this.sections = new ArrayList<>();
+		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
+		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
+		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, config, client);
+		this.canUseLayouts = canUseLayouts();
+
+		// load all the inventory setups from the config file
+		clientThread.invokeLater(() ->
+		{
+			switch (client.getGameState())
+			{
+				case STARTING:
+				case UNKNOWN:
+				case LOADING:
+					return false;
+			}
+
+			clientThread.invokeLater(() ->
+			{
+				dataManager.loadConfig();
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
+			});
+
+			return true;
+		});
+
+	}
+
+	@Override
+	public void shutDown()
+	{
+		resetBankSearch();
+		clientToolbar.removeNavigation(navButton);
+	}
+
+	public String getSavedVersionString()
+	{
+		final String versionStr = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_VERSION_STR);
+		return versionStr == null ? "" : versionStr;
+	}
+
+	public void setSavedVersionString(final String newVersion)
+	{
+		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_VERSION_STR, newVersion);
+	}
+
+	public String getCurrentVersionString()
+	{
+		return currentVersion;
+	}
+
+	private boolean canUseLayouts()
+	{
+		// If Hub BTL is on (meaning the config for inventory setups usage is set) or Bank Tags is off, layouts will not work.
+		if (!pluginManager.isPluginEnabled(bankTagsPlugin))
+		{
+			return false;
+		}
+		final Boolean hubBTLIsOn = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS, Boolean.class);
+		return hubBTLIsOn == null || !hubBTLIsOn;
+	}
+
+	public void enableLayouts()
+	{
+		// Turn on Bank Tags and configure hub plugin bank tag layouts setting to be off.
+		if (!pluginManager.isPluginEnabled(bankTagsPlugin))
+		{
+			log.info("Turning on Bank Tags plugin");
+			pluginManager.setPluginEnabled(bankTagsPlugin, true);
+			try
+			{
+				pluginManager.startPlugin(bankTagsPlugin);
+			}
+			catch (Exception e)
+			{
+				log.error("Failed to start Bank Tags plugin.");
+				log.error(e.toString());
+			}
+		}
+		final String hubBTLIsOn = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS);
+		if (hubBTLIsOn != null && hubBTLIsOn.equals("true"))
+		{
+			log.info("Setting Hub Bank Tag Layouts useWithInventorySetups to false");
+			configManager.setConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS, "false");
+		}
+	}
+
+	@Subscribe
+	public void onPluginChanged(PluginChanged pluginChanged)
+	{
+		if (pluginChanged.getPlugin() == bankTagsPlugin)
+		{
+			this.canUseLayouts = canUseLayouts();
+		}
+	}
+
 	private void registerHotkeys()
 	{
 		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
 		keyManager.registerKeyListener(filterBankHotkeyListener);
-		keyManager.registerKeyListener(filterInventoryHotkeyListener);
-		keyManager.registerKeyListener(filterEquipmentHotkeyListener);
-		keyManager.registerKeyListener(filterAddItemsHotkeyListener);
 		keyManager.registerKeyListener(sectionModeHotkeyListener);
 	}
 
@@ -316,30 +433,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
 		keyManager.unregisterKeyListener(filterBankHotkeyListener);
-		keyManager.unregisterKeyListener(filterInventoryHotkeyListener);
-		keyManager.unregisterKeyListener(filterEquipmentHotkeyListener);
-		keyManager.unregisterKeyListener(filterAddItemsHotkeyListener);
 		keyManager.unregisterKeyListener(sectionModeHotkeyListener);
-	}
-
-	private void triggerBankSearchFromHotKey()
-	{
-		// you must wait at least one game tick otherwise
-		// the bank filter will work but then go back to the previous tab.
-		// For some reason this can still happen but it is very rare,
-		// and only when the user clicks a tab and the hot key extremely shortly after.
-		int gameTick = client.getTickCount();
-		clientThread.invokeLater(() ->
-		{
-			int gameTick2 = client.getTickCount();
-			if (gameTick2 <= gameTick)
-			{
-				return false;
-			}
-
-			doBankSearch();
-			return true;
-		});
 	}
 
 	@Provides
@@ -377,6 +471,10 @@ public class InventorySetupsPlugin extends Plugin
 					}
 				});
 			}
+		}
+		else if (event.getGroup().equals(CONFIG_GROUP_HUB_BTL) && event.getKey().equals(CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS))
+		{
+			this.canUseLayouts = canUseLayouts();
 		}
 	}
 
@@ -496,6 +594,7 @@ public class InventorySetupsPlugin extends Plugin
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
 		else if (panel.getCurrentSelectedSetup() != null
+				&& bankTagsService.getActiveLayout() == null // If there is an active layout, then the real item behind the fake layout item may be added. So just disallow this menu.
 			&& event.getActionParam1() == ComponentID.BANK_ITEM_CONTAINER
 			&& client.isKeyPressed(KeyCode.KC_SHIFT)
 			&& event.getOption().equals("Examine"))
@@ -618,43 +717,17 @@ public class InventorySetupsPlugin extends Plugin
 						.setOption(OPEN_SETUP_MENU_ENTRY)
 						.setTarget(ColorUtil.prependColorTag(setupToShow.getName(), menuTargetColor))
 						.setType(MenuAction.RUNELITE)
-						.onClick(e ->
-						{
-							resetBankSearch(true);
-							panel.setCurrentInventorySetup(setupToShow, true);
-						});
+						.onClick(e -> panel.setCurrentInventorySetup(setupToShow, true));
 			}
 		}
 
 		if (panel.getCurrentSelectedSetup() != null)
 		{
-			// add menu entry to filter add items
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_ADD_ITEMS_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ADDITIONAL_FILTERED_ITEMS));
-
-			// add menu entry to filter equipment
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_EQUIPMENT_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.EQUIPMENT));
-
-			// add menu entry to filter inventory
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_INVENTORY_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.INVENTORY));
-
-			// add menu entry to filter all
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption(FILTER_ALL_ENTRY)
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch(InventorySetupsFilteringModeID.ALL));
+			if (this.canUseLayouts)
+			{
+				// Add Auto layouts
+				createAutoLayoutSubMenuOnWornItems();
+			}
 
 			// add menu entry to close setup
 			client.getMenu()
@@ -665,13 +738,68 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
+	private void createAutoLayoutSubMenuOnWornItems()
+	{
+		Menu parentMenu = client.getMenu()
+				.createMenuEntry(-1)
+				.setOption("Auto Layout")
+				.setType(MenuAction.RUNELITE)
+				.createSubMenu();
+		parentMenu.createMenuEntry(0)
+				.setOption(AUTO_LAYOUT_PRESET_ENTRY)
+				.setType(MenuAction.RUNELITE)
+				.onClick(e -> previewNewLayout(panel.getCurrentSelectedSetup(), InventorySetupLayoutType.PRESET));
+		parentMenu.createMenuEntry(0)
+				.setOption(AUTO_LAYOUT_ZIGZAG_ENTRY)
+				.setType(MenuAction.RUNELITE)
+				.onClick(e -> previewNewLayout(panel.getCurrentSelectedSetup(), InventorySetupLayoutType.ZIGZAG));
+
+	}
+
+	private void previewNewLayout(final InventorySetup setup, final InventorySetupLayoutType type)
+	{
+		clientThread.invoke(() ->
+		{
+			final Layout old = layoutUtilities.getSetupLayout(setup);
+
+			// Don't add any items to the tag yet. We just want to display a layout
+			// We can add tags after if the user likes the layout.
+			// This stops the case that somebody removed a tag from the inventory setup
+			// And this layout won't accidentally bring it back if they decide not to use it.
+			final Layout new_ = layoutUtilities.createSetupLayout(setup, type, false);
+
+			// Temporarily save the new layout to open the tag.
+			layoutManager.saveLayout(new_);
+			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+
+			// Save the old layout again in case the user hits escape on the menu.
+			// The bank will still show the temporary new layout.
+			layoutManager.saveLayout(old);
+
+			chatboxPanelManager.openTextMenuInput("Tab laid out using the '" + type.getName() + "' layout.")
+					.option("1. Keep", () ->
+					{
+						// Tag all the items in the setup now since the user likes it.
+						layoutUtilities.createSetupLayout(setup, type, true);
+						layoutManager.saveLayout(new_);
+					})
+					.option("2. Undo", () ->
+					{
+						// The old layout is already saved, no need to do anything.
+					})
+					// If this is not done with invokeLater, I get crashing...
+					.onClose(() -> clientThread.invokeLater(() -> bankTagsService.openBankTag(old.getTag(), BANK_TAG_OPTIONS)))
+					.build();
+		});
+	}
+
 	private void createSectionSubMenuOnWornItems(Collection<InventorySetup> setups, String name, Color color)
 	{
 		Menu subMenu = client.getMenu()
 			.createMenuEntry(1)
 			.setOption(OPEN_SECTION_MENU_ENTRY)
 			.setTarget(ColorUtil.prependColorTag(name, color))
-			.setType(MenuAction.RUNELITE_WIDGET)
+			.setType(MenuAction.RUNELITE)
 			.createSubMenu();
 
 		for (final InventorySetup inventorySetup : setups)
@@ -701,7 +829,7 @@ public class InventorySetupsPlugin extends Plugin
 				.setType(MenuAction.RUNELITE)
 				.onClick(e ->
 				{
-					resetBankSearch(true);
+					resetBankSearch();
 					panel.setCurrentInventorySetup(setup, true);
 				});
 	}
@@ -725,7 +853,7 @@ public class InventorySetupsPlugin extends Plugin
 				// Item already exists, don't add it again
 				if (!additionalFilteredItemsHasItem(newItem.getId(), additionalFilteredItems))
 				{
-					addAdditionalFilteredItem(newItem.getId(), additionalFilteredItems);
+					addAdditionalFilteredItem(newItem.getId(), panel.getCurrentSelectedSetup(), additionalFilteredItems);
 				}
 			});
 	}
@@ -755,7 +883,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	private void onWidgetClosed(WidgetClosed event)
 	{
-
 		if (event.getGroupId() == InterfaceID.BANK && !config.persistHotKeysOutsideBank())
 		{
 			unregisterHotkeys();
@@ -765,21 +892,8 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		// when the bank is loaded up allowing filtering again
-		// this is to make it so the bank will refilter if a tab was clicked and then the player exited the bank
 		if (event.getGroupId() == InterfaceID.BANK)
 		{
-			// If manual bank filter is selected, don't allow filtering when the bank is opened
-			// filtering will only occur if the user selects a setup or uses a filtering hotkey
-			// while the bank is already open
-			internalFilteringIsAllowed = !config.manualBankFilter();
-
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
-			{
-				// start a bank search so the bank is filtered when it's opened
-				doBankSearch();
-			}
-
 			if (!config.persistHotKeysOutsideBank())
 			{
 				registerHotkeys();
@@ -817,82 +931,6 @@ public class InventorySetupsPlugin extends Plugin
 		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SORTING_MODE, mode);
 	}
 
-	public String getSavedVersionString()
-	{
-		final String versionStr = configManager.getConfiguration(CONFIG_GROUP, CONFIG_KEY_VERSION_STR);
-		return versionStr == null ? "" : versionStr;
-	}
-
-	public void setSavedVersionString(final String newVersion)
-	{
-		configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_VERSION_STR, newVersion);
-	}
-
-	public String getCurrentVersionString()
-	{
-		return currentVersion;
-	}
-
-	@Override
-	public void startUp()
-	{
-		// get current version of the plugin using properties file generated by build.gradle
-		try
-		{
-			final Properties props = new Properties();
-			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/invsetups_version.txt");
-			props.load(is);
-			this.currentVersion = props.getProperty("version");
-		}
-		catch (Exception e)
-		{
-			log.warn("Could not determine current plugin version", e);
-			this.currentVersion = "";
-		}
-
-		this.internalFilteringIsAllowed = true;
-		this.panel = new InventorySetupsPluginPanel(this, itemManager);
-		final BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/inventorysetups_icon.png");
-
-		this.navButtonIsSelected = false;
-		navButton = NavigationButton.builder()
-			.tooltip("Inventory Setups")
-			.icon(icon)
-			.priority(6)
-			.panel(panel)
-			.build();
-
-		clientToolbar.addNavigation(navButton);
-
-		bankFilteringMode = InventorySetupsFilteringModeID.ALL;
-
-		this.shouldTriggerInventoryHighlightOnGameTick = false;
-		this.cache = new InventorySetupsCache();
-		this.inventorySetups = new ArrayList<>();
-		this.sections = new ArrayList<>();
-		this.dataManager = new InventorySetupsPersistentDataManager(this, panel, configManager, cache, gson, inventorySetups, sections);
-		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
-
-		// load all the inventory setups from the config file
-		clientThread.invokeLater(() ->
-		{
-			switch (client.getGameState())
-			{
-				case STARTING:
-				case UNKNOWN:
-					return false;
-			}
-
-			clientThread.invokeLater(() ->
-			{
-				dataManager.loadConfig();
-				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
-			});
-
-			return true;
-		});
-
-	}
 
 	public void addInventorySetup()
 	{
@@ -949,6 +987,10 @@ public class InventorySetupsPlugin extends Plugin
 			cache.addSetup(invSetup);
 			inventorySetups.add(invSetup);
 			dataManager.updateConfig(true, false);
+
+			Layout setupLayout = layoutUtilities.createSetupLayout(invSetup);
+			layoutManager.saveLayout(setupLayout);
+
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
 		});
@@ -1106,64 +1148,42 @@ public class InventorySetupsPlugin extends Plugin
 			.anyMatch(itemName -> itemName.contains(textToFilterLower));
 	}
 
-	public void doBankSearch(final InventorySetupsFilteringModeID filteringModeID)
-	{
-		bankFilteringMode = filteringModeID;
-		doBankSearch();
-	}
-
 	public void doBankSearch()
 	{
-		final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
-		internalFilteringIsAllowed = true;
-
-		if (currentSelectedSetup != null && currentSelectedSetup.isFilterBank())
+		clientThread.invoke(() ->
 		{
+			final InventorySetup currentSelectedSetup = panel.getCurrentSelectedSetup();
 
-			clientThread.invoke(() ->
+			if (currentSelectedSetup == null || !currentSelectedSetup.isFilterBank() || !isFilteringAllowed())
 			{
-				client.setVarbit(Varbits.CURRENT_BANK_TAB, 0);
-				bankSearch.layoutBank();
-
-				// When tab is selected with search window open, the search window closes but the search button
-				// stays highlighted, this solves that issue
-				Widget bankContainer = client.getWidget(ComponentID.BANK_ITEM_CONTAINER);
-				if (bankContainer != null && !bankContainer.isHidden())
-				{
-					Widget searchBackground = client.getWidget(ComponentID.BANK_SEARCH_BUTTON_BACKGROUND);
-					searchBackground.setSpriteId(SpriteID.EQUIPMENT_SLOT_TILE);
-				}
-			});
-		}
-	}
-
-	@Subscribe
-	public void onMenuOptionClicked(MenuOptionClicked event)
-	{
-
-		if (event.getMenuAction() == MenuAction.RUNELITE)
-		{
-			return;
-		}
-
-		if (panel.getCurrentSelectedSetup() == null)
-		{
-			return;
-		}
-
-		if (event.getParam1() == ComponentID.BANK_ITEM_CONTAINER && event.getMenuOption().startsWith("View tab"))
-		{
-			if (config.disableBankTabBar())
-			{
-				event.consume();
+				return;
 			}
-		}
-		else if (panel.getCurrentSelectedSetup() != null
-			&& (event.getMenuOption().startsWith("View tab") || event.getMenuOption().equals("View all items")))
-		{
-			internalFilteringIsAllowed = false;
-		}
+
+			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
+			bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
+		});
 	}
+
+	private void triggerBankSearchFromHotKey()
+	{
+		// you must wait at least one game tick otherwise
+		// the bank filter will work but then go back to the previous tab.
+		// For some reason this can still happen but it is very rare,
+		// and only when the user clicks a tab and the hot key extremely shortly after.
+		int gameTick = client.getTickCount();
+		clientThread.invokeLater(() ->
+		{
+			int gameTick2 = client.getTickCount();
+			if (gameTick2 <= gameTick)
+			{
+				return false;
+			}
+
+			doBankSearch();
+			return true;
+		});
+	}
+
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
@@ -1187,7 +1207,7 @@ public class InventorySetupsPlugin extends Plugin
 		return false;
 	}
 
-	private void addAdditionalFilteredItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
+	private void addAdditionalFilteredItem(int itemId, final InventorySetup setup, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
 		// un-noted, un-placeholdered ID
 		final int processedItemId = itemManager.canonicalize(itemId);
@@ -1199,6 +1219,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetupsItem setupItem = new InventorySetupsItem(processedItemId, name, 1, config.fuzzy(), stackCompareType);
 
 			additionalFilteredItems.put(processedItemId, setupItem);
+			layoutUtilities.recalculateLayout(setup);
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
@@ -1227,193 +1248,38 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public void resetBankSearch(boolean closeChat)
+	public void resetBankSearch()
 	{
-		// Only reset the bank automatically if filtering is allowed
-		// This makes it so that you click the search button again to cancel a filter
-		if (isFilteringAllowed())
-		{
-			bankSearch.reset(closeChat);
-		}
+		clientThread.invoke(() -> bankTagsService.closeBankTag());
 	}
 
-	@Subscribe
-	public void onScriptCallbackEvent(ScriptCallbackEvent event)
-	{
-		String eventName = event.getEventName();
-
-		int[] intStack = client.getIntStack();
-		int intStackSize = client.getIntStackSize();
-
-		switch (eventName)
-		{
-			case "bankSearchFilter":
-			{
-				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
-				// Shared storage uses the bankmain filter scripts too. Allow using tag searches in it but don't
-				// apply the tag search from the active tab.
-				final boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
-				if (bankOpen && currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
-				{
-					int itemId = intStack[intStackSize - 1];
-					boolean containsItem = false;
-					boolean quiverContainsItem;
-					switch (bankFilteringMode)
-					{
-						case ALL:
-							containsItem = setupContainsItem(currentSetup, itemId);
-							break;
-						case INVENTORY:
-
-							boolean runePouchContainsItem = containerContainsItem(itemId, currentSetup.getRune_pouch());
-							boolean boltPouchContainsItem = containerContainsItem(itemId, currentSetup.getBoltPouch());
-							quiverContainsItem = containerContainsItem(itemId, currentSetup.getQuiver());
-							containsItem = runePouchContainsItem || boltPouchContainsItem || quiverContainsItem ||
-								containerContainsItem(itemId, currentSetup.getInventory());
-							break;
-						case EQUIPMENT:
-							quiverContainsItem = containerContainsItem(itemId, currentSetup.getQuiver());
-							containsItem = containerContainsItem(itemId, currentSetup.getEquipment()) || quiverContainsItem;
-							break;
-						case ADDITIONAL_FILTERED_ITEMS:
-							containsItem = additionalFilteredItemsHasItem(itemId, currentSetup.getAdditionalFilteredItems());
-							break;
-					}
-					if (containsItem)
-					{
-						// return true
-						intStack[intStackSize - 2] = 1;
-					}
-					else
-					{
-						intStack[intStackSize - 2] = 0;
-					}
-				}
-				break;
-			}
-			case "getSearchingTagTab":
-				// Clicking on a bank tab that isn't the first one (main tab),
-				// then filtering the bank (either by selecting a setup or hotkey),
-				// then clicking on "item" or "note" would cause the bank to show the tab
-				// and remove the filter. This stops this from happening.
-				final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
-				if (currentSetup != null && currentSetup.isFilterBank() && isFilteringAllowed())
-				{
-					intStack[intStackSize - 1] = 1;
-				}
-				else
-				{
-					intStack[intStackSize - 1] = 0;
-				}
-				break;
-		}
-
-
-	}
-
-	@Subscribe
+	@Subscribe(priority = -1) // Make sure this runs AFTER bank tags plugin.
 	public void onScriptPreFired(ScriptPreFired event)
 	{
-		if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
+		if (event.getScriptId() == ScriptID.BANKMAIN_INIT)
+		{
+			// Do a bank search when the bank is opened
+			// This will set the proper layout
+			if (!config.manualBankFilter())
+			{
+				// Only do the filter if manual bank filter is not set.
+				doBankSearch();
+			}
+		}
+		else if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed() && bankTagsService.getActiveLayout() != null)
 			{
-				String postTitle = " - ";
-				switch (bankFilteringMode)
-				{
-					case ALL:
-						postTitle += "All Items";
-						break;
-					case INVENTORY:
-						postTitle += "Inventory";
-						break;
-					case EQUIPMENT:
-						postTitle += "Equipment";
-						break;
-					case ADDITIONAL_FILTERED_ITEMS:
-						postTitle += "Additional Items";
-						break;
-				}
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
-				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + postTitle + "</col>");
+				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
 			}
 		}
 		else if (event.getScriptId() == ScriptID.BANKMAIN_SEARCH_TOGGLE)
 		{
 			// cancel the current filtering if the search button is clicked
-			resetBankSearch(true);
-
-			// don't allow the bank to retry a filter if the search button is clicked
-			internalFilteringIsAllowed = false;
+			resetBankSearch();
 		}
-	}
-
-	@Subscribe
-	public void onScriptPostFired(ScriptPostFired event)
-	{
-		if (event.getScriptId() == ScriptID.BANKMAIN_SEARCHING)
-		{
-			// The return value of bankmain_searching is on the stack. If we have a setup active
-			// make it return true to put the bank in a searching state.
-			boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
-			if (bankOpen && panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed())
-			{
-				client.getIntStack()[client.getIntStackSize() - 1] = 1; // true
-			}
-		}
-
-		if (event.getScriptId() != ScriptID.BANKMAIN_BUILD)
-		{
-			return;
-		}
-
-		int items = 0;
-
-		Widget itemContainer = client.getWidget(ComponentID.BANK_ITEM_CONTAINER);
-		if (itemContainer == null)
-		{
-			return;
-		}
-
-		if (panel.getCurrentSelectedSetup() != null && config.removeBankTabSeparator() && isFilteringAllowed())
-		{
-			Widget[] containerChildren = itemContainer.getDynamicChildren();
-
-			// sort the child array as the items are not in the displayed order
-			Arrays.sort(containerChildren, Comparator.comparing(Widget::getOriginalY).thenComparing(Widget::getOriginalX));
-
-			for (Widget child : containerChildren)
-			{
-				if (child.getItemId() != -1 && !child.isHidden())
-				{
-					// calculate correct item position as if this was a normal tab
-					int adjYOffset = (items / ITEMS_PER_ROW) * ITEM_VERTICAL_SPACING;
-					int adjXOffset = (items % ITEMS_PER_ROW) * ITEM_HORIZONTAL_SPACING + ITEM_ROW_START;
-
-					if (child.getOriginalY() != adjYOffset)
-					{
-						child.setOriginalY(adjYOffset);
-						child.revalidate();
-					}
-
-					if (child.getOriginalX() != adjXOffset)
-					{
-						child.setOriginalX(adjXOffset);
-						child.revalidate();
-					}
-
-					items++;
-				}
-
-				// separator line or tab text
-				if (child.getSpriteId() == SpriteID.RESIZEABLE_MODE_SIDE_PANEL_BACKGROUND || child.getText().contains("Tab"))
-				{
-					child.setHidden(true);
-				}
-			}
-		}
-
 	}
 
 	public void updateCurrentSetup(InventorySetup setup)
@@ -1451,14 +1317,27 @@ public class InventorySetupsPlugin extends Plugin
 			setup.updateInventory(inv);
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
+
+			// Regenerate the layout and tag.
+			clientThread.invoke(() ->
+			{
+				String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
+				tagManager.removeTag(tagName);
+				layoutManager.removeLayout(tagName);
+
+				Layout newLayout = layoutUtilities.createSetupLayout(setup);
+				layoutManager.saveLayout(newLayout);
+			});
+
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
 	}
 
-	private void updateAllInstancesInContainerSetupWithNewItem(final InventorySetup inventorySetup, List<InventorySetupsItem> containerToUpdate,
+	private boolean updateAllInstancesInContainerSetupWithNewItem(final InventorySetup inventorySetup, List<InventorySetupsItem> containerToUpdate,
 																final InventorySetupsItem oldItem, final InventorySetupsItem newItem, final InventorySetupsSlotID id)
 	{
+		boolean updated = false;
 		for (int i = 0; i < containerToUpdate.size(); i++)
 		{
 			final InventorySetupsItem item = containerToUpdate.get(i);
@@ -1466,9 +1345,10 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				ammoHandler.handleSpecialAmmo(inventorySetup, containerToUpdate.get(i), newItem);
 				containerToUpdate.set(i, newItem);
-
+				updated = true;
 			}
 		}
+		return updated;
 	}
 
 	private void updateAllInstancesInSetupWithNewItem(final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
@@ -1486,8 +1366,12 @@ public class InventorySetupsPlugin extends Plugin
 
 		for (final InventorySetup inventorySetup : inventorySetups)
 		{
-			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
-			updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
+			boolean invUpdated = updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getInventory(), oldItem, newItem, InventorySetupsSlotID.INVENTORY);
+			boolean eqpUpdated = updateAllInstancesInContainerSetupWithNewItem(inventorySetup, inventorySetup.getEquipment(), oldItem, newItem, InventorySetupsSlotID.EQUIPMENT);
+			if (invUpdated || eqpUpdated)
+			{
+				layoutUtilities.recalculateLayout(inventorySetup);
+			}
 		}
 	}
 
@@ -1523,7 +1407,7 @@ public class InventorySetupsPlugin extends Plugin
 				List<InventorySetupsItem> containerToUpdate =  getContainerFromID(slot.getParentSetup(), slot.getSlotID());
 				ammoHandler.handleSpecialAmmo(slot.getParentSetup(), oldItem, newItem);
 				containerToUpdate.set(slot.getIndexInSlot(), newItem);
-
+				layoutUtilities.recalculateLayout(slot.getParentSetup());
 			}
 
 			dataManager.updateConfig(true, false);
@@ -1559,7 +1443,7 @@ public class InventorySetupsPlugin extends Plugin
 						if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
 						{
 							removeAdditionalFilteredItem(slot, additionalFilteredItems);
-							addAdditionalFilteredItem(finalId, additionalFilteredItems);
+							addAdditionalFilteredItem(finalId, slot.getParentSetup(), additionalFilteredItems);
 						}
 						return;
 					}
@@ -1608,6 +1492,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, newItem);
 				container.set(slot.getIndexInSlot(), newItem);
+				layoutUtilities.recalculateLayout(slot.getParentSetup());
 			}
 
 			SwingUtilities.invokeLater(() ->
@@ -1678,6 +1563,7 @@ public class InventorySetupsPlugin extends Plugin
 			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
 				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
+				layoutUtilities.recalculateLayout(panel.getCurrentSelectedSetup());
 				dataManager.updateConfig(true, false);
 				panel.refreshCurrentSetup();
 				return;
@@ -1691,6 +1577,13 @@ public class InventorySetupsPlugin extends Plugin
 			ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, dummyItem);
 
 			container.set(slot.getIndexInSlot(), dummyItem);
+
+			// Update the layout
+			if (itemToBeReplaced.getId() != -1)
+			{
+				layoutUtilities.recalculateLayout(slot.getParentSetup());
+			}
+
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
 		});
@@ -1702,6 +1595,8 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			return;
 		}
+
+		InventorySetupsItem item = null;
 
 		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 		{
@@ -1724,13 +1619,23 @@ public class InventorySetupsPlugin extends Plugin
 				}
 				j++;
 			}
-			additionalFilteredItems.get(keyToMakeFuzzy).toggleIsFuzzy();
+			item = additionalFilteredItems.get(keyToMakeFuzzy);
 		}
 		else
 		{
 			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-			container.get(slot.getIndexInSlot()).toggleIsFuzzy();
+			item = container.get(slot.getIndexInSlot());
 		}
+		item.toggleIsFuzzy();
+		final int itemId = item.getId();
+		clientThread.invoke(() ->
+		{
+			if (itemId == -1)
+			{
+				return;
+			}
+			layoutUtilities.recalculateLayout(slot.getParentSetup());
+		});
 
 		dataManager.updateConfig(true, false);
 		panel.refreshCurrentSetup();
@@ -1776,6 +1681,9 @@ public class InventorySetupsPlugin extends Plugin
 		}
 
 		additionalFilteredItems.remove(keyToDelete);
+		// None of the data functions are called here because the callee does it.
+		// If an item is swapped (removed + added) this would result in a double data process
+		// Which isn't bad, just a minor optimization
 
 	}
 
@@ -1806,6 +1714,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (isDeletionConfirmed("Are you sure you want to permanently delete this inventory setup?", "Warning"))
 		{
+
 			// Remove the setup from any sections which have it
 			for (final InventorySetupsSection section : sections)
 			{
@@ -1816,6 +1725,15 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			cache.removeSetup(setup);
 			inventorySetups.remove(setup);
+
+			// Remove the layout and tag
+			clientThread.invoke(() ->
+			{
+				String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
+				tagManager.removeTag(tagName);
+				layoutManager.removeLayout(tagName);
+			});
+
 			panel.redrawOverviewPanel(false);
 			dataManager.updateConfig(true, true);
 		}
@@ -1862,6 +1780,8 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			dataManager.loadConfig();
+			// We may need to display the warning for this profile so reset it.
+			panel.setHasDisplayedLayoutWarning(false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			return true;
 		});
@@ -1952,7 +1872,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void exportSetup(final InventorySetup setup)
 	{
-		final String json = gson.toJson(setup);
+		InventorySetupPortable portableSetup = InventorySetupPortable.convertFromInventorySetup(setup, layoutUtilities);
+		final String json = gson.toJson(portableSetup);
 		final StringSelection contents = new StringSelection(json);
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(contents, null);
 
@@ -2031,26 +1952,39 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			Type type = new TypeToken<InventorySetup>()
+			Type type = new TypeToken<InventorySetupPortable>()
 			{
 
 			}.getType();
 
+			final InventorySetupPortable newSetupPortable = gson.fromJson(setup, type);
 
-			final InventorySetup newSetup = gson.fromJson(setup, type);
+			if (isSetupPortableInvalid(newSetupPortable))
+			{
+				throw new RuntimeException("Setup has invalid data.");
+			}
+
+			final InventorySetup newSetup = newSetupPortable.getSerializedSetup();
 
 			if (isImportedSetupInvalid(newSetup))
 			{
 				throw new RuntimeException("Imported setup was missing required fields");
 			}
 
-			preProcessNewSetup(newSetup);
-			cache.addSetup(newSetup);
-			inventorySetups.add(newSetup);
+			clientThread.invoke(() ->
+			{
+				preProcessNewSetup(newSetup);
+				cache.addSetup(newSetup);
+				inventorySetups.add(newSetup);
+				// This will tag all the items in the setup for us, but don't use the layout.
+				// Use what's stored in the import.
+				Layout temp_layout_ = layoutUtilities.createSetupLayout(newSetup);
+				Layout newLayout = new Layout(temp_layout_.getTag(), newSetupPortable.getLayout());
+				layoutManager.saveLayout(newLayout);
 
-			dataManager.updateConfig(true, false);
-			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
-
+				dataManager.updateConfig(true, false);
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+			});
 		}
 		catch (Exception e)
 		{
@@ -2073,33 +2007,51 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			final String json = new String(Files.readAllBytes(path));
 
-			Type typeSetups = new TypeToken<ArrayList<InventorySetup>>()
+			Type typeSetups = new TypeToken<ArrayList<InventorySetupPortable>>()
 			{
 
 			}.getType();
 
-			final ArrayList<InventorySetup> newSetups = gson.fromJson(json, typeSetups);
+			final ArrayList<InventorySetupPortable> newSetupPortables = gson.fromJson(json, typeSetups);
 
-			// It's possible that the gson call succeeds but returns setups that have basically nothing
-			// This can occur if trying to import a section file instead of a inventory setup file, since they share fields
-			// Therefore, do some additional checking for required fields
-			for (final InventorySetup setup : newSetups)
+			final ArrayList<InventorySetup> newUnprocessedSetups = new ArrayList<>();
+			final ArrayList<int[]> newUnprocessedLayouts = new ArrayList<>();
+			for (final InventorySetupPortable portable : newSetupPortables)
 			{
+				if (isSetupPortableInvalid(portable))
+				{
+					throw new RuntimeException("Setup has invalid data.");
+				}
+
+				final InventorySetup setup = portable.getSerializedSetup();
+				// Do some additional checking for required fields
 				if (isImportedSetupInvalid(setup))
 				{
 					throw new RuntimeException("Mass import section file was missing required fields");
 				}
+				newUnprocessedSetups.add(setup);
+				newUnprocessedLayouts.add(portable.getLayout());
 			}
 
-			for (final InventorySetup inventorySetup : newSetups)
+			clientThread.invoke(() ->
 			{
-				preProcessNewSetup(inventorySetup);
-				cache.addSetup(inventorySetup);
-				inventorySetups.add(inventorySetup);
-			}
+				for (int i = 0; i < newUnprocessedSetups.size(); i++)
+				{
+					final InventorySetup inventorySetup = newUnprocessedSetups.get(i);
+					preProcessNewSetup(inventorySetup);
+					cache.addSetup(inventorySetup);
+					inventorySetups.add(inventorySetup);
 
-			dataManager.updateConfig(true, false);
-			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+					// This will tag all the items in the setup for us, but don't use the layout.
+					// Use what's stored in the import.
+					Layout temp_layout_ = layoutUtilities.createSetupLayout(inventorySetup);
+					Layout newLayout = new Layout(temp_layout_.getTag(), newUnprocessedLayouts.get(i));
+					layoutManager.saveLayout(newLayout);
+				}
+
+				dataManager.updateConfig(true, false);
+				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+			});
 
 		}
 		catch (Exception e)
@@ -2115,6 +2067,11 @@ public class InventorySetupsPlugin extends Plugin
 	private boolean isImportedSetupInvalid(final InventorySetup setup)
 	{
 		return setup.getName() == null || setup.getInventory() == null || setup.getEquipment() == null || setup.getAdditionalFilteredItems() == null;
+	}
+
+	private boolean isSetupPortableInvalid(final InventorySetupPortable portable)
+	{
+		return portable.getSetup() == null || portable.getLayout() == null;
 	}
 
 	public void importSection()
@@ -2256,13 +2213,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	@Override
-	public void shutDown()
-	{
-		resetBankSearch(true);
-		clientToolbar.removeNavigation(navButton);
-	}
-
 	public boolean isHighlightingAllowed()
 	{
 		return client.getGameState() == GameState.LOGGED_IN;
@@ -2270,9 +2220,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public boolean isFilteringAllowed()
 	{
-		boolean allowBasedOnActivePanel = navButtonIsSelected || !config.requireActivePanelFilter();
-
-		return internalFilteringIsAllowed && allowBasedOnActivePanel;
+		return navButtonIsSelected || !config.requireActivePanelFilter();
 	}
 
 	private List<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
@@ -2294,11 +2242,6 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
-	public boolean setupContainsItem(final InventorySetup setup, int itemID)
-	{
-		return setupContainsItem(setup, itemID, true, true);
-	}
-
 	public boolean setupContainsItem(final InventorySetup setup, int itemID, boolean allowFuzzy, boolean canonicalize)
 	{
 		if (additionalFilteredItemsHasItem(itemID, setup.getAdditionalFilteredItems(), allowFuzzy, canonicalize))
@@ -2318,11 +2261,6 @@ public class InventorySetupsPlugin extends Plugin
 			return true;
 		}
 		return false;
-	}
-
-	private boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer)
-	{
-		return containerContainsItem(itemID, setupContainer, true, true);
 	}
 
 	public boolean containerContainsItem(int itemID, final List<InventorySetupsItem> setupContainer, boolean allowFuzzy, boolean canonicalize)
@@ -2422,8 +2360,26 @@ public class InventorySetupsPlugin extends Plugin
 			}
 		}
 		// Make sure not to set the new name of the setup before allowing the cache to update
+		final String oldTag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
 		cache.updateSetupName(setup, newName);
 		setup.setName(newName);
+
+		// Update the tag and layout info
+		clientThread.invoke(() ->
+		{
+			// Rename the tag
+			String newTag = InventorySetupLayoutUtilities.getTagNameForLayout(setup.getName());
+			tagManager.renameTag(oldTag, newTag);
+
+			// Construct the new Layout using the new tag but the old layout info.
+			Layout oldLayout = layoutManager.loadLayout(oldTag);
+			assert oldLayout != null : "Setup did not have a layout!";
+			Layout newLayout = new Layout(newTag, oldLayout.getLayout());
+
+			layoutManager.removeLayout(oldTag);
+			layoutManager.saveLayout(newLayout);
+		});
+
 		// config will already be updated by caller so no need to update it here
 	}
 

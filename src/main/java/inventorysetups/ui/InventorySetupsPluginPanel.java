@@ -26,7 +26,6 @@ package inventorysetups.ui;
 
 import inventorysetups.InventorySetupUtilities;
 import inventorysetups.InventorySetup;
-import inventorysetups.InventorySetupsFilteringModeID;
 import inventorysetups.InventorySetupsItem;
 import inventorysetups.InventorySetupsPanelViewID;
 import inventorysetups.InventorySetupsPlugin;
@@ -46,7 +45,10 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import inventorysetups.serialization.InventorySetupPortable;
 import lombok.Getter;
+import lombok.Setter;
 import net.runelite.api.InventoryID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -152,6 +154,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private final InventorySetupsPlugin plugin;
 
 	@Getter
+	@Setter
+	private boolean hasDisplayedLayoutWarning;
+
+	private final JPanel layoutWarningPanel;
+
+	@Getter
 	private List<InventorySetup> filteredInventorysetups;
 
 	static
@@ -221,11 +229,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		this.notesPanel = new InventorySetupsNotesPanel(itemManager, plugin);
 		this.noSetupsPanel = new JPanel();
 		this.updateNewsPanel = new InventorySetupsUpdateNewsPanel(plugin, this);
+		this.layoutWarningPanel = new InventorySetupsLayoutWarningPanel(plugin, this);
 		this.setupDisplayPanel = new JPanel();
 		this.overviewPanel = new JPanel();
 		this.overviewTopPanel = new JPanel();
 		this.overviewPanelScrollPosition = 0;
 		this.filteredInventorysetups = new ArrayList<>();
+		this.hasDisplayedLayoutWarning = false;
 
 		// setup the title
 		this.mainTitle = new JLabel();
@@ -310,7 +320,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		});
 		massExportSetupsMenu.addActionListener(e ->
 		{
-			plugin.massExport(plugin.getInventorySetups(), "Setups", "inventory_setups");
+			ArrayList<InventorySetupPortable> portables = InventorySetupPortable.convertFromListOfSetups(plugin.getInventorySetups(), plugin.getLayoutUtilities());
+			plugin.massExport(portables, "Setups", "inventory_setups");
 		});
 		massImportSectionsMenu.addActionListener(e ->
 		{
@@ -614,8 +625,13 @@ public class InventorySetupsPluginPanel extends PluginPanel
 
 		add(northAnchoredPanel, BorderLayout.NORTH);
 
+		JPanel extraPanelsWrapper = new JPanel();
+		extraPanelsWrapper.setLayout(new BoxLayout(extraPanelsWrapper, BoxLayout.Y_AXIS));
+		extraPanelsWrapper.add(updateNewsPanelWrapper);
+		extraPanelsWrapper.add(layoutWarningPanel);
+
 		JPanel southPanel = new JPanel(new BorderLayout());
-		southPanel.add(updateNewsPanelWrapper, BorderLayout.NORTH);
+		southPanel.add(extraPanelsWrapper, BorderLayout.NORTH);
 		southPanel.add(contentWrapperPane, BorderLayout.CENTER);
 
 		add(southPanel, BorderLayout.CENTER);
@@ -671,7 +687,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		layoutSetups(filteredInventorysetups);
 		returnToOverviewPanel(resetScrollBar);
 
-		showCorrectPanelBasedOnVersion();
+		showCorrectPanel();
 
 		revalidate();
 		repaint();
@@ -682,19 +698,33 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		return equipmentPanel.getQuiverPanel();
 	}
 
-	public void showCorrectPanelBasedOnVersion()
+	public void showCorrectPanel()
 	{
+
 		if (!plugin.getSavedVersionString().equals(plugin.getCurrentVersionString()))
 		{
+			layoutWarningPanel.setVisible(false);
 			updateNewsPanelWrapper.setVisible(true);
+			northAnchoredPanel.setVisible(false);
+			contentWrapperPane.setVisible(false);
+		}
+		else if (!hasDisplayedLayoutWarning && !plugin.getCanUseLayouts() && plugin.getConfig().enableLayoutWarning())
+		{
+			layoutWarningPanel.setVisible(true);
+			updateNewsPanelWrapper.setVisible(false);
 			northAnchoredPanel.setVisible(false);
 			contentWrapperPane.setVisible(false);
 		}
 		else
 		{
+			layoutWarningPanel.setVisible(false);
 			updateNewsPanelWrapper.setVisible(false);
 			northAnchoredPanel.setVisible(true);
 			contentWrapperPane.setVisible(true);
+
+			// We set this to true now because we only want this menu to show up on startup.
+			// If someone modifies settings after startup, just continue.
+			hasDisplayedLayoutWarning = true;
 		}
 	}
 
@@ -751,7 +781,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			setScrollBarPosition(0);
 		}
 
-		plugin.setBankFilteringMode(InventorySetupsFilteringModeID.ALL);
 		plugin.doBankSearch();
 
 		validate();
@@ -834,7 +863,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		currentSelectedSetup = null;
-		plugin.resetBankSearch(true);
+		plugin.resetBankSearch();
 	}
 
 	public boolean isStackCompareForSlotAllowed(final InventorySetupsSlotID inventoryID, final int slotId)

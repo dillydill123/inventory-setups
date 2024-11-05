@@ -24,7 +24,9 @@
  */
 package inventorysetups;
 
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ENABLE_LAYOUT_WARNING;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
@@ -57,17 +59,30 @@ public interface InventorySetupsConfig extends Config
 	String hotkeySection = "hotkeysection";
 
 	@ConfigSection(
-			name = "Ground Item Menu Options",
-			description = "Options for ground item menus (Useful for UIM)",
+			name = "Layout Options",
+			description = "Options for bank layouts",
 			position = 2
 	)
+	String layoutSection = "layoutSection";
+
+	@ConfigSection(
+			name = "Ground Item Menu Options",
+			description = "Options for ground item menus (Useful for UIM)",
+			position = 3
+	)
 	String groundItemSection = "groundItemSection";
+
+	@ConfigSection(
+			name = "Other",
+			description = "Other options",
+			position = 4
+	)
+	String otherSection = "otherSection";
 
 	@ConfigItem(
 			keyName = "bankFilter",
 			name = "Default Filter Bank",
 			description = "Configures the default setting for bank filtering in new setups",
-			position = 1,
 			section = defaultSection
 	)
 	default boolean bankFilter()
@@ -79,7 +94,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightStackDifference",
 			name = "Default Highlight Stack Difference",
 			description = "Configures the default setting for highlighting stack differences in new setups",
-			position = 1,
 			hidden = true,
 			section = defaultSection
 	)
@@ -92,7 +106,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightStackDifferenceEnum",
 			name = "Default Highlight Stack Difference",
 			description = "Configures the default setting for highlighting stack differences in new setups",
-			position = 1,
 			hidden = true,
 			section = defaultSection
 	)
@@ -105,7 +118,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightVarianceDifference",
 			name = "Default Highlight Variation Difference",
 			description = "Configures the default setting for highlighting variations in new setups",
-			position = 2,
 			hidden = true,
 			section = defaultSection
 	)
@@ -118,7 +130,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightUnorderedDifference",
 			name = "Default Highlight Unordered Difference",
 			description = "Configures the default setting for unordered highlighting in new setups",
-			position = 2,
 			section = defaultSection
 	)
 	default boolean highlightUnorderedDifference()
@@ -130,7 +141,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightDifference",
 			name = "Default Highlight",
 			description = "Configures the default setting for highlighting differences in new setups",
-			position = 3,
 			section = defaultSection
 	)
 	default boolean highlightDifference()
@@ -143,7 +153,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "highlightColor",
 			name = "Default Highlight Color",
 			description = "Configures the default highlighting color in new setups",
-			position = 4,
 			section = defaultSection
 	)
 	default Color highlightColor()
@@ -155,7 +164,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "enableDisplayColor",
 			name = "Default Enable Display Color",
 			description = "Configures the default display color in new setups",
-			position = 5,
 			section = defaultSection
 	)
 	default boolean enableDisplayColor()
@@ -168,7 +176,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "displayColor",
 			name = "Default Display Color",
 			description = "Configures the default display color in new setups",
-			position = 6,
 			section = defaultSection
 	)
 	default Color displayColor()
@@ -180,7 +187,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "fuzzy",
 			name = "Default Fuzzy",
 			description = "Configures the default setting for fuzziness in new setups",
-			position = 8,
 			section = defaultSection
 	)
 	default boolean fuzzy()
@@ -192,7 +198,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "stackCompare",
 			name = "Default Stack Compare",
 			description = "Configures the default setting for stack compare in new setups",
-			position = 9,
 			section = defaultSection
 	)
 	default InventorySetupsStackCompareID stackCompareType()
@@ -204,7 +209,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "returnToSetupsHotkey",
 			name = "Return To Setups Hotkey",
 			description = "Configures the hotkey for returning to setups",
-			position = 6,
 			section = hotkeySection
 	)
 	default Keybind returnToSetupsHotkey()
@@ -216,7 +220,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankHotkey",
 			name = "Filter Bank Hotkey",
 			description = "Configures the hotkey for filtering all items in the bank",
-			position = 7,
 			section = hotkeySection
 	)
 	default Keybind filterBankHotkey()
@@ -228,8 +231,8 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankInventoryOnlyHotkey",
 			name = "Filter Inventory Hotkey",
 			description = "Configures the hotkey for filtering the inventory in the bank",
-			position = 8,
-			section = hotkeySection
+			section = hotkeySection,
+			hidden = true
 	)
 	default Keybind filterInventoryHotkey()
 	{
@@ -240,8 +243,8 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankEquipmentOnlyHotkey",
 			name = "Filter Equipment Hotkey",
 			description = "Configures the hotkey for filtering the equipment in the bank",
-			position = 9,
-			section = hotkeySection
+			section = hotkeySection,
+			hidden = true
 	)
 	default Keybind filterEquipmentHotkey()
 	{
@@ -252,8 +255,8 @@ public interface InventorySetupsConfig extends Config
 			keyName = "filterBankAddItemstOnlyHotkey",
 			name = "Filter Additional Items Hotkey",
 			description = "Configures the hotkey for filtering the additional items in the bank",
-			position = 10,
-			section = hotkeySection
+			section = hotkeySection,
+			hidden = true
 	)
 	default Keybind filterAddItemsHotkey()
 	{
@@ -264,7 +267,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "sectionModeHotkey",
 			name = "Toggle section mode",
 			description = "Configures the hotkey for toggling section mode",
-			position = 11,
 			section = hotkeySection
 	)
 	default Keybind sectionModeHotkey()
@@ -276,7 +278,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_PERSIST_HOTKEYS,
 			name = "Persist Hotkeys Outside Bank",
 			description = "Configures hotkeys to persist even outside the bank",
-			position = 12,
 			section = hotkeySection
 	)
 	default boolean persistHotKeysOutsideBank()
@@ -285,10 +286,20 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = CONFIG_KEY_LAYOUT_DEFAULT,
+			name = "Default Layout",
+			description = "Configures default bank layout when creating or updating a setup",
+			section = layoutSection
+	)
+	default InventorySetupLayoutType defaultLayout()
+	{
+		return InventorySetupLayoutType.PRESET;
+	}
+
+	@ConfigItem(
 			keyName = "groundItemMenuHighlight",
 			name = "Highlight Menu Entries on Ground Items",
 			description = "Highlights menu entries on ground items which are in the current setup",
-			position = 13,
 			section = groundItemSection
 	)
 	default boolean groundItemMenuHighlight()
@@ -301,7 +312,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "groundItemMenuHighlightColor",
 			name = "Highlight Menu Entries Color",
 			description = "Highlight color for menu entries on ground items which are in the current setup",
-			position = 14,
 			section = groundItemSection
 	)
 	default Color groundItemMenuHighlightColor()
@@ -313,7 +323,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "groundItemMenuSwap",
 			name = "Swap Menu Entries on Ground Items",
 			description = "Swaps menu entries on ground items which are in the current setup",
-			position = 15,
 			section = groundItemSection
 	)
 	default boolean groundItemMenuSwap()
@@ -325,7 +334,6 @@ public interface InventorySetupsConfig extends Config
 			keyName = "groundItemMenuSwapPriority",
 			name = "Menu Entries Priority on Ground Items",
 			description = "Choose which entries to swap to the top based on if ground items are in or not in the current setup",
-			position = 16,
 			section = groundItemSection
 	)
 	default InventorySetupsGroundItemMenuSwapPriority groundItemMenuSwapPriority()
@@ -337,7 +345,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_SECTION_MODE,
 			name = "Section Mode",
 			description = "Configures the view to be in section mode",
-			position = 17
+			section = otherSection
 	)
 	default boolean sectionMode()
 	{
@@ -348,7 +356,7 @@ public interface InventorySetupsConfig extends Config
 		keyName = CONFIG_KEY_PANEL_VIEW,
 		name = "Panel View",
 		description = "Configures which type of panels are displayed for setups",
-		position = 18
+		section = otherSection
 	)
 	default InventorySetupsPanelViewID panelView()
 	{
@@ -359,8 +367,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "Deprecated",
 			name = "Compact Mode",
 			description = "Configures the setup panels to be compact",
-			hidden = true,
-			position = 19
+			hidden = true
 	)
 	default boolean compactMode()
 	{
@@ -371,7 +378,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_SORTING_MODE,
 			name = "Sorting Mode",
 			description = "Configures the sorting of setups",
-			position = 20
+			section = otherSection
 	)
 	default InventorySetupsSortingID sortingMode()
 	{
@@ -382,7 +389,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_HIDE_BUTTON,
 			name = "Hide Help Button",
 			description = "Hide the help button",
-			position = 21
+			section = otherSection
 	)
 	default boolean hideButton()
 	{
@@ -390,10 +397,10 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "disableBankTabBar",
+			keyName = "disableBankTabBarDeprecated",
 			name = "Disable Bank Tab Separator",
 			description = "Stops the thin bank tab separator from removing the bank filter when clicked",
-			position = 22
+			hidden = true
 	)
 	default boolean disableBankTabBar()
 	{
@@ -401,10 +408,10 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "removeBankTabSeparator",
+			keyName = "removeBankTabSeparatorDeprecated",
 			name = "Remove Bank Tab Separator",
 			description = "Removes the thin bank tab separators from the bank filter",
-			position = 23
+			hidden = true
 	)
 	default boolean removeBankTabSeparator()
 	{
@@ -415,7 +422,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "requireActivePanelFilter",
 			name = "Require Active Panel for Filtering",
 			description = "Only allow filtering if the Inventory Setups panel is active",
-			position = 24
+			section = otherSection
 	)
 	default boolean requireActivePanelFilter()
 	{
@@ -426,7 +433,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "showWornItemsFilter",
 			name = "Show Worn Items Filter",
 			description = "Determines which setups show up when right clicking the show worn items menu",
-			position = 25
+			section = otherSection
 	)
 	default InventorySetupsShowWornItemsFilterID showWornItemsFilter()
 	{
@@ -437,7 +444,7 @@ public interface InventorySetupsConfig extends Config
 			keyName = "showSectionSubmenusWornItems",
 			name = "Worn Items Section Submenus",
 			description = "Enable section submenus on the worn items button when section mode is enabled",
-			position = 26
+			section = otherSection
 	)
 	default boolean wornItemSelectionSubmenu()
 	{
@@ -449,11 +456,22 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_MANUAL_BANK_FILTER,
 			name = "Manual Bank Filter",
 			description = "Disable automatic bank filtering when opening the bank",
-			position = 27
+			section = otherSection
 	)
 	default boolean manualBankFilter()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_ENABLE_LAYOUT_WARNING,
+			name = "Enable Layout Warning",
+			description = "Show a warning panel upon startup if layouts will not work",
+			section = otherSection
+	)
+	default boolean enableLayoutWarning()
+	{
+		return true;
 	}
 
 

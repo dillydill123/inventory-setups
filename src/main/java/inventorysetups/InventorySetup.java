@@ -25,6 +25,7 @@
 package inventorysetups;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.AllArgsConstructor;
@@ -139,6 +140,27 @@ public class InventorySetup implements InventorySetupsDisplayAttributes
 	public void updateNotes(final String text)
 	{
 		notes = text;
+	}
+
+	public static List<InventorySetupsItem> getSetupItems(final InventorySetup setup)
+	{
+		List<InventorySetupsItem> itemsInSetup = new ArrayList<>();
+		itemsInSetup.addAll(setup.getInventory());
+		itemsInSetup.addAll(setup.getEquipment());
+		itemsInSetup.addAll(setup.getAdditionalFilteredItems().values());
+		if (setup.getRune_pouch() != null)
+		{
+			itemsInSetup.addAll(setup.getRune_pouch());
+		}
+		if (setup.getBoltPouch() != null)
+		{
+			itemsInSetup.addAll(setup.getBoltPouch());
+		}
+		if (setup.getQuiver() != null)
+		{
+			itemsInSetup.addAll(setup.getQuiver());
+		}
+		return itemsInSetup;
 	}
 
 }

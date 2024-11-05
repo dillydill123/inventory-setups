@@ -14,7 +14,7 @@ Contents
   - [Moving a Setup](#moving-a-setup)
   - [Favorites](#favorites)
 - [Editing a Setup](#editing-a-setup)
-- [Bank Filtering](#bank-filtering)
+- [Bank Filtering and Layouts](#bank-filtering-and-layouts)
 - [Highlighting](#highlighting)
   - [Stack Difference](#stack-difference)
   - [Fuzzy Difference](#fuzzy-difference)
@@ -27,10 +27,8 @@ Contents
   - [Moving Setups in a Section](#moving-setups-in-a-section)
   - [The Unassigned Section](#unassigned-section)
 - [Exporting and Importing](#exporting-and-importing-setups-and-sections)
-- [Configuration Settings](#configuration-settings)
 - [Other Plugin Compatibilities](#other-plugin-compatibilities)
-  - [Bank Tag Layouts Plugin](#bank-tag-layouts-plugin)
-  - [Bank Tags Plugin](#bank-tags-plugin)
+- [Configuration Settings](#configuration-settings)
 - [Data Storage](#data-storage)
 - [Support and Suggestions](#support-and-suggestions)
   - [Donations](#donations)
@@ -56,13 +54,13 @@ The overview panel contains all the setups and options to manipulate them.
 
 ### Viewing a Setup
 
-You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, rune and bolt pouch (if present), spellbook, additional filtered items (explained later) and notes are saved in the setup. 
+You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, spellbook, additional filtered items (explained later) and notes are saved in the setup. Additional ammunition containers like the rune pouch, bolt pouch, and quiver will also be displayed if present.
 
 ![View Setup](readme_images_and_gifs/view_setup_button.png)
 
 ![View Setup](readme_images_and_gifs/view_setup.gif)
 
-It is also possible to view setups in game. You can do this by right clicking the "Show worn items" button in the top left of the bank, and clicking on one of your setups.
+It is also possible to view setups in game. You can do this by right-clicking the "Show worn items" button in the top left of the bank, and clicking on one of your setups.
 
 ![View Setups in Game](readme_images_and_gifs/show_worn_items_view_setup.gif)
 
@@ -90,7 +88,7 @@ Clicking the switch view button again will move you to Icon view. Icon mode will
 
 ![Icon Mode](readme_images_and_gifs/icon_mode.gif)
 
-You can update an icon by right clicking a setup in Icon view and clicking "Update Icon..". By default, setups will try to use your weapon if no icon is provided. If there is no weapon, it will use a default icon (Cake of Guidance).
+You can update an icon by right-clicking a setup in Icon view and clicking "Update Icon..". By default, setups will try to use your weapon if no icon is provided. If there is no weapon, it will use a default icon (Cake of Guidance).
 
 ![Update Icon](readme_images_and_gifs/update_icon.gif)
 
@@ -106,7 +104,7 @@ Currently there is only one additional sorting mode, alphabetical. This will org
 
 ### Moving a Setup
 
-Is it possible to move a setup up and down the list by right clicking near the setup name and selecting one of the menu options.
+Is it possible to move a setup up and down the list by right-clicking near the setup name and selecting one of the menu options.
 
 ![Move Setups](readme_images_and_gifs/move_setup_options.gif)
 
@@ -120,7 +118,7 @@ You can favorite your setups so they always appear at the top of the list unless
 
 ## Editing a Setup
 
-When viewing a setup, you can right click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot.
+When viewing a setup, you can right-click individual slots to update them, either from inventory/equipment, or from search. If you select from inventory/equipment, it will take the corresponding item from your inventory/equipment and update the slot.
 
 ![Update Slot from Inventory](readme_images_and_gifs/update_slot_from_inventory.gif)
 
@@ -132,11 +130,11 @@ There is an option to update all occurrences of an item with a new item via cont
 
 This is useful if you want to "upgrade" an item. For example, if you recently got an Infernal Cape, you can replace all instances of your Fire Cape in all setups to the Infernal Cape with this feature.
 
-To access this feature, SHIFT + Right Click an inventory or equipment slot and select one of the two options.
+To access this feature, SHIFT + Right-Click an inventory or equipment slot and select one of the two options.
 
 ![Update All from Inventory Or Search](readme_images_and_gifs/update_item_in_all_setups.gif)
 
-The Rune and Bolt Pouch can also be updated with these options.
+The Rune pouch, Bolt Pouch, and quiver can also be updated with these options.
 
 ![Update Slot from Rune Pouch](readme_images_and_gifs/update_slot_from_rune_pouch.gif)
 
@@ -150,21 +148,23 @@ You can also refresh an entire setup by using the refresh icon when viewing a se
 
 ![Refresh Button](readme_images_and_gifs/refresh_button.png)
 
-You can update the spellbook by right clicking the slot and choosing the desired spellbook. There is also an option for none if you do not care about the spellbook for a particular setup.
+You can update the spellbook by right-clicking the slot and choosing the desired spellbook. There is also an option for none if you do not care about the spellbook for a particular setup.
 
 ![Update Spellbook](readme_images_and_gifs/spellbook.png)
 
-## Bank Filtering
+## Bank Filtering and Layouts
 
-One of the many buttons on each inventory setup panel is a bank filtering option. Enabling this will cause the bank to only show the items in your setup when being viewed. This is very similar to the bank tags plugin.
+One of the many buttons on each inventory setup panel is a bank filtering option. Enabling this will cause the bank to only show the items in your setup in a customizable layout when it is selected. This is very similar to the Bank Tags plugin.
+
+**Bank Tags plugin must be ON and Hub Plugin Bank Tag Layouts 'Use with Inventory Setups' option must be OFF to use this feature. Inventory Setups will warn the user if filtering and layouts cannot be used.**
 
 ![Bank Filtering](readme_images_and_gifs/bank_filtering.gif)
 
-You can also filter specific parts of the setup, like the inventory, equipment, and additional filtered items. You can use this to quickly gear up with equipment before filling up your inventory. To do this, right click on the "Show worn items" button when a setup is selected, and you'll see options to filter specific parts of the setup. There are additional hotkeys that can be configured for these options as well.
+Layouts will automatically be managed by Inventory Setups as you create, remove, edit, export, import, and manipulate your setups. If you'd like to reset only the layout of an inventory setup, you can right-click the "Show worn items" menu and select the auto layout option. Currently, there are two default layouts, Preset and ZigZag. You can change the default for newly created setups in the settings.
 
-![Bank Filtering Equipment Inventory](readme_images_and_gifs/bank_filtering_equip_invent.gif)
+![Auto Layouts](readme_images_and_gifs/auto_layout.gif)
 
-When selecting a particular filtering mode, it will persist even when you leave the bank. In order to filter for all items again, you will need to select it from the "Show worn items" menu, or use the hotkey. Selecting a new setup will automatically be set to filter all items.
+The core work of the layouts is done by the Bank Tags plugin. This also includes integration with potion storage.
 
 ## Highlighting
 
@@ -176,11 +176,9 @@ You can enable highlighting to further assist in gearing up. Highlighting will c
 
 Enabling this will cause a slot to become highlighted if the stack size of the item in the player's inventory or equipment does not match the corresponding slot in the setup being viewed. This might be useful if you are at the chaos altar training prayer, and you want to be sure you don't bring more gp than needed to unnote the bones.
 
-![Stack Difference](readme_images_and_gifs/normal_stack_difference.gif)
-
 Greater than or less than stack difference can also be selected. These highlight if the item stack in the inventory is greater than or less than the amount in the setup respectively. This can be useful if you want a reminder that a stack is too low or too high.
 
-![Stack Difference Less Than](readme_images_and_gifs/less_than_stack_difference.gif)
+![Stack Difference](readme_images_and_gifs/stack_difference.gif)
 
 Note that you must have base highlighting enabled in order to use this feature. There is a configuration option to set the default stack compare type for each slot when creating new setups.
 
@@ -188,13 +186,13 @@ Note that you must have base highlighting enabled in order to use this feature. 
 
 Normally, Inventory Setups requires items to be **exactly** the same as those in the setup, else it will highlight the item, or not include it in the bank filter. This works for most items, but there are some cases where this is not desirable. Degradable items from Barrows are a great example. Ahrim's robetop 75 should be considered the same as Ahrim's robetop 100 for the purposes of highlighting and filtering.
 
-It is possible to configure Inventory Setups to fix this issue using the "fuzzy" difference indicator. You can do this by right clicking any slot in the inventory or equipment panels, and selecting "Toggle Fuzzy". A "*" will appear in the top right corner of the slot if it is marked as fuzzy. The fuzzy indicator will make it so "similar" items are treated as equal for highlighting and filtering purposes.
+It is possible to configure Inventory Setups to fix this issue using the "fuzzy" difference indicator. You can do this by right-clicking any slot in the inventory or equipment panels, and selecting "Toggle Fuzzy". A "*" will appear in the top right corner of the slot if it is marked as fuzzy. The fuzzy indicator will make it so "similar" items are treated as equal for highlighting and filtering purposes.
 
 ![Fuzzy Difference Highlight](readme_images_and_gifs/fuzzy_difference_highlighting.gif)
 
 As you can see, there are different types of items that the "fuzzy" indicator can be used on. Jewellery with different charges, degradable items like Barrows, and potions with different doses are a few examples.
 
-The fuzzy indicator will also impact bank filtering.
+The fuzzy indicator will also impact bank layouts.
 
 ![Fuzzy Difference Filtering](readme_images_and_gifs/fuzzy_filtering.gif)
 
@@ -212,9 +210,9 @@ You can add additional filtered items to setups. These are items that will show 
 
 * Select a setup
 * Break the bank filter and navigate to the item you want to add to the additional items filter
-* Hold SHIFT and RIGHT CLICK on the item and select "Add to Additional Filtered Items"
+* Hold SHIFT and RIGHT-CLICK on the item and select "Add to Additional Filtered Items"
 * The item will now show in the bank filter and in the "Additional Filtered Items" section
-* You can remove an item from this list by right clicking and selecting "Remove Item from Slot"
+* You can remove an item from this list by right-clicking and selecting "Remove Item from Slot"
 
 You can also add or update items by using the search option. The fuzzy indicator can also be added to additional filtered items.
 
@@ -252,9 +250,9 @@ Like setups, section names have a maximum length of 50 and must be unique.
 
 ### Adding Setups to a Section
 
-To add setups to your section, there are two ways to do this. You can right click a section and select "Add setups to section..". This will open a dialogue where you can select setups to add to the section.
+To add setups to your section, there are two ways to do this. You can right-click a section and select "Add setups to section..". This will open a dialogue where you can select setups to add to the section.
 
-You can also right click a setup and select "Add setup to sections.." This will open a dialogue where you can select sections for the setup to be a part of.
+You can also right-click a setup and select "Add setup to sections.." This will open a dialogue where you can select sections for the setup to be a part of.
 
 With both dialogues, you can CTRL + Click to select multiple options. The setups/sections displayed on the dialogue will be in alphabetical order.
 
@@ -270,19 +268,19 @@ You can use the search bar to search for setups while in section mode. Any secti
 
 ![Remove from Section](readme_images_and_gifs/remove_from_section.gif)
 
-To remove a setup from a section, make sure you are in section view. Then you can right click on a setup and select "Remove from section". This will remove the setup from that section.
+To remove a setup from a section, make sure you are in section view. Then you can right-click on a setup and select "Remove from section". This will remove the setup from that section.
 
 Do not use the X button to remove a setup from a section. This will simply delete your setup. When a setup is deleted, it will be removed from all sections.
 
 ### Moving Setups in a Section
 
-You can right click a setup while in section mode and select one of the move options to move a setup within a section. This will not affect the position of the setup in the normal view. It only modifies the position within the section.
+You can right-click a setup while in section mode and select one of the move options to move a setup within a section. This will not affect the position of the setup in the normal view. It only modifies the position within the section.
 
 ### Section Menu Options
 
-Right clicking a section will show a menu with some options. Here you can move the section, export it, add setups to it, and delete it.
+Right-clicking a section will show a menu with some options. Here you can move the section, export it, add setups to it, and delete it.
 
-![Sections Right Click Menu](readme_images_and_gifs/section_right_click.png)
+![Sections Right-Click Menu](readme_images_and_gifs/section_right_click.png)
 
 ### Unassigned Section
 
@@ -294,17 +292,17 @@ With this section, you do not need to switch from section mode to normal mode wh
 
 It is possible to import and export inventory setups and sections. This is useful if you would like to share your setups with your friends. To export an inventory setup, click on the export button next to the view setup button. This will copy the setup to your clipboard. You can then send this to your friends.
 
-To export a section, right click a section in section view and select the appropriate option.
+To export a section, right-click a section in section view and select the appropriate option.
 
 ![Export Setup](readme_images_and_gifs/export.png)
 
-To import a setup, click on the green import button at the top. It will prompt for a setup. Paste the setup and confirm.The new setup will be added to the bottom of the list of setups.
-
-The same can be done for sections, but you must be in section view to import a section.
+To import a setup, click on the green import button at the top and select "Import setup...". It will prompt for a setup. Paste the setup and confirm.The new setup will be added to the bottom of the list of setups.
 
 ![Import Setup](readme_images_and_gifs/import.png)
 
-You can also mass import or export by right clicking the import button and following the instructions.
+You can also mass import or export by right-clicking the import button and following the instructions. This is a good way to make a backup of your setups offline, although if you are logged into RuneLite your profile data is stored.
+
+Setups will be exported with layout data.
 
 ![Mass Import Export](readme_images_and_gifs/mass_import_export.png)
 
@@ -312,6 +310,19 @@ You can also mass import or export by right clicking the import button and follo
 
 Duplicate names for setups or sections are not allowed in Inventory Setups. If you attempt to import a section or setup that has a name which already exists, the plugin will find a new name for it by adding a number to the end.
 
+### Exporting to Bank Tags
+
+You can export an Inventory Setup to Bank Tag format by right-clicking the export button and selecting "Export Setup to Bank Tag Tab", then importing this into Bank Tags.
+
+![Export to Bank Tag Tab](readme_images_and_gifs/export_to_bank_tag.gif)
+
+## Other Plugin Compatibilities
+
+### Bank Tags and Hub Plugin Bank Tag Layouts
+
+Bank Tags plugin must be ON and Hub Plugin Bank Tag Layouts 'Use with Inventory Setups' option must be OFF to use all features of Inventory Setups. Inventory Setups will warn the user if filtering and layouts cannot be used. This warning will also provide an option to update your settings for you.
+
+Hub Plugin Bank Tag Layouts is not required for Inventory Setups anymore. If you were only using the plugin for use with Inventory Setups, it's recommended that you turn off the 'Use with Inventory Setups' option and uninstall the plugin. If you have layout data from Bank Tag Layouts, Inventory Setups will attempt to migrate the layout data the first time you use the plugin.
 ## Configuration Settings
 
 In the settings of Inventory Setups, you can change default setup options, key binds, ground item menu options, and other miscellaneous settings.
@@ -320,29 +331,30 @@ In the settings of Inventory Setups, you can change default setup options, key b
 
 ### Default Setup Options
 
-* **Default Filter Bank** - Enabling this will make it so all newly created setups will have bank filtering enabled
-* **Default Highlight Unordered Difference** - Enabling this will make it so all newly created setups will have unordered highlighting enabled
-* **Default Highlight** - Enabling this will make it so all newly created setups will have highlighting enabled
-* **Default Highlight Color** - The default highlighting color for newly created setups
-* **Default Enable Display Color** - Enabling this will make it so all newly created setups will have the default display color. The display color is the thin colored line on Standard and Compact setup panels
 * **Default Display Color** - The default color that will be used as a display color for new setups. The option above must be enabled
+* **Default Enable Display Color** - Enabling this will make it so all newly created setups will have the default display color. The display color is the thin colored line on Standard and Compact setup panels
 
 ![Display Color Gif](readme_images_and_gifs/display_color.gif)
 
-Hint: You can right click the paint bucket to delete the color of a setup or section.
+Hint: You can right-click the paint bucket to delete the color of a setup or section.
 
+* **Default Filter Bank** - Enabling this will make it so all newly created setups will have bank filtering enabled
 * **Default Fuzzy** - Enabling this will make all slots fuzzy for newly created setups
+* **Default Highlight** - Enabling this will make it so all newly created setups will have highlighting enabled
+* **Default Highlight Color** - The default highlighting color for newly created setups
+* **Default Highlight Unordered Difference** - Enabling this will make it so all newly created setups will have unordered highlighting enabled
 * **Default Stack Compare** - The default stack comparison type for all slots in newly created setups
 
 ### HotKey Options
 
-* **Return To Setups Hotkey** - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
 * **Filter Bank Hotkey** - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
-* **Filter Inventory Hotkey** - Pressing this will cause the bank to filter only the inventory of a setup if one is selected and filtering is enabled for that setup
-* **Filter Equipment Hotkey** - Pressing this will cause the bank to filter only the equipment of a setup if one is selected and filtering is enabled for that setup
-* **Filter Additional Items Hotkey** - Pressing this will cause the bank to filter only the additional filtered items of a setup if one is selected and filtering is enabled for that setup
-* **Toggle section mode** - Pressing this will switch to section mode
 * **Persist Hotkeys Outside Bank** - Enabling this will cause hot keys to persist outside the bank
+* **Return To Setups Hotkey** - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
+* **Toggle section mode** - Pressing this will switch to section mode
+
+### Layout Options
+
+* **Default Layout** - The default layout used when setups are created
 
 ### Ground Item Menu Options
 
@@ -353,39 +365,17 @@ Hint: You can right click the paint bucket to delete the color of a setup or sec
 
 ### Other Options
 
-* **Section Mode** - Toggles section mode. Can also be selected on the main window of Inventory Setups
-* **Panel View** - The type of panel view. Standard, Compact, or Icon
-* **Sorting Mode** - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
+* **Enable Layout Warning** - Enables the warning message that layouts will not work when starting inventory setups.
 * **Hide Help Button** - Hides the help button
-* **Disable Bank Tab Separator** - Enabling this causes bank filtering to continue when the thin bank tab bar is clicked. This is useful if you are accidentally clicking the bar while retrieving items
-
-![Disable Bank Tab Bar](readme_images_and_gifs/disable_tab_bar.png)
-
-* **Remove Bank Tab Separator** - Enabling this causes the bank tab separators to be removed when the bank is filtered. This is just like the bank tags option
-
-![Remove Bank Tab Bar](readme_images_and_gifs/remote_tab_separator.png)
-
+* **Manual Bank Filter** - Enabling this causes the bank to not filter automatically when opened. You will need to manually trigger a bank filter by using a hot key or selecting a setup when the bank when it is already opened
+* **Panel View** - The type of panel view. Standard, Compact, or Icon
 * **Require Active Panel for Filtering** - Enabling this will make it so filtering will only occur if the Inventory Setups Panel is selected. For example, if you have selected the hiscores panel and are viewing a setup with filtering enabled, the bank **will not** be filtered
-
-* **Show Worn Item Filter** - Changes which setups show up on the "show worn items" button when right clicked
-
-* **Worn Items Section Submenus** - Allows section submenus when right clicking the "show worn items" button
+* **Section Mode** - Toggles section mode. Can also be selected on the main window of Inventory Setups
+* **Show Worn Item Filter** - Changes which setups show up on the "show worn items" button when right-clicked
+* **Sorting Mode** - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
+* **Worn Items Section Submenus** - Allows section submenus when right-clicking the "show worn items" button
 
 ![Section Submenus](readme_images_and_gifs/section_submenus.png)
-
-* **Manual Bank Filter** - Enabling this causes the bank to not filter automatically when opened. You will need to manually trigger a bank filter by using a hot key or selecting a setup when the bank when it is already opened
-
-## Other Plugin Compatibilities
-
-### Bank Tag Layouts Plugin 
-
-The [Bank Tag Layouts Plugin](https://github.com/geheur/bank-tag-custom-layouts) is compatible with Inventory Setups and can be installed to create custom layouts for your bank filters.
-
-![Bank Tag Layouts](readme_images_and_gifs/bank_tag_layouts.png)
-
-### Bank Tags Plugin
-
-Currently, there is one known compatibility issue with Bank Tags. If Bank Tags and Inventory Setups are both enabled, switching the withdraw type from Items to Notes (or vice versa) will cause the filter to exit. This is unfortunately not something that can be fixed. The only solution is to turn off the Bank Tags plugin. More info can be found [Here](https://github.com/dillydill123/inventory-setups/issues/29).
 
 ## Data Storage
 
@@ -395,6 +385,8 @@ Once you've found your `<profile_name>.properties` file, a particular setup's da
 
 Section data can be found under the key `inventorySetups.sections`.
 
+Layout data is stored under the Bank Tag config group. An example would look like `banktags.layout_<custom_marker><hash_of_setup_name>`. A custom marker is used to stop collisions with Bank Tags.
+
 Inventory Setups will sync your data to the cloud if you are signed in to RuneLite. It is still a good idea to mass export your setups every once in a while, especially if you aren't signed in to RuneLite.
 
 ## Support and Suggestions
@@ -403,7 +395,7 @@ If you need help, have any suggestions, or notice any bugs, you can comment them
 
 ### Donations
 
-Inventory Setups was developed by me in my free time (100+ hours of work). I did it for fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
+Inventory Setups was developed by me in my free time (200+ hours of work). I did it for fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
 
 ## Changelog
 

@@ -5,8 +5,8 @@ import java.awt.Container;
 import java.util.Set;
 import javax.swing.SwingUtilities;
 import net.runelite.client.util.SwingUtil;
-
 import static inventorysetups.InventorySetupsPlugin.MAX_SETUP_NAME_LENGTH;
+
 
 public class InventorySetupUtilities
 {
