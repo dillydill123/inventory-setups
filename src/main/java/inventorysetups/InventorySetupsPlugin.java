@@ -1260,7 +1260,6 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// Do a bank search when the bank is opened
 			// This will set the proper layout
-			// TODO try this in onWidgetLoaded to see if setup comes back after potion storage.
 			if (!config.manualBankFilter())
 			{
 				// Only do the filter if manual bank filter is not set.
