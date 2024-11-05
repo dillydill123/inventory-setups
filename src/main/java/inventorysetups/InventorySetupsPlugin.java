@@ -594,6 +594,7 @@ public class InventorySetupsPlugin extends Plugin
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
 		else if (panel.getCurrentSelectedSetup() != null
+				&& bankTagsService.getActiveLayout() == null // If there is an active layout, then the real item behind the fake layout item may be added. So just disallow this menu.
 			&& event.getActionParam1() == ComponentID.BANK_ITEM_CONTAINER
 			&& client.isKeyPressed(KeyCode.KC_SHIFT)
 			&& event.getOption().equals("Examine"))
