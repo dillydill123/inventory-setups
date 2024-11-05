@@ -158,6 +158,8 @@ One of the many buttons on each inventory setup panel is a bank filtering option
 
 **Bank Tags plugin must be ON and Hub Plugin Bank Tag Layouts 'Use with Inventory Setups' option must be OFF to use this feature. Inventory Setups will warn the user if filtering and layouts cannot be used.**
 
+**If you previously used Hub Plugin Bank Tag Layouts only for Inventory Setups, it is recommended that you turn off the 'Use with Inventory Setups' option and uninstall it.**
+
 ![Bank Filtering](readme_images_and_gifs/bank_filtering.gif)
 
 Layouts will automatically be managed by Inventory Setups as you create, remove, edit, export, import, and manipulate your setups. If you'd like to reset only the layout of an inventory setup, you can right-click the "Show worn items" menu and select the auto layout option. Currently, there are two default layouts, Preset and ZigZag. You can change the default for newly created setups in the settings.
@@ -398,6 +400,9 @@ If you need help, have any suggestions, or notice any bugs, you can comment them
 Inventory Setups was developed by me in my free time (200+ hours of work). I did it for fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
 
 ## Changelog
+
+##### 1.20
+Integration with core Bank Tag for layouts which has potion storage support.
 
 ##### 1.14
 Added Icon mode and optimizations for how setups are stored
