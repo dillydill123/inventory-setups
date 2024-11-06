@@ -265,6 +265,10 @@ public class InventorySetupLayoutUtilities
 
 	private void addItemToLayout(final Layout layout, final String tagName, final InventorySetupsItem item, final int pos, final boolean addToTag)
 	{
+		if (item.getId() == -1)
+		{
+			return;
+		}
 		int id = itemManager.canonicalize(item.getId());
 		layout.setItemAtPos(id, pos);
 		// We may not want to add to the tag if we just want to create a layout but not update tags.
