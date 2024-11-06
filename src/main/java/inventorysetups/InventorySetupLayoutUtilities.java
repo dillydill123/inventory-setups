@@ -347,7 +347,7 @@ public class InventorySetupLayoutUtilities
 			}
 		}
 
-		addFuzzyItemsToEndOfLayout(layout, idsInSetup, idsInSetupNoFuzzy);
+		addFuzzyItemsToEndOfLayout(layout, idsInSetup, idsInSetupNoFuzzy, idsInLayout);
 
 		trimLayout(layout);
 
@@ -376,41 +376,58 @@ public class InventorySetupLayoutUtilities
 			}
 		}
 
-		addFuzzyItemsToEndOfLayout(layout, idsInSetup, idsInSetupNoFuzzy);
+		Set<Integer> idsInLayout = new LinkedHashSet<>();
+		for (int i = 0; i < layout.size(); i++)
+		{
+			idsInLayout.add(layout.getItemAtPos(i));
+		}
+
+		addFuzzyItemsToEndOfLayout(layout, idsInSetup, idsInSetupNoFuzzy, idsInLayout);
 	}
 
-	private void addFuzzyItemsToEndOfLayout(final Layout layout, final Set<Integer> idsInSetup, final Set<Integer> idsInSetupNoFuzzy)
+	private void addFuzzyItemsToEndOfLayout(final Layout layout, final Set<Integer> idsInSetup, final Set<Integer> idsInSetupNoFuzzy, final Set<Integer> idsInLayout)
 	{
 		// Try our best at adding fuzzy items to the bottom of the layout
 		// Only add those that exist in the bank, otherwise we would add every possible variation which is not ideal.
 		// Any missed items will be added by the layout manager.
 		// This also adds the benefit that we can use our own custom mappings along with base item variation mappings.
 		// This will probably only work if the bank is open, but still worth doing for things like auto layouts.
+
+		// NOTE: This does have some drawbacks. Fuzzy items will occupy a new slot rather than fit an existing placeholder
+		// This means that a fuzzy barrows item will have two bank slots.
+		// Additionally, this will not find item placeholders like "Amulet of Glory" so they will be put at the top
+		// of the bank instead of at the bottom.
 		ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
-		if (bankContainer != null)
+		if (bankContainer == null)
 		{
+			return;
+		}
 
-			Set<Integer> bankItems = new LinkedHashSet<>();
-			for (int i = 0; i < bankContainer.size(); i++)
+		Set<Integer> idsInSetupOnlyFuzzy = new LinkedHashSet<>(idsInSetup);
+		idsInSetupOnlyFuzzy.removeAll(idsInSetupNoFuzzy);
+		if (idsInSetupOnlyFuzzy.isEmpty())
+		{
+			return;
+		}
+
+		Set<Integer> bankItems = new LinkedHashSet<>();
+		for (int i = 0; i < bankContainer.size(); i++)
+		{
+			Item item = bankContainer.getItem(i);
+			if (item != null && item.getId() > -1 && item.getId() != NullItemID.NULL_6512)
 			{
-				Item item = bankContainer.getItem(i);
-				if (item != null && item.getId() > -1 && item.getId() != NullItemID.NULL_6512)
-				{
-					bankItems.add(item.getId());
-				}
-			}
-
-			Set<Integer> idsInSetupOnlyFuzzy = new LinkedHashSet<>(idsInSetup);
-			idsInSetupOnlyFuzzy.removeAll(idsInSetupNoFuzzy);
-
-			for (final Integer id : idsInSetupOnlyFuzzy)
-			{
-				if (bankItems.contains(id) && layout.count(id) < 1)
-				{
-					layout.addItemAfter(id, layout.size());
-				}
+				bankItems.add(item.getId());
 			}
 		}
+
+		for (final Integer id : idsInSetupOnlyFuzzy)
+		{
+			if (bankItems.contains(id) && !idsInLayout.contains(id))
+			{
+				layout.addItemAfter(id, layout.size());
+			}
+		}
+
 	}
 
 	public void exportSetupToBankTagTab(final InventorySetup setup, final Component component)
