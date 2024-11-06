@@ -145,7 +145,6 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
 	public static final String CONFIG_KEY_ENABLE_LAYOUT_WARNING = "enableLayoutWarning";
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
-	public static final String CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS = "useWithInventorySetups";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
 	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
 	public static final String LAYOUT_PREFIX_MARKER = "_invSetup_";
@@ -379,13 +378,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	private boolean canUseLayouts()
 	{
-		// If Hub BTL is on (meaning the config for inventory setups usage is set) or Bank Tags is off, layouts will not work.
-		if (!pluginManager.isPluginEnabled(bankTagsPlugin))
-		{
-			return false;
-		}
-		final Boolean hubBTLIsOn = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS, Boolean.class);
-		return hubBTLIsOn == null || !hubBTLIsOn;
+		// If Bank Tags is off, layouts will not work.
+		return pluginManager.isPluginEnabled(bankTagsPlugin);
 	}
 
 	public void enableLayouts()
@@ -404,12 +398,6 @@ public class InventorySetupsPlugin extends Plugin
 				log.error("Failed to start Bank Tags plugin.");
 				log.error(e.toString());
 			}
-		}
-		final String hubBTLIsOn = configManager.getConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS);
-		if (hubBTLIsOn != null && hubBTLIsOn.equals("true"))
-		{
-			log.info("Setting Hub Bank Tag Layouts useWithInventorySetups to false");
-			configManager.setConfiguration(CONFIG_GROUP_HUB_BTL, CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS, "false");
 		}
 	}
 
@@ -471,10 +459,6 @@ public class InventorySetupsPlugin extends Plugin
 					}
 				});
 			}
-		}
-		else if (event.getGroup().equals(CONFIG_GROUP_HUB_BTL) && event.getKey().equals(CONFIG_KEY_HUB_BTL_USE_WITH_INVENTORY_SETUPS))
-		{
-			this.canUseLayouts = canUseLayouts();
 		}
 	}
 

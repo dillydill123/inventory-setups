@@ -98,7 +98,7 @@ Click a third time on the switch view button at the top to go back to standard v
 
 Sorting modes allow for setups to be ordered in the overview panel in different ways.
 
-Currently there is only one additional sorting mode, alphabetical. This will organize all setups alphabetically. You can return to the default sorting mode through the config or by clicking the alphabetical sort button.
+Currently, there is only one additional sorting mode, alphabetical. This will organize all setups alphabetically. You can return to the default sorting mode through the config or by clicking the alphabetical sort button.
 
 ![Alphabetical Mode](readme_images_and_gifs/alphabetical_sort.gif)
 
@@ -156,9 +156,9 @@ You can update the spellbook by right-clicking the slot and choosing the desired
 
 One of the many buttons on each inventory setup panel is a bank filtering option. Enabling this will cause the bank to only show the items in your setup in a customizable layout when it is selected. This is very similar to the Bank Tags plugin.
 
-**Bank Tags plugin must be ON and Hub Plugin Bank Tag Layouts 'Use with Inventory Setups' option must be OFF to use this feature. Inventory Setups will warn the user if filtering and layouts cannot be used.**
+**Bank Tags plugin must be ON to use this feature. Inventory Setups will warn the user if filtering and layouts cannot be used.**
 
-**If you previously used Hub Plugin Bank Tag Layouts only for Inventory Setups, it is recommended that you turn off the 'Use with Inventory Setups' option and uninstall it.**
+**If you previously used Hub Plugin Bank Tag Layouts only for Inventory Setups, it is recommended that you uninstall it. It is not required anymore.**
 
 ![Bank Filtering](readme_images_and_gifs/bank_filtering.gif)
 
@@ -322,9 +322,9 @@ You can export an Inventory Setup to Bank Tag format by right-clicking the expor
 
 ### Bank Tags and Hub Plugin Bank Tag Layouts
 
-Bank Tags plugin must be ON and Hub Plugin Bank Tag Layouts 'Use with Inventory Setups' option must be OFF to use all features of Inventory Setups. Inventory Setups will warn the user if filtering and layouts cannot be used. This warning will also provide an option to update your settings for you.
+The Bank Tags plugin must be ON to use all features of Inventory Setups, specifically bank layouts and filtering. Inventory Setups will warn the user if filtering and layouts cannot be used. This warning will also provide an option to turn on Bank Tags for you.
 
-Hub Plugin Bank Tag Layouts is not required for Inventory Setups anymore. If you were only using the plugin for use with Inventory Setups, it's recommended that you turn off the 'Use with Inventory Setups' option and uninstall the plugin. If you have layout data from Bank Tag Layouts, Inventory Setups will attempt to migrate the layout data the first time you use the plugin.
+Hub Plugin Bank Tag Layouts is not required for Inventory Setups anymore. If you were only using the plugin for Inventory Setups, it's recommended that you uninstall the plugin. If you have layout data from Bank Tag Layouts, Inventory Setups will attempt to migrate the layout data the first time you use the plugin.
 ## Configuration Settings
 
 In the settings of Inventory Setups, you can change default setup options, key binds, ground item menu options, and other miscellaneous settings.

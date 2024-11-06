@@ -24,8 +24,8 @@ public class InventorySetupsLayoutWarningPanel extends JPanel
 	InventorySetupsLayoutWarningPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel)
 	{
 		final String warningText = "Inventory Setups has detected that layouts will not work with your current settings.\n\n" +
-				"\"Bank Tags\" Plugin must be ON and the setting \"Use with Inventory Setups\" in Hub Plugin \"Bank Tag Layouts\" must be OFF.\n\n" +
-				"Inventory Setups can adjust your settings so bank layouts will work. This is recommended so you can use all features of Inventory Setups.\n\n" +
+				"The Bank Tags Plugin must be ON to use bank filtering and layouts.\n\n" +
+				"Inventory Setups can turn it on for you. This is recommended so you can use all features of Inventory Setups.\n\n" +
 				"Hub Plugin \"Bank Tag Layouts\" is not required with Inventory Setups. If you only used it with Inventory Setups, you can safely uninstall it.\n\n" +
 				"You can disable this warning in the settings.";
 
@@ -45,7 +45,7 @@ public class InventorySetupsLayoutWarningPanel extends JPanel
 
 		final JLabel configureSettings = new JLabel("Do you want Inventory Setups to ");
 		final JLabel configureSettings2 = new JLabel("change your settings to use layouts?");
-		final JButton configureSettingsButton = new JButton("Change my settings.");
+		final JButton configureSettingsButton = new JButton("Turn on Bank Tags.");
 		configureSettingsButton.setForeground(Color.GREEN);
 		configureSettingsButton.addActionListener(e ->
 		{
