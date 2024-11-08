@@ -764,8 +764,13 @@ public class InventorySetupsPlugin extends Plugin
 					.option("1. Keep", () ->
 					{
 						// Tag all the items in the setup now since the user likes it.
-						layoutUtilities.createSetupLayout(setup, type, true);
-						layoutManager.saveLayout(new_);
+						clientThread.invoke(() ->
+						{
+							// Need this to be in a client thread invoke in case the user types 1 instead.
+							layoutUtilities.createSetupLayout(setup, type, true);
+							layoutManager.saveLayout(new_);
+						});
+
 					})
 					.option("2. Undo", () ->
 					{
