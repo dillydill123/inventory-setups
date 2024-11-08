@@ -27,11 +27,14 @@ package inventorysetups;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ENABLE_LAYOUT_WARNING;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DUPLICATES;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_USE_LAYOUTS;
+
 import java.awt.Color;
 import net.runelite.client.config.Alpha;
 import net.runelite.client.config.Config;
@@ -286,6 +289,17 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = CONFIG_KEY_USE_LAYOUTS,
+			name = "Use Layouts",
+			description = "Use customizable layouts when filtering the bank. Uncheck this for classic bank filtering.",
+			section = layoutSection
+	)
+	default boolean useLayouts()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_LAYOUT_DEFAULT,
 			name = "Default Layout",
 			description = "Configures default bank layout when creating or updating a setup",
@@ -294,6 +308,17 @@ public interface InventorySetupsConfig extends Config
 	default InventorySetupLayoutType defaultLayout()
 	{
 		return InventorySetupLayoutType.PRESET;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_LAYOUT_DUPLICATES,
+			name = "Add Duplicates",
+			description = "Configures layouts to create duplicates of items if you have multiple of that item in your setup",
+			section = layoutSection
+	)
+	default boolean layoutDuplicates()
+	{
+		return true;
 	}
 
 	@ConfigItem(
