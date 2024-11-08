@@ -128,13 +128,20 @@ public class InventorySetupLayoutUtilities
 		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
 		for (final InventorySetupsItem item : additionalItems)
 		{
-			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag, counter);
-			additionalItemsCounter++;
+			boolean added = addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag, counter);
+			if (added)
+			{
+				additionalItemsCounter++;
+			}
 		}
 
-		addFuzzyItemsToEndOfLayout(layout, setup);
-
+		// If duplicate items are disabled, this will ensure fuzzy items get added to the bottom row after
 		trimLayout(layout);
+		if (layout.size() < startOfAdditionalItems)
+		{
+			layout.resize(startOfAdditionalItems);
+		}
+		addFuzzyItemsToEndOfLayout(layout, setup);
 
 		return layout;
 	}
@@ -259,13 +266,20 @@ public class InventorySetupLayoutUtilities
 		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
 		for (final InventorySetupsItem item : additionalItems)
 		{
-			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag, counter);
-			additionalItemsCounter++;
+			boolean added = addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag, counter);
+			if (added)
+			{
+				additionalItemsCounter++;
+			}
 		}
 
-		addFuzzyItemsToEndOfLayout(layout, setup);
-
+		// If duplicate items are disabled, this will ensure fuzzy items get added to the bottom row after
 		trimLayout(layout);
+		if (layout.size() < startOfAdditionalItems)
+		{
+			layout.resize(startOfAdditionalItems);
+		}
+		addFuzzyItemsToEndOfLayout(layout, setup);
 
 		return layout;
 	}
