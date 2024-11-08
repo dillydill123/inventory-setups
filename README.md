@@ -164,7 +164,7 @@ One of the many buttons on each inventory setup panel is a bank filtering option
 
 Layouts will automatically be managed by Inventory Setups as you create, remove, edit, export, import, and manipulate your setups. If you'd like to reset only the layout of an inventory setup, you can right-click the "Show worn items" menu and select the auto layout option.
 
-Currently, there are two default layouts, Preset and ZigZag. You can change the default layout for newly created setups in the settings. By default, layouts will create duplicate items for you if you have multiple items in your setup. You can disable that in the settings as well.
+Currently, there are two default layouts, Preset and ZigZag. You can change the default layout for newly created setups in the settings. Layouts will create duplicates of an item for you if you have multiple of that item in your setup. You can disable this in the settings as well.
 
 ![Auto Layouts](readme_images_and_gifs/auto_layout.gif)
 
