@@ -720,6 +720,13 @@ public class InventorySetupsPlugin extends Plugin
 				createAutoLayoutSubMenuOnWornItems();
 			}
 
+			// add menu entry to re-filter/layout setup
+			client.getMenu()
+					.createMenuEntry(-1)
+					.setOption("Filter Bank")
+					.setType(MenuAction.RUNELITE)
+					.onClick(e -> doBankSearch());
+
 			// add menu entry to close setup
 			client.getMenu()
 					.createMenuEntry(-1)
