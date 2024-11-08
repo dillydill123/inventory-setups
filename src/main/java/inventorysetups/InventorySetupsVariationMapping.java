@@ -262,6 +262,11 @@ public class InventorySetupsVariationMapping
 		mappings.put(FIRE_CAPE_L, FIRE_CAPE);
 		mappings.put(INFERNAL_CAPE_L, INFERNAL_CAPE);
 
+		// Blood Torva -> Regular Torva
+		mappings.put(SANGUINE_TORVA_FULL_HELM, TORVA_FULL_HELM);
+		mappings.put(SANGUINE_TORVA_PLATEBODY, TORVA_PLATEBODY);
+		mappings.put(SANGUINE_TORVA_PLATELEGS, TORVA_PLATELEGS);
+
 		ImmutableMultimap.Builder<Integer, Integer> invertedBuilder = new ImmutableMultimap.Builder<>();
 		Set<Integer> addedValues = new HashSet<>();
 		for (Integer key : mappings.keySet())
