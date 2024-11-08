@@ -174,7 +174,7 @@ You can disable layouts and go back to classic filtering by unchecking the "Use 
 
 ![Disable Layouts](readme_images_and_gifs/disable_layouts.gif)
 
-NOTE: Some custom fuzzy mappings may not work with classic filtering. 
+NOTE: Some custom fuzzy mappings will not work with classic filtering.
 
 ## Highlighting
 
