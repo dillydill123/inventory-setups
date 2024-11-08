@@ -658,6 +658,10 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	public void onDeactivate()
 	{
 		plugin.setNavButtonIsSelected(false);
+		if (plugin.getConfig().requireActivePanelFilter())
+		{
+			plugin.resetBankSearch();
+		}
 	}
 
 	// Redraw the entire overview panel, considering the text in the search bar
