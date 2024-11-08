@@ -66,6 +66,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
+import net.runelite.api.VarClientInt;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
@@ -755,6 +756,7 @@ public class InventorySetupsPlugin extends Plugin
 			// Temporarily save the new layout to open the tag.
 			layoutManager.saveLayout(new_);
 			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+			resetBankScrollBar();
 
 			// Save the old layout again in case the user hits escape on the menu.
 			// The bank will still show the temporary new layout.
@@ -1150,7 +1152,19 @@ public class InventorySetupsPlugin extends Plugin
 
 			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
 			bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
+			resetBankScrollBar();
 		});
+	}
+
+	public void resetBankScrollBar()
+	{
+		// Reset the scroll bar position to 0
+		Widget widget = client.getWidget(ComponentID.BANK_SCROLLBAR);
+		if (widget != null)
+		{
+			widget.setScrollY(0);
+			client.setVarcIntValue(VarClientInt.BANK_SCROLL, 0);
+		}
 	}
 
 	private void triggerBankSearchFromHotKey()
