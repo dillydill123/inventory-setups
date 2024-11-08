@@ -714,18 +714,21 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() != null)
 		{
-			if (this.canUseLayouts && config.useLayouts())
+			if (panel.getCurrentSelectedSetup().isFilterBank())
 			{
-				// Add Auto layouts
-				createAutoLayoutSubMenuOnWornItems();
-			}
+				if (this.canUseLayouts && config.useLayouts())
+				{
+					// Add Auto layouts
+					createAutoLayoutSubMenuOnWornItems();
+				}
 
-			// add menu entry to re-filter/layout setup
-			client.getMenu()
-					.createMenuEntry(-1)
-					.setOption("Filter Bank")
-					.setType(MenuAction.RUNELITE)
-					.onClick(e -> doBankSearch());
+				// add menu entry to re-filter/layout setup
+				client.getMenu()
+						.createMenuEntry(-1)
+						.setOption("Filter Bank")
+						.setType(MenuAction.RUNELITE)
+						.onClick(e -> doBankSearch());
+			}
 
 			// add menu entry to close setup
 			client.getMenu()
