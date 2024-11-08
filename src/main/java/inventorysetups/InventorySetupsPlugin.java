@@ -585,10 +585,10 @@ public class InventorySetupsPlugin extends Plugin
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
 		else if (panel.getCurrentSelectedSetup() != null
-				&& bankTagsService.getActiveTag() == null // If there is an active tag, then the real item behind the fake layout item may be added. So just disallow this menu.
-			&& event.getActionParam1() == ComponentID.BANK_ITEM_CONTAINER
-			&& client.isKeyPressed(KeyCode.KC_SHIFT)
-			&& event.getOption().equals("Examine"))
+				&& bankTagsService.getActiveLayout() == null // If there is an active layout, then the real item behind the fake layout item may be added. So just disallow this menu.
+				&& event.getActionParam1() == ComponentID.BANK_ITEM_CONTAINER
+				&& client.isKeyPressed(KeyCode.KC_SHIFT)
+				&& event.getOption().equals("Examine"))
 		{
 			createMenuEntryToAddAdditionalFilteredItem(event.getActionParam0());
 		}
@@ -1299,7 +1299,10 @@ public class InventorySetupsPlugin extends Plugin
 		else if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed() && bankTagsService.getActiveTag() != null)
+			// We should only do this if the active tag is an inventory setup tag
+			if (panel.getCurrentSelectedSetup() != null &&
+				bankTagsService.getActiveTag() != null &&
+				bankTagsService.getActiveTag().startsWith(LAYOUT_PREFIX_MARKER))
 			{
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
