@@ -291,7 +291,7 @@ public interface InventorySetupsConfig extends Config
 	@ConfigItem(
 			keyName = CONFIG_KEY_USE_LAYOUTS,
 			name = "Use Layouts",
-			description = "Use customizable layouts when filtering the bank. Uncheck this for classic bank filtering.",
+			description = "Use customizable layouts when filtering the bank. Uncheck this for classic bank filtering",
 			section = layoutSection
 	)
 	default boolean useLayouts()
