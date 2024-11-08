@@ -446,8 +446,14 @@ public class InventorySetupLayoutUtilities
 		int icon = setup.getIconID();
 		if (icon <= 0)
 		{
+			// try to use the current weapon
+			icon = setup.getEquipment().get(EquipmentInventorySlot.WEAPON.getSlotIdx()).getId();
+		}
+		if (icon <= 0)
+		{
 			icon = ItemID.SPADE;
 		}
+
 		data.add(String.valueOf(icon));
 
 		for (Integer item : tagManager.getItemsForTag(layout.getTag()))
