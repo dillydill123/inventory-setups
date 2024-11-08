@@ -137,10 +137,11 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Inventory Setups now uses Bank Tags for Bank Layouts and Filtering.\n\n" +
-							"Some notable changes include Potion Storage support and Auto Layouts.\n\n" +
-							"Please see the newly updated Guide for examples and information.\n\n" +
-							"Hub Plugin \"Bank Tag Layouts\" is not required anymore. If you previously used it, your layout data was migrated to Inventory Setups. You can safely uninstall it if you only used the plugin with Inventory Setups.";
+		String updateText =	"Fixed several layout related bugs.\n\n" +
+							"Added option to globally disable layouts and use classic filtering in the settings.\n\n" +
+							"Added option to not include duplicate items when creating layouts in the settings.\n\n" +
+							"Added \"Filter Bank\" menu entry to re-filter the bank in the \"Show worn items\" right click menu.\n\n" +
+							"Bank scroll bar will be reset to the top when opening setups or previews.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);

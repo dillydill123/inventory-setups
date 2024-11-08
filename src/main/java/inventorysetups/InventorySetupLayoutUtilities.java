@@ -20,9 +20,11 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static inventorysetups.InventorySetupsPlugin.LAYOUT_PREFIX_MARKER;
@@ -93,20 +95,22 @@ public class InventorySetupLayoutUtilities
 
 		int newSizeGuess = setup.getAdditionalFilteredItems().size() + startOfAdditionalItems;
 		layout.resize(newSizeGuess);
+		final HashMap<Integer, Integer> counter = new HashMap<>();
 
-		int nextPos = layoutZigZagContainer(setup.getEquipment(), layout, tag, addToTag, startOfEquipment);
+
+		int nextPos = layoutZigZagContainer(setup.getEquipment(), layout, tag, addToTag, startOfEquipment, counter);
 		if (setup.getQuiver() != null && !setup.getQuiver().isEmpty())
 		{
-			addItemToLayout(layout, tag, setup.getQuiver().get(0), nextPos, addToTag);
+			addItemToLayout(layout, tag, setup.getQuiver().get(0), nextPos, addToTag, counter);
 		}
-		layoutZigZagContainer(setup.getInventory(), layout, tag, addToTag, startOfInventory);
+		layoutZigZagContainer(setup.getInventory(), layout, tag, addToTag, startOfInventory, counter);
 
 		// Layout the rune pouch
 		if (setup.getRune_pouch() != null)
 		{
 			for (int i = 0; i < setup.getRune_pouch().size(); i++)
 			{
-				addItemToLayout(layout, tag, setup.getRune_pouch().get(i), i + startOfRunePouch, addToTag);
+				addItemToLayout(layout, tag, setup.getRune_pouch().get(i), i + startOfRunePouch, addToTag, counter);
 			}
 		}
 
@@ -115,7 +119,7 @@ public class InventorySetupLayoutUtilities
 		{
 			for (int i = 0; i < setup.getBoltPouch().size(); i++)
 			{
-				addItemToLayout(layout, tag, setup.getBoltPouch().get(i), i + startOfBoltPouch, addToTag);
+				addItemToLayout(layout, tag, setup.getBoltPouch().get(i), i + startOfBoltPouch, addToTag, counter);
 			}
 		}
 
@@ -124,7 +128,7 @@ public class InventorySetupLayoutUtilities
 		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
 		for (final InventorySetupsItem item : additionalItems)
 		{
-			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag);
+			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag, counter);
 			additionalItemsCounter++;
 		}
 
@@ -135,7 +139,7 @@ public class InventorySetupLayoutUtilities
 		return layout;
 	}
 
-	private int layoutZigZagContainer(final List<InventorySetupsItem> container, final Layout layout, final String tag, boolean addToTag, final int start)
+	private int layoutZigZagContainer(final List<InventorySetupsItem> container, final Layout layout, final String tag, boolean addToTag, final int start, final Map<Integer, Integer> counter)
 	{
 		// Note, this might not work if the start is not a multiple of the row size (8)...
 		// But this is not needed, so I won't spend time over engineering this function.
@@ -146,27 +150,28 @@ public class InventorySetupLayoutUtilities
 
 		for (final InventorySetupsItem item : container)
 		{
-			if (item.getId() != -1)
+			boolean added = addItemToLayout(layout, tag, item, nextPos + start, addToTag, counter);
+			if (!added)
 			{
-				addItemToLayout(layout, tag, item, nextPos + start, addToTag);
-				if (nextPos == (rowSize * 2) - 1)
-				{
-					// We hit the end of a double row, we need to start a new one.
-					doubleRowStart += 2;
-					nextPos = doubleRowStart * rowSize;
-				}
-				else if (nextPos < ((doubleRowStart * rowSize) + rowSize))
-				{
-					// We are in the top half of a double row. Go down directly one.
-					nextPos += rowSize;
-				}
-				else
-				{
-					// We are in the bottom half of a double. Go back up and add one to move to the right.
-					nextPos = (nextPos - rowSize) + 1;
-				}
+				continue;
 			}
 
+			if (nextPos == (rowSize * 2) - 1)
+			{
+				// We hit the end of a double row, we need to start a new one.
+				doubleRowStart += 2;
+				nextPos = doubleRowStart * rowSize;
+			}
+			else if (nextPos < ((doubleRowStart * rowSize) + rowSize))
+			{
+				// We are in the top half of a double row. Go down directly one.
+				nextPos += rowSize;
+			}
+			else
+			{
+				// We are in the bottom half of a double. Go back up and add one to move to the right.
+				nextPos = (nextPos - rowSize) + 1;
+			}
 		}
 
 		return nextPos;
@@ -193,23 +198,25 @@ public class InventorySetupLayoutUtilities
 		int newSizeGuess = setup.getAdditionalFilteredItems().size() + startOfAdditionalItems;
 		layout.resize(newSizeGuess);
 
+		final HashMap<Integer, Integer> counter = new HashMap<>();
+
 		// Layout the equipment on left side
 		final List<InventorySetupsItem> eqp = setup.getEquipment();
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.HEAD.getSlotIdx()), 1, addToTag);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.HEAD.getSlotIdx()), 1, addToTag, counter);
 		if (setup.getQuiver() != null && !setup.getQuiver().isEmpty())
 		{
-			addItemToLayout(layout, tag, setup.getQuiver().get(0), 2, addToTag);
+			addItemToLayout(layout, tag, setup.getQuiver().get(0), 2, addToTag, counter);
 		}
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.CAPE.getSlotIdx()), 8, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMULET.getSlotIdx()), 9, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMMO.getSlotIdx()), 10, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.WEAPON.getSlotIdx()), 16, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BODY.getSlotIdx()), 17, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.SHIELD.getSlotIdx()), 18, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.LEGS.getSlotIdx()), 25, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.GLOVES.getSlotIdx()), 32, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BOOTS.getSlotIdx()), 33, addToTag);
-		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.RING.getSlotIdx()), 34, addToTag);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.CAPE.getSlotIdx()), 8, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMULET.getSlotIdx()), 9, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.AMMO.getSlotIdx()), 10, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.WEAPON.getSlotIdx()), 16, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BODY.getSlotIdx()), 17, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.SHIELD.getSlotIdx()), 18, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.LEGS.getSlotIdx()), 25, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.GLOVES.getSlotIdx()), 32, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.BOOTS.getSlotIdx()), 33, addToTag, counter);
+		addItemToLayout(layout, tag, eqp.get(EquipmentInventorySlot.RING.getSlotIdx()), 34, addToTag, counter);
 
 		// Layout the inventory on the right side
 		int invRow = 0;
@@ -217,7 +224,7 @@ public class InventorySetupLayoutUtilities
 		int width = 8;
 		for (final InventorySetupsItem item: setup.getInventory())
 		{
-			addItemToLayout(layout, tag, item, invCol + (invRow * width), addToTag);
+			addItemToLayout(layout, tag, item, invCol + (invRow * width), addToTag, counter);
 			if (invCol == 7)
 			{
 				invCol = 4;
@@ -234,7 +241,7 @@ public class InventorySetupLayoutUtilities
 		{
 			for (int i = 0; i < setup.getRune_pouch().size(); i++)
 			{
-				addItemToLayout(layout, tag, setup.getRune_pouch().get(i), i + startOfRunePouch, addToTag);
+				addItemToLayout(layout, tag, setup.getRune_pouch().get(i), i + startOfRunePouch, addToTag, counter);
 			}
 		}
 
@@ -243,7 +250,7 @@ public class InventorySetupLayoutUtilities
 		{
 			for (int i = 0; i < setup.getBoltPouch().size(); i++)
 			{
-				addItemToLayout(layout, tag, setup.getBoltPouch().get(i), i + startOfBoltPouch, addToTag);
+				addItemToLayout(layout, tag, setup.getBoltPouch().get(i), i + startOfBoltPouch, addToTag, counter);
 			}
 		}
 
@@ -252,7 +259,7 @@ public class InventorySetupLayoutUtilities
 		Collection<InventorySetupsItem> additionalItems = setup.getAdditionalFilteredItems().values();
 		for (final InventorySetupsItem item : additionalItems)
 		{
-			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag);
+			addItemToLayout(layout, tag, item, additionalItemsCounter + startOfAdditionalItems, addToTag, counter);
 			additionalItemsCounter++;
 		}
 
@@ -263,13 +270,17 @@ public class InventorySetupLayoutUtilities
 		return layout;
 	}
 
-	private void addItemToLayout(final Layout layout, final String tagName, final InventorySetupsItem item, final int pos, final boolean addToTag)
+	private boolean addItemToLayout(final Layout layout, final String tagName, final InventorySetupsItem item, final int pos, final boolean addToTag, final Map<Integer, Integer> counter)
 	{
 		if (item.getId() == -1)
 		{
-			return;
+			return false;
 		}
 		int id = itemManager.canonicalize(item.getId());
+		if (!config.layoutDuplicates() && counter.containsKey(id))
+		{
+			return false;
+		}
 		layout.setItemAtPos(id, pos);
 		// We may not want to add to the tag if we just want to create a layout but not update tags.
 		// Useful for displaying a temporary layout.
@@ -277,6 +288,9 @@ public class InventorySetupLayoutUtilities
 		{
 			tagManager.addTag(id, tagName, item.isFuzzy());
 		}
+		counter.put(id, counter.getOrDefault(id, 0) + 1);
+
+		return true;
 	}
 
 	public void recalculateLayout(final InventorySetup setup)
@@ -446,8 +460,14 @@ public class InventorySetupLayoutUtilities
 		int icon = setup.getIconID();
 		if (icon <= 0)
 		{
+			// try to use the current weapon
+			icon = setup.getEquipment().get(EquipmentInventorySlot.WEAPON.getSlotIdx()).getId();
+		}
+		if (icon <= 0)
+		{
 			icon = ItemID.SPADE;
 		}
+
 		data.add(String.valueOf(icon));
 
 		for (Integer item : tagManager.getItemsForTag(layout.getTag()))

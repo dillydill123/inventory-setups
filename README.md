@@ -162,11 +162,19 @@ One of the many buttons on each inventory setup panel is a bank filtering option
 
 ![Bank Filtering](readme_images_and_gifs/bank_filtering.gif)
 
-Layouts will automatically be managed by Inventory Setups as you create, remove, edit, export, import, and manipulate your setups. If you'd like to reset only the layout of an inventory setup, you can right-click the "Show worn items" menu and select the auto layout option. Currently, there are two default layouts, Preset and ZigZag. You can change the default for newly created setups in the settings.
+Layouts will automatically be managed by Inventory Setups as you create, remove, edit, export, import, and manipulate your setups. If you'd like to reset only the layout of an inventory setup, you can right-click the "Show worn items" menu and select the auto layout option.
+
+Currently, there are two default layouts, Preset and ZigZag. You can change the default layout for newly created setups in the settings. By default, layouts will create duplicate items for you if you have multiple items in your setup. You can disable that in the settings as well.
 
 ![Auto Layouts](readme_images_and_gifs/auto_layout.gif)
 
 The core work of the layouts is done by the Bank Tags plugin. This also includes integration with potion storage.
+
+You can disable layouts and go back to classic filtering by unchecking the "Use Layouts" option in the settings. This will globally disable layouts.
+
+![Disable Layouts](readme_images_and_gifs/disable_layouts.gif)
+
+NOTE: Some custom fuzzy mappings will not work with classic filtering.
 
 ## Highlighting
 
@@ -356,7 +364,9 @@ Hint: You can right-click the paint bucket to delete the color of a setup or sec
 
 ### Layout Options
 
+* **Add Duplicates** - Add duplicate items if you have multiple of that item in your setup when creating layouts
 * **Default Layout** - The default layout used when setups are created
+* **Use Layouts** - Globally enable customizable layouts. Uncheck this to disable layouts and only use classic filtering
 
 ### Ground Item Menu Options
 

@@ -66,6 +66,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
+import net.runelite.api.VarClientInt;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
@@ -142,7 +143,9 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
+	public static final String CONFIG_KEY_USE_LAYOUTS = "useLayouts";
 	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
+	public static final String CONFIG_KEY_LAYOUT_DUPLICATES = "addDuplicatesInLayouts";
 	public static final String CONFIG_KEY_ENABLE_LAYOUT_WARNING = "enableLayoutWarning";
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
@@ -459,6 +462,10 @@ public class InventorySetupsPlugin extends Plugin
 					}
 				});
 			}
+			else if (event.getKey().equals(CONFIG_KEY_USE_LAYOUTS))
+			{
+				doBankSearch();
+			}
 		}
 	}
 
@@ -578,7 +585,7 @@ public class InventorySetupsPlugin extends Plugin
 		// If shift is held and item is right clicked in the bank while a setup is active,
 		// add item to additional filtered items
 		else if (panel.getCurrentSelectedSetup() != null
-				&& bankTagsService.getActiveLayout() == null // If there is an active layout, then the real item behind the fake layout item may be added. So just disallow this menu.
+				&& bankTagsService.getActiveTag() == null // If there is an active tag, then the real item behind the fake layout item may be added. So just disallow this menu.
 			&& event.getActionParam1() == ComponentID.BANK_ITEM_CONTAINER
 			&& client.isKeyPressed(KeyCode.KC_SHIFT)
 			&& event.getOption().equals("Examine"))
@@ -707,11 +714,18 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() != null)
 		{
-			if (this.canUseLayouts)
+			if (this.canUseLayouts && config.useLayouts())
 			{
 				// Add Auto layouts
 				createAutoLayoutSubMenuOnWornItems();
 			}
+
+			// add menu entry to re-filter/layout setup
+			client.getMenu()
+					.createMenuEntry(-1)
+					.setOption("Filter Bank")
+					.setType(MenuAction.RUNELITE)
+					.onClick(e -> doBankSearch());
 
 			// add menu entry to close setup
 			client.getMenu()
@@ -755,6 +769,7 @@ public class InventorySetupsPlugin extends Plugin
 			// Temporarily save the new layout to open the tag.
 			layoutManager.saveLayout(new_);
 			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+			resetBankScrollBar();
 
 			// Save the old layout again in case the user hits escape on the menu.
 			// The bank will still show the temporary new layout.
@@ -764,8 +779,13 @@ public class InventorySetupsPlugin extends Plugin
 					.option("1. Keep", () ->
 					{
 						// Tag all the items in the setup now since the user likes it.
-						layoutUtilities.createSetupLayout(setup, type, true);
-						layoutManager.saveLayout(new_);
+						clientThread.invoke(() ->
+						{
+							// Need this to be in a client thread invoke in case the user types 1 instead.
+							layoutUtilities.createSetupLayout(setup, type, true);
+							layoutManager.saveLayout(new_);
+						});
+
 					})
 					.option("2. Undo", () ->
 					{
@@ -1144,8 +1164,34 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
-			bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
+			if (!config.useLayouts())
+			{
+				// If we are not using layouts, then we can quickly remove the layout, open the bank tag, then save it.
+				// This will make Bank Tags see no layout and open a tag tab instead.
+				// We can replace this if Bank Tags adds an option to
+				final Layout layout = layoutManager.loadLayout(tagName);
+				layoutManager.removeLayout(tagName);
+				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
+				layoutManager.saveLayout(layout);
+			}
+			else
+			{
+				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
+				resetBankScrollBar();
+			}
+
 		});
+	}
+
+	public void resetBankScrollBar()
+	{
+		// Reset the scroll bar position to 0
+		Widget widget = client.getWidget(ComponentID.BANK_SCROLLBAR);
+		if (widget != null)
+		{
+			widget.setScrollY(0);
+			client.setVarcIntValue(VarClientInt.BANK_SCROLL, 0);
+		}
 	}
 
 	private void triggerBankSearchFromHotKey()
@@ -1253,7 +1299,7 @@ public class InventorySetupsPlugin extends Plugin
 		else if (event.getScriptId() == ScriptID.BANKMAIN_FINISHBUILDING)
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
-			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed() && bankTagsService.getActiveLayout() != null)
+			if (panel.getCurrentSelectedSetup() != null && panel.getCurrentSelectedSetup().isFilterBank() && isFilteringAllowed() && bankTagsService.getActiveTag() != null)
 			{
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
