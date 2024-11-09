@@ -457,6 +457,14 @@ public class InventorySetupLayoutUtilities
 			if (bankItems.contains(id) && !idsInLayout.contains(id))
 			{
 				layout.addItemAfter(id, layout.size());
+				continue;
+			}
+
+			// Try to add the placeholder IDs at the bottom of the layout if the actual item doesn't exist.
+			int placeholderID = itemManager.getItemComposition(id).getPlaceholderId();
+			if (bankItems.contains(placeholderID) && !idsInLayout.contains(placeholderID))
+			{
+				layout.addItemAfter(placeholderID, layout.size());
 			}
 		}
 
