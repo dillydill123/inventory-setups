@@ -150,7 +150,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
 	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
-	public static final String LAYOUT_PREFIX_MARKER = "_invSetup_";
+	public static final String LAYOUT_PREFIX_MARKER = "_invsetup_";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -997,6 +997,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			Layout setupLayout = layoutUtilities.createSetupLayout(invSetup);
 			layoutManager.saveLayout(setupLayout);
+			tagManager.setHidden(setupLayout.getTag(), true);
 
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
@@ -1169,13 +1170,7 @@ public class InventorySetupsPlugin extends Plugin
 			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
 			if (!config.useLayouts())
 			{
-				// If we are not using layouts, then we can quickly remove the layout, open the bank tag, then save it.
-				// This will make Bank Tags see no layout and open a tag tab instead.
-				// We can replace this if Bank Tags adds an option to
-				final Layout layout = layoutManager.loadLayout(tagName);
-				layoutManager.removeLayout(tagName);
-				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
-				layoutManager.saveLayout(layout);
+				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS | BankTagsService.OPTION_NO_LAYOUT);
 			}
 			else
 			{
@@ -2017,6 +2012,7 @@ public class InventorySetupsPlugin extends Plugin
 				Layout temp_layout_ = layoutUtilities.createSetupLayout(newSetup);
 				Layout newLayout = new Layout(temp_layout_.getTag(), newSetupPortable.getLayout());
 				layoutManager.saveLayout(newLayout);
+				tagManager.setHidden(newLayout.getTag(), true);
 
 				dataManager.updateConfig(true, false);
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -2083,6 +2079,7 @@ public class InventorySetupsPlugin extends Plugin
 					Layout temp_layout_ = layoutUtilities.createSetupLayout(inventorySetup);
 					Layout newLayout = new Layout(temp_layout_.getTag(), newUnprocessedLayouts.get(i));
 					layoutManager.saveLayout(newLayout);
+					tagManager.setHidden(newLayout.getTag(), true);
 				}
 
 				dataManager.updateConfig(true, false);
@@ -2414,6 +2411,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			layoutManager.removeLayout(oldTag);
 			layoutManager.saveLayout(newLayout);
+			tagManager.setHidden(newLayout.getTag(), true);
 		});
 
 		// config will already be updated by caller so no need to update it here
