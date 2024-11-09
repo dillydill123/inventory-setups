@@ -1291,7 +1291,12 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void resetBankSearch()
 	{
-		clientThread.invoke(() -> bankTagsService.closeBankTag());
+		// We only reset the bank search if the active tag is an inventory setup
+		// This stops it from closing an open bank tag tab or other plugins opening bank tags.
+		if (isInventorySetupTagOpen())
+		{
+			clientThread.invoke(() -> bankTagsService.closeBankTag());
+		}
 	}
 
 	public boolean isInventorySetupTagOpen()
