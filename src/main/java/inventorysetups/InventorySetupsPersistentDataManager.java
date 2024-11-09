@@ -369,10 +369,11 @@ public class InventorySetupsPersistentDataManager
 		{
 			String removedSetupHash = key.substring(keyLengthMinusHash);
 
-			// This wwill remove the "banktag.layouts_" key and remove the tag from every
-			// "banktags.item_" that references this tag.
+			// This will remove the "banktag.layouts_" key and remove the tag from every "banktags.item_" that references this tag.
 			// Due to the nature of this cleanup algorithm, if a "banktags.item_" key refers to a tag
-			// that doesn't have a "banktag.layouts_" key, then it will not be found and remain dangling
+			// that doesn't have a "banktag.layouts_" key, then it will not be found and remain dangling.
+			// This will likely never be the case. This cleanup is primarily to ensure no rogue inventory setup tags appear
+			// in the Bank or chat UI when users edit or see tags.
 			plugin.getTagManager().removeTag(LAYOUT_PREFIX_MARKER + removedSetupHash);
 		}
 	}
