@@ -890,9 +890,18 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	private void onWidgetClosed(WidgetClosed event)
 	{
-		if (event.getGroupId() == InterfaceID.BANK && !config.persistHotKeysOutsideBank())
+		if (event.getGroupId() == InterfaceID.BANK )
 		{
-			unregisterHotkeys();
+			if (!config.persistHotKeysOutsideBank())
+			{
+				unregisterHotkeys();
+			}
+
+			if (isInventorySetupTagOpen())
+			{
+				// Close the bank tag for those who use manual bank filter
+				clientThread.invokeLater(() -> bankTagsService.closeBankTag());
+			}
 		}
 	}
 
@@ -905,7 +914,6 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				registerHotkeys();
 			}
-
 		}
 	}
 
@@ -1167,6 +1175,11 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
+			if (client.getWidget(ComponentID.BANK_CONTAINER) == null)
+			{
+				return;
+			}
+
 			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
 			if (!config.useLayouts())
 			{
@@ -1281,6 +1294,11 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invoke(() -> bankTagsService.closeBankTag());
 	}
 
+	public boolean isInventorySetupTagOpen()
+	{
+		return bankTagsService.getActiveTag() != null && bankTagsService.getActiveTag().startsWith(LAYOUT_PREFIX_MARKER);
+	}
+
 	@Subscribe(priority = -1) // Make sure this runs AFTER bank tags plugin.
 	public void onScriptPreFired(ScriptPreFired event)
 	{
@@ -1298,9 +1316,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
 			// We should only do this if the active tag is an inventory setup tag
-			if (panel.getCurrentSelectedSetup() != null &&
-				bankTagsService.getActiveTag() != null &&
-				bankTagsService.getActiveTag().startsWith(LAYOUT_PREFIX_MARKER))
+			if (panel.getCurrentSelectedSetup() != null && isInventorySetupTagOpen())
 			{
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
