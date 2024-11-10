@@ -11,12 +11,9 @@ repositories {
 	mavenCentral()
 }
 
-def runeLiteVersion = 'latest.release'
+def runeLiteVersion = '1.10.44-SNAPSHOT'
 
 dependencies {
-
-    implementation files('D:/Repos/adam_runelite/runelite-client/target/client-1.10.44-SNAPSHOT.jar')
-
     compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
 	compileOnly 'org.projectlombok:lombok:1.18.20'
