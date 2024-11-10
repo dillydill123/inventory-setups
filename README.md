@@ -15,6 +15,8 @@ Contents
   - [Favorites](#favorites)
 - [Editing a Setup](#editing-a-setup)
 - [Bank Filtering and Layouts](#bank-filtering-and-layouts)
+  - [Classic Filtering](#classic-filtering)
+  - [Potion Storage](#potion-storage)
 - [Highlighting](#highlighting)
   - [Stack Difference](#stack-difference)
   - [Fuzzy Difference](#fuzzy-difference)
@@ -170,11 +172,21 @@ Currently, there are two default layouts, Preset and ZigZag. You can change the 
 
 The core work of the layouts is done by the Bank Tags plugin. This also includes integration with potion storage.
 
+### Classic Filtering
+
 You can disable layouts and go back to classic filtering by unchecking the "Use Layouts" option in the settings. This will globally disable layouts.
 
 ![Disable Layouts](readme_images_and_gifs/disable_layouts.gif)
 
 NOTE: Some custom fuzzy mappings will not work with classic filtering.
+
+### Potion Storage
+
+Bank Tags will put potions from potion storage into your layout. Only the dose that you have selected in potion storage will be available from your layout. This is a limitation of potion storage.
+
+Make sure you do not have placeholders of the potion in your bank that you want to pull from potion storage. Bank tags will prefer to show the placeholder first before pulling from potion storage.
+
+A common way to integrate with potion storage is to have 1 dose potions for pre-potting in your actual bank, with the rest of the doses (without placeholders) in your potion storage set to the 4 dose option.
 
 ## Highlighting
 
