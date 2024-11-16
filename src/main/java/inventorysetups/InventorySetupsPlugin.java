@@ -166,7 +166,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final String NOTES_SEARCH_TAG = "notes:";
 	private static final int SPELLBOOK_VARBIT = 4070;
-	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME;
+	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_TAG_NAME;
 
 	@Inject
 	@Getter
@@ -771,7 +771,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			// Temporarily save the new layout to open the tag.
 			layoutManager.saveLayout(new_);
-			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_TAG_NAME);
 			resetBankScrollBar();
 
 			// Save the old layout again in case the user hits escape on the menu.
