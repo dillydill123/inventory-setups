@@ -14,7 +14,7 @@ repositories {
 def runeLiteVersion = 'latest.release'
 
 dependencies {
-	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+    compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
 	compileOnly 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
@@ -28,7 +28,7 @@ dependencies {
 }
 
 group = 'inventorysetups'
-version = 'v1.20.1'
+version = 'v1.20.2'
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {

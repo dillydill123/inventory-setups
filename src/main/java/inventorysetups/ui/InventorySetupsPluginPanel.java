@@ -867,7 +867,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		currentSelectedSetup = null;
+
 		plugin.resetBankSearch();
+
 	}
 
 	public boolean isStackCompareForSlotAllowed(final InventorySetupsSlotID inventoryID, final int slotId)

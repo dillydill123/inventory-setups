@@ -150,7 +150,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
 	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
-	public static final String LAYOUT_PREFIX_MARKER = "_invSetup_";
+	public static final String LAYOUT_PREFIX_MARKER = "_invsetup_";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
@@ -166,7 +166,7 @@ public class InventorySetupsPlugin extends Plugin
 	private static final String ITEM_SEARCH_TAG = "item:";
 	private static final String NOTES_SEARCH_TAG = "notes:";
 	private static final int SPELLBOOK_VARBIT = 4070;
-	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME;
+	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_TAG_NAME;
 
 	@Inject
 	@Getter
@@ -771,7 +771,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			// Temporarily save the new layout to open the tag.
 			layoutManager.saveLayout(new_);
-			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_REMOVE_TAG_NAME);
+			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_TAG_NAME);
 			resetBankScrollBar();
 
 			// Save the old layout again in case the user hits escape on the menu.
@@ -890,9 +890,18 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	private void onWidgetClosed(WidgetClosed event)
 	{
-		if (event.getGroupId() == InterfaceID.BANK && !config.persistHotKeysOutsideBank())
+		if (event.getGroupId() == InterfaceID.BANK )
 		{
-			unregisterHotkeys();
+			if (!config.persistHotKeysOutsideBank())
+			{
+				unregisterHotkeys();
+			}
+
+			if (isInventorySetupTagOpen())
+			{
+				// Close the bank tag for those who use manual bank filter
+				clientThread.invokeLater(() -> bankTagsService.closeBankTag());
+			}
 		}
 	}
 
@@ -905,7 +914,6 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				registerHotkeys();
 			}
-
 		}
 	}
 
@@ -997,6 +1005,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			Layout setupLayout = layoutUtilities.createSetupLayout(invSetup);
 			layoutManager.saveLayout(setupLayout);
+			tagManager.setHidden(setupLayout.getTag(), true);
 
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 
@@ -1166,16 +1175,15 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
+			if (client.getWidget(ComponentID.BANK_CONTAINER) == null)
+			{
+				return;
+			}
+
 			final String tagName = InventorySetupLayoutUtilities.getTagNameForLayout(currentSelectedSetup.getName());
 			if (!config.useLayouts())
 			{
-				// If we are not using layouts, then we can quickly remove the layout, open the bank tag, then save it.
-				// This will make Bank Tags see no layout and open a tag tab instead.
-				// We can replace this if Bank Tags adds an option to
-				final Layout layout = layoutManager.loadLayout(tagName);
-				layoutManager.removeLayout(tagName);
-				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
-				layoutManager.saveLayout(layout);
+				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS | BankTagsService.OPTION_NO_LAYOUT);
 			}
 			else
 			{
@@ -1283,7 +1291,17 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void resetBankSearch()
 	{
-		clientThread.invoke(() -> bankTagsService.closeBankTag());
+		// We only reset the bank search if the active tag is an inventory setup
+		// This stops it from closing an open bank tag tab or other plugins opening bank tags.
+		if (isInventorySetupTagOpen())
+		{
+			clientThread.invoke(() -> bankTagsService.closeBankTag());
+		}
+	}
+
+	public boolean isInventorySetupTagOpen()
+	{
+		return bankTagsService.getActiveTag() != null && bankTagsService.getActiveTag().startsWith(LAYOUT_PREFIX_MARKER);
 	}
 
 	@Subscribe(priority = -1) // Make sure this runs AFTER bank tags plugin.
@@ -1303,9 +1321,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// Bankmain_build will reset the bank title to "The Bank of Gielinor". So apply our own title.
 			// We should only do this if the active tag is an inventory setup tag
-			if (panel.getCurrentSelectedSetup() != null &&
-				bankTagsService.getActiveTag() != null &&
-				bankTagsService.getActiveTag().startsWith(LAYOUT_PREFIX_MARKER))
+			if (panel.getCurrentSelectedSetup() != null && isInventorySetupTagOpen())
 			{
 				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
@@ -2017,6 +2033,7 @@ public class InventorySetupsPlugin extends Plugin
 				Layout temp_layout_ = layoutUtilities.createSetupLayout(newSetup);
 				Layout newLayout = new Layout(temp_layout_.getTag(), newSetupPortable.getLayout());
 				layoutManager.saveLayout(newLayout);
+				tagManager.setHidden(newLayout.getTag(), true);
 
 				dataManager.updateConfig(true, false);
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
@@ -2083,6 +2100,7 @@ public class InventorySetupsPlugin extends Plugin
 					Layout temp_layout_ = layoutUtilities.createSetupLayout(inventorySetup);
 					Layout newLayout = new Layout(temp_layout_.getTag(), newUnprocessedLayouts.get(i));
 					layoutManager.saveLayout(newLayout);
+					tagManager.setHidden(newLayout.getTag(), true);
 				}
 
 				dataManager.updateConfig(true, false);
@@ -2414,6 +2432,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			layoutManager.removeLayout(oldTag);
 			layoutManager.saveLayout(newLayout);
+			tagManager.setHidden(newLayout.getTag(), true);
 		});
 
 		// config will already be updated by caller so no need to update it here
