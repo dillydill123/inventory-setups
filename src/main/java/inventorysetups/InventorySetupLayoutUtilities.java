@@ -4,6 +4,7 @@ import net.runelite.api.Client;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.api.NullItemID;
@@ -359,7 +360,17 @@ public class InventorySetupLayoutUtilities
 				continue;
 			}
 
-			if (!idsInSetup.contains(layoutId))
+			// Make sure to convert placeholders to the actual value otherwise we might delete
+			// The placeholder in the layout.
+			ItemComposition itemComp = itemManager.getItemComposition(layoutId);
+			boolean itemIsPlaceholder = itemComp.getPlaceholderTemplateId() > -1;
+			int processedId = layoutId;
+			if (itemIsPlaceholder)
+			{
+				processedId = itemComp.getPlaceholderId();
+			}
+
+			if (!idsInSetup.contains(processedId))
 			{
 				layout.removeItemAtPos(i);
 				continue;
@@ -461,6 +472,7 @@ public class InventorySetupLayoutUtilities
 			}
 
 			// Try to add the placeholder IDs at the bottom of the layout if the actual item doesn't exist.
+			// Bank Tags will add the placeholder ID rather than the item ID, so we should add the placeholder as well.
 			int placeholderID = itemManager.getItemComposition(id).getPlaceholderId();
 			if (bankItems.contains(placeholderID) && !idsInLayout.contains(placeholderID))
 			{
