@@ -150,7 +150,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
 	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
-	public static final String LAYOUT_PREFIX_MARKER = "_invsetup_";
+	public static final String LAYOUT_PREFIX_MARKER = "_invSetup_";
 	public static final String TUTORIAL_LINK = "https://github.com/dillydill123/inventory-setups#inventory-setups";
 	public static final String SUGGESTION_LINK = "https://github.com/dillydill123/inventory-setups/issues";
 	public static final int NUM_INVENTORY_ITEMS = 28;
