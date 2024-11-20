@@ -158,6 +158,8 @@ You can update the spellbook by right-clicking the slot and choosing the desired
 
 One of the many buttons on each inventory setup panel is a bank filtering option. Enabling this will cause the bank to only show the items in your setup in a customizable layout when it is selected. This is very similar to the Bank Tags plugin.
 
+With layouts enabled, items can be dragged however you like without affecting their actual positions in the bank. If your setup has multiple of an item, Inventory Setups will duplicate that item for you. You can disable this in the settings.
+
 **Bank Tags plugin must be ON to use this feature. Inventory Setups will warn the user if filtering and layouts cannot be used.**
 
 **If you previously used Hub Plugin Bank Tag Layouts only for Inventory Setups, it is recommended that you uninstall it. It is not required anymore.**
