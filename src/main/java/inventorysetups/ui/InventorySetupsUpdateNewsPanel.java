@@ -137,11 +137,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Fixed several layout related bugs.\n\n" +
-							"Added option to globally disable layouts and use classic filtering in the settings.\n\n" +
-							"Added option to not include duplicate items when creating layouts in the settings.\n\n" +
-							"Added \"Filter Bank\" menu entry to re-filter the bank in the \"Show worn items\" right click menu.\n\n" +
-							"Bank scroll bar will be reset to the top when opening setups or previews.";
+		String updateText =	"Updated Inventory Setups for the latest RuneLite update.\n\n" +
+							"Fuzzy placeholders will now appear at the bottom of the layout when updating a setup or using a preset.\n\n" +
+							"The '_invsetup_' tags are now hidden from the user in the bank.\n\n" +
+							"Fixed manual bank filter config option.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
