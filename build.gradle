@@ -12,9 +12,16 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
+// Test latest RL master
+// - Pull and build latest RL master
+// - Comment out line above and link snapshot version here. Version is in runelite-client/target/client-<VERSION>-SNAPSHOT.jar
+// - Update implementation files line below with absolute path to jar runelite-client/target/client-<VERSION>-SNAPSHOT.jar
+//def runeLiteVersion = '1.11.4-SNAPSHOT'
 
 dependencies {
-	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+    // Use this to test local master from RL
+    //implementation files('D:/Repos/runelite/runelite-client/target/client-1.11.4-SNAPSHOT.jar')
+    compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
 	compileOnly 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
