@@ -432,14 +432,17 @@ public class InventorySetupLayoutUtilities
 	{
 		// Try our best at adding fuzzy items to the bottom of the layout
 		// Only add those that exist in the bank, otherwise we would add every possible variation which is not ideal.
-		// Any missed items will be added by the layout manager.
-		// This also adds the benefit that we can use our own custom mappings along with base item variation mappings.
-		// This will probably only work if the bank is open, but still worth doing for things like auto layouts.
-
-		// NOTE: This does have some drawbacks. Fuzzy items will occupy a new slot rather than fit an existing placeholder
-		// This means that a fuzzy barrows item will have two bank slots.
-		// Additionally, this will not find item placeholders like "Amulet of Glory" so they will be put at the top
-		// of the bank instead of at the bottom.
+		// Any missed items will be added by the layout manager from core bank tags.
+		//
+		// Core bank tags will also place variation mapped items in an existing placeholder if available for us. However,
+		// this does not support our custom variation mappings in those placeholders. Our custom variation mappings will
+		// show up in the layout if it is in the bank, but not fill an empty variation placeholder slot. It will occupy
+		// a new slot in the bank.
+		//
+		// This will only work if the bank is open, but still worth doing for things like auto layouts.
+		//
+		// NOTE: Placeholders take precedence over variants, so core bank tags will still show a placeholder if the actual
+		// placeholder item exists in the players bank.
 		ItemContainer bankContainer = client.getItemContainer(InventoryID.BANK);
 		if (bankContainer == null)
 		{
@@ -463,8 +466,41 @@ public class InventorySetupLayoutUtilities
 			}
 		}
 
+		Set<Integer> variantsSeen = new LinkedHashSet<>();
 		for (final Integer id : idsInSetupOnlyFuzzy)
 		{
+
+			// For all fuzzy items, we need to decide if we should add it to the layout now, or let core bank tags do it
+			// If core bank tags adds the item, it will be at the top, unless there is an item that matches the placeholder
+			// if it is marked as fuzzy.
+			int baseId = InventorySetupsVariationMapping.map(id);
+			boolean hasPlaceHolderVariant = false;
+			for (int variationId : InventorySetupsVariationMapping.getVariations(baseId))
+			{
+				// Protects against the case the fuzzy item is the base variant.
+				if (baseId == variationId)
+				{
+					continue;
+				}
+
+				// If a variation is in the layout and this fuzzy item is not in the layout but in the bank,
+				// Then this is a placeholder in the layout that bank tags can place a variation mapped item. For this
+				// reason we will skip adding this fuzzy item to the bottom of the layout.
+				if (idsInLayout.contains(variationId) && !idsInLayout.contains(id) && bankItems.contains(id) && !variantsSeen.contains(variationId))
+				{
+					// Add this to variants seen. We don't want this item to be considered an option for other items,
+					// otherwise we would not put this fuzzy item at the bottom and bank tags will put it at the top.
+					variantsSeen.add(variationId);
+					hasPlaceHolderVariant = true;
+					break;
+				}
+			}
+
+			if (hasPlaceHolderVariant)
+			{
+				continue;
+			}
+
 			if (bankItems.contains(id) && !idsInLayout.contains(id))
 			{
 				layout.addItemAfter(id, layout.size());
@@ -479,7 +515,6 @@ public class InventorySetupLayoutUtilities
 				layout.addItemAfter(placeholderID, layout.size());
 			}
 		}
-
 	}
 
 	public void exportSetupToBankTagTab(final InventorySetup setup, final Component component)
