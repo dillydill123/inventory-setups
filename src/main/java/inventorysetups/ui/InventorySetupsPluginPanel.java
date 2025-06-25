@@ -974,7 +974,12 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	private void layoutSections(final List<InventorySetup> setups, final GridBagConstraints constraints)
 	{
 		Set<String> setupNamesToBeIncluded = setups.stream().map(InventorySetup::getName).collect(Collectors.toSet());
-		for (final InventorySetupsSection section : plugin.getSections())
+		List<InventorySetupsSection> sections = new ArrayList<>(plugin.getSections());
+		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL && plugin.getConfig().sectionSorting())
+		{
+			sections.sort(Comparator.comparing(InventorySetupsSection::getName));
+		}
+		for (final InventorySetupsSection section : sections)
 		{
 			// For quick look up
 			Set<String> setupsInSection = plugin.getCache().getSectionSetupsMap().get(section.getName()).keySet();

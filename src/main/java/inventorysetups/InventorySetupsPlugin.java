@@ -138,6 +138,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_SECTION_MODE = "sectionMode";
 	public static final String CONFIG_KEY_PANEL_VIEW = "panelView";
 	public static final String CONFIG_KEY_SORTING_MODE = "sortingMode";
+	public static final String CONFIG_KEY_SECTION_SORTING = "sectionSorting";
 	public static final String CONFIG_KEY_HIDE_BUTTON = "hideHelpButton";
 	public static final String CONFIG_KEY_VERSION_STR = "version";
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";

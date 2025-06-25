@@ -32,6 +32,7 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTE
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_SORTING;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SORTING_MODE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_USE_LAYOUTS;
 
@@ -408,6 +409,17 @@ public interface InventorySetupsConfig extends Config
 	default InventorySetupsSortingID sortingMode()
 	{
 		return InventorySetupsSortingID.DEFAULT;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_SECTION_SORTING,
+			name = "Section Sorting",
+			description = "Sorts sections according to the sorting mode.",
+			section = otherSection
+	)
+	default boolean sectionSorting()
+	{
+		return false;
 	}
 
 	@ConfigItem(
