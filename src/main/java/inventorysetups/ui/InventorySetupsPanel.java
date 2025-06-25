@@ -109,6 +109,10 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 			selectionDialog.show();
 		});
 
+		JMenuItem deleteSetup = new JMenuItem("Delete Setup..");
+		deleteSetup.addActionListener(e -> plugin.removeInventorySetup(inventorySetup));
+
+		popupMenu.add(deleteSetup);
 		setComponentPopupMenu(popupMenu);
 	}
 
