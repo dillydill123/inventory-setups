@@ -1795,7 +1795,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	public void removeSection(final InventorySetupsSection section)
 	{
-		if (isDeletionConfirmed("Are you sure you want to permanently delete this section?", "Warning"))
+		if (isDeletionConfirmed("Are you sure you want to permanently delete this section? This will not delete the setups in this section.", "Warning"))
 		{
 			cache.removeSection(section);
 			sections.remove(section);
