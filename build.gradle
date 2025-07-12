@@ -14,8 +14,10 @@ repositories {
 def runeLiteVersion = 'latest.release'
 // Test latest RL master
 // - Pull and build latest RL master
-// - Comment out line above and link snapshot version here. Version is in runelite-client/target/client-<VERSION>-SNAPSHOT.jar
-// - Update implementation files line below with absolute path to jar runelite-client/target/client-<VERSION>-SNAPSHOT.jar
+// - Comment out line above and link snapshot version here.
+//       Version is in runelite-client/target/client-<VERSION>-SNAPSHOT.jar
+// - Update implementation files line below with absolute path to jar
+//       runelite-client/target/client-<VERSION>-SNAPSHOT.jar
 //def runeLiteVersion = '1.11.4-SNAPSHOT'
 
 dependencies {
