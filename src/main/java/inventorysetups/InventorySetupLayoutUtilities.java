@@ -479,6 +479,8 @@ public class InventorySetupLayoutUtilities
 			for (int variationId : InventorySetupsVariationMapping.getVariations(baseId))
 			{
 				// Protects against the case the fuzzy item is the base variant.
+				// Bank Tags does not appear to fill a base item with a variant, so it will place the fuzzy item at the
+				// top of the bank, while we want it at the bottom. So we avoid allowing the base id as a fuzzy option.
 				if (baseId == variationId)
 				{
 					continue;
