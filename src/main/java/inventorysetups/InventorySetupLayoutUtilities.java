@@ -2,12 +2,11 @@ package inventorysetups;
 
 import net.runelite.api.Client;
 import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.InventoryID;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.ItemID;
-import net.runelite.api.NullItemID;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.banktags.tabs.Layout;
@@ -461,7 +460,7 @@ public class InventorySetupLayoutUtilities
 		for (int i = 0; i < bankContainer.size(); i++)
 		{
 			Item item = bankContainer.getItem(i);
-			if (item != null && item.getId() > -1 && item.getId() != NullItemID.NULL_6512)
+			if (item != null && item.getId() > -1 && item.getId() != ItemID.BLANKOBJECT)
 			{
 				bankItems.add(item.getId());
 			}
@@ -565,12 +564,10 @@ public class InventorySetupLayoutUtilities
 		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
 
 		SwingUtilities.invokeLater(() ->
-		{
-			JOptionPane.showMessageDialog(component,
-					"Bank tag tab data was copied to clipboard.",
-					"Export Setup To Bank Tag Tab Succeeded",
-					JOptionPane.PLAIN_MESSAGE);
-		});
+				JOptionPane.showMessageDialog(component,
+						"Bank tag tab data was copied to clipboard.",
+						"Export Setup To Bank Tag Tab Succeeded",
+						JOptionPane.PLAIN_MESSAGE));
 	}
 
 	public Layout convertHubBankTagLayoutToCoreBankTagLayout(final String hubBankTagLayoutData, final String tag)

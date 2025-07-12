@@ -58,7 +58,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.api.InventoryID;
+import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.KeyCode;
@@ -76,8 +77,6 @@ import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
-import net.runelite.api.widgets.ComponentID;
-import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -573,7 +572,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
 
-		Widget bankWidget = client.getWidget(ComponentID.BANK_TITLE_BAR);
+		Widget bankWidget = client.getWidget(InterfaceID.Bankmain.TITLE);
 		if (bankWidget == null || bankWidget.isHidden())
 		{
 			return;
@@ -584,11 +583,11 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			createMenuEntriesForWornItems();
 		}
-		// If shift is held and item is right clicked in the bank while a setup is active,
+		// If shift is held and item is right-clicked in the bank while a setup is active,
 		// add item to additional filtered items
 		else if (panel.getCurrentSelectedSetup() != null
 				&& bankTagsService.getActiveLayout() == null // If there is an active layout, then the real item behind the fake layout item may be added. So just disallow this menu.
-				&& event.getActionParam1() == ComponentID.BANK_ITEM_CONTAINER
+				&& event.getActionParam1() == InterfaceID.Bankmain.ITEMS
 				&& client.isKeyPressed(KeyCode.KC_SHIFT)
 				&& event.getOption().equals("Examine"))
 		{
@@ -892,7 +891,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	private void onWidgetClosed(WidgetClosed event)
 	{
-		if (event.getGroupId() == InterfaceID.BANK )
+		if (event.getGroupId() == InterfaceID.BANKMAIN)
 		{
 			if (!config.persistHotKeysOutsideBank())
 			{
@@ -910,7 +909,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		if (event.getGroupId() == InterfaceID.BANK)
+		if (event.getGroupId() == InterfaceID.BANKMAIN)
 		{
 			if (!config.persistHotKeysOutsideBank())
 			{
@@ -981,8 +980,8 @@ public class InventorySetupsPlugin extends Plugin
 
 		clientThread.invokeLater(() ->
 		{
-			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
-			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INV);
+			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.WORN);
 
 			List<InventorySetupsItem> runePouchData = ammoHandler.getRunePouchDataIfInContainer(inv);
 			List<InventorySetupsItem> boltPouchData = ammoHandler.getBoltPouchDataIfInContainer(inv);
@@ -1177,7 +1176,7 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 
-			if (client.getWidget(ComponentID.BANK_CONTAINER) == null)
+			if (client.getWidget(InterfaceID.Bankmain.UNIVERSE) == null)
 			{
 				return;
 			}
@@ -1199,7 +1198,7 @@ public class InventorySetupsPlugin extends Plugin
 	public void resetBankScrollBar()
 	{
 		// Reset the scroll bar position to 0
-		Widget widget = client.getWidget(ComponentID.BANK_SCROLLBAR);
+		Widget widget = client.getWidget(InterfaceID.Bankmain.SCROLLBAR);
 		if (widget != null)
 		{
 			widget.setScrollY(0);
@@ -1279,7 +1278,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		Widget bankContainer = client.getWidget(ComponentID.BANK_ITEM_CONTAINER);
+		Widget bankContainer = client.getWidget(InterfaceID.Bankmain.ITEMS);
 		boolean bankIsOpen = bankContainer != null && !bankContainer.isHidden();
 		// Avoid extra highlighting calls by deferring the highlighting to GameTick after a bunch of varbit changes come
 		// If the bank is closed, then onItemContainerChanged will handle the highlighting
@@ -1325,7 +1324,7 @@ public class InventorySetupsPlugin extends Plugin
 			// We should only do this if the active tag is an inventory setup tag
 			if (panel.getCurrentSelectedSetup() != null && isInventorySetupTagOpen())
 			{
-				Widget bankTitle = client.getWidget(ComponentID.BANK_TITLE_BAR);
+				Widget bankTitle = client.getWidget(InterfaceID.Bankmain.TITLE);
 				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
 			}
 		}
@@ -1351,8 +1350,8 @@ public class InventorySetupsPlugin extends Plugin
 		// must be on client thread to get names
 		clientThread.invokeLater(() ->
 		{
-			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INVENTORY);
-			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.EQUIPMENT);
+			List<InventorySetupsItem> inv = getNormalizedContainer(InventoryID.INV);
+			List<InventorySetupsItem> eqp = getNormalizedContainer(InventoryID.WORN);
 
 			// copy over fuzzy attributes
 			for (int i = 0; i < inv.size(); i++)
@@ -1848,7 +1847,7 @@ public class InventorySetupsPlugin extends Plugin
 		// check to see that the container is the equipment or inventory
 		ItemContainer container = event.getItemContainer();
 
-		if (container == client.getItemContainer(InventoryID.INVENTORY) || container == client.getItemContainer(InventoryID.EQUIPMENT))
+		if (container == client.getItemContainer(InventoryID.INV) || container == client.getItemContainer(InventoryID.WORN))
 		{
 			panel.doHighlighting();
 		}
@@ -1872,17 +1871,17 @@ public class InventorySetupsPlugin extends Plugin
 		switch (id)
 		{
 			case INVENTORY:
-				return getNormalizedContainer(InventoryID.INVENTORY);
+				return getNormalizedContainer(InventoryID.INV);
 			case EQUIPMENT:
-				return getNormalizedContainer(InventoryID.EQUIPMENT);
+				return getNormalizedContainer(InventoryID.WORN);
 			default:
 				return ammoHandler.getNormalizedSpecialContainer(id);
 		}
 	}
 
-	public List<InventorySetupsItem> getNormalizedContainer(final InventoryID id)
+	public List<InventorySetupsItem> getNormalizedContainer(final int id)
 	{
-		assert id == InventoryID.INVENTORY || id == InventoryID.EQUIPMENT : "invalid inventory ID";
+		assert id == InventoryID.INV || id == InventoryID.WORN : "invalid inventory ID";
 
 		final ItemContainer container = client.getItemContainer(id);
 
@@ -1894,7 +1893,7 @@ public class InventorySetupsPlugin extends Plugin
 			items = container.getItems();
 		}
 
-		int size = id == InventoryID.INVENTORY ? NUM_INVENTORY_ITEMS : NUM_EQUIPMENT_ITEMS;
+		int size = id == InventoryID.INV ? NUM_INVENTORY_ITEMS : NUM_EQUIPMENT_ITEMS;
 
 		for (int i = 0; i < size; i++)
 		{

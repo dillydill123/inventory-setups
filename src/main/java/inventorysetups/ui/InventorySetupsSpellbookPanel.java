@@ -35,7 +35,7 @@ import java.util.List;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import net.runelite.api.SpriteID;
+import net.runelite.api.gameval.SpriteID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 
@@ -54,10 +54,10 @@ public class InventorySetupsSpellbookPanel extends InventorySetupsContainerPanel
 		plugin.getClientThread().invokeLater(() ->
 		{
 
-			BufferedImage standardSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC, 0);
-			BufferedImage ancientsSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC_SPELLBOOK_ANCIENT_MAGICKS, 0);
-			BufferedImage lunarSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC_SPELLBOOK_LUNAR, 0);
-			BufferedImage arceuusSpellbook = plugin.getSpriteManager().getSprite(SpriteID.TAB_MAGIC_SPELLBOOK_ARCEUUS, 0);
+			BufferedImage standardSpellbook = plugin.getSpriteManager().getSprite(SpriteID.SideiconsInterface.MAGIC, 0);
+			BufferedImage ancientsSpellbook = plugin.getSpriteManager().getSprite(SpriteID.SideiconsInterface.SPELLBOOK_ANCIENT_MAGICKS, 0);
+			BufferedImage lunarSpellbook = plugin.getSpriteManager().getSprite(SpriteID.SideiconsInterface.SPELLBOOK_LUNAR, 0);
+			BufferedImage arceuusSpellbook = plugin.getSpriteManager().getSprite(SpriteID.SideiconsInterface.SPELLBOOK_ARCEUUS, 0);
 			BufferedImage noneSpellbook = null;
 
 			// might be null depending on game state
