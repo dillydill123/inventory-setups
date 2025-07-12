@@ -395,6 +395,7 @@ public class InventorySetupLayoutUtilities
 		trimLayout(layout);
 
 		layoutManager.saveLayout(layout);
+		tagManager.setHidden(layout.getTag(), true);
 	}
 
 	private void addFuzzyItemsToEndOfLayout(final Layout layout, final InventorySetup setup)
