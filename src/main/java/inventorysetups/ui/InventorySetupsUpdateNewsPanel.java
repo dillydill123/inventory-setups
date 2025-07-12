@@ -137,10 +137,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Updated Inventory Setups for the latest RuneLite update.\n\n" +
-							"Fuzzy placeholders will now appear at the bottom of the layout when updating a setup or using a preset.\n\n" +
-							"The '_invsetup_' tags are now hidden from the user in the bank.\n\n" +
-							"Fixed manual bank filter config option.";
+		String updateText =	"Fuzzy items now behave more like bank tag layouts. You may need to regenerate the layout on some setups.\n\n" +
+							"There is now a right click remove setup option for standard, compact, and icon panels.\n\n" +
+							"Added an config option to apply sorting modes to sections.\n\n" +
+							"Fixed a bug where underlying tags were visible after modifying a setup.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
