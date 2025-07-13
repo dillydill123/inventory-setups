@@ -485,10 +485,13 @@ public class InventorySetupLayoutUtilities
 					continue;
 				}
 
-				// If a variation is in the layout and this fuzzy item is not in the layout but in the bank,
+				// If a variation is in the layout but not in the bank, and this fuzzy item is not in the layout but in the bank,
 				// Then this is a placeholder in the layout that bank tags can place a variation mapped item. For this
 				// reason we will skip adding this fuzzy item to the bottom of the layout.
-				if (idsInLayout.contains(variationId) && !idsInLayout.contains(id) && bankItems.contains(id) && !variantsSeen.contains(variationId))
+				if (idsInLayout.contains(variationId) &&
+					!bankItems.contains(variationId) &&
+					!idsInLayout.contains(id) && bankItems.contains(id) &&
+					!variantsSeen.contains(variationId))
 				{
 					// Add this to variants seen. We don't want this item to be considered an option for other items,
 					// otherwise we would not put this fuzzy item at the bottom and bank tags will put it at the top.
