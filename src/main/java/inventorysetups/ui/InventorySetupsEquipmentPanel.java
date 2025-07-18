@@ -60,6 +60,7 @@ public class InventorySetupsEquipmentPanel extends InventorySetupsContainerPanel
 		{
 			final InventorySetupsSlot setupSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.EQUIPMENT, slot.getSlotIdx());
 			InventorySetupsSlot.addFuzzyMouseListenerToSlot(plugin, setupSlot);
+			InventorySetupsSlot.addAllFuzzyMouseListenerToSlot(plugin, setupSlot);
 
 			// add stackable configurations for ammo and weapon slots
 			if (slot == EquipmentInventorySlot.AMMO || slot == EquipmentInventorySlot.WEAPON)

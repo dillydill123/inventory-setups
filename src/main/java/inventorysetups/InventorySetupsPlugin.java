@@ -1679,7 +1679,7 @@ public class InventorySetupsPlugin extends Plugin
 			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 			item = container.get(slot.getIndexInSlot());
 		}
-		item.toggleIsFuzzy();
+		item.setFuzzy(!(item.isFuzzy()));
 		final int itemId = item.getId();
 		clientThread.invoke(() ->
 		{
@@ -1694,6 +1694,34 @@ public class InventorySetupsPlugin extends Plugin
 		panel.refreshCurrentSetup();
 	}
 
+	public void toggleAllFuzzyOnSlot(final InventorySetupsSlot slot) {
+		if (panel.getCurrentSelectedSetup() == null) {
+			return;
+		}
+		log.debug("Toggling all the fuzzies");
+		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
+		InventorySetupsItem item = container.get(slot.getIndexInSlot());
+		boolean fuzz = item.isFuzzy();
+
+        for (final InventorySetupsItem eachItem : container) {
+            if (eachItem.getId() == getContainerFromSlot(slot).get(slot.getIndexInSlot()).getId()) {
+                eachItem.setFuzzy(!fuzz);
+            }
+        }
+
+		final int itemId = item.getId();
+		clientThread.invoke(() ->
+		{
+			if (itemId == -1)
+			{
+				return;
+			}
+			layoutUtilities.recalculateLayout(slot.getParentSetup());
+		});
+
+		dataManager.updateConfig(true, false);
+		panel.refreshCurrentSetup();
+	}
 	public void setStackCompareOnSlot(final InventorySetupsSlot slot, final InventorySetupsStackCompareID newStackCompare)
 	{
 		if (panel.getCurrentSelectedSetup() == null)
