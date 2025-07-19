@@ -1679,7 +1679,7 @@ public class InventorySetupsPlugin extends Plugin
 			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 			item = container.get(slot.getIndexInSlot());
 		}
-		item.setFuzzy(!(item.isFuzzy()));
+		item.setFuzzy(!item.isFuzzy());
 		final int itemId = item.getId();
 		clientThread.invoke(() ->
 		{
@@ -1694,22 +1694,25 @@ public class InventorySetupsPlugin extends Plugin
 		panel.refreshCurrentSetup();
 	}
 
-	public void toggleAllFuzzyOnSlot(final InventorySetupsSlot slot) {
-		if (panel.getCurrentSelectedSetup() == null) {
-			return;
-		}
-		log.debug("Toggling all the fuzzies");
-		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-		InventorySetupsItem item = container.get(slot.getIndexInSlot());
-		boolean fuzz = item.isFuzzy();
 
-        for (final InventorySetupsItem eachItem : container) {
-            if (eachItem.getId() == getContainerFromSlot(slot).get(slot.getIndexInSlot()).getId()) {
-                eachItem.setFuzzy(!fuzz);
+	public void toggleAllFuzzyOnSlot(final InventorySetupsSlot slot) {
+
+		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
+		InventorySetupsItem originalItem = container.get(slot.getIndexInSlot());
+		boolean fuzz = originalItem.isFuzzy();
+
+		//Find all variations of the item, so they can also be toggled
+		int processedId = itemManager.canonicalize(originalItem.getId());
+		int baseProcessedId = InventorySetupsVariationMapping.map(processedId);
+		Collection<Integer> variations = InventorySetupsVariationMapping.getVariations(baseProcessedId);
+		//variations.add(processedId);
+        for (final InventorySetupsItem item : container) {
+            if (variations.contains(item.getId())) {
+                item.setFuzzy(!fuzz);
             }
         }
 
-		final int itemId = item.getId();
+		final int itemId = originalItem.getId();
 		clientThread.invoke(() ->
 		{
 			if (itemId == -1)
