@@ -48,7 +48,6 @@ public class InventorySetupsQuiverPanel
 		this.itemManager = itemManager;
 		quiverSlot = new InventorySetupsSlot(ColorScheme.DARKER_GRAY_COLOR, InventorySetupsSlotID.QUIVER, QUIVER_SLOT_IDX);
 		InventorySetupsSlot.addFuzzyMouseListenerToSlot(plugin, quiverSlot);
-		InventorySetupsSlot.addAllFuzzyMouseListenerToSlot(plugin, quiverSlot);
 		InventorySetupsSlot.addStackMouseListenerToSlot(plugin, quiverSlot);
 		InventorySetupsSlot.addUpdateFromContainerMouseListenerToSlot(plugin, quiverSlot);
 		InventorySetupsSlot.addUpdateFromSearchMouseListenerToSlot(plugin, quiverSlot, true);

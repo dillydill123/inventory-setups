@@ -1495,7 +1495,7 @@ public class InventorySetupsPlugin extends Plugin
 								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
 						if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
 						{
-							removeAdditionalFilteredItem(slot, additionalFilteredItems);
+							removeAdditionalFilteredItem(slot);
 							addAdditionalFilteredItem(finalId, slot.getParentSetup(), additionalFilteredItems);
 						}
 						return;
@@ -1608,6 +1608,10 @@ public class InventorySetupsPlugin extends Plugin
 				JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+		if (panel.getCurrentSelectedSetup() == null)
+		{
+			return;
+		}
 
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
@@ -1615,7 +1619,7 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
-				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
+				removeAdditionalFilteredItem(slot);
 				layoutUtilities.recalculateLayout(panel.getCurrentSelectedSetup());
 				dataManager.updateConfig(true, false);
 				panel.refreshCurrentSetup();
@@ -1653,26 +1657,12 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 		{
-			// Empty slot was selected to be toggled, don't do anything
-			if (slot.getIndexInSlot() >= slot.getParentSetup().getAdditionalFilteredItems().size())
+			Integer keyToMakeFuzzy = getAdditionalItemKey(slot);
+			if(keyToMakeFuzzy==null)
 			{
 				return;
 			}
-
-			final Map<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
-			final int slotID = slot.getIndexInSlot();
-			int j = 0;
-			Integer keyToMakeFuzzy = null;
-			for (final Integer key : additionalFilteredItems.keySet())
-			{
-				if (slotID == j)
-				{
-					keyToMakeFuzzy = key;
-					break;
-				}
-				j++;
-			}
-			item = additionalFilteredItems.get(keyToMakeFuzzy);
+			item = slot.getParentSetup().getAdditionalFilteredItems().get(keyToMakeFuzzy);
 		}
 		else
 		{
@@ -1695,35 +1685,83 @@ public class InventorySetupsPlugin extends Plugin
 	}
 
 
-	public void toggleAllFuzzyOnSlot(final InventorySetupsSlot slot) {
-
-		final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-		InventorySetupsItem originalItem = container.get(slot.getIndexInSlot());
-		boolean fuzz = originalItem.isFuzzy();
-
-		//Find all variations of the item, so they can also be toggled
-		int processedId = itemManager.canonicalize(originalItem.getId());
-		int baseProcessedId = InventorySetupsVariationMapping.map(processedId);
-		Collection<Integer> variations = InventorySetupsVariationMapping.getVariations(baseProcessedId);
-		//variations.add(processedId);
-        for (final InventorySetupsItem item : container) {
-            if (variations.contains(item.getId())) {
-                item.setFuzzy(!fuzz);
-            }
-        }
-
-		final int itemId = originalItem.getId();
-		clientThread.invoke(() ->
+	public void toggleAllFuzzyOnSlot(final InventorySetupsSlot slot)
+	{
+		if (panel.getCurrentSelectedSetup() == null)
 		{
-			if (itemId == -1)
+			return;
+		}
+
+		final InventorySetup owner = slot.getParentSetup();
+		InventorySetupsItem originalItem;
+		//If an additional slot was clicked
+		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
+		{
+			Integer keyToToggle = getAdditionalItemKey(slot);
+			if (keyToToggle == null)
 			{
 				return;
 			}
+			else{
+				originalItem = owner.getAdditionalFilteredItems().get(keyToToggle);
+			}
+		}
+		else{
+			originalItem = getContainerFromSlot(slot).get(slot.getIndexInSlot());
+		}
+		if (originalItem.getId() == -1)
+		{
+			return;
+		}
+		boolean fuzz = originalItem.isFuzzy();
+
+		//has to be in client to use itemManager
+		clientThread.invoke(() ->
+		{
+			//Find all variations of the item, so they can also be toggled
+			int processedId = itemManager.canonicalize(originalItem.getId());
+			int baseProcessedId = InventorySetupsVariationMapping.map(processedId);
+			Collection<Integer> variations = InventorySetupsVariationMapping.getVariations(baseProcessedId);
+			variations.add(processedId);
+
+			for (final InventorySetupsItem item : owner.getInventory())
+			{
+				if (variations.contains(item.getId()))
+				{
+					item.setFuzzy(!fuzz);
+				}
+			}
+			for (final InventorySetupsItem item : owner.getEquipment())
+			{
+				if (variations.contains(item.getId()))
+				{
+					item.setFuzzy(!fuzz);
+				}
+			}
+			for (final InventorySetupsItem item : owner.getAdditionalFilteredItems().values())
+			{
+				if (variations.contains(item.getId()))
+				{
+					item.setFuzzy(!fuzz);
+				}
+			}
+			if (owner.getQuiver() != null)
+			{
+				for (final InventorySetupsItem item : owner.getQuiver())
+				{
+					if (variations.contains(item.getId()))
+					{
+						item.setFuzzy(!fuzz);
+					}
+				}
+			}
+
 			layoutUtilities.recalculateLayout(slot.getParentSetup());
+			dataManager.updateConfig(true, false);
+			panel.refreshCurrentSetup();
 		});
 
-		dataManager.updateConfig(true, false);
-		panel.refreshCurrentSetup();
+
 	}
 	public void setStackCompareOnSlot(final InventorySetupsSlot slot, final InventorySetupsStackCompareID newStackCompare)
 	{
@@ -1739,32 +1777,42 @@ public class InventorySetupsPlugin extends Plugin
 		panel.refreshCurrentSetup();
 	}
 
-	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
+	private Integer getAdditionalItemKey(final InventorySetupsSlot slot)
 	{
-
-		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
-
-		final int slotID = slot.getIndexInSlot();
-
-		// Empty slot was selected to be removed, don't do anything
-		if (slotID >= additionalFilteredItems.size())
+		final Map<Integer, InventorySetupsItem> additionalFilteredItems = slot.getParentSetup().getAdditionalFilteredItems();
+		// Empty slot was selected to be toggled, don't do anything
+		if (slot.getIndexInSlot() >= additionalFilteredItems.size())
 		{
-			return;
+			return null;
 		}
 
+
+		final int slotID = slot.getIndexInSlot();
 		int j = 0;
-		Integer keyToDelete = null;
+		Integer keyToMakeFuzzy = null;
 		for (final Integer key : additionalFilteredItems.keySet())
 		{
 			if (slotID == j)
 			{
-				keyToDelete = key;
+				keyToMakeFuzzy = key;
 				break;
 			}
 			j++;
 		}
+		return keyToMakeFuzzy;
+	}
+	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot)
+	{
 
-		additionalFilteredItems.remove(keyToDelete);
+		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
+
+		Integer keyToDelete = getAdditionalItemKey(slot);
+		if (keyToDelete == null)
+		{
+			return;
+		}
+
+		slot.getParentSetup().getAdditionalFilteredItems().remove(keyToDelete);
 		// None of the data functions are called here because the callee does it.
 		// If an item is swapped (removed + added) this would result in a double data process
 		// Which isn't bad, just a minor optimization
