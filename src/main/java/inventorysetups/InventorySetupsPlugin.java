@@ -145,6 +145,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
 	public static final String CONFIG_KEY_USE_LAYOUTS = "useLayouts";
 	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
+	public static final String CONFIG_KEY_ZIGZAG_TYPE = "zigZagType";
 	public static final String CONFIG_KEY_LAYOUT_DUPLICATES = "addDuplicatesInLayouts";
 	public static final String CONFIG_KEY_ENABLE_LAYOUT_WARNING = "enableLayoutWarning";
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
