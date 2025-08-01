@@ -27,6 +27,7 @@ package inventorysetups;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ENABLE_LAYOUT_WARNING;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ZIGZAG_TYPE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DUPLICATES;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
@@ -309,6 +310,17 @@ public interface InventorySetupsConfig extends Config
 	default InventorySetupLayoutType defaultLayout()
 	{
 		return InventorySetupLayoutType.PRESET;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_ZIGZAG_TYPE,
+			name = "ZigZag Type",
+			description = "Configures ZigZag type when creating or updating a setup",
+			section = layoutSection
+	)
+	default InventorySetupsZigZagTypeID zigZagType()
+	{
+		return InventorySetupsZigZagTypeID.TOP_TO_BOTTOM;
 	}
 
 	@ConfigItem(

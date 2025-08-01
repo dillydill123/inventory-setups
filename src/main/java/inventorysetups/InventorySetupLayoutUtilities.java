@@ -97,7 +97,6 @@ public class InventorySetupLayoutUtilities
 		layout.resize(newSizeGuess);
 		final HashMap<Integer, Integer> counter = new HashMap<>();
 
-
 		int nextPos = layoutZigZagContainer(setup.getEquipment(), layout, tag, addToTag, startOfEquipment, counter);
 		if (setup.getQuiver() != null && !setup.getQuiver().isEmpty())
 		{
@@ -152,8 +151,10 @@ public class InventorySetupLayoutUtilities
 		// But this is not needed, so I won't spend time over engineering this function.
 
 		int doubleRowStart = 0;
-		int nextPos = 0;
+		boolean topToBottom = config.zigZagType().equals(InventorySetupsZigZagTypeID.TOP_TO_BOTTOM);
 		final int rowSize = 8;
+
+		int nextPos = topToBottom ? 0 : 8;
 
 		for (final InventorySetupsItem item : container)
 		{
@@ -163,21 +164,43 @@ public class InventorySetupLayoutUtilities
 				continue;
 			}
 
-			if (nextPos == (rowSize * 2) - 1)
+            if (topToBottom)
 			{
-				// We hit the end of a double row, we need to start a new one.
-				doubleRowStart += 2;
-				nextPos = doubleRowStart * rowSize;
-			}
-			else if (nextPos < ((doubleRowStart * rowSize) + rowSize))
-			{
-				// We are in the top half of a double row. Go down directly one.
-				nextPos += rowSize;
-			}
+				if (nextPos == ((doubleRowStart * rowSize) + (2 * rowSize) - 1))
+				{
+					// We hit the end of a double row, we need to start a new one.
+					doubleRowStart += 2;
+					nextPos = doubleRowStart * rowSize;
+				}
+				else if (nextPos < ((doubleRowStart * rowSize) + rowSize))
+				{
+					// We are in the top half of a double row. Go down directly one.
+					nextPos += rowSize;
+				}
+				else
+				{
+					// We are in the bottom half of a double. Go back up and add one to move to the right.
+					nextPos = (nextPos - rowSize) + 1;
+				}
+            }
 			else
 			{
-				// We are in the bottom half of a double. Go back up and add one to move to the right.
-				nextPos = (nextPos - rowSize) + 1;
+				if (nextPos == ((doubleRowStart * rowSize) + rowSize - 1))
+				{
+					// We hit the end of a double row, we need to start a new one.
+					doubleRowStart += 2;
+					nextPos = (doubleRowStart * rowSize) + rowSize;
+				}
+				else if (nextPos > ((doubleRowStart * rowSize) + rowSize) - 1)
+				{
+					// We are in the bottom half of a double. Go up directly one.
+					nextPos -= rowSize;
+				}
+				else
+				{
+					// We are in the top half of a double row. Go back down and add one to move to the right.
+					nextPos = nextPos + rowSize + 1;
+				}
 			}
 		}
 
