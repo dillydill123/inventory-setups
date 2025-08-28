@@ -1646,45 +1646,6 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
-	public void toggleFuzzyOnSlot(final InventorySetupsSlot slot)
-	{
-		if (panel.getCurrentSelectedSetup() == null)
-		{
-			return;
-		}
-
-		InventorySetupsItem item = null;
-
-		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
-		{
-			Integer keyToMakeFuzzy = getAdditionalItemKey(slot);
-			if(keyToMakeFuzzy==null)
-			{
-				return;
-			}
-			item = slot.getParentSetup().getAdditionalFilteredItems().get(keyToMakeFuzzy);
-		}
-		else
-		{
-			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-			item = container.get(slot.getIndexInSlot());
-		}
-		item.setFuzzy(!item.isFuzzy());
-		final int itemId = item.getId();
-		clientThread.invoke(() ->
-		{
-			if (itemId == -1)
-			{
-				return;
-			}
-			layoutUtilities.recalculateLayout(slot.getParentSetup());
-		});
-
-		dataManager.updateConfig(true, false);
-		panel.refreshCurrentSetup();
-	}
-
-
 	public void toggleAllFuzzyOnSlot(final InventorySetupsSlot slot)
 	{
 		if (panel.getCurrentSelectedSetup() == null)
@@ -1692,7 +1653,7 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		final InventorySetup owner = slot.getParentSetup();
+		final InventorySetup inventorySetup = slot.getParentSetup();
 		InventorySetupsItem originalItem;
 		//If an additional slot was clicked
 		if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
@@ -1703,7 +1664,7 @@ public class InventorySetupsPlugin extends Plugin
 				return;
 			}
 			else{
-				originalItem = owner.getAdditionalFilteredItems().get(keyToToggle);
+				originalItem = inventorySetup.getAdditionalFilteredItems().get(keyToToggle);
 			}
 		}
 		else{
@@ -1713,7 +1674,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			return;
 		}
-		boolean fuzz = originalItem.isFuzzy();
+		boolean newFuzzyValue = !originalItem.isFuzzy();
 
 		//has to be in client to use itemManager
 		clientThread.invoke(() ->
@@ -1724,36 +1685,22 @@ public class InventorySetupsPlugin extends Plugin
 			Collection<Integer> variations = InventorySetupsVariationMapping.getVariations(baseProcessedId);
 			variations.add(processedId);
 
-			for (final InventorySetupsItem item : owner.getInventory())
+			Consumer<InventorySetupsItem> toggleFuzzyIfMatched = item ->
 			{
 				if (variations.contains(item.getId()))
 				{
-					item.setFuzzy(!fuzz);
+					item.setFuzzy(newFuzzyValue);
 				}
-			}
-			for (final InventorySetupsItem item : owner.getEquipment())
+			};
+
+			inventorySetup.getInventory().forEach(toggleFuzzyIfMatched);
+
+			inventorySetup.getEquipment().forEach(toggleFuzzyIfMatched);
+			inventorySetup.getAdditionalFilteredItems().values().forEach(toggleFuzzyIfMatched);
+
+			if (inventorySetup.getQuiver() != null)
 			{
-				if (variations.contains(item.getId()))
-				{
-					item.setFuzzy(!fuzz);
-				}
-			}
-			for (final InventorySetupsItem item : owner.getAdditionalFilteredItems().values())
-			{
-				if (variations.contains(item.getId()))
-				{
-					item.setFuzzy(!fuzz);
-				}
-			}
-			if (owner.getQuiver() != null)
-			{
-				for (final InventorySetupsItem item : owner.getQuiver())
-				{
-					if (variations.contains(item.getId()))
-					{
-						item.setFuzzy(!fuzz);
-					}
-				}
+				inventorySetup.getQuiver().forEach(toggleFuzzyIfMatched);
 			}
 
 			layoutUtilities.recalculateLayout(slot.getParentSetup());
@@ -1804,7 +1751,10 @@ public class InventorySetupsPlugin extends Plugin
 	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot)
 	{
 
-		assert panel.getCurrentSelectedSetup() != null : "Current setup is null";
+		if (panel.getCurrentSelectedSetup() == null)
+		{
+			return;
+		}
 
 		Integer keyToDelete = getAdditionalItemKey(slot);
 		if (keyToDelete == null)

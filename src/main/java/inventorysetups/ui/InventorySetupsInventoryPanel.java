@@ -75,7 +75,6 @@ public class InventorySetupsInventoryPanel extends InventorySetupsContainerPanel
 		{
 			containerSlotsPanel.add(inventorySlots.get(i));
 			InventorySetupsSlot.addFuzzyMouseListenerToSlot(plugin, inventorySlots.get(i));
-			InventorySetupsSlot.addAllFuzzyMouseListenerToSlot(plugin, inventorySlots.get(i));
 			InventorySetupsSlot.addStackMouseListenerToSlot(plugin, inventorySlots.get(i));
 			InventorySetupsSlot.addUpdateFromContainerMouseListenerToSlot(plugin, inventorySlots.get(i));
 			InventorySetupsSlot.addUpdateFromSearchMouseListenerToSlot(plugin, inventorySlots.get(i), true);

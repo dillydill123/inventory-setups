@@ -254,15 +254,6 @@ public class InventorySetupsSlot extends JPanel
 		slot.getRightClickMenu().add(makeSlotFuzzy);
 		makeSlotFuzzy.addActionListener(e ->
 		{
-			plugin.toggleFuzzyOnSlot(slot);
-		});
-	}
-	public static void addAllFuzzyMouseListenerToSlot(final InventorySetupsPlugin plugin, final InventorySetupsSlot slot)
-	{
-		JMenuItem makeAllSlotFuzzy = new JMenuItem("Toggle Fuzzy All");
-		slot.getRightClickMenu().add(makeAllSlotFuzzy);
-		makeAllSlotFuzzy.addActionListener(e ->
-		{
 			plugin.toggleAllFuzzyOnSlot(slot);
 		});
 	}
