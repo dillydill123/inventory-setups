@@ -30,6 +30,7 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ZIGZAG_TYPE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DUPLICATES;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_CLOSE_WITH_BANK;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_SECTION_MODE;
@@ -523,6 +524,16 @@ public interface InventorySetupsConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(
+			keyName = CONFIG_KEY_CLOSE_WITH_BANK,
+			name = "Close with Bank",
+			description = "Close your current setup when you close the bank",
+			section = otherSection
+	)
+	default boolean closeWithBank()
+	{
+		return false;
+	}
 
 
 }

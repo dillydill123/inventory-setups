@@ -142,6 +142,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_VERSION_STR = "version";
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
+	public static final String CONFIG_KEY_CLOSE_WITH_BANK = "closeWithBank";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
 	public static final String CONFIG_KEY_USE_LAYOUTS = "useLayouts";
 	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
@@ -898,7 +899,11 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				unregisterHotkeys();
 			}
+			if (config.closeWithBank())
+			{
+				clientThread.invokeLater(() -> panel.returnToOverviewPanel(false));
 
+			}
 			if (isInventorySetupTagOpen())
 			{
 				// Close the bank tag for those who use manual bank filter
