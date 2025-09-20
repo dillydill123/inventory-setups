@@ -442,7 +442,7 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			if (event.getKey().equals(CONFIG_KEY_PANEL_VIEW) || event.getKey().equals(CONFIG_KEY_SECTION_MODE) ||
 				event.getKey().equals(CONFIG_KEY_SORTING_MODE) || event.getKey().equals(CONFIG_KEY_HIDE_BUTTON) ||
-				event.getKey().equals(CONFIG_KEY_UNASSIGNED_MAXIMIZED))
+				event.getKey().equals(CONFIG_KEY_UNASSIGNED_MAXIMIZED) || event.getKey().equals(CONFIG_KEY_SECTION_SORTING))
 			{
 				SwingUtilities.invokeLater(() ->
 				{
