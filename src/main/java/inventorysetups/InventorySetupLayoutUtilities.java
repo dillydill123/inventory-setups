@@ -409,6 +409,7 @@ public class InventorySetupLayoutUtilities
 			if (!idsInLayout.contains(idInSetup))
 			{
 				layout.addItem(idInSetup);
+				idsInLayout.add(idInSetup);
 			}
 		}
 
