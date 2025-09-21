@@ -58,6 +58,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.events.VarClientIntChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.Item;
@@ -77,6 +78,8 @@ import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.gameval.VarClientID;
+import net.runelite.api.vars.InputType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
@@ -143,6 +146,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
+	public static final String CONFIG_KEY_PERSIST_HOTKEYS_CHAT_INPUT = "persistHotKeysDuringChatInput";
 	public static final String CONFIG_KEY_USE_LAYOUTS = "useLayouts";
 	public static final String CONFIG_KEY_LAYOUT_DEFAULT = "defaultLayout";
 	public static final String CONFIG_KEY_ZIGZAG_TYPE = "zigZagType";
@@ -270,6 +274,12 @@ public class InventorySetupsPlugin extends Plugin
 	// Used to defer highlighting to GameTick
 	private boolean shouldTriggerInventoryHighlightOnGameTick;
 
+	// Whether a search input of any kind (bank, seed vault, item search, etc.) is happening
+	private boolean chatBoxInputIsOpen;
+
+	// Whether hot keys are registered
+	private boolean hotkeysAreRegistered;
+
 	private final HotkeyListener returnToSetupsHotkeyListener = new HotkeyListener(() -> config.returnToSetupsHotkey())
 	{
 		@Override
@@ -328,6 +338,8 @@ public class InventorySetupsPlugin extends Plugin
 		clientToolbar.addNavigation(navButton);
 
 		this.shouldTriggerInventoryHighlightOnGameTick = false;
+		this.chatBoxInputIsOpen = false;
+		this.hotkeysAreRegistered = false;
 		this.cache = new InventorySetupsCache();
 		this.inventorySetups = new ArrayList<>();
 		this.sections = new ArrayList<>();
@@ -350,6 +362,7 @@ public class InventorySetupsPlugin extends Plugin
 			clientThread.invokeLater(() ->
 			{
 				dataManager.loadConfig();
+				handleRegistrationOfHotkeys();
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
@@ -417,16 +430,49 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void registerHotkeys()
 	{
-		keyManager.registerKeyListener(returnToSetupsHotkeyListener);
-		keyManager.registerKeyListener(filterBankHotkeyListener);
-		keyManager.registerKeyListener(sectionModeHotkeyListener);
+		if (!this.hotkeysAreRegistered)
+		{
+			keyManager.registerKeyListener(returnToSetupsHotkeyListener);
+			keyManager.registerKeyListener(filterBankHotkeyListener);
+			keyManager.registerKeyListener(sectionModeHotkeyListener);
+			this.hotkeysAreRegistered = true;
+		}
 	}
 
 	private void unregisterHotkeys()
 	{
-		keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
-		keyManager.unregisterKeyListener(filterBankHotkeyListener);
-		keyManager.unregisterKeyListener(sectionModeHotkeyListener);
+		if (this.hotkeysAreRegistered)
+		{
+			keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
+			keyManager.unregisterKeyListener(filterBankHotkeyListener);
+			keyManager.unregisterKeyListener(sectionModeHotkeyListener);
+			this.hotkeysAreRegistered = false;
+		}
+	}
+
+	private void handleRegistrationOfHotkeys()
+	{
+		Widget bankContainer = client.getWidget(InterfaceID.Bankmain.ITEMS);
+		boolean bankIsOpen = bankContainer != null && !bankContainer.isHidden();
+
+		// Bank takes priority if hotkeys are disabled.
+		boolean shouldRegisterKeys = bankIsOpen || config.persistHotKeysOutsideBank();
+		if (!shouldRegisterKeys)
+		{
+			unregisterHotkeys();
+			return;
+		}
+
+		// If the bank wants to enable hotkeys, then ensure chat input will allow it as well.
+		shouldRegisterKeys = !this.chatBoxInputIsOpen || config.persistHotKeysDuringChatInput();
+		if (shouldRegisterKeys)
+		{
+			registerHotkeys();
+		}
+		else
+		{
+			unregisterHotkeys();
+		}
 	}
 
 	@Provides
@@ -449,20 +495,9 @@ public class InventorySetupsPlugin extends Plugin
 					panel.redrawOverviewPanel(false);
 				});
 			}
-			else if (event.getKey().equals(CONFIG_KEY_PERSIST_HOTKEYS))
+			else if (event.getKey().equals(CONFIG_KEY_PERSIST_HOTKEYS) || event.getKey().equals(CONFIG_KEY_PERSIST_HOTKEYS_CHAT_INPUT))
 			{
-				clientThread.invokeLater(() ->
-				{
-					boolean bankOpen = client.getItemContainer(InventoryID.BANK) != null;
-					if (config.persistHotKeysOutsideBank())
-					{
-						registerHotkeys();
-					}
-					else if (!bankOpen)
-					{
-						unregisterHotkeys();
-					}
-				});
+				clientThread.invokeLater(this::handleRegistrationOfHotkeys);
 			}
 			else if (event.getKey().equals(CONFIG_KEY_USE_LAYOUTS))
 			{
@@ -894,10 +929,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getGroupId() == InterfaceID.BANKMAIN)
 		{
-			if (!config.persistHotKeysOutsideBank())
-			{
-				unregisterHotkeys();
-			}
+			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
 
 			if (isInventorySetupTagOpen())
 			{
@@ -912,10 +944,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		if (event.getGroupId() == InterfaceID.BANKMAIN)
 		{
-			if (!config.persistHotKeysOutsideBank())
-			{
-				registerHotkeys();
-			}
+			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
 		}
 	}
 
@@ -1333,6 +1362,27 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// cancel the current filtering if the search button is clicked
 			resetBankSearch();
+		}
+	}
+
+	@Subscribe
+	public void onVarClientIntChanged(VarClientIntChanged intChanged)
+	{
+		if (intChanged.getIndex() != VarClientID.MESLAYERMODE)
+		{
+			return;
+		}
+		boolean chatBoxInputOpened = client.getVarcIntValue(VarClientID.MESLAYERMODE) != InputType.NONE.getType();
+		if (chatBoxInputOpened)
+		{
+			this.chatBoxInputIsOpen = true;
+			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
+		}
+		else if (this.chatBoxInputIsOpen)
+		{
+
+			this.chatBoxInputIsOpen = false;
+			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
 		}
 	}
 

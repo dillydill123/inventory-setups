@@ -27,6 +27,7 @@ package inventorysetups;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ENABLE_LAYOUT_WARNING;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_HIDE_BUTTON;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DEFAULT;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS_CHAT_INPUT;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ZIGZAG_TYPE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DUPLICATES;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
@@ -283,9 +284,22 @@ public interface InventorySetupsConfig extends Config
 			keyName = CONFIG_KEY_PERSIST_HOTKEYS,
 			name = "Persist Hotkeys Outside Bank",
 			description = "Configures hotkeys to persist even outside the bank",
-			section = hotkeySection
+			section = hotkeySection,
+			position = 1
 	)
 	default boolean persistHotKeysOutsideBank()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_PERSIST_HOTKEYS_CHAT_INPUT,
+			name = "Persist Hotkeys In Chat Inputs",
+			description = "Configures hotkeys to persist even during a chat input (searching the bank, PMs, etc.)",
+			section = hotkeySection,
+			position = 2
+	)
+	default boolean persistHotKeysDuringChatInput()
 	{
 		return false;
 	}
