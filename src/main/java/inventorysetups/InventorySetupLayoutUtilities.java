@@ -164,7 +164,7 @@ public class InventorySetupLayoutUtilities
 				continue;
 			}
 
-            if (topToBottom)
+			if (topToBottom)
 			{
 				if (nextPos == ((doubleRowStart * rowSize) + (2 * rowSize) - 1))
 				{
@@ -182,7 +182,7 @@ public class InventorySetupLayoutUtilities
 					// We are in the bottom half of a double. Go back up and add one to move to the right.
 					nextPos = (nextPos - rowSize) + 1;
 				}
-            }
+			}
 			else
 			{
 				if (nextPos == ((doubleRowStart * rowSize) + rowSize - 1))
