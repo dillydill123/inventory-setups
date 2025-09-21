@@ -137,10 +137,10 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Fuzzy items now behave more like bank tag layouts. You may need to regenerate the layout on some setups.\n\n" +
-							"There is now a right click remove setup option for standard, compact, and icon panels.\n\n" +
-							"Added an config option to apply sorting modes to sections.\n\n" +
-							"Fixed a bug where underlying tags were visible after modifying a setup.";
+		String updateText =	"Added a config option for bottom to top ZigZag layouts.\n\n" +
+							"Hotkeys are now disabled during chat box inputs (bank searches, PMs, etc.) by default. A new config option has been added to revert this.\n\n" +
+							"Fixed some issues with fuzzy items adding a placeholder incorrectly.\n\n" +
+							"As a reminder, layouts can be reset by right clicking the \"Show worn items\" button in the bank and navigating to \"Auto Layout\". Items can be moved freely in layouts without affecting their real positions in the bank.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
