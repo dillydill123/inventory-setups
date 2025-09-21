@@ -68,7 +68,6 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.ScriptID;
-import net.runelite.api.VarClientInt;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
@@ -1232,7 +1231,7 @@ public class InventorySetupsPlugin extends Plugin
 		if (widget != null)
 		{
 			widget.setScrollY(0);
-			client.setVarcIntValue(VarClientInt.BANK_SCROLL, 0);
+			client.setVarcIntValue(VarClientID.BANK_SCROLLPOS, 0);
 		}
 	}
 
