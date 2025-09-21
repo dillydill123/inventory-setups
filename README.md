@@ -372,22 +372,24 @@ Hint: You can right-click the paint bucket to delete the color of a setup or sec
 ### HotKey Options
 
 * **Filter Bank Hotkey** - Pressing this will cause the bank to filter if a setup is selected and filtering is enabled for that setup. This is useful if you canceled the filter while banking and want to quickly refilter
-* **Persist Hotkeys Outside Bank** - Enabling this will cause hot keys to persist outside the bank
 * **Return To Setups Hotkey** - Pressing this key will exit the current setup and return to the overview panel where all setups are shown
 * **Toggle section mode** - Pressing this will switch to section mode
+* **Persist Hotkeys Outside Bank** - Enabling this will cause hot keys to persist outside the bank
+* **Persist Hotkeys In Chat Inputs** - Enabling this will cause hot keys to persist when a chat input (bank searching, PMs, etc.) is open
 
 ### Layout Options
 
 * **Add Duplicates** - Add duplicate items if you have multiple of that item in your setup when creating layouts
 * **Default Layout** - The default layout used when setups are created
 * **Use Layouts** - Globally enable customizable layouts. Uncheck this to disable layouts and only use classic filtering
+* **ZigZag Type** - Globally change the zigzag type for new ZigZag layouts. Top to bottom means the first item will start at the top of the zigzag and vice versa.
 
 ### Ground Item Menu Options
 
-* **Highlight Menu Entries on Ground Items** - Highlights menu entries on ground items which exist in your current setup
 * **Highlight Menu Entries Color** - Changes the color of the menu entries that are highlighted if the above option is selected
-* **Swap Menu Entries on Ground Items** - Swaps menu entries for ground items which exist in your current setup
+* **Highlight Menu Entries on Ground Items** - Highlights menu entries on ground items which exist in your current setup
 * **Menu Entries Priority on Ground Items** - Sets which ground item menu entries appear the top if the above option is selected. Either IN - inside the setup, or OUT - not in the setup
+* **Swap Menu Entries on Ground Items** - Swaps menu entries for ground items which exist in your current setup
 
 ### Other Options
 
