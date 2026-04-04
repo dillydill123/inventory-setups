@@ -797,6 +797,7 @@ public class InventorySetupsPlugin extends Plugin
 	{
 		clientThread.invoke(() ->
 		{
+			resetBankScrollBar();
 			final Layout old = layoutUtilities.getSetupLayout(setup);
 
 			// Don't add any items to the tag yet. We just want to display a layout
@@ -808,7 +809,6 @@ public class InventorySetupsPlugin extends Plugin
 			// Temporarily save the new layout to open the tag.
 			layoutManager.saveLayout(new_);
 			bankTagsService.openBankTag(new_.getTag(), BankTagsService.OPTION_HIDE_TAG_NAME);
-			resetBankScrollBar();
 
 			// Save the old layout again in case the user hits escape on the menu.
 			// The bank will still show the temporary new layout.
@@ -930,10 +930,14 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
 
-			if (isInventorySetupTagOpen())
+			if (isInventorySetupTagOpen() && config.manualBankFilter())
 			{
 				// Close the bank tag for those who use manual bank filter
-				clientThread.invokeLater(() -> bankTagsService.closeBankTag());
+				clientThread.invokeLater(() ->
+				{
+					resetBankScrollBar();
+					bankTagsService.closeBankTag();
+				});
 			}
 		}
 	}
@@ -1217,8 +1221,13 @@ public class InventorySetupsPlugin extends Plugin
 			}
 			else
 			{
+				String activeTag = bankTagsService.getActiveTag();
+				if (activeTag == null || !activeTag.equals(tagName))
+				{
+					// Reset the scrollbar if we are selecting a new setup.
+					resetBankScrollBar();
+				}
 				bankTagsService.openBankTag(tagName, BANK_TAG_OPTIONS);
-				resetBankScrollBar();
 			}
 
 		});
@@ -1231,8 +1240,8 @@ public class InventorySetupsPlugin extends Plugin
 		if (widget != null)
 		{
 			widget.setScrollY(0);
-			client.setVarcIntValue(VarClientID.BANK_SCROLLPOS, 0);
 		}
+		client.setVarcIntValue(VarClientID.BANK_SCROLLPOS, 0);
 	}
 
 	private void triggerBankSearchFromHotKey()
@@ -1325,7 +1334,11 @@ public class InventorySetupsPlugin extends Plugin
 		// This stops it from closing an open bank tag tab or other plugins opening bank tags.
 		if (isInventorySetupTagOpen())
 		{
-			clientThread.invoke(() -> bankTagsService.closeBankTag());
+			clientThread.invoke(() ->
+			{
+				resetBankScrollBar();
+				bankTagsService.closeBankTag();
+			});
 		}
 	}
 
@@ -1354,7 +1367,10 @@ public class InventorySetupsPlugin extends Plugin
 			if (panel.getCurrentSelectedSetup() != null && isInventorySetupTagOpen())
 			{
 				Widget bankTitle = client.getWidget(InterfaceID.Bankmain.TITLE);
-				bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
+				if (bankTitle != null)
+				{
+					bankTitle.setText("Inventory Setup <col=ff0000>" + panel.getCurrentSelectedSetup().getName() + "</col>");
+				}
 			}
 		}
 		else if (event.getScriptId() == ScriptID.BANKMAIN_SEARCH_TOGGLE)
