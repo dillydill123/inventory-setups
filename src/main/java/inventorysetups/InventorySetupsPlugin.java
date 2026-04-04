@@ -27,6 +27,8 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.chatbox.InventorySetupsChatboxItemSearch;
+import inventorysetups.chatbox.InventorySetupsChatboxItemSearchFilter;
 import inventorysetups.serialization.InventorySetupPortable;
 import inventorysetups.ui.InventorySetupsPluginPanel;
 import inventorysetups.ui.InventorySetupsSlot;
@@ -151,6 +153,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_ZIGZAG_TYPE = "zigZagType";
 	public static final String CONFIG_KEY_LAYOUT_DUPLICATES = "addDuplicatesInLayouts";
 	public static final String CONFIG_KEY_ENABLE_LAYOUT_WARNING = "enableLayoutWarning";
+	public static final String CONFIG_KEY_USE_OLD_ITEM_SEARCH = "useOldItemSearch";
 	public static final String CONFIG_GROUP_HUB_BTL = "banktaglayouts";
 	// Bank tags will standardize tag names so this must not be modified by that standardization.
 	// DO NOT CHANGE THIS. CHANGING THIS WOULD REQUIRE MIGRATION OF USER DATA.
@@ -253,6 +256,10 @@ public class InventorySetupsPlugin extends Plugin
 	private ChatboxItemSearch itemSearch;
 
 	@Inject
+	@Getter
+	private InventorySetupsChatboxItemSearch geItemSearch;
+
+	@Inject
 	private ChatboxPanelManager chatboxPanelManager;
 
 	private ChatboxTextInput searchInput;
@@ -347,6 +354,8 @@ public class InventorySetupsPlugin extends Plugin
 		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, config, client);
 		this.canUseLayouts = canUseLayouts();
 
+		InventorySetupsChatboxItemSearchFilter chatboxSearchFilter = new InventorySetupsChatboxItemSearchFilter(client.getItemCount());
+
 		// load all the inventory setups from the config file
 		clientThread.invokeLater(() ->
 		{
@@ -357,6 +366,9 @@ public class InventorySetupsPlugin extends Plugin
 				case LOADING:
 					return false;
 			}
+
+			chatboxSearchFilter.estimateFakeItems(itemManager);
+			this.geItemSearch.searchFilter(chatboxSearchFilter);
 
 			clientThread.invokeLater(() ->
 			{
@@ -1338,6 +1350,9 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				resetBankScrollBar();
 				bankTagsService.closeBankTag();
+				// Close any possible item search prompts. This will only close RuneLite constructed inputs, not native
+				// inputs like bank search, PMs, etc.
+				chatboxPanelManager.close();
 			});
 		}
 	}
@@ -1531,6 +1546,8 @@ public class InventorySetupsPlugin extends Plugin
 
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
+			// Close any RuneLite spawned Chatbox input in progress
+			chatboxPanelManager.close();
 		});
 
 	}
@@ -1541,63 +1558,27 @@ public class InventorySetupsPlugin extends Plugin
 		if (client.getGameState() != GameState.LOGGED_IN)
 		{
 			JOptionPane.showMessageDialog(panel,
-				"You must be logged in to search.",
-				"Cannot Search for Item",
-				JOptionPane.ERROR_MESSAGE);
+					"You must be logged in to search.",
+					"Cannot Search for Item",
+					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		itemSearch
-			.tooltipText("Set slot to")
-			.onItemSelected((itemId) ->
-			{
-				clientThread.invokeLater(() ->
-				{
-					int finalId = itemManager.canonicalize(itemId);
-
-					if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
-					{
-						final Map<Integer, InventorySetupsItem> additionalFilteredItems =
-								panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
-						if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
-						{
-							removeAdditionalFilteredItem(slot, additionalFilteredItems);
-							addAdditionalFilteredItem(finalId, slot.getParentSetup(), additionalFilteredItems);
-						}
-						return;
-					}
-
-					final String itemName = itemManager.getItemComposition(finalId).getName();
-					final List<InventorySetupsItem> container = getContainerFromSlot(slot);
-					final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
-					final InventorySetupsItem newItem = new InventorySetupsItem(finalId, itemName, 1, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
-
-					// NOTE: the itemSearch shows items from skill guides which can be selected, which may be highlighted
-
-					// if the item is stackable, ask for a quantity
-					if (allowStackable && itemManager.getItemComposition(finalId).isStackable())
-					{
-						searchInput = chatboxPanelManager.openTextInput("Enter amount")
-							// only allow numbers and k, m, b (if 1 value is available)
-							// stop once k, m, or b is seen
-							.addCharValidator(this::validateCharFromItemSearch)
-							.onDone((input) ->
-							{
-								int quantity = InventorySetupUtilities.parseTextInputAmount(input);
-								newItem.setQuantity(quantity);
-								updateSlotFromSearchHelper(slot, itemToBeReplaced, newItem, container, updateAllInstances);
-							}).build();
-					}
-					else
-					{
-						updateSlotFromSearchHelper(slot, itemToBeReplaced, newItem, container, updateAllInstances);
-					}
-				});
-			})
-			.build();
+		if (!config.useOldItemSearch())
+		{
+			geItemSearch.tooltipText("Set slot to");
+			geItemSearch.onItemSelected(itemID -> handleItemSelectedFromSearch(itemID, slot, allowStackable, updateAllInstances));
+			geItemSearch.build();
+		}
+		else
+		{
+			itemSearch.tooltipText("Set slot to");
+			itemSearch.onItemSelected(itemID -> handleItemSelectedFromSearch(itemID, slot, allowStackable, updateAllInstances));
+			itemSearch.build();
+		}
 	}
 
-	private void updateSlotFromSearchHelper(final InventorySetupsSlot slot, final InventorySetupsItem itemToBeReplaced,
+	private void updateSlotWithNewItem(final InventorySetupsSlot slot, final InventorySetupsItem itemToBeReplaced,
 										final InventorySetupsItem newItem, final List<InventorySetupsItem> container,
 										boolean updateAllInstances)
 	{
@@ -1619,6 +1600,57 @@ public class InventorySetupsPlugin extends Plugin
 				dataManager.updateConfig(true, false);
 				panel.refreshCurrentSetup();
 			});
+		});
+	}
+
+	private void handleItemSelectedFromSearch(
+			int itemId,
+			InventorySetupsSlot slot,
+			boolean allowStackable,
+			boolean updateAllInstances
+	)
+	{
+		clientThread.invokeLater(() ->
+		{
+			int finalId = itemManager.canonicalize(itemId);
+			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
+			{
+				final Map<Integer, InventorySetupsItem> additionalFilteredItems =
+						panel.getCurrentSelectedSetup().getAdditionalFilteredItems();
+				if (!additionalFilteredItemsHasItem(finalId, additionalFilteredItems))
+				{
+					removeAdditionalFilteredItem(slot, additionalFilteredItems);
+					addAdditionalFilteredItem(finalId, slot.getParentSetup(), additionalFilteredItems);
+				}
+				return;
+			}
+
+			final String itemName = itemManager.getItemComposition(finalId).getName();
+			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
+			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
+			final InventorySetupsItem newItem = new InventorySetupsItem(
+					finalId,
+					itemName,
+					1,
+					itemToBeReplaced.isFuzzy(),
+					itemToBeReplaced.getStackCompare()
+			);
+
+			if (allowStackable && itemManager.getItemComposition(finalId).isStackable())
+			{
+				searchInput = chatboxPanelManager.openTextInput("Enter amount")
+						.addCharValidator(this::validateCharFromItemSearch)
+						.onDone((input) ->
+						{
+							int quantity = InventorySetupUtilities.parseTextInputAmount(input);
+							newItem.setQuantity(quantity);
+							updateSlotWithNewItem(slot, itemToBeReplaced, newItem, container, updateAllInstances);
+						}).build();
+			}
+			else
+			{
+				updateSlotWithNewItem(slot, itemToBeReplaced, newItem, container, updateAllInstances);
+			}
 		});
 	}
 
@@ -1653,15 +1685,29 @@ public class InventorySetupsPlugin extends Plugin
 			return;
 		}
 
-		itemSearch
-			.tooltipText("Set slot to")
-			.onItemSelected((itemId) ->
-			{
-				int finalId = itemManager.canonicalize(itemId);
-				setup.setIconID(finalId);
-				dataManager.updateConfig(true, false);
-				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
-			}).build();
+		if (!config.useOldItemSearch())
+		{
+			geItemSearch
+				.tooltipText("Set icon to")
+				.onItemSelected(itemId -> handleItemSelectedForIconUpdate(itemId, setup))
+				.build();
+		}
+		else
+		{
+			itemSearch
+				.tooltipText("Set icon to")
+				.onItemSelected(itemId -> handleItemSelectedForIconUpdate(itemId, setup))
+				.build();
+		}
+
+	}
+
+	private void handleItemSelectedForIconUpdate(int itemId, InventorySetup inventorySetup)
+	{
+		int finalId = itemManager.canonicalize(itemId);
+		inventorySetup.setIconID(finalId);
+		dataManager.updateConfig(true, false);
+		SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
 	}
 
 	public void removeItemFromSlot(final InventorySetupsSlot slot)
@@ -1705,6 +1751,8 @@ public class InventorySetupsPlugin extends Plugin
 
 			dataManager.updateConfig(true, false);
 			panel.refreshCurrentSetup();
+			// Close any RuneLite spawned Chatbox input in progress
+			chatboxPanelManager.close();
 		});
 	}
 
@@ -2346,7 +2394,7 @@ public class InventorySetupsPlugin extends Plugin
 
 	private List<InventorySetupsItem> getContainerFromSlot(final InventorySetupsSlot slot)
 	{
-		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch";
+		assert slot.getParentSetup() == panel.getCurrentSelectedSetup() : "Setup Mismatch " + slot.getParentSetup().getName() + " " + panel.getCurrentSelectedSetup();
 		return getContainerFromID(slot.getParentSetup(), slot.getSlotID());
 	}
 
