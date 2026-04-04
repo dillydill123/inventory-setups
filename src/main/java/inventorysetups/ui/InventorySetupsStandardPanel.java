@@ -318,7 +318,7 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 						c ->
 						{
 							// Don't consider the transparency component
-							Color newColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), 255);
+							Color newColor = new Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
 							inventorySetup.setHighlightColor(newColor);
 							updateHighlightColorLabel();
 						}
