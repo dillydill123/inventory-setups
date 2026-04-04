@@ -5,9 +5,11 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import inventorysetups.InventorySetupsStackCompareID;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
+@Slf4j
 public class InventorySetupItemSerializableTypeAdapter extends TypeAdapter<InventorySetupItemSerializable>
 {
 	@Override
@@ -81,8 +83,17 @@ public class InventorySetupItemSerializableTypeAdapter extends TypeAdapter<Inven
 						sc = InventorySetupsStackCompareID.valueOf(in.nextString());
 						break;
 					default:
+						// Handle any issues from legacy migrations without getting stuck in infinite loops
+						log.warn("Skipping unknown field '{}' in InventorySetupItemSerializable", fieldName);
+						in.skipValue();
 						break;
 				}
+			}
+			else
+			{
+				// Defensive: ensure we always make progress even if we somehow end up on a value token.
+				log.warn("Skipping unknown token '{}' in InventorySetupItemSerializable", token);
+				in.skipValue();
 			}
 		}
 
@@ -90,3 +101,4 @@ public class InventorySetupItemSerializableTypeAdapter extends TypeAdapter<Inven
 		return new InventorySetupItemSerializable(id, q, f, sc);
 	}
 }
+
