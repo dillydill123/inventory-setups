@@ -1,0 +1,223 @@
+/*
+ * Copyright (c) 2018 Abex
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package inventorysetups.chatbox;
+
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.ScriptID;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.ScriptPreFired;
+import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarClientID;
+import net.runelite.api.vars.InputType;
+import net.runelite.api.widgets.JavaScriptCallback;
+import net.runelite.api.widgets.Widget;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.game.chatbox.ChatboxTextInput;
+import net.runelite.client.game.chatbox.ChatboxTextMenuInput;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.input.KeyListener;
+import net.runelite.client.input.KeyManager;
+import net.runelite.client.input.MouseListener;
+import net.runelite.client.input.MouseManager;
+import net.runelite.client.input.MouseWheelListener;
+
+// NOTE: Copy of https://github.com/raiyni/runelite/blob/00d5f3667075d43d2bab3d088efbffb93f8b14ea/runelite-client/src/main/java/net/runelite/client/game/chatbox/ChatboxPanelManager.java
+// Part of RuneLite https://github.com/runelite/runelite/pull/18410. Even if this merges, we still need this due to the custom filtering logic.
+
+@Singleton
+@Slf4j
+public class InventorySetupsChatboxPanelManager
+{
+	private final Client client;
+
+	private final ClientThread clientThread;
+
+	private final EventBus eventBus;
+
+	private final KeyManager keyManager;
+
+	private final MouseManager mouseManager;
+
+	private final Provider<ChatboxTextMenuInput> chatboxTextMenuInputProvider;
+	private final Provider<ChatboxTextInput> chatboxTextInputProvider;
+
+	@Getter
+	private InventorySetupsChatboxInput currentInput = null;
+
+	@Inject
+	private InventorySetupsChatboxPanelManager(EventBus eventBus, Client client, ClientThread clientThread,
+								KeyManager keyManager, MouseManager mouseManager,
+								Provider<ChatboxTextMenuInput> chatboxTextMenuInputProvider, Provider<ChatboxTextInput> chatboxTextInputProvider)
+	{
+		this.client = client;
+		this.clientThread = clientThread;
+		this.eventBus = eventBus;
+
+		this.keyManager = keyManager;
+		this.mouseManager = mouseManager;
+
+		this.chatboxTextMenuInputProvider = chatboxTextMenuInputProvider;
+		this.chatboxTextInputProvider = chatboxTextInputProvider;
+
+		eventBus.register(this);
+	}
+
+	public void close()
+	{
+		clientThread.invokeLater(this::unsafeCloseInput);
+	}
+
+	private void unsafeCloseInput()
+	{
+		client.runScript(
+				ScriptID.MESSAGE_LAYER_CLOSE,
+				0,
+				1,
+				0
+		);
+		if (currentInput != null)
+		{
+			killCurrentPanel();
+		}
+	}
+
+	private void unsafeOpenInput(InventorySetupsChatboxInput input)
+	{
+		if (currentInput != null)
+		{
+			killCurrentPanel();
+		}
+
+		client.runScript(ScriptID.MESSAGE_LAYER_OPEN, 0);
+
+		eventBus.register(input);
+		if (input instanceof KeyListener)
+		{
+			keyManager.registerKeyListener((KeyListener) input);
+		}
+		if (input instanceof MouseListener)
+		{
+			mouseManager.registerMouseListener((MouseListener) input);
+		}
+		if (input instanceof MouseWheelListener)
+		{
+			mouseManager.registerMouseWheelListener((MouseWheelListener) input);
+		}
+
+		client.setVarcIntValue(VarClientID.MESLAYERMODE, InputType.RUNELITE_CHATBOX_PANEL.getType());
+		client.getWidget(InterfaceID.Chatbox.MES_TEXT).setHidden(true);
+		client.getWidget(InterfaceID.Chatbox.MES_TEXT2).setHidden(true);
+
+		Widget c = getContainerWidget();
+		c.deleteAllChildren();
+		c.setOnDialogAbortListener((JavaScriptCallback) ev -> this.unsafeCloseInput());
+		input.open();
+
+		currentInput = input;
+	}
+
+	public void openInput(InventorySetupsChatboxInput input)
+	{
+		clientThread.invokeLater(() -> unsafeOpenInput(input));
+	}
+
+	public ChatboxTextMenuInput openTextMenuInput(String title)
+	{
+		return chatboxTextMenuInputProvider.get()
+				.title(title);
+	}
+
+	public ChatboxTextInput openTextInput(String prompt)
+	{
+		return chatboxTextInputProvider.get()
+				.prompt(prompt);
+	}
+
+	@Subscribe
+	public void onScriptPreFired(ScriptPreFired ev)
+	{
+		if (currentInput != null && ev.getScriptId() == ScriptID.MESSAGE_LAYER_CLOSE)
+		{
+			killCurrentPanel();
+		}
+	}
+
+	@Subscribe
+	private void onGameStateChanged(GameStateChanged ev)
+	{
+		if (currentInput != null && ev.getGameState() == GameState.LOGIN_SCREEN)
+		{
+			killCurrentPanel();
+		}
+	}
+
+	private void killCurrentPanel()
+	{
+		try
+		{
+			currentInput.close();
+		}
+		catch (Exception e)
+		{
+			log.warn("Exception closing {}", currentInput.getClass(), e);
+		}
+
+		eventBus.unregister(currentInput);
+		if (currentInput instanceof KeyListener)
+		{
+			keyManager.unregisterKeyListener((KeyListener) currentInput);
+		}
+		if (currentInput instanceof MouseListener)
+		{
+			mouseManager.unregisterMouseListener((MouseListener) currentInput);
+		}
+		if (currentInput instanceof MouseWheelListener)
+		{
+			mouseManager.unregisterMouseWheelListener((MouseWheelListener) currentInput);
+		}
+		currentInput = null;
+	}
+
+	public Widget getContainerWidget()
+	{
+		return client.getWidget(InterfaceID.Chatbox.MES_LAYER);
+	}
+
+	public boolean shouldTakeInput()
+	{
+		// the search box on the world map can be focused, and chat input goes there, even
+		// though the chatbox still has its key listener.
+		Widget worldMapSearch = client.getWidget(InterfaceID.Worldmap.MAPLIST_DISPLAY);
+		return worldMapSearch == null || client.getVarcIntValue(VarClientID.WORLDMAP_SEARCHING) != 1;
+	}
+}

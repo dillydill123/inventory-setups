@@ -17,6 +17,11 @@ public class InventorySetupUtilities
 
 	static public int parseTextInputAmount(String input)
 	{
+		if (input == null || input.isEmpty())
+		{
+			return 1;
+		}
+
 		// only take the first 10 characters (max amount is 2.147B which is only 10 digits)
 		if (input.length() > 10)
 		{
