@@ -163,8 +163,13 @@ public class InventorySetupsChatboxItemSearchFilter
 		idsToFilter.add(ItemID.FAKE_WRATHRUNE);
 		idsToFilter.add(ItemID.FAKE_WINE_OF_ZAMORAK);
 
-		// This is a "Clue Scroll"?
+		// This is a "Clue Scroll" that looks like a Pink Skirt...
 		idsToFilter.add(ItemID.CERT_DISPLAY_TEA);
+
+		// These appear at the top when searching "Rune". Since it's such a common term, remove these that will never
+		// be selected.
+		idsToFilter.add(ItemID.MACRO_RUNE_PICKAXEHEAD);
+		idsToFilter.add(ItemID.MACRO_RUNE_HATCHETHEAD);
 	}
 
 	public void addGenericDiaryItemsToFilter()
