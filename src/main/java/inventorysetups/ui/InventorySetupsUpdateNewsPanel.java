@@ -137,10 +137,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Added a config option for bottom to top ZigZag layouts.\n\n" +
-							"Hotkeys are now disabled during chat box inputs (bank searches, PMs, etc.) by default. A new config option has been added to revert this.\n\n" +
-							"Fixed some issues with fuzzy items adding a placeholder incorrectly.\n\n" +
-							"As a reminder, layouts can be reset by right clicking the \"Show worn items\" button in the bank and navigating to \"Auto Layout\". Items can be moved freely in layouts without affecting their real positions in the bank.";
+		String updateText =	"The bank now maintains the scroll bar position when using the same setup.\n\n" +
+							"Updating an icon or slot from search now uses a Grand Exchange search. Many items that were previously missing will now be available. A config option has been made to use the old item search.\n\n" +
+							"Fixed an issue where Bank Tags would filter the bank using the previous Inventory Setup upon login, despite no setup selected in the panel.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
