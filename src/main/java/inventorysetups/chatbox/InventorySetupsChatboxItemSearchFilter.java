@@ -50,6 +50,7 @@ public class InventorySetupsChatboxItemSearchFilter
 		addLMSItemsToFilter();
 		addNightmarezoneItemsToFilter();
 		addClueScrollItemsToFilter();
+		addGenericDiaryItemsToFilter();
 		addMiscellaneousItemsToFilter();
 
 		// Estimate fake items by collecting items with duplicate inventory models. If a tradeable item exists among the
@@ -164,6 +165,34 @@ public class InventorySetupsChatboxItemSearchFilter
 
 		// This is a "Clue Scroll"?
 		idsToFilter.add(ItemID.CERT_DISPLAY_TEA);
+	}
+
+	public void addGenericDiaryItemsToFilter()
+	{
+		// Diary items have a "Generic version" that look like the "Hard" reward should be avoided as well.
+		// No, the names do not make sense...
+		// Kandarin Headgear
+		idsToFilter.add(ItemID.CERT_BLAST_FURNACE_PUMP_HELD);
+		// Varrock Armor
+		idsToFilter.add(ItemID.CERT_ANVIL_ICON_DUMMY);
+		// Karamja Gloves
+		idsToFilter.add(ItemID.CERT_BLACK_AMULET);
+		// Morytania Legs
+		idsToFilter.add(ItemID.CERT_QUEST_START_ICON_DUMMY);
+		// Fremennik Boots
+		idsToFilter.add(ItemID.CERT_GUB_XMAS_2006_SNOWBALL);
+		// Falador Shield
+		idsToFilter.add(ItemID.CERT_INTELLIGENCE_REPORT);
+		// Explorer's Ring
+		idsToFilter.add(ItemID.CERT_GENERAL_STORE_ICON_DUMMY);
+		// Wilderness Sword
+		idsToFilter.add(ItemID.CERT_REINITIALISATION_15_INACTIVE);
+		// Western Banner
+		idsToFilter.add(ItemID.CERT_REINITIALISATION_16_INACTIVE);
+		// Desert Amulet
+		idsToFilter.add(ItemID.CERT_ROGUESDEN_PUZZLE_ROTATION);
+		// Ardougne Cloak
+		idsToFilter.add(ItemID.CERT_ARRAVCERTIFICATE);
 	}
 
 	public void addClueScrollItemsToFilter()
