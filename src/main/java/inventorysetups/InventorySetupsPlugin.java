@@ -1218,6 +1218,12 @@ public class InventorySetupsPlugin extends Plugin
 
 			if (currentSelectedSetup == null || !currentSelectedSetup.isFilterBank() || !isFilteringAllowed())
 			{
+				// There is a chance Bank Tags is remembering the last tag opened, and will try to open an Inventory Setup
+				// tag even if the current selected setup is null.
+				if (isInventorySetupTagOpen())
+				{
+					bankTagsService.closeBankTag();
+				}
 				return;
 			}
 
