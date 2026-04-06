@@ -53,7 +53,7 @@ public class InventorySetupsChatboxItemSearchFilter
 		addGenericDiaryItemsToFilter();
 		addMiscellaneousItemsToFilter();
 
-		// Estimate fake items by collecting items with duplicate inventory models. If a tradeable item exists among the
+		// Estimate fake items by collecting items with duplicate names. If a tradeable item exists among the
 		// nontradeable items, we add the nontradeable items to the list of IDs to filter. If all items are tradeable
 		// or untradeable, do nothing. Note that in F2P, even tradeable members items are considered untradeable, so
 		// this heuristic will not work there.
@@ -69,7 +69,7 @@ public class InventorySetupsChatboxItemSearchFilter
 			}
 
 			String membersName = itemComp.getMembersName();
-			// Filter any object that has "null" as the name
+			// Filter any object that has "null" as the name, or is an empty string.
 			if (membersName == null || membersName.isEmpty() || membersName.equalsIgnoreCase("null"))
 			{
 				idsToFilter.add(id);
