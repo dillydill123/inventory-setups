@@ -170,6 +170,10 @@ public class InventorySetupsChatboxItemSearchFilter
 		// be selected.
 		idsToFilter.add(ItemID.MACRO_RUNE_PICKAXEHEAD);
 		idsToFilter.add(ItemID.MACRO_RUNE_HATCHETHEAD);
+
+		// Remove "Fake" Rune pouches
+		idsToFilter.add(ItemID.PVPA_RUNE_REPLACEMENT);
+		idsToFilter.add(ItemID.CASTLEWARS_RUNE_REPLACEMENT);
 	}
 
 	public void addGenericDiaryItemsToFilter()
