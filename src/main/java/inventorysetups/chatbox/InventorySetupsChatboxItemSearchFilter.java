@@ -174,6 +174,9 @@ public class InventorySetupsChatboxItemSearchFilter
 		// Remove "Fake" Rune pouches
 		idsToFilter.add(ItemID.PVPA_RUNE_REPLACEMENT);
 		idsToFilter.add(ItemID.CASTLEWARS_RUNE_REPLACEMENT);
+
+		// Fake copy of V's Shield
+		idsToFilter.add(ItemID.VIKINGEXILE_V_SHIELD);
 	}
 
 	public void addGenericDiaryItemsToFilter()
@@ -202,6 +205,8 @@ public class InventorySetupsChatboxItemSearchFilter
 		idsToFilter.add(ItemID.CERT_ROGUESDEN_PUZZLE_ROTATION);
 		// Ardougne Cloak
 		idsToFilter.add(ItemID.CERT_ARRAVCERTIFICATE);
+		// Rada's Blessing
+		idsToFilter.add(ItemID.RADA_BLESSING_DUMMY);
 	}
 
 	public void addClueScrollItemsToFilter()
