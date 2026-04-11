@@ -282,6 +282,17 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "openSlayerTaskSetupHotkey",
+			name = "Open Slayer Task Setup",
+			description = "When in bank, opens the inventory setup whose name matches your current slayer task",
+			section = hotkeySection
+	)
+	default Keybind openSlayerTaskSetupHotkey()
+	{
+		return Keybind.NOT_SET;
+	}
+
+	@ConfigItem(
 			keyName = CONFIG_KEY_PERSIST_HOTKEYS,
 			name = "Persist Hotkeys Outside Bank",
 			description = "Configures hotkeys to persist even outside the bank",

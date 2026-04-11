@@ -61,8 +61,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.events.VarClientIntChanged;
+import net.runelite.api.gameval.DBTableID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.InterfaceID;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.KeyCode;
@@ -313,6 +315,15 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	};
 
+	private final HotkeyListener openSlayerTaskSetupHotkeyListener = new HotkeyListener(() -> config.openSlayerTaskSetupHotkey())
+	{
+		@Override
+		public void hotkeyPressed()
+		{
+			openSetupForCurrentSlayerTask();
+		}
+	};
+
 	@Override
 	public void startUp()
 	{
@@ -446,6 +457,7 @@ public class InventorySetupsPlugin extends Plugin
 			keyManager.registerKeyListener(returnToSetupsHotkeyListener);
 			keyManager.registerKeyListener(filterBankHotkeyListener);
 			keyManager.registerKeyListener(sectionModeHotkeyListener);
+			keyManager.registerKeyListener(openSlayerTaskSetupHotkeyListener);
 			this.hotkeysAreRegistered = true;
 		}
 	}
@@ -457,6 +469,7 @@ public class InventorySetupsPlugin extends Plugin
 			keyManager.unregisterKeyListener(returnToSetupsHotkeyListener);
 			keyManager.unregisterKeyListener(filterBankHotkeyListener);
 			keyManager.unregisterKeyListener(sectionModeHotkeyListener);
+			keyManager.unregisterKeyListener(openSlayerTaskSetupHotkeyListener);
 			this.hotkeysAreRegistered = false;
 		}
 	}
@@ -1282,6 +1295,77 @@ public class InventorySetupsPlugin extends Plugin
 		});
 	}
 
+
+	private void openSetupForCurrentSlayerTask()
+	{
+		clientThread.invokeLater(() ->
+		{
+			String taskName = getSlayerTaskName();
+			if (taskName.isEmpty())
+			{
+				return;
+			}
+			for (final InventorySetup setup : inventorySetups)
+			{
+				if (setup.getName().replace('_', ' ').equalsIgnoreCase(taskName))
+				{
+					SwingUtilities.invokeLater(() ->
+					{
+						if (setup == panel.getCurrentSelectedSetup())
+						{
+							panel.returnToOverviewPanel(false);
+						}
+						else
+						{
+							panel.setCurrentInventorySetup(setup, true);
+						}
+					});
+					return;
+				}
+			}
+		});
+	}
+
+	private String getSlayerTaskName()
+	{
+		int taskId = client.getVarpValue(395);
+		if (taskId == 0)
+		{
+			return "";
+		}
+
+		int taskCount = client.getVarpValue(394);
+		if (taskCount == 0)
+		{
+			return "";
+		}
+
+		int taskDBRow;
+		if (taskId == 98) // Boss task
+		{
+			List<Integer> bossRows = client.getDBRowsByValue(
+				DBTableID.SlayerTaskSublist.ID,
+				DBTableID.SlayerTaskSublist.COL_SUBTABLE_ID,
+				0,
+				client.getVarbitValue(VarbitID.SLAYER_TARGET_BOSSID));
+			if (bossRows.isEmpty())
+			{
+				return "";
+			}
+			taskDBRow = (Integer) client.getDBTableField(bossRows.get(0), DBTableID.SlayerTaskSublist.COL_TASK, 0)[0];
+		}
+		else
+		{
+			List<Integer> taskRows = client.getDBRowsByValue(DBTableID.SlayerTask.ID, DBTableID.SlayerTask.COL_ID, 0, taskId);
+			if (taskRows.isEmpty())
+			{
+				return "";
+			}
+			taskDBRow = taskRows.get(0);
+		}
+
+		return ((String) client.getDBTableField(taskDBRow, DBTableID.SlayerTask.COL_NAME_UPPERCASE, 0)[0]).replace('_', ' ');
+	}
 
 	private boolean additionalFilteredItemsHasItem(int itemId, final Map<Integer, InventorySetupsItem> additionalFilteredItems)
 	{
