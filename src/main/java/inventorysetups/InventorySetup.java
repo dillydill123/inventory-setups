@@ -102,6 +102,10 @@ public class InventorySetup implements InventorySetupsDisplayAttributes
 	@Setter
 	private int iconID;
 
+	@Getter
+	@Setter
+	private String attackOption;
+
 	public void updateInventory(final List<InventorySetupsItem> inv)
 	{
 		inventory = inv;

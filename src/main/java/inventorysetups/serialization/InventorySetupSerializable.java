@@ -44,6 +44,8 @@ public class InventorySetupSerializable
 	Boolean fv;		// favorite (null = false)
 	@Nullable
 	Integer iId;	// iconID (null = default item ID for icon view)
+	@Nullable
+	String ao;		// Attack option e.g., "Chop", "Pound", "Block". (null = No saved option)
 
 	static public InventorySetupSerializable convertFromInventorySetup(final InventorySetup inventorySetup)
 	{
@@ -74,8 +76,9 @@ public class InventorySetupSerializable
 		Integer sb = inventorySetup.getSpellBook() != 0 ? inventorySetup.getSpellBook() : null;
 		Boolean fv = inventorySetup.isFavorite() ? Boolean.TRUE : null;
 		Integer iId = inventorySetup.getIconID() > 0 ? inventorySetup.getIconID() : null;
+		String ao = !Strings.isNullOrEmpty(inventorySetup.getAttackOption()) ? inventorySetup.getAttackOption() : null;
 
-		return new InventorySetupSerializable(inv, eq, rp, bp, qv, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId);
+		return new InventorySetupSerializable(inv, eq, rp, bp, qv, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId, ao);
 	}
 
 	static private List<InventorySetupItemSerializable> convertListFromInventorySetup(final List<InventorySetupsItem> items)
@@ -134,8 +137,9 @@ public class InventorySetupSerializable
 		int sb = iss.getSb() != null ? iss.getSb() : 0;
 		boolean fv = iss.getFv() != null ? iss.getFv() : Boolean.FALSE;
 		int iId = iss.getIId() != null ? iss.getIId() : -1;
+		String ao = iss.getAo() != null ? iss.getAo() : "";
 
-		return new InventorySetup(inv, eq, rp, bp, qv, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId);
+		return new InventorySetup(inv, eq, rp, bp, qv, afi, name, notes, hc, hd, dc, fb, uh, sb, fv, iId, ao);
 	}
 
 

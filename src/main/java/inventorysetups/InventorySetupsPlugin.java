@@ -27,6 +27,7 @@ package inventorysetups;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import inventorysetups.attackstyle.AttackStyleCache;
 import inventorysetups.chatbox.InventorySetupsChatboxItemSearch;
 import inventorysetups.chatbox.InventorySetupsChatboxItemSearchFilter;
 import inventorysetups.serialization.InventorySetupPortable;
@@ -59,6 +60,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.GameState;
 import net.runelite.api.events.VarClientIntChanged;
 import net.runelite.api.gameval.InventoryID;
@@ -80,6 +82,7 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.gameval.VarClientID;
+import net.runelite.api.gameval.VarPlayerID;
 import net.runelite.api.vars.InputType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
@@ -264,6 +267,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	private ChatboxTextInput searchInput;
 
+	@Getter
+	private AttackStyleCache attackStyleCache;
+
 	@Setter
 	@Getter
 	private boolean navButtonIsSelected;
@@ -369,6 +375,8 @@ public class InventorySetupsPlugin extends Plugin
 
 			chatboxSearchFilter.estimateFakeItems(itemManager);
 			this.geItemSearch.searchFilter(chatboxSearchFilter);
+
+			this.attackStyleCache = new AttackStyleCache(this.client);
 
 			clientThread.invokeLater(() ->
 			{
@@ -1032,6 +1040,7 @@ public class InventorySetupsPlugin extends Plugin
 			List<InventorySetupsItem> boltPouchData = ammoHandler.getBoltPouchDataIfInContainer(inv);
 			List<InventorySetupsItem> quiverData = ammoHandler.getQuiverDataIfInSetup(inv, eqp);
 
+			String attackOption = config.attackOption() ? attackStyleCache.getCurrentAttackOption() : "";
 			int spellbook = getCurrentSpellbook();
 
 			final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouchData, boltPouchData, quiverData,
@@ -1043,7 +1052,7 @@ public class InventorySetupsPlugin extends Plugin
 				config.enableDisplayColor() ? config.displayColor() : null,
 				config.bankFilter(),
 				config.highlightUnorderedDifference(),
-				spellbook, false, -1);
+				spellbook, false, -1, attackOption);
 
 			cache.addSetup(invSetup);
 			inventorySetups.add(invSetup);
@@ -1326,8 +1335,8 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
-		// Spellbook changed
-		if (event.getVarpId() == 439 && client.getGameState() == GameState.LOGGED_IN)
+		// Spellbook or Combat mode changed.
+		if ((event.getVarpId() == VarPlayerID.ALTERNATE_SPELLS || event.getVarpId() == VarPlayerID.COM_MODE) && client.getGameState() == GameState.LOGGED_IN)
 		{
 			// must be invoked later otherwise causes freezing.
 			clientThread.invokeLater(panel::doHighlighting);
@@ -1458,6 +1467,12 @@ public class InventorySetupsPlugin extends Plugin
 			setup.updateEquipment(eqp);
 			setup.updateSpellbook(getCurrentSpellbook());
 
+			// Only update the attack option if it has one currently set.
+			if (!setup.getAttackOption().isEmpty())
+			{
+				setup.setAttackOption(attackStyleCache.getCurrentAttackOption());
+			}
+
 			// Regenerate the layout and tag.
 			clientThread.invoke(() ->
 			{
@@ -1493,6 +1508,8 @@ public class InventorySetupsPlugin extends Plugin
 
 	private void updateAllInstancesInSetupWithNewItem(final InventorySetupsItem oldItem, final InventorySetupsItem newItem)
 	{
+		// NOTE: This does not update attack options for weapons. Preferring to leave the current attack option as is.
+
 		if (oldItem.getId() == -1 || newItem.getId() == -1)
 		{
 			SwingUtilities.invokeLater(() ->
@@ -1546,6 +1563,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				List<InventorySetupsItem> containerToUpdate =  getContainerFromID(slot.getParentSetup(), slot.getSlotID());
 				ammoHandler.handleSpecialAmmo(slot.getParentSetup(), oldItem, newItem);
+				handleUpdatingInSpecialSlots(slot);
 				containerToUpdate.set(slot.getIndexInSlot(), newItem);
 				layoutUtilities.recalculateLayout(slot.getParentSetup());
 			}
@@ -1598,6 +1616,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, newItem);
 				container.set(slot.getIndexInSlot(), newItem);
+				handleUpdatingInSpecialSlots(slot);
 				layoutUtilities.recalculateLayout(slot.getParentSetup());
 			}
 
@@ -1730,7 +1749,6 @@ public class InventorySetupsPlugin extends Plugin
 		// must be invoked on client thread to get the name
 		clientThread.invokeLater(() ->
 		{
-
 			if (slot.getSlotID() == InventorySetupsSlotID.ADDITIONAL_ITEMS)
 			{
 				removeAdditionalFilteredItem(slot, panel.getCurrentSelectedSetup().getAdditionalFilteredItems());
@@ -1746,6 +1764,7 @@ public class InventorySetupsPlugin extends Plugin
 			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 			final InventorySetupsItem dummyItem = new InventorySetupsItem(-1, "", 0, itemToBeReplaced.isFuzzy(), itemToBeReplaced.getStackCompare());
 			ammoHandler.handleSpecialAmmo(slot.getParentSetup(), itemToBeReplaced, dummyItem);
+			handleRemovingInSpecialSlots(slot);
 
 			container.set(slot.getIndexInSlot(), dummyItem);
 
@@ -1826,6 +1845,71 @@ public class InventorySetupsPlugin extends Plugin
 
 		dataManager.updateConfig(true, false);
 		panel.refreshCurrentSetup();
+	}
+
+	public void setAttackOptionForSetup(final InventorySetupsSlot slot)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			JOptionPane.showMessageDialog(panel,
+					"You must be logged in to update the attack option.",
+					"Cannot Update Attack Option",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		clientThread.invokeLater(() ->
+				setAttackOptionForSetup(slot, attackStyleCache.getCurrentAttackOption()));
+	}
+
+	public void setAttackOptionForSetup(final InventorySetupsSlot slot, final String newAttackOption)
+	{
+		if (panel.getCurrentSelectedSetup() == null || slot.getParentSetup() == null)
+		{
+			return;
+		}
+
+		slot.getParentSetup().setAttackOption(newAttackOption);
+		dataManager.updateConfig(true, false);
+		panel.refreshCurrentSetup();
+	}
+
+	private void handleUpdatingInSpecialSlots(final InventorySetupsSlot slot)
+	{
+		// Handle updating any special non ammo slots, currently only the weapon slot
+		if (slot.getSlotID() != InventorySetupsSlotID.EQUIPMENT || slot.getIndexInSlot() != EquipmentInventorySlot.WEAPON.getSlotIdx())
+		{
+			return;
+		}
+
+		// Handle weapon slot being updated
+		if (slot.getParentSetup() == null)
+		{
+			return;
+		}
+
+		InventorySetup setup = slot.getParentSetup();
+		if (!setup.getAttackOption().isEmpty())
+		{
+			setup.setAttackOption(attackStyleCache.getCurrentAttackOption());
+		}
+	}
+
+	private void handleRemovingInSpecialSlots(final InventorySetupsSlot slot)
+	{
+		// Handle removing any special non ammo slots, currently only the weapon slot
+		if (slot.getSlotID() != InventorySetupsSlotID.EQUIPMENT || slot.getIndexInSlot() != EquipmentInventorySlot.WEAPON.getSlotIdx())
+		{
+			return;
+		}
+
+		if (slot.getParentSetup() == null)
+		{
+			return;
+		}
+
+		InventorySetup setup = slot.getParentSetup();
+		setup.setAttackOption("");
 	}
 
 	private void removeAdditionalFilteredItem(final InventorySetupsSlot slot, final Map<Integer, InventorySetupsItem> additionalFilteredItems)

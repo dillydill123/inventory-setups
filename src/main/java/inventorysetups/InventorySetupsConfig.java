@@ -213,6 +213,17 @@ public interface InventorySetupsConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "attackOption",
+			name = "Default Attack Option",
+			description = "Configures new setups to include the player's current attack option",
+			section = defaultSection
+	)
+	default boolean attackOption()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "returnToSetupsHotkey",
 			name = "Return To Setups Hotkey",
 			description = "Configures the hotkey for returning to setups",
