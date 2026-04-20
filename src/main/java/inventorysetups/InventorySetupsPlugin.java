@@ -45,6 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -642,6 +643,12 @@ public class InventorySetupsPlugin extends Plugin
 		}
 	}
 
+	public Comparator<InventorySetup> getSetupsComparator()
+	{
+		Comparator<InventorySetup> favoriteComparator = Comparator.<InventorySetup>comparingInt(s -> s.isFavorite() ? 0 : 1);
+		return (config.sortingMode() == InventorySetupsSortingID.ALPHABETICAL) ? favoriteComparator.thenComparing(Comparator.<InventorySetup, String>comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER)) : favoriteComparator;
+	}
+
 	private void createMenuEntriesForWornItems()
 	{
 		List<InventorySetup> filteredSetups = panel.getFilteredInventorysetups();
@@ -662,7 +669,7 @@ public class InventorySetupsPlugin extends Plugin
 				setupsToShowOnWornItemsList = filteredSetups;
 				break;
 		}
-
+		setupsToShowOnWornItemsList.sort(getSetupsComparator());
 		// Section mode creates the section entries and sub menus
 		if (config.sectionMode() && config.wornItemSelectionSubmenu())
 		{
@@ -672,26 +679,24 @@ public class InventorySetupsPlugin extends Plugin
 
 			// If the sorting mode is default, then the order to appear on the worn items list
 			// should be the order they appear in the section, which may not be the filtered order.
+			List<InventorySetupsSection> sortedSections = new ArrayList<>(getSections());
+			if (config.sortingMode() == InventorySetupsSortingID.ALPHABETICAL && config.sectionSorting())
+			{
+				sortedSections.sort(Comparator.comparing(InventorySetupsSection::getName, String.CASE_INSENSITIVE_ORDER));
+			}
 			if (config.sortingMode() == InventorySetupsSortingID.DEFAULT)
 			{
-				Set<String> setupsToShowOnWornItemsListCache = setupsToShowOnWornItemsList.stream()
-						.map(InventorySetup::getName)
-						.collect(Collectors.toSet());
-				sections.forEach(section ->
+				sortedSections.forEach(section ->
 				{
-					List<String> setupsInSection =  section.getSetups();
-					setupsInSection.forEach(setupName ->
-					{
-						if (setupsToShowOnWornItemsListCache.contains(setupName))
-						{
+					setupsToShowOnWornItemsList.stream().filter(setup -> section.getSetups().stream().anyMatch(ssetups -> ssetups.equals(setup.getName())))
+						.forEach(setupName -> {
 							if (!sectionsToDisplay.containsKey(section.getName()))
 							{
 								sectionsToDisplay.put(section.getName(), new ArrayList<>());
 							}
 							final InventorySetup inventorySetup = cache.getInventorySetupNames().get(setupName);
 							sectionsToDisplay.get(section.getName()).add(inventorySetup);
-						}
-					});
+						});
 				});
 
 				setupsToShowOnWornItemsList.forEach(setupToShow ->
@@ -726,7 +731,7 @@ public class InventorySetupsPlugin extends Plugin
 				});
 			}
 
-			sections.forEach(section ->
+			sortedSections.forEach(section ->
 			{
 
 				if (!sectionsToDisplay.containsKey(section.getName()))
