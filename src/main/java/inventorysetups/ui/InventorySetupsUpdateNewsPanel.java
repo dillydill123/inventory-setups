@@ -137,9 +137,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"The bank now maintains the scroll bar position when using the same setup.\n\n" +
-							"Updating an icon or slot from search now uses a Grand Exchange search. Many items that were previously missing will now be available. A config option has been made to use the old item search.\n\n" +
-							"Fixed an issue where Bank Tags would filter the bank using the previous Inventory Setup upon login, despite no setup selected in the panel.";
+		String updateText =	"You can now save an attack option in setups.\n\n" +
+							"Right click the weapon slot to update or remove the currently saved attack option.\n\n" +
+							"A config setting has been added to include the player's current attack option for new setups.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
