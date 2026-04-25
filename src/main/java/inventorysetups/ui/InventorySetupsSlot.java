@@ -75,9 +75,12 @@ public class InventorySetupsSlot extends JPanel
 	@Getter
 	private JPopupMenu shiftRightClickMenu;
 
+	public static final int SLOT_WIDTH = 46;
+	public static final int SLOT_HEIGHT = 42;
+
 	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot)
 	{
-		this(color, id, indexInSlot, 46, 42);
+		this(color, id, indexInSlot, SLOT_WIDTH, SLOT_HEIGHT);
 	}
 
 	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot, int width, int height)
@@ -128,6 +131,7 @@ public class InventorySetupsSlot extends JPanel
 		setPreferredSize(new Dimension(width, height));
 		setBackground(color);
 		setLayout(new GridBagLayout());
+
 		// Set constraints to put it in the north east (top right)
 		GridBagConstraints fuzzyConstraints = new GridBagConstraints(0, 0, 1, 1, 1, 1,
 																		GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
@@ -293,6 +297,26 @@ public class InventorySetupsSlot extends JPanel
 		slot.getRightClickMenu().add(stackIndicatorMainMenu);
 	}
 
+	public static void addAttackOptionListenerToSlot(final InventorySetupsPlugin plugin, final InventorySetupsSlot slot)
+	{
+		JMenuItem updateToCurrentAttackOption = new JMenuItem("Update to Current Attack Option");
+		updateToCurrentAttackOption.addActionListener(e ->
+		{
+			plugin.setAttackOptionForSetup(slot);
+		});
+
+		JMenuItem removeAttackOption = new JMenuItem("Remove Attack Option");
+		removeAttackOption.addActionListener(e ->
+		{
+			plugin.setAttackOptionForSetup(slot, "");
+		});
+
+		JMenu stackIndicatorMainMenu = new JMenu("Attack Option");
+		stackIndicatorMainMenu.add(updateToCurrentAttackOption);
+		stackIndicatorMainMenu.add(removeAttackOption);
+		slot.getRightClickMenu().add(stackIndicatorMainMenu);
+	}
+
 	public static String getContainerString(final InventorySetupsSlot slot)
 	{
 		String updateContainerFrom = "";
@@ -330,6 +354,7 @@ public class InventorySetupsSlot extends JPanel
 		{
 			toolTip += " (" + quantity + ")";
 		}
+
 		containerSlot.setImageLabel(toolTip, itemImg, item.isFuzzy(), item.getStackCompare());
 	}
 
@@ -342,7 +367,7 @@ public class InventorySetupsSlot extends JPanel
 		// first check if stack differences are enabled and compare quantities
 		if (shouldHighlightSlotBasedOnStack(savedItemFromSetup.getStackCompare(), savedItemFromSetup.getQuantity(), currentItemFromContainer.getQuantity()))
 		{
-			containerSlot.setBackground(setup.getHighlightColor());
+			doHighlight(setup, containerSlot);
 			return;
 		}
 
@@ -359,11 +384,21 @@ public class InventorySetupsSlot extends JPanel
 		// if the ids don't match, highlight the container slot
 		if (currentItemId != savedItemId)
 		{
-			containerSlot.setBackground(setup.getHighlightColor());
+			doHighlight(setup, containerSlot);
 			return;
 		}
 
 		// set the color back to the original, because they match
+		doResetHighlight(containerSlot);
+	}
+
+	public static void doHighlight(final InventorySetup setup, final InventorySetupsSlot containerSlot)
+	{
+		containerSlot.setBackground(setup.getHighlightColor());
+	}
+
+	public static void doResetHighlight(final InventorySetupsSlot containerSlot)
+	{
 		containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 	}
 
