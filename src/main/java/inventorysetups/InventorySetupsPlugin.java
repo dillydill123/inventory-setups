@@ -1651,6 +1651,9 @@ public class InventorySetupsPlugin extends Plugin
 			}
 
 			final String itemName = itemManager.getItemComposition(finalId).getName();
+
+			log.debug("Selected {} ({}) from search.", itemName, finalId);
+
 			final List<InventorySetupsItem> container = getContainerFromSlot(slot);
 			final InventorySetupsItem itemToBeReplaced = container.get(slot.getIndexInSlot());
 			final InventorySetupsItem newItem = new InventorySetupsItem(

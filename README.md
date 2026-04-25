@@ -56,7 +56,7 @@ The overview panel contains all the setups and options to manipulate them.
 
 ### Viewing a Setup
 
-You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, spellbook, additional filtered items (explained later) and notes are saved in the setup. Additional ammunition containers like the rune pouch, bolt pouch, and quiver will also be displayed if present.
+You can view the setup by clicking on the view setups button (the eye icon). You can see that your inventory, equipment, spellbook, attack option, additional filtered items (explained later), and notes are saved in the setup. Additional ammunition containers like the rune pouch, bolt pouch, and quiver will also be displayed if present.
 
 ![View Setup](readme_images_and_gifs/view_setup_button.png)
 
@@ -153,6 +153,12 @@ You can also refresh an entire setup by using the refresh icon when viewing a se
 You can update the spellbook by right-clicking the slot and choosing the desired spellbook. There is also an option for none if you do not care about the spellbook for a particular setup.
 
 ![Update Spellbook](readme_images_and_gifs/spellbook.png)
+
+The Attack Option can be similarly updated or removed by right-clicking the weapon slot and using the Attack Option submenu.
+
+The attack option is specific to the weapon category and style selected. Instead of just "Aggressive" or "Accurate", the information saved is the option like "Chop", "Slash", or "Block". This encodes both the type of XP you wish to gain along with the combat style.
+
+![Update Attack Option](readme_images_and_gifs/update_attack_option.gif)
 
 ## Bank Filtering and Layouts
 
@@ -355,6 +361,7 @@ In the settings of Inventory Setups, you can change default setup options, key b
 
 ### Default Setup Options
 
+* **Default Attack Option** - Enabling this will make it so all newly created setups will save the current attack option
 * **Default Display Color** - The default color that will be used as a display color for new setups. The option above must be enabled
 * **Default Enable Display Color** - Enabling this will make it so all newly created setups will have the default display color. The display color is the thin colored line on Standard and Compact setup panels
 
@@ -401,6 +408,7 @@ Hint: You can right-click the paint bucket to delete the color of a setup or sec
 * **Section Mode** - Toggles section mode. Can also be selected on the main window of Inventory Setups
 * **Show Worn Item Filter** - Changes which setups show up on the "show worn items" button when right-clicked
 * **Sorting Mode** - The current sorting mode. It is equivalent to pressing the sorting mode button on the overview panel
+* **Use Old Item Search** - Use the old item search instead of the new GE Search
 * **Worn Items Section Submenus** - Allows section submenus when right-clicking the "show worn items" button
 
 ![Section Submenus](readme_images_and_gifs/section_submenus.png)
