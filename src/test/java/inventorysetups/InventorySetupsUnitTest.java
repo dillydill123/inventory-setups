@@ -17,6 +17,7 @@ import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import net.runelite.client.plugins.banktags.BankTagsConfig;
 import net.runelite.client.plugins.banktags.BankTagsPlugin;
@@ -135,5 +136,25 @@ public class InventorySetupsUnitTest
 												inventorySetupsConfig.displayColor(), false,false, 0, false, -1, "");
 		inventorySetupsPlugin.startUp();
 		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL, true, true));
+	}
+
+	@Test
+	public void testSetupContainsItemForSharedBankFilter()
+	{
+		// The shared bank filter keeps an item only when setupContainsItem returns true for it.
+		List<InventorySetupsItem> inventory = new ArrayList<>(Collections.nCopies(28, InventorySetupsItem.getDummyItem()));
+		inventory.set(0, new InventorySetupsItem(ItemID.COAL, "Coal", 1, false, InventorySetupsStackCompareID.None));
+		List<InventorySetupsItem> equipment = new ArrayList<>(Collections.nCopies(13, InventorySetupsItem.getDummyItem()));
+		List<InventorySetupsItem> runePouch = null;
+		List<InventorySetupsItem> boltPouch = null;
+		List<InventorySetupsItem> quiver = null;
+		Map<Integer, InventorySetupsItem> addItems = new HashMap<>();
+		InventorySetup setup = new InventorySetup(inventory, equipment, runePouch, boltPouch, quiver, addItems, "Test",
+												"", inventorySetupsConfig.highlightColor(), false,
+												inventorySetupsConfig.displayColor(), false, false, 0, false, -1, "");
+		inventorySetupsPlugin.startUp();
+		// Item present in the setup is kept, item not present is hidden.
+		assertTrue(inventorySetupsPlugin.setupContainsItem(setup, ItemID.COAL, true, true));
+		assertFalse(inventorySetupsPlugin.setupContainsItem(setup, ItemID.LOGS, true, true));
 	}
 }

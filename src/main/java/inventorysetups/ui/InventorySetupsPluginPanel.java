@@ -786,6 +786,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		plugin.doBankSearch();
+		plugin.refreshSharedBank();
 
 		validate();
 		repaint();
@@ -869,6 +870,8 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		currentSelectedSetup = null;
 
 		plugin.resetBankSearch();
+		// Restore the shared storage (if open) now that no setup is selected.
+		plugin.refreshSharedBank();
 
 	}
 

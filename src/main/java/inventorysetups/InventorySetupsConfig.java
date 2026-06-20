@@ -31,6 +31,7 @@ import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS_C
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_USE_OLD_ITEM_SEARCH;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_ZIGZAG_TYPE;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_LAYOUT_DUPLICATES;
+import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_FILTER_SHARED_BANK;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_MANUAL_BANK_FILTER;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PANEL_VIEW;
 import static inventorysetups.InventorySetupsPlugin.CONFIG_KEY_PERSIST_HOTKEYS;
@@ -536,6 +537,17 @@ public interface InventorySetupsConfig extends Config
 	default boolean manualBankFilter()
 	{
 		return false;
+	}
+
+	@ConfigItem(
+			keyName = CONFIG_KEY_FILTER_SHARED_BANK,
+			name = "Filter Group Storage",
+			description = "Apply bank filtering to the Group Ironman shared storage when a setup is selected",
+			section = otherSection
+	)
+	default boolean filterSharedBank()
+	{
+		return true;
 	}
 
 	@ConfigItem(
