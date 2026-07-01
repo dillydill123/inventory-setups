@@ -87,9 +87,11 @@ import net.runelite.api.vars.InputType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.PluginChanged;
+import net.runelite.client.events.PluginMessage;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
@@ -179,6 +181,24 @@ public class InventorySetupsPlugin extends Plugin
 	private static final int SPELLBOOK_VARBIT = 4070;
 	private static final int BANK_TAG_OPTIONS = BankTagsService.OPTION_ALLOW_MODIFICATIONS | BankTagsService.OPTION_HIDE_TAG_NAME;
 
+	// PluginMessage API for other plugins to list and open/clear inventory setups. See #415.
+	public static final String API_NAMESPACE = "inventory-setups";
+	// Bumped when the contract below changes in a breaking way. Shipped in setups-changed as data["version"].
+	public static final int API_VERSION = 1;
+	// out: broadcast when the setups change. data["setups"] = List<String> of names, data["version"] = int.
+	public static final String API_MSG_SETUPS_CHANGED = "setups-changed";
+	// in: list setups on demand (for plugins that start after us). Put a mutable Collection<String> under
+	// "setups"; it is filled synchronously with the current setup names.
+	public static final String API_MSG_GET_SETUPS = "get-setups";
+	// in: open a setup, filtering the bank like the worn items menu. data["setup"] = name.
+	public static final String API_MSG_VIEW = "view";
+	// in: clear the current setup (like worn items "Close current setup"). data["setup"] = name to clear
+	// only when it is the active setup; omit to clear whatever is active.
+	public static final String API_MSG_CLEAR = "clear";
+	public static final String API_DATA_SETUPS = "setups";
+	public static final String API_DATA_SETUP = "setup";
+	public static final String API_DATA_VERSION = "version";
+
 	@Inject
 	@Getter
 	private Client client;
@@ -200,6 +220,9 @@ public class InventorySetupsPlugin extends Plugin
 
 	@Inject
 	private ConfigManager configManager;
+
+	@Inject
+	private EventBus eventBus;
 
 	@Inject
 	@Getter
@@ -382,6 +405,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				dataManager.loadConfig();
 				handleRegistrationOfHotkeys();
+				broadcastSetupsChanged();
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
@@ -2652,6 +2676,109 @@ public class InventorySetupsPlugin extends Plugin
 		cache.updateSectionName(section, newName);
 		section.setName(newName);
 		// config will already be updated by caller so no need to update it here
+	}
+
+	// Immutable snapshot of the setup names, republished on every change. Lets get-setups answer from any
+	// thread without touching the live list. Only written on the mutating thread (see broadcastSetupsChanged).
+	private volatile List<String> setupNamesSnapshot = List.of();
+
+	private List<String> buildSetupNames()
+	{
+		final List<String> names = new ArrayList<>(inventorySetups.size());
+		for (final InventorySetup setup : inventorySetups)
+		{
+			names.add(setup.getName());
+		}
+		return List.copyOf(names);
+	}
+
+	// Refresh the snapshot and notify listeners. Serialized onto the client thread because setups are
+	// mutated from both the client thread and the Swing EDT. Skips the post when the name list is unchanged,
+	// since updateConfig also fires on slot and note edits.
+	public void broadcastSetupsChanged()
+	{
+		clientThread.invoke(() ->
+		{
+			final List<String> names = buildSetupNames();
+			if (names.equals(setupNamesSnapshot))
+			{
+				return;
+			}
+			setupNamesSnapshot = names;
+			eventBus.post(new PluginMessage(API_NAMESPACE, API_MSG_SETUPS_CHANGED,
+				Map.of(API_DATA_SETUPS, names, API_DATA_VERSION, API_VERSION)));
+		});
+	}
+
+	@Subscribe
+	public void onPluginMessage(final PluginMessage message)
+	{
+		if (!API_NAMESPACE.equals(message.getNamespace())
+			|| API_MSG_SETUPS_CHANGED.equals(message.getName()))
+		{
+			// Ignore other namespaces and our own outgoing broadcast.
+			return;
+		}
+
+		switch (message.getName())
+		{
+			case API_MSG_GET_SETUPS:
+			{
+				final Object container = message.getData().get(API_DATA_SETUPS);
+				if (container instanceof Collection)
+				{
+					// eventBus.post is synchronous, so the caller's collection is filled before its own
+					// post() call returns.
+					//noinspection unchecked
+					((Collection<String>) container).addAll(setupNamesSnapshot);
+				}
+				break;
+			}
+			case API_MSG_VIEW:
+			{
+				final Object nameObj = message.getData().get(API_DATA_SETUP);
+				if (!(nameObj instanceof String))
+				{
+					break;
+				}
+				final String targetName = (String) nameObj;
+				// Resolve and apply on the client thread, where inventorySetups is otherwise accessed.
+				clientThread.invoke(() ->
+				{
+					final InventorySetup target = inventorySetups.stream()
+						.filter(setup -> setup.getName().equals(targetName))
+						.findFirst()
+						.orElse(null);
+					if (target == null)
+					{
+						log.debug("Ignoring view request for unknown setup '{}'", targetName);
+						return;
+					}
+					panel.setCurrentInventorySetup(target, true);
+				});
+				break;
+			}
+			case API_MSG_CLEAR:
+			{
+				final Object nameObj = message.getData().get(API_DATA_SETUP);
+				clientThread.invoke(() ->
+				{
+					final InventorySetup current = panel.getCurrentSelectedSetup();
+					if (current == null)
+					{
+						return;
+					}
+					// If a setup name is given, only clear when it is the one currently shown, so a caller
+					// never closes a setup the user switched to themselves.
+					if (nameObj instanceof String && !current.getName().equals(nameObj))
+					{
+						return;
+					}
+					panel.returnToOverviewPanel(false);
+				});
+				break;
+			}
+		}
 	}
 
 }
