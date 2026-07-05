@@ -38,6 +38,9 @@ public class InventorySetupsChatboxItemSearchFilter
 		safeIdsOverride.add(ItemID.TRAIL_SARADOMIN_CLOAK);
 		safeIdsOverride.add(ItemID.CASTLEWARS_CLOAK_ZAMORAK);
 		safeIdsOverride.add(ItemID.TRAIL_ZAMORAK_CLOAK);
+
+		// Unsure what is causing this to be filtered.
+		safeIdsOverride.add(ItemID.INFERNAL_CAPE);
 	}
 
 	public boolean shouldKeep(int itemID)
