@@ -12,6 +12,18 @@ import java.util.List;
 import java.util.Map;
 
 // PluginMessage API for other plugins to list and open/clear inventory setups. See #415.
+//
+// To use this from another plugin, post a PluginMessage on the EventBus with the "inventory-setups"
+// namespace, e.g.:
+//
+//   Map<String, Object> data = new HashMap<>();
+//   data.put("setup", "Vorkath");
+//   eventBus.post(new PluginMessage("inventory-setups", "view", data));
+//
+// Supported messages are documented on the constants below. To track the available setups, subscribe
+// to PluginMessage and listen for "setups-changed" broadcasts, and post "get-setups" once on startup
+// (posting is synchronous, so the collection you pass is filled before post() returns). Payload values
+// are plain JDK types (String, int, Collection<String>) so they are visible across plugin classloaders.
 @Slf4j
 public class InventorySetupsPluginMessageHandler
 {
@@ -99,7 +111,7 @@ public class InventorySetupsPluginMessageHandler
 			}
 			default:
 			{
-				log.debug("Ignoring unsupported message '{}' in the {} namespace", message.getName(), API_NAMESPACE);
+				log.warn("Ignoring unsupported message '{}' in the {} namespace", message.getName(), API_NAMESPACE);
 				break;
 			}
 		}
@@ -107,7 +119,7 @@ public class InventorySetupsPluginMessageHandler
 
 	private void handleGetSetups(final PluginMessage message)
 	{
-		final Object container = message.getData().get(API_DATA_SETUPS);
+		final Object container = message.getData().getOrDefault(API_DATA_SETUPS, null);
 		if (container instanceof Collection)
 		{
 			// eventBus.post is synchronous, so the caller's collection is filled before its own
@@ -115,13 +127,18 @@ public class InventorySetupsPluginMessageHandler
 			//noinspection unchecked
 			((Collection<String>) container).addAll(setupNamesSnapshot);
 		}
+		else
+		{
+			log.warn("Ignoring {} message without a Collection under '{}'", API_MSG_GET_SETUPS, API_DATA_SETUPS);
+		}
 	}
 
 	private void handleView(final PluginMessage message)
 	{
-		final Object nameObj = message.getData().get(API_DATA_SETUP);
+		final Object nameObj = message.getData().getOrDefault(API_DATA_SETUP, null);
 		if (!(nameObj instanceof String))
 		{
+			log.warn("Ignoring {} message without a String under '{}'", API_MSG_VIEW, API_DATA_SETUP);
 			return;
 		}
 		final String targetName = (String) nameObj;
@@ -134,7 +151,7 @@ public class InventorySetupsPluginMessageHandler
 				.orElse(null);
 			if (target == null)
 			{
-				log.debug("Ignoring view request for unknown setup '{}'", targetName);
+				log.warn("Ignoring view request for unknown setup '{}'", targetName);
 				return;
 			}
 			panel.setCurrentInventorySetup(target, true);
@@ -143,7 +160,12 @@ public class InventorySetupsPluginMessageHandler
 
 	private void handleClear(final PluginMessage message)
 	{
-		final Object nameObj = message.getData().get(API_DATA_SETUP);
+		final Object nameObj = message.getData().getOrDefault(API_DATA_SETUP, null);
+		if (nameObj != null && !(nameObj instanceof String))
+		{
+			log.warn("Ignoring {} message with a non-String value under '{}'", API_MSG_CLEAR, API_DATA_SETUP);
+			return;
+		}
 		clientThread.invoke(() ->
 		{
 			final InventorySetup current = panel.getCurrentSelectedSetup();
