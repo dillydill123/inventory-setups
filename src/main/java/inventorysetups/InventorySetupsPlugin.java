@@ -2050,6 +2050,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			dataManager.loadConfig();
+			broadcastSetupsChanged();
 			// We may need to display the warning for this profile so reset it.
 			panel.setHasDisplayedLayoutWarning(false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
