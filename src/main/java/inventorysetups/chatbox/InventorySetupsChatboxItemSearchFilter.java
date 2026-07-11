@@ -38,9 +38,6 @@ public class InventorySetupsChatboxItemSearchFilter
 		safeIdsOverride.add(ItemID.TRAIL_SARADOMIN_CLOAK);
 		safeIdsOverride.add(ItemID.CASTLEWARS_CLOAK_ZAMORAK);
 		safeIdsOverride.add(ItemID.TRAIL_ZAMORAK_CLOAK);
-
-		// Unsure what is causing this to be filtered.
-		safeIdsOverride.add(ItemID.INFERNAL_CAPE);
 	}
 
 	public boolean shouldKeep(int itemID)
@@ -51,6 +48,7 @@ public class InventorySetupsChatboxItemSearchFilter
 	public void estimateFakeItems(ItemManager itemManager)
 	{
 		addLMSItemsToFilter();
+		addEmirsArenaItemsToFilter();
 		addNightmarezoneItemsToFilter();
 		addClueScrollItemsToFilter();
 		addGenericDiaryItemsToFilter();
@@ -66,6 +64,7 @@ public class InventorySetupsChatboxItemSearchFilter
 		{
 			if (idsToFilter.contains(id))
 			{
+				// We already know these items should be filtered. Do not include them as part of the heuristic.
 				continue;
 			}
 
@@ -79,6 +78,13 @@ public class InventorySetupsChatboxItemSearchFilter
 			String membersName = itemComp.getMembersName();
 			// Filter any object that has "null" as the name, or is an empty string.
 			if (membersName == null || membersName.isEmpty() || membersName.equalsIgnoreCase("null"))
+			{
+				idsToFilter.add(id);
+				continue;
+			}
+
+			// Filter any item that has "(broken)" in the name. These are broken PVP items that we can ignore.
+			if (membersName.contains("(broken)") || membersName.contains("(mangled)"))
 			{
 				idsToFilter.add(id);
 				continue;
@@ -111,7 +117,7 @@ public class InventorySetupsChatboxItemSearchFilter
 				}
 			}
 
-			// If one item is tradeable and the others are not, remove the untradeable items
+			// If at least one item is tradeable and the others are not, remove the untradeable items
 			// It is possible that two items with the same name can be completely different. For example, the castle
 			// wars cloaks are named exactly as the treasure trail cloaks (Saradomin/Zamorak cloak). For these special
 			// cases, we add them to the safeIdsOverride.
@@ -185,6 +191,9 @@ public class InventorySetupsChatboxItemSearchFilter
 
 		// Fake copy of V's Shield
 		idsToFilter.add(ItemID.VIKINGEXILE_V_SHIELD);
+
+		// Fake Infernal Cape
+		idsToFilter.add(ItemID.INFERNAL_CAPE_DUMMY);
 	}
 
 	public void addGenericDiaryItemsToFilter()
@@ -1556,6 +1565,23 @@ public class InventorySetupsChatboxItemSearchFilter
 		idsToFilter.add(ItemID.BR_DUAL_MACUAHUITL);
 		idsToFilter.add(ItemID.BR_ECLIPSE_ATLATL);
 		idsToFilter.add(ItemID.BR_ATLATL_DART);
+	}
+
+	public void addEmirsArenaItemsToFilter()
+	{
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_BROKEN);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_I_BROKEN);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_TROUVER);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_CHARGED);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_CHARGED_TROUVER);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_I);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_I_TROUVER);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_I_CHARGED);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_I_CHARGED_TROUVER);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_MITHRIL);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_RUNE);
+		idsToFilter.add(ItemID.PVPA_ARENA_WRISTBANDS_BARROWS);
 	}
 
 }
