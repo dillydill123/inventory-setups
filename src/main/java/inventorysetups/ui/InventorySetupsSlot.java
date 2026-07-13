@@ -34,13 +34,14 @@ import inventorysetups.InventorySetupsVariationMapping;
 import lombok.Getter;
 import lombok.Setter;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
 import javax.swing.*;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -75,6 +76,8 @@ public class InventorySetupsSlot extends JPanel
 	@Getter
 	private JPopupMenu shiftRightClickMenu;
 
+	private final Color defaultBackgroundColor;
+
 	public static final int SLOT_WIDTH = 46;
 	public static final int SLOT_HEIGHT = 42;
 
@@ -85,6 +88,7 @@ public class InventorySetupsSlot extends JPanel
 
 	public InventorySetupsSlot(Color color, InventorySetupsSlotID id, int indexInSlot, int width, int height)
 	{
+		this.defaultBackgroundColor = color;
 		this.slotID = id;
 		this.imageLabel = new JLabel();
 		this.parentSetup = null;
@@ -129,6 +133,11 @@ public class InventorySetupsSlot extends JPanel
 		this.imageLabel.addMouseListener(menuAdapter);
 
 		setPreferredSize(new Dimension(width, height));
+
+		// Swing assumes opaque components paint an opaque background. If the
+		// background color has an alpha < 255, previous pixels may show through.
+		// We set Slots to be non-opaque and handle painting ourselves in `PaintComponent`.
+		setOpaque(false);
 		setBackground(color);
 		setLayout(new GridBagLayout());
 
@@ -143,6 +152,34 @@ public class InventorySetupsSlot extends JPanel
 		add(imageLabel);
 		add(fuzzyIndicator, fuzzyConstraints);
 		add(stackIndicator, stackConstraints);
+	}
+
+	@Override
+	protected void paintComponent(Graphics g)
+	{
+		// Since this panel is non-opaque, Swing does not clear its background.
+		// Paint an opaque default background first so translucent background
+		// colors don't blend with pixels from previous repaints.
+		Graphics2D g2d = (Graphics2D) g.create();
+		try
+		{
+			g2d.setColor(defaultBackgroundColor);
+			g2d.fillRect(0, 0, getWidth(), getHeight());
+
+			Color bg = getBackground();
+			if (bg != null && !bg.equals(defaultBackgroundColor))
+			{
+				g2d.setColor(bg);
+				g2d.fillRect(0, 0, getWidth(), getHeight());
+			}
+		}
+		finally
+		{
+			g2d.dispose();
+		}
+
+		// Call super last to paint images and text over the now correctly filled-in background
+		super.paintComponent(g);
 	}
 
 	public void setImageLabel(String toolTip, BufferedImage itemImage, boolean isFuzzy, InventorySetupsStackCompareID stackCompare)
@@ -399,7 +436,7 @@ public class InventorySetupsSlot extends JPanel
 
 	public static void doResetHighlight(final InventorySetupsSlot containerSlot)
 	{
-		containerSlot.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		containerSlot.setBackground(containerSlot.defaultBackgroundColor);
 	}
 
 	public static boolean shouldHighlightSlotBasedOnStack(final InventorySetupsStackCompareID stackCompareType, final Integer savedItemQty, final Integer currItemQty)
