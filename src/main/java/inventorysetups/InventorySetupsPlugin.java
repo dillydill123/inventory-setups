@@ -77,6 +77,7 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuEntryAdded;
 import net.runelite.api.events.PostMenuSort;
+import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
@@ -149,6 +150,7 @@ public class InventorySetupsPlugin extends Plugin
 	public static final String CONFIG_KEY_VERSION_STR = "version";
 	public static final String CONFIG_KEY_UNASSIGNED_MAXIMIZED = "unassignedMaximized";
 	public static final String CONFIG_KEY_MANUAL_BANK_FILTER = "manualBankFilter";
+	public static final String CONFIG_KEY_FILTER_SHARED_BANK = "filterSharedBank";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS = "persistHotKeysOutsideBank";
 	public static final String CONFIG_KEY_PERSIST_HOTKEYS_CHAT_INPUT = "persistHotKeysDuringChatInput";
 	public static final String CONFIG_KEY_USE_LAYOUTS = "useLayouts";
@@ -283,6 +285,9 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsAmmoHandler ammoHandler;
 
+	@Getter
+	private InventorySetupsSharedBankFilter sharedBankFilter;
+
 	// Used to defer highlighting to GameTick
 	private boolean shouldTriggerInventoryHighlightOnGameTick;
 
@@ -357,6 +362,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.sections = new ArrayList<>();
 		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
+		this.sharedBankFilter = new InventorySetupsSharedBankFilter(this, client, panel, config);
 		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, config, client);
 		this.canUseLayouts = canUseLayouts();
 
@@ -472,7 +478,7 @@ public class InventorySetupsPlugin extends Plugin
 	private void handleRegistrationOfHotkeys()
 	{
 		Widget bankContainer = client.getWidget(InterfaceID.Bankmain.ITEMS);
-		boolean bankIsOpen = bankContainer != null && !bankContainer.isHidden();
+		boolean bankIsOpen = (bankContainer != null && !bankContainer.isHidden()) || sharedBankFilter.isSharedBankOpen();
 
 		// Bank takes priority if hotkeys are disabled.
 		boolean shouldRegisterKeys = bankIsOpen || config.persistHotKeysOutsideBank();
@@ -521,6 +527,10 @@ public class InventorySetupsPlugin extends Plugin
 			else if (event.getKey().equals(CONFIG_KEY_USE_LAYOUTS))
 			{
 				doBankSearch();
+			}
+			else if (event.getKey().equals(CONFIG_KEY_FILTER_SHARED_BANK))
+			{
+				refreshSharedBank();
 			}
 		}
 	}
@@ -960,12 +970,17 @@ public class InventorySetupsPlugin extends Plugin
 				});
 			}
 		}
+		else if (event.getGroupId() == InterfaceID.SHARED_BANK)
+		{
+			// The widget tree is being torn down so there is nothing to un-hide.
+			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
+		}
 	}
 
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded event)
 	{
-		if (event.getGroupId() == InterfaceID.BANKMAIN)
+		if (event.getGroupId() == InterfaceID.BANKMAIN || event.getGroupId() == InterfaceID.SHARED_BANK)
 		{
 			clientThread.invokeLater(this::handleRegistrationOfHotkeys);
 		}
@@ -1286,8 +1301,31 @@ public class InventorySetupsPlugin extends Plugin
 				return false;
 			}
 
-			doBankSearch();
+			if (sharedBankFilter.isSharedBankOpen())
+			{
+				refreshSharedBank();
+			}
+			else
+			{
+				doBankSearch();
+			}
 			return true;
+		});
+	}
+
+	// Restores the shared storage to its native state and then re-applies the filter for the current setup.
+	// Used for manual transitions where there is no natural rebuild, e.g. switching/deselecting a setup in
+	// the side panel, toggling the config, or pressing the filter bank hotkey while the storage is open.
+	public void refreshSharedBank()
+	{
+		clientThread.invoke(() ->
+		{
+			if (!sharedBankFilter.isSharedBankOpen())
+			{
+				return;
+			}
+			sharedBankFilter.resetSharedBank();
+			sharedBankFilter.filterSharedBank();
 		});
 	}
 
@@ -1407,6 +1445,20 @@ public class InventorySetupsPlugin extends Plugin
 		{
 			// cancel the current filtering if the search button is clicked
 			resetBankSearch();
+		}
+	}
+
+	@Subscribe
+	public void onScriptPostFired(ScriptPostFired event)
+	{
+		// The shared storage was (re)built (on open and after every deposit/withdraw). We use the POST event
+		// so the item widgets are populated before we filter them.
+		if (event.getScriptId() == ScriptID.GROUP_IRONMAN_STORAGE_BUILD)
+		{
+			if (!config.manualBankFilter())
+			{
+				sharedBankFilter.filterSharedBank();
+			}
 		}
 	}
 
