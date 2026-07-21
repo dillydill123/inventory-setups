@@ -135,6 +135,9 @@ public class InventorySetupsPersistentDataManager
 
 			final String setupsOrderJson = gson.toJson(setupsOrder);
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_KEY_SETUPS_ORDER_V3, setupsOrderJson);
+
+			// Setups were just persisted; notify integrating plugins.
+			plugin.broadcastSetupsChanged();
 		}
 
 		if (updateSections)

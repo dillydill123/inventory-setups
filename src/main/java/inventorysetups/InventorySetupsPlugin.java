@@ -87,9 +87,11 @@ import net.runelite.api.vars.InputType;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.PluginChanged;
+import net.runelite.client.events.PluginMessage;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.SpriteManager;
@@ -202,6 +204,9 @@ public class InventorySetupsPlugin extends Plugin
 	private ConfigManager configManager;
 
 	@Inject
+	private EventBus eventBus;
+
+	@Inject
 	@Getter
 	private InventorySetupsConfig config;
 
@@ -283,6 +288,9 @@ public class InventorySetupsPlugin extends Plugin
 	@Getter
 	private InventorySetupsAmmoHandler ammoHandler;
 
+	@Getter
+	private InventorySetupsPluginMessageHandler pluginMessageHandler;
+
 	// Used to defer highlighting to GameTick
 	private boolean shouldTriggerInventoryHighlightOnGameTick;
 
@@ -357,6 +365,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.sections = new ArrayList<>();
 		this.dataManager = new InventorySetupsPersistentDataManager(this, configManager, cache, gson, inventorySetups, sections);
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
+		this.pluginMessageHandler = new InventorySetupsPluginMessageHandler(this, clientThread, eventBus, panel);
 		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, config, client);
 		this.canUseLayouts = canUseLayouts();
 
@@ -382,6 +391,7 @@ public class InventorySetupsPlugin extends Plugin
 			{
 				dataManager.loadConfig();
 				handleRegistrationOfHotkeys();
+				broadcastSetupsChanged();
 				SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
 			});
 
@@ -2040,6 +2050,7 @@ public class InventorySetupsPlugin extends Plugin
 		clientThread.invokeLater(() ->
 		{
 			dataManager.loadConfig();
+			broadcastSetupsChanged();
 			// We may need to display the warning for this profile so reset it.
 			panel.setHasDisplayedLayoutWarning(false);
 			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(true));
@@ -2652,6 +2663,19 @@ public class InventorySetupsPlugin extends Plugin
 		cache.updateSectionName(section, newName);
 		section.setName(newName);
 		// config will already be updated by caller so no need to update it here
+	}
+
+	// Called by the data manager whenever setups are persisted; the handler decides whether a broadcast
+	// is actually needed.
+	public void broadcastSetupsChanged()
+	{
+		pluginMessageHandler.broadcastSetupsChanged();
+	}
+
+	@Subscribe
+	public void onPluginMessage(final PluginMessage message)
+	{
+		pluginMessageHandler.handleMessage(message);
 	}
 
 }

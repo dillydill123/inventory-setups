@@ -353,6 +353,11 @@ You can export an Inventory Setup to Bank Tag format by right-clicking the expor
 The Bank Tags plugin must be ON to use all features of Inventory Setups, specifically bank layouts and filtering. Inventory Setups will warn the user if filtering and layouts cannot be used. This warning will also provide an option to turn on Bank Tags for you.
 
 Hub Plugin Bank Tag Layouts is not required for Inventory Setups anymore. If you were only using the plugin for Inventory Setups, it's recommended that you uninstall the plugin. If you have layout data from Bank Tag Layouts, Inventory Setups will attempt to migrate the layout data the first time you use the plugin.
+
+### PluginMessage API for Plugin Developers
+
+Other plugins can integrate with Inventory Setups by posting [`PluginMessage`](https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/events/PluginMessage.java) events on the EventBus with the `inventory-setups` namespace. The API supports listing setup names (`get-setups`, plus a `setups-changed` broadcast whenever they change), opening a setup with bank filtering (`view`), and closing the current setup (`clear`). The message names, payload keys, and usage details are documented in [`InventorySetupsPluginMessageHandler`](src/main/java/inventorysetups/InventorySetupsPluginMessageHandler.java).
+
 ## Configuration Settings
 
 In the settings of Inventory Setups, you can change default setup options, key binds, ground item menu options, and other miscellaneous settings.
