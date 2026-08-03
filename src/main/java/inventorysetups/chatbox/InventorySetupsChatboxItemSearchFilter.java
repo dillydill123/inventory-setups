@@ -64,6 +64,11 @@ public class InventorySetupsChatboxItemSearchFilter
 
 		for (int id = 0; id < highestItemID; id++)
 		{
+			if (idsToFilter.contains(id))
+			{
+				continue;
+			}
+
 			ItemComposition itemComp = itemManager.getItemComposition(id);
 			// Skip noted and placeholder items.
 			if (itemComp.getNote() != -1 || itemComp.getPlaceholderTemplateId() != -1)
