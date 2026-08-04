@@ -192,8 +192,17 @@ public class InventorySetupsChatboxItemSearchFilter
 		// Fake copy of V's Shield
 		idsToFilter.add(ItemID.VIKINGEXILE_V_SHIELD);
 
-		// Fake Infernal Cape
+		// Dummy items. Items that have a tradeable non "dummy" version will already filter out the untradeable "dummy"
+		// version through the estimate heuristic. Other "dummy" items have a "Null" name which also gets filtered out.
+		// The dummy items below are those that are common-enough that pass through the filter, so manually add them.
 		idsToFilter.add(ItemID.INFERNAL_CAPE_DUMMY);
+		idsToFilter.add(ItemID.SKILLCAPE_MAX_INFERNALCAPE_DUMMY);
+		idsToFilter.add(ItemID.TZHAAR_CAPE_FIRE_DUMMY);
+		idsToFilter.add(ItemID.DUMMY_MAX_CAPE);
+		idsToFilter.add(ItemID.SKILLCAPE_MAX_FIRECAPE_DUMMY);
+		idsToFilter.add(ItemID.CERT_DRILL_TOP);
+		idsToFilter.add(ItemID.CERT_DRILL_BOTTOMS);
+		idsToFilter.add(ItemID.CERT_DRILL_HELM);
 	}
 
 	public void addGenericDiaryItemsToFilter()
