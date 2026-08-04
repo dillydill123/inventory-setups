@@ -137,9 +137,9 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"You can now save an attack option in setups.\n\n" +
-							"Right click the weapon slot to update or remove the currently saved attack option.\n\n" +
-							"A config setting has been added to include the player's current attack option for new setups.";
+		String updateText =	"Improved the GE item search when replacing an item with search.\n\n" +
+							"Opacity (alpha) is now respected when choosing a highlight color.\n\n" +
+							"The PluginMessage API is now supported, allowing other plugins to interact with Inventory Setups. See the guide for details if you are a developer.";
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
