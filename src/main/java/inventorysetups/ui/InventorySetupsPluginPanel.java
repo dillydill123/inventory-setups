@@ -754,6 +754,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		overviewPanelScrollPosition = contentWrapperPane.getVerticalScrollBar().getValue();
 		currentSelectedSetup = inventorySetup;
+		plugin.broadcastActiveSetupChanged();
 		inventoryPanel.updatePanelWithSetupInformation(inventorySetup);
 		runePouchPanel.updatePanelWithSetupInformation(inventorySetup);
 		boltPouchPanel.updatePanelWithSetupInformation(inventorySetup);
@@ -867,6 +868,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		currentSelectedSetup = null;
+		plugin.broadcastActiveSetupChanged();
 
 		plugin.resetBankSearch();
 
