@@ -247,18 +247,15 @@ public class InventorySetupsPluginMessageHandler
 			final Collection<Integer> inventoryItemIds = asIntegerCollection(inventoryObj);
 			final Collection<Integer> additionalItemIds = asIntegerCollection(additionalObj);
 
-			for (final InventorySetupsItem item : setup.getEquipment())
-			{
-				equipmentItemIds.add(InventorySetupsItem.itemIsDummy(item) ? -1 : item.getId());
-			}
-			for (final InventorySetupsItem item : setup.getInventory())
-			{
-				inventoryItemIds.add(InventorySetupsItem.itemIsDummy(item) ? -1 : item.getId());
-			}
-			for (final InventorySetupsItem item : setup.getAdditionalFilteredItems().values())
-			{
-				additionalItemIds.add(item.getId());
-			}
+			setup.getEquipment().stream()
+				.map(item -> item.getId())
+				.forEach(equipmentItemIds::add);
+			setup.getInventory().stream()
+				.map(item -> item.getId())
+				.forEach(inventoryItemIds::add);
+			setup.getAdditionalFilteredItems().values().stream()
+				.map(InventorySetupsItem::getId)
+				.forEach(additionalItemIds::add);
 		});
 	}
 
