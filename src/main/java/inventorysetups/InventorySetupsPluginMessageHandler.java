@@ -50,12 +50,13 @@ public class InventorySetupsPluginMessageHandler
 	// in: get the active setup's contents by slot, e.g. for a plugin that wants to mirror its layout elsewhere.
 	// Put mutable Collection<Integer> under "equipmentItemIds" (EquipmentInventorySlot order,
 	// size 14), "inventoryItemIds" (size 28), and "additionalItemIds" (no position semantics). Posting is synchronous.
-	// data["hasActiveSetup"] is set to false when no setup is active or the active setup has bank filtering disabled.
+	// data["activeSetup"] is set to the active setup's name (String) when one is active and
+	// bank filtering is allowed; the key is absent otherwise.
 	public static final String API_MSG_GET_ACTIVE_SETUP_CONTENTS = "get-active-setup-contents";
 	public static final String API_DATA_SETUPS = "setups";
 	public static final String API_DATA_SETUP = "setup";
 	public static final String API_DATA_VERSION = "version";
-	public static final String API_DATA_HAS_ACTIVE_SETUP = "hasActiveSetup";
+	public static final String API_DATA_ACTIVE_SETUP = "activeSetup";
 	public static final String API_DATA_EQUIPMENT_ITEM_IDS = "equipmentItemIds";
 	public static final String API_DATA_INVENTORY_ITEM_IDS = "inventoryItemIds";
 	public static final String API_DATA_ADDITIONAL_ITEM_IDS = "additionalItemIds";
@@ -237,11 +238,11 @@ public class InventorySetupsPluginMessageHandler
 		{
 			final InventorySetup setup = panel.getCurrentSelectedSetup();
 			final boolean hasActiveSetup = setup != null && setup.isFilterBank() && plugin.isFilteringAllowed();
-			message.getData().put(API_DATA_HAS_ACTIVE_SETUP, hasActiveSetup);
 			if (!hasActiveSetup)
 			{
 				return;
 			}
+			message.getData().put(API_DATA_ACTIVE_SETUP, setup.getName());
 
 			final Collection<Integer> equipmentItemIds = asIntegerCollection(equipmentObj);
 			final Collection<Integer> inventoryItemIds = asIntegerCollection(inventoryObj);
