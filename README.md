@@ -30,6 +30,7 @@ Contents
   - [The Unassigned Section](#unassigned-section)
 - [Exporting and Importing](#exporting-and-importing-setups-and-sections)
 - [Other Plugin Compatibilities](#other-plugin-compatibilities)
+  - [PluginMessage API](#pluginmessage-api-for-plugin-developers)
 - [Configuration Settings](#configuration-settings)
 - [Data Storage](#data-storage)
 - [Support and Suggestions](#support-and-suggestions)
@@ -430,11 +431,19 @@ Layout data is stored under the Bank Tag config group. An example would look lik
 
 Inventory Setups will sync your data to the cloud if you are signed in to RuneLite. It is still a good idea to mass export your setups every once in a while, especially if you aren't signed in to RuneLite.
 
-## Support and Suggestions
+## Support, Suggestions, and Contributions
 
-If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a github account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234
+If you need help, have any suggestions, or notice any bugs, you can comment them here in the issues section. If you do not have a GitHub account, you can send a message to this reddit account: https://www.reddit.com/user/rlis1234. Making a GitHub issue is much more likely to be seen.
 
-### Donations
+### Contributing
+
+Contributions to Inventory Setups are welcome. It is highly recommended to create an issue first before writing any code to start a discussion about a potential feature. Please disclose any usage of AI related tools in all pull requests.
+
+Smaller features, like new configuration options or bug fixes are more likely to be accepted as compared to large feature updates, in particular those that require modification to the UI.
+
+You may also write a new PluginHub plugin that interacts with Inventory Setups using the [PluginMessage API](#pluginmessage-api-for-plugin-developers).
+
+## Donations
 
 Inventory Setups was developed by me in my free time (200+ hours of work). I did it for fun and to make something that others and myself would enjoy using without any intention of making money. However, if you'd like to donate to me, you can use [this link](https://www.buymeacoffee.com/dillydill123). Any amount is greatly appreciated!
 
