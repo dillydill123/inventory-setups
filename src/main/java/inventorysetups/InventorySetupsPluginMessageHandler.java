@@ -48,10 +48,11 @@ public class InventorySetupsPluginMessageHandler
 	// data["setup"] = the active setup's name; the key is absent when setup is closed.
 	public static final String API_MSG_ACTIVE_SETUP_CHANGED = "active-setup-changed";
 	// in: get the active setup's contents by slot, e.g. for a plugin that wants to mirror its layout elsewhere.
-	// Put mutable Collection<Integer> under "equipmentItemIds" (EquipmentInventorySlot order,
-	// size 14), "inventoryItemIds" (size 28), and "additionalItemIds" (no position semantics). Posting is synchronous.
-	// data["activeSetup"] is set to the active setup's name (String) when one is active and
-	// bank filtering is allowed; the key is absent otherwise.
+	// Put mutable Collection<Integer> under "equipmentItemIds" (EquipmentInventorySlot order, size 14),
+	// "inventoryItemIds" (size 28) and "additionalItemIds" (no position semantics).
+	// Empty slots are included with id -1 to avoid breaking proper order. Posting is synchronous.
+	// data["activeSetup"] is set to the active setup's name (String) when one
+	// is active and bank filtering is allowed; the key is absent otherwise.
 	public static final String API_MSG_GET_ACTIVE_SETUP_CONTENTS = "get-active-setup-contents";
 	public static final String API_DATA_SETUPS = "setups";
 	public static final String API_DATA_SETUP = "setup";
@@ -104,8 +105,8 @@ public class InventorySetupsPluginMessageHandler
 	{
 		clientThread.invoke(() ->
 		{
-			final InventorySetup active = panel.getCurrentSelectedSetup();
-			final Map<String, Object> data = active == null ? Map.of() : Map.of(API_DATA_SETUP, active.getName());
+			final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+			final Map<String, Object> data = currentSetup == null ? Map.of() : Map.of(API_DATA_ACTIVE_SETUP, currentSetup.getName());
 			eventBus.post(new PluginMessage(API_NAMESPACE, API_MSG_ACTIVE_SETUP_CHANGED, data));
 		});
 	}
@@ -244,26 +245,20 @@ public class InventorySetupsPluginMessageHandler
 			}
 			message.getData().put(API_DATA_ACTIVE_SETUP, setup.getName());
 
-			final Collection<Integer> equipmentItemIds = asIntegerCollection(equipmentObj);
-			final Collection<Integer> inventoryItemIds = asIntegerCollection(inventoryObj);
-			final Collection<Integer> additionalItemIds = asIntegerCollection(additionalObj);
-
-			setup.getEquipment().stream()
-				.map(item -> item.getId())
-				.forEach(equipmentItemIds::add);
-			setup.getInventory().stream()
-				.map(item -> item.getId())
-				.forEach(inventoryItemIds::add);
-			setup.getAdditionalFilteredItems().values().stream()
-				.map(InventorySetupsItem::getId)
-				.forEach(additionalItemIds::add);
+			addItemIds(equipmentObj, setup.getEquipment());
+			addItemIds(inventoryObj, setup.getInventory());
+			addItemIds(additionalObj, setup.getAdditionalFilteredItems().values());
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	private static Collection<Integer> asIntegerCollection(final Object obj)
+	private static void addItemIds(final Object obj, final Collection<InventorySetupsItem> items)
 	{
-		return (Collection<Integer>) obj;
+		@SuppressWarnings("unchecked")
+		final Collection<Integer> ids = (Collection<Integer>) obj;
+
+		items.stream()
+			.map(InventorySetupsItem::getId)
+			.forEach(ids::add);
 	}
 
 	private List<String> buildSetupNames()

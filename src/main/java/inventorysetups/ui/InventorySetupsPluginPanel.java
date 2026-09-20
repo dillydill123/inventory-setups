@@ -754,7 +754,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 	{
 		overviewPanelScrollPosition = contentWrapperPane.getVerticalScrollBar().getValue();
 		currentSelectedSetup = inventorySetup;
-		plugin.broadcastActiveSetupChanged();
 		inventoryPanel.updatePanelWithSetupInformation(inventorySetup);
 		runePouchPanel.updatePanelWithSetupInformation(inventorySetup);
 		boltPouchPanel.updatePanelWithSetupInformation(inventorySetup);
@@ -778,6 +777,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
+		plugin.broadcastActiveSetupChanged();
 		plugin.getClientThread().invoke(this::doHighlighting);
 
 		if (resetScrollBar)
