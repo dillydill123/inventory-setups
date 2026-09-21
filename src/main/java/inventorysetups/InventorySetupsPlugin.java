@@ -334,7 +334,7 @@ public class InventorySetupsPlugin extends Plugin
 		try
 		{
 			final Properties props = new Properties();
-			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/invsetups_version.txt");
+			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/version_and_patch_notes/version.txt");
 			props.load(is);
 			this.currentVersion = props.getProperty("version");
 		}
@@ -421,6 +421,22 @@ public class InventorySetupsPlugin extends Plugin
 	public String getCurrentVersionString()
 	{
 		return currentVersion;
+	}
+
+	public String getPatchNotesString()
+	{
+		String updateText;
+		try
+		{
+			InputStream is = InventorySetupsPlugin.class.getResourceAsStream("/version_and_patch_notes/patch_notes.txt");
+			updateText = new String(is.readAllBytes());
+		}
+		catch (Exception e)
+		{
+			log.warn("Could not get plugin patch notes.", e);
+			updateText = "Unable to get patch notes at this time. Please report this issue to " + SUGGESTION_LINK;
+		}
+		return updateText;
 	}
 
 	private boolean canUseLayouts()

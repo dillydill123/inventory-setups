@@ -26,8 +26,11 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 
 	private static final String DONATION_LINK = "https://www.buymeacoffee.com/dillydill123";
 
+	private final InventorySetupsPlugin plugin;
+
 	InventorySetupsUpdateNewsPanel(InventorySetupsPlugin plugin, InventorySetupsPluginPanel panel)
 	{
+		this.plugin = plugin;
 		final JLabel welcomeText = new JLabel("Inventory Setups " + plugin.getCurrentVersionString());
 		welcomeText.setFont(FontManager.getRunescapeBoldFont());
 		welcomeText.setHorizontalAlignment(JLabel.CENTER);
@@ -77,7 +80,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JButton returnToSetups = new JButton("Return to Setups");
 		returnToSetups.addActionListener(e ->
 		{
-			plugin.setSavedVersionString(plugin.getCurrentVersionString());
+			this.plugin.setSavedVersionString(this.plugin.getCurrentVersionString());
 			panel.showCorrectPanel();
 		});
 		final JLabel clickButtonToLeave = new JLabel("Click here to hide this window");
@@ -137,9 +140,7 @@ public class InventorySetupsUpdateNewsPanel extends JPanel
 		final JPanel patchTitlePanel = new JPanel(new BorderLayout());
 		patchTitlePanel.add(patchNotesLabel, BorderLayout.NORTH);
 
-		String updateText =	"Improved the GE item search when replacing an item with search.\n\n" +
-							"Opacity (alpha) is now respected when choosing a highlight color.\n\n" +
-							"The PluginMessage API is now supported, allowing other plugins to interact with Inventory Setups. See the guide for details if you are a developer.";
+		String updateText = this.plugin.getPatchNotesString();
 
 		JTextArea textArea = new JTextArea(2, 20);
 		textArea.setText(updateText);
