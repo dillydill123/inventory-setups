@@ -357,7 +357,19 @@ Hub Plugin Bank Tag Layouts is not required for Inventory Setups anymore. If you
 
 ### PluginMessage API for Plugin Developers
 
-Other plugins can integrate with Inventory Setups by posting [`PluginMessage`](https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/events/PluginMessage.java) events on the EventBus with the `inventory-setups` namespace. The API supports listing setup names (`get-setups`, plus a `setups-changed` broadcast whenever they change), opening a setup with bank filtering (`view`), and closing the current setup (`clear`). The message names, payload keys, and usage details are documented in [`InventorySetupsPluginMessageHandler`](src/main/java/inventorysetups/InventorySetupsPluginMessageHandler.java).
+Other plugins can integrate with Inventory Setups by posting [`PluginMessage`](https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/events/PluginMessage.java) events on the EventBus with the `inventory-setups` namespace.
+
+The API broadcasts the following messages:
+* `setups-changed`: A broadcast whenever the list of setups as changed.
+* `active-setup-changed`: The active setup has changed, or its contents (inventory, equipment, etc.) have been modified.
+
+The API can receive the following messages and provide data or act upon the message:
+* `get-setups`: A list of all setup.
+* `get-active-setup-contents`: Get the contents (inventory, equipment, etc.) of the active setup.
+* `view`: Open a setup.
+* `clear`: Close the current setup.
+
+The message names, payload keys, and usage details are documented in [`InventorySetupsPluginMessageHandler`](src/main/java/inventorysetups/InventorySetupsPluginMessageHandler.java).
 
 ## Configuration Settings
 
