@@ -1,6 +1,7 @@
 package inventorysetups;
 
 import com.google.inject.Guice;
+import com.google.inject.name.Named;
 import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.gameval.ItemID;
+import net.runelite.client.config.ChatColorConfig;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
@@ -33,9 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -96,6 +95,14 @@ public class InventorySetupsUnitTest
 
 	@Inject
 	private InventorySetupsPlugin inventorySetupsPlugin;
+
+	@Mock
+	@Bind
+	private ChatColorConfig chatColorConfig;
+
+	@Bind
+	@Named("developerMode")
+	private Boolean developerMode = false;
 
 	@Before
 	public void before()
