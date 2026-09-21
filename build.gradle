@@ -37,22 +37,12 @@ dependencies {
 }
 
 group = 'inventorysetups'
-version = 'v1.25.0'
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-task createProperties(dependsOn: processResources) {
-	doLast {
-		new File("$buildDir/resources/main/invsetups_version.txt").text = "version=$project.version"
-	}
-}
-
-classes {
-	dependsOn createProperties
-}
 // To create a shadow jar, run `gradlew shadowJar`
 // Output will be in build/libs
 // Run it with `java -jar -ea <name>.jar`

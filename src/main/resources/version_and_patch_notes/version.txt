@@ -1,0 +1,2 @@
+# runelite-plugin.properties in repository root must be updated to match.
+version=v1.26.0
