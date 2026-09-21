@@ -867,8 +867,15 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			setScrollBarPosition(overviewPanelScrollPosition);
 		}
 
+		// Only a real close (a setup was actually open) is worth telling integrating plugins about.
+		// This method also runs on plain overview redraws (search typing, panelView/sorting toggles, etc.)
+		// where nothing was active to begin with, and those must not fire a broadcast.
+		final boolean wasActive = currentSelectedSetup != null;
 		currentSelectedSetup = null;
-		plugin.broadcastActiveSetupChanged();
+		if (wasActive)
+		{
+			plugin.broadcastActiveSetupChanged();
+		}
 
 		plugin.resetBankSearch();
 
