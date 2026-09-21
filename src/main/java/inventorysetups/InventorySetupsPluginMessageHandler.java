@@ -45,14 +45,14 @@ public class InventorySetupsPluginMessageHandler
 	public static final String API_MSG_CLEAR = "clear";
 	// out: broadcast when the active setup changes - on opening, closing and editing
 	// of the setup that's still active (add/remove an item, toggle fuzzy, etc.)
-	// data["activeSetup"] = the active setup's name; the key is absent when setup is closed.
+	// data["activeSetup"] = the active setup's name, or "" when setup is closed.
 	public static final String API_MSG_ACTIVE_SETUP_CHANGED = "active-setup-changed";
 	// in: get the active setup's contents by slot, e.g. for a plugin that wants to mirror its layout elsewhere.
 	// Put mutable Collection<Integer> under "equipmentItemIds" (EquipmentInventorySlot order, size 14),
 	// "inventoryItemIds" (size 28) and "additionalItemIds" (no position semantics).
 	// Empty slots are included with id -1 to avoid breaking proper order. Posting is synchronous.
 	// data["activeSetup"] is set to the active setup's name (String) when one
-	// is active and bank filtering is allowed; the key is absent otherwise.
+	// is active and bank filtering is allowed, or "" otherwise.
 	public static final String API_MSG_GET_ACTIVE_SETUP_CONTENTS = "get-active-setup-contents";
 	public static final String API_DATA_SETUPS = "setups";
 	public static final String API_DATA_SETUP = "setup";
@@ -106,7 +106,7 @@ public class InventorySetupsPluginMessageHandler
 		clientThread.invoke(() ->
 		{
 			final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
-			final Map<String, Object> data = currentSetup == null ? Map.of() : Map.of(API_DATA_ACTIVE_SETUP, currentSetup.getName());
+			final Map<String, Object> data = Map.of(API_DATA_ACTIVE_SETUP, currentSetup == null ? "" : currentSetup.getName());
 			eventBus.post(new PluginMessage(API_NAMESPACE, API_MSG_ACTIVE_SETUP_CHANGED, data));
 		});
 	}
@@ -239,11 +239,11 @@ public class InventorySetupsPluginMessageHandler
 		{
 			final InventorySetup setup = panel.getCurrentSelectedSetup();
 			final boolean hasActiveSetup = setup != null && setup.isFilterBank() && plugin.isFilteringAllowed();
+			message.getData().put(API_DATA_ACTIVE_SETUP, hasActiveSetup ? setup.getName() : "");
 			if (!hasActiveSetup)
 			{
 				return;
 			}
-			message.getData().put(API_DATA_ACTIVE_SETUP, setup.getName());
 
 			addItemIds(equipmentObj, setup.getEquipment());
 			addItemIds(inventoryObj, setup.getInventory());
