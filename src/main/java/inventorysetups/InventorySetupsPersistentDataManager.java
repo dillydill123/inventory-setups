@@ -138,6 +138,8 @@ public class InventorySetupsPersistentDataManager
 
 			// Setups were just persisted; notify integrating plugins.
 			plugin.broadcastSetupsChanged();
+			// Also notify of content edits to the still-active setup (slot/note/fuzzy changes, etc.).
+			plugin.broadcastActiveSetupChanged();
 		}
 
 		if (updateSections)

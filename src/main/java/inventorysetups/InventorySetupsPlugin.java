@@ -2672,6 +2672,11 @@ public class InventorySetupsPlugin extends Plugin
 		pluginMessageHandler.broadcastSetupsChanged();
 	}
 
+	public void broadcastActiveSetupChanged()
+	{
+		pluginMessageHandler.broadcastActiveSetupChanged();
+	}
+
 	@Subscribe
 	public void onPluginMessage(final PluginMessage message)
 	{

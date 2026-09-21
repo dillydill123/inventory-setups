@@ -777,6 +777,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		runePouchPanel.setVisible(currentSelectedSetup.getRune_pouch() != null);
 		boltPouchPanel.setVisible(currentSelectedSetup.getBoltPouch() != null);
 
+		plugin.broadcastActiveSetupChanged();
 		plugin.getClientThread().invoke(this::doHighlighting);
 
 		if (resetScrollBar)
@@ -867,6 +868,7 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		}
 
 		currentSelectedSetup = null;
+		plugin.broadcastActiveSetupChanged();
 
 		plugin.resetBankSearch();
 

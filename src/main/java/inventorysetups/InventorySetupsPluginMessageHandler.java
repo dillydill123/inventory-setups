@@ -22,8 +22,11 @@ import java.util.Map;
 //
 // Supported messages are documented on the constants below. To track the available setups, subscribe
 // to PluginMessage and listen for "setups-changed" broadcasts, and post "get-setups" once on startup
-// (posting is synchronous, so the collection you pass is filled before post() returns). Payload values
-// are plain JDK types (String, int, Collection<String>) so they are visible across plugin classloaders.
+// (posting is synchronous, so the collection you pass is filled before post() returns). To track the
+// active setup (including live edits to it), listen for "active-setup-changed" broadcasts and post
+// "get-active-setup-contents" whenever you need its current contents. Payload values are plain JDK
+// types (String, int, boolean, Collection<Integer>/<String>) so they are visible across plugin
+// classloaders.
 @Slf4j
 public class InventorySetupsPluginMessageHandler
 {
@@ -40,9 +43,24 @@ public class InventorySetupsPluginMessageHandler
 	// in: clear the current setup (like worn items "Close current setup"). data["setup"] = name to clear
 	// only when it is the active setup; omit to clear whatever is active.
 	public static final String API_MSG_CLEAR = "clear";
+	// out: broadcast when the active setup changes - on opening, closing and editing
+	// of the setup that's still active (add/remove an item, toggle fuzzy, etc.)
+	// data["activeSetup"] = the active setup's name, or "" when setup is closed.
+	public static final String API_MSG_ACTIVE_SETUP_CHANGED = "active-setup-changed";
+	// in: get the active setup's contents by slot, e.g. for a plugin that wants to mirror its layout elsewhere.
+	// Put mutable Collection<Integer> under "equipmentItemIds" (EquipmentInventorySlot order, size 14),
+	// "inventoryItemIds" (size 28) and "additionalItemIds" (no position semantics).
+	// Empty slots are included with id -1 to avoid breaking proper order. Posting is synchronous.
+	// data["activeSetup"] is set to the active setup's name (String) when one
+	// is active and bank filtering is allowed, or "" otherwise.
+	public static final String API_MSG_GET_ACTIVE_SETUP_CONTENTS = "get-active-setup-contents";
 	public static final String API_DATA_SETUPS = "setups";
 	public static final String API_DATA_SETUP = "setup";
 	public static final String API_DATA_VERSION = "version";
+	public static final String API_DATA_ACTIVE_SETUP = "activeSetup";
+	public static final String API_DATA_EQUIPMENT_ITEM_IDS = "equipmentItemIds";
+	public static final String API_DATA_INVENTORY_ITEM_IDS = "inventoryItemIds";
+	public static final String API_DATA_ADDITIONAL_ITEM_IDS = "additionalItemIds";
 
 	private final InventorySetupsPlugin plugin;
 	private final ClientThread clientThread;
@@ -80,13 +98,26 @@ public class InventorySetupsPluginMessageHandler
 		});
 	}
 
+	// Broadcasts the active setup's name, or clears it. Called on selection change and on every content
+	// edit of the setup that's still active. Deliberately not deduped like broadcastSetupsChanged() -
+	// content edits don't change the name, but callers still need to know to re-read the contents.
+	public void broadcastActiveSetupChanged()
+	{
+		clientThread.invoke(() ->
+		{
+			final InventorySetup currentSetup = panel.getCurrentSelectedSetup();
+			final Map<String, Object> data = Map.of(API_DATA_ACTIVE_SETUP, currentSetup == null ? "" : currentSetup.getName());
+			eventBus.post(new PluginMessage(API_NAMESPACE, API_MSG_ACTIVE_SETUP_CHANGED, data));
+		});
+	}
+
 	public void handleMessage(final PluginMessage message)
 	{
 		if (!API_NAMESPACE.equals(message.getNamespace()))
 		{
 			return;
 		}
-		if (API_MSG_SETUPS_CHANGED.equals(message.getName()))
+		if (API_MSG_SETUPS_CHANGED.equals(message.getName()) || API_MSG_ACTIVE_SETUP_CHANGED.equals(message.getName()))
 		{
 			// Our own outgoing broadcast.
 			return;
@@ -107,6 +138,11 @@ public class InventorySetupsPluginMessageHandler
 			case API_MSG_CLEAR:
 			{
 				handleClear(message);
+				break;
+			}
+			case API_MSG_GET_ACTIVE_SETUP_CONTENTS:
+			{
+				handleGetActiveSetupContents(message);
 				break;
 			}
 			default:
@@ -186,6 +222,43 @@ public class InventorySetupsPluginMessageHandler
 				panel.returnToOverviewPanel(false);
 			}
 		});
+	}
+
+	private void handleGetActiveSetupContents(final PluginMessage message)
+	{
+		final Object equipmentObj = message.getData().getOrDefault(API_DATA_EQUIPMENT_ITEM_IDS, null);
+		final Object inventoryObj = message.getData().getOrDefault(API_DATA_INVENTORY_ITEM_IDS, null);
+		final Object additionalObj = message.getData().getOrDefault(API_DATA_ADDITIONAL_ITEM_IDS, null);
+		if (!(equipmentObj instanceof Collection) || !(inventoryObj instanceof Collection) || !(additionalObj instanceof Collection))
+		{
+			log.warn("Ignoring {} message without the expected mutable collections", API_MSG_GET_ACTIVE_SETUP_CONTENTS);
+			return;
+		}
+
+		clientThread.invoke(() ->
+		{
+			final InventorySetup setup = panel.getCurrentSelectedSetup();
+			final boolean hasActiveSetup = setup != null && setup.isFilterBank() && plugin.isFilteringAllowed();
+			message.getData().put(API_DATA_ACTIVE_SETUP, hasActiveSetup ? setup.getName() : "");
+			if (!hasActiveSetup)
+			{
+				return;
+			}
+
+			addItemIds(equipmentObj, setup.getEquipment());
+			addItemIds(inventoryObj, setup.getInventory());
+			addItemIds(additionalObj, setup.getAdditionalFilteredItems().values());
+		});
+	}
+
+	private static void addItemIds(final Object obj, final Collection<InventorySetupsItem> items)
+	{
+		@SuppressWarnings("unchecked")
+		final Collection<Integer> ids = (Collection<Integer>) obj;
+
+		items.stream()
+			.map(InventorySetupsItem::getId)
+			.forEach(ids::add);
 	}
 
 	private List<String> buildSetupNames()
