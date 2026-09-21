@@ -45,7 +45,7 @@ public class InventorySetupsPluginMessageHandler
 	public static final String API_MSG_CLEAR = "clear";
 	// out: broadcast when the active setup changes - on opening, closing and editing
 	// of the setup that's still active (add/remove an item, toggle fuzzy, etc.)
-	// data["setup"] = the active setup's name; the key is absent when setup is closed.
+	// data["activeSetup"] = the active setup's name; the key is absent when setup is closed.
 	public static final String API_MSG_ACTIVE_SETUP_CHANGED = "active-setup-changed";
 	// in: get the active setup's contents by slot, e.g. for a plugin that wants to mirror its layout elsewhere.
 	// Put mutable Collection<Integer> under "equipmentItemIds" (EquipmentInventorySlot order, size 14),
