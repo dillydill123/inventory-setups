@@ -2677,6 +2677,11 @@ public class InventorySetupsPlugin extends Plugin
 		pluginMessageHandler.broadcastActiveSetupChanged();
 	}
 
+	public boolean hasActiveSetup()
+	{
+		return panel.getCurrentSelectedSetup() != null;
+	}
+
 	@Subscribe
 	public void onPluginMessage(final PluginMessage message)
 	{

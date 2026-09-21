@@ -139,7 +139,13 @@ public class InventorySetupsPersistentDataManager
 			// Setups were just persisted; notify integrating plugins.
 			plugin.broadcastSetupsChanged();
 			// Also notify of content edits to the still-active setup (slot/note/fuzzy changes, etc.).
-			plugin.broadcastActiveSetupChanged();
+			// Skip this when nothing is active: edits made from the overview list (favoriting, bank-filter
+			// toggle, rename, etc.) don't touch the active setup, and closing is signalled separately by
+			// InventorySetupsPluginPanel#returnToOverviewPanel().
+			if (plugin.hasActiveSetup())
+			{
+				plugin.broadcastActiveSetupChanged();
+			}
 		}
 
 		if (updateSections)
