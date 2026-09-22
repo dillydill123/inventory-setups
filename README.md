@@ -361,7 +361,7 @@ Other plugins can integrate with Inventory Setups by posting [`PluginMessage`](h
 
 The API broadcasts the following messages:
 * `setups-changed`: The list of setups has changed. This could mean a setup was added, deleted, or its name was updated.
-* `active-setup-changed`: The active setup has changed, or its contents (inventory, equipment, etc.) have been modified. This also includes the behavioral options of individual setups (favorite, filtering, etc.).
+* `active-setup-changed`: The active setup has changed, or its contents (inventory, equipment, etc.) have been modified.
 
 The API can receive the following messages and provide data or act upon the message:
 * `get-setups`: A list of all setups.
