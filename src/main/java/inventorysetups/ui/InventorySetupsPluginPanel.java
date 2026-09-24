@@ -680,13 +680,9 @@ public class InventorySetupsPluginPanel extends PluginPanel
 		else
 		{
 			filteredInventorysetups = new ArrayList<>(plugin.getInventorySetups());
-			moveFavoriteSetupsToTopOfList(filteredInventorysetups);
 		}
 
-		if (plugin.getConfig().sortingMode() == InventorySetupsSortingID.ALPHABETICAL)
-		{
-			filteredInventorysetups.sort(Comparator.comparing(InventorySetup::getName, String.CASE_INSENSITIVE_ORDER));
-		}
+		filteredInventorysetups.sort(plugin.getSetupsComparator());
 
 		layoutSetups(filteredInventorysetups);
 		returnToOverviewPanel(resetScrollBar);
@@ -729,16 +725,6 @@ public class InventorySetupsPluginPanel extends PluginPanel
 			// We set this to true now because we only want this menu to show up on startup.
 			// If someone modifies settings after startup, just continue.
 			hasDisplayedLayoutWarning = true;
-		}
-	}
-
-	public void moveFavoriteSetupsToTopOfList(final List<InventorySetup> setupsToAdd)
-	{
-		List<InventorySetup> favSetups = setupsToAdd.stream().filter(InventorySetup::isFavorite).collect(Collectors.toList());
-		setupsToAdd.removeAll(favSetups);
-		for (int i = favSetups.size() - 1; i >= 0; i--)
-		{
-			setupsToAdd.add(0, favSetups.get(i));
 		}
 	}
 
