@@ -237,9 +237,6 @@ public class InventorySetupsPlugin extends Plugin
 	private BankTagsService bankTagsService;
 
 	@Inject
-	private BankTagsPlugin bankTagsPlugin;
-
-	@Inject
 	private BankSearch bankSearch;
 
 	@Inject
@@ -439,15 +436,32 @@ public class InventorySetupsPlugin extends Plugin
 		return updateText;
 	}
 
+	private BankTagsPlugin getBankTagsPlugin()
+	{
+		return pluginManager.getPlugins().stream()
+			.filter(BankTagsPlugin.class::isInstance)
+			.map(BankTagsPlugin.class::cast)
+			.findFirst()
+			.orElse(null);
+	}
+
 	private boolean canUseLayouts()
 	{
 		// If Bank Tags is off, layouts will not work.
-		return pluginManager.isPluginEnabled(bankTagsPlugin);
+		final BankTagsPlugin bankTagsPlugin = getBankTagsPlugin();
+		return bankTagsPlugin != null && pluginManager.isPluginEnabled(bankTagsPlugin);
 	}
 
 	public void enableLayouts()
 	{
 		// Turn on Bank Tags and configure hub plugin bank tag layouts setting to be off.
+		final BankTagsPlugin bankTagsPlugin = getBankTagsPlugin();
+		if (bankTagsPlugin == null)
+		{
+			log.error("Could not find Bank Tags plugin.");
+			return;
+		}
+
 		if (!pluginManager.isPluginEnabled(bankTagsPlugin))
 		{
 			log.info("Turning on Bank Tags plugin");
@@ -467,7 +481,7 @@ public class InventorySetupsPlugin extends Plugin
 	@Subscribe
 	public void onPluginChanged(PluginChanged pluginChanged)
 	{
-		if (pluginChanged.getPlugin() == bankTagsPlugin)
+		if (pluginChanged.getPlugin() instanceof BankTagsPlugin)
 		{
 			this.canUseLayouts = canUseLayouts();
 		}
