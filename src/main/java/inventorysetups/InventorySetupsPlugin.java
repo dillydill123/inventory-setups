@@ -236,7 +236,6 @@ public class InventorySetupsPlugin extends Plugin
 	@Inject
 	private BankTagsService bankTagsService;
 
-	@Inject
 	private BankTagsPlugin bankTagsPlugin;
 
 	@Inject
@@ -367,6 +366,7 @@ public class InventorySetupsPlugin extends Plugin
 		this.ammoHandler = new InventorySetupsAmmoHandler(this, client, itemManager, panel, config);
 		this.pluginMessageHandler = new InventorySetupsPluginMessageHandler(this, clientThread, eventBus, panel);
 		this.layoutUtilities = new InventorySetupLayoutUtilities(itemManager, tagManager, layoutManager, config, client);
+		this.bankTagsPlugin = findBankTagsPlugin();
 		this.canUseLayouts = canUseLayouts();
 
 		InventorySetupsChatboxItemSearchFilter chatboxSearchFilter = new InventorySetupsChatboxItemSearchFilter(client.getItemCount());
@@ -439,15 +439,30 @@ public class InventorySetupsPlugin extends Plugin
 		return updateText;
 	}
 
+	private BankTagsPlugin findBankTagsPlugin()
+	{
+		return pluginManager.getPlugins().stream()
+			.filter(BankTagsPlugin.class::isInstance)
+			.map(BankTagsPlugin.class::cast)
+			.findFirst()
+			.orElse(null);
+	}
+
 	private boolean canUseLayouts()
 	{
 		// If Bank Tags is off, layouts will not work.
-		return pluginManager.isPluginEnabled(bankTagsPlugin);
+		return bankTagsPlugin != null && pluginManager.isPluginEnabled(bankTagsPlugin);
 	}
 
 	public void enableLayouts()
 	{
 		// Turn on Bank Tags and configure hub plugin bank tag layouts setting to be off.
+		if (bankTagsPlugin == null)
+		{
+			log.error("Could not find Bank Tags plugin.");
+			return;
+		}
+
 		if (!pluginManager.isPluginEnabled(bankTagsPlugin))
 		{
 			log.info("Turning on Bank Tags plugin");

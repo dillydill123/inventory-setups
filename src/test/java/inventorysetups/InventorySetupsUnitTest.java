@@ -20,15 +20,10 @@ import net.runelite.client.game.ItemManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import net.runelite.client.plugins.banktags.BankTagsConfig;
-import net.runelite.client.plugins.banktags.BankTagsPlugin;
-
-
 import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.plugins.banktags.BankTagsService;
 import net.runelite.client.plugins.banktags.TagManager;
 import net.runelite.client.plugins.banktags.tabs.LayoutManager;
-import net.runelite.client.plugins.banktags.tabs.TabInterface;
 import net.runelite.client.ui.ClientToolbar;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,18 +59,6 @@ public class InventorySetupsUnitTest
 	@Mock
 	@Bind
 	private ClientToolbar clientToolbar;
-
-	@Mock
-	@Bind
-	private BankTagsPlugin bankTagsPlugin;
-
-	@Mock
-	@Bind
-	private BankTagsConfig bankTagsConfig;
-
-	@Mock
-	@Bind
-	private TabInterface tabInterface;
 
 	@Mock
 	@Bind
