@@ -811,15 +811,16 @@ public class InventorySetupsPlugin extends Plugin
 
 		if (panel.getCurrentSelectedSetup() != null)
 		{
-			if (panel.getCurrentSelectedSetup().isFilterBank())
+			if (panel.getCurrentSelectedSetup().isFilterBank() && this.canUseLayouts)
 			{
-				if (this.canUseLayouts && config.useLayouts())
+				if (config.useLayouts())
 				{
 					// Add Auto layouts
 					createAutoLayoutSubMenuOnWornItems();
 				}
 
 				// add menu entry to re-filter/layout setup
+				// canUseLayouts also influences classic filtering
 				client.getMenu()
 						.createMenuEntry(-1)
 						.setOption("Filter Bank")
