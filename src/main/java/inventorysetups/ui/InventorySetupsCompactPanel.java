@@ -72,6 +72,10 @@ public class InventorySetupsCompactPanel extends InventorySetupsPanel
 		nameInput.getTextField().setCaretPosition(0);
 
 		nameWrapper.add(nameInput, BorderLayout.CENTER);
+		if (section != null && allowEditable)
+		{
+			nameWrapper.add(createSectionMoveButtons(), BorderLayout.EAST);
+		}
 
 		add(nameWrapper, BorderLayout.NORTH);
 

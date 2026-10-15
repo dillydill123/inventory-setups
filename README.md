@@ -279,6 +279,10 @@ When you are in the section mode view, the add and import buttons can now be use
 
 Like setups, section names have a maximum length of 50 and must be unique.
 
+Use the up and down arrows on a section header to move it one position at a time. The arrows are disabled at the ends of the list and while a sorting mode is enabled. They are hidden while editing a section name. The Unassigned section stays in place and has no move arrows. The right-click menu still provides all section movement options.
+
+![Moving sections and setups with arrows (local UI test)](readme_images_and_gifs/section_reordering.gif)
+
 ### Adding Setups to a Section
 
 To add setups to your section, there are two ways to do this. You can right-click a section and select "Add setups to section..". This will open a dialogue where you can select setups to add to the section.
@@ -305,7 +309,7 @@ Do not use the X button to remove a setup from a section. This will simply delet
 
 ### Moving Setups in a Section
 
-You can right-click a setup while in section mode and select one of the move options to move a setup within a section. This will not affect the position of the setup in the normal view. It only modifies the position within the section.
+In standard and compact views, use the up and down arrows beside a setup name to move it within its section. The arrows follow the same sorting and boundary restrictions as section arrows, and are not shown for setups in Unassigned. You can also right-click a setup while in section mode and select one of the move options to move a setup within a section. This will not affect the position of the setup in the normal view. It only modifies the position within the section.
 
 ### Section Menu Options
 

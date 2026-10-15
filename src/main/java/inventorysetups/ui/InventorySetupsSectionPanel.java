@@ -200,6 +200,13 @@ public class InventorySetupsSectionPanel extends JPanel implements InventorySetu
 
 		nameActions.add(westNameActions, BorderLayout.WEST);
 
+		if (allowEditable)
+		{
+			nameActions.addMoveButtons(new InventorySetupsMoveButtons(plugin, "section",
+				plugin.getSections().indexOf(section), plugin.getSections().size(),
+				() -> moveUp(section), () -> moveDown(section)));
+		}
+
 		JPanel nameWrapper = new JPanel();
 		nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		nameWrapper.setLayout(new BorderLayout());

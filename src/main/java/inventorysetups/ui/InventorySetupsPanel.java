@@ -116,6 +116,13 @@ public class InventorySetupsPanel extends JPanel implements InventorySetupsMoveH
 		setComponentPopupMenu(popupMenu);
 	}
 
+	protected JPanel createSectionMoveButtons()
+	{
+		return new InventorySetupsMoveButtons(plugin, "setup",
+			section.getSetups().indexOf(inventorySetup.getName()), section.getSetups().size(),
+			() -> moveUp(inventorySetup), () -> moveDown(inventorySetup));
+	}
+
 	@Override
 	public void moveUp(final InventorySetup invSetup)
 	{

@@ -175,9 +175,14 @@ public class InventorySetupsStandardPanel extends InventorySetupsPanel implement
 		setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
 		// Always allow the name actions to work for the standard panel
-		JPanel nameActions = new InventorySetupsNameActions<>(invSetup, plugin, panel, this,
+		InventorySetupsNameActions<InventorySetup> nameActions = new InventorySetupsNameActions<>(invSetup, plugin, panel, this,
 																popupMenu, MAX_SETUP_NAME_LENGTH,
 																ColorScheme.DARKER_GRAY_COLOR, true, null);
+
+		if (section != null && allowEditable)
+		{
+			nameActions.addMoveButtons(createSectionMoveButtons());
+		}
 
 		JPanel bottomContainer = new JPanel(new BorderLayout());
 		bottomContainer.setBorder(new EmptyBorder(8, 0, 8, 0));

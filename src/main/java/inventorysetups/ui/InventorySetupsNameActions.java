@@ -363,6 +363,14 @@ public class InventorySetupsNameActions<T extends InventorySetupsDisplayAttribut
 
 	}
 
+	void addMoveButtons(JPanel moveButtons)
+	{
+		add(moveButtons, BorderLayout.EAST);
+		// Moving redraws the overview, so hide the controls during an unfinished rename.
+		nameInput.getTextField().addPropertyChangeListener("editable", e ->
+			moveButtons.setVisible(!Boolean.TRUE.equals(e.getNewValue())));
+	}
+
 	private void updateNameActions(boolean saveAndCancel)
 	{
 		save.setVisible(saveAndCancel);
