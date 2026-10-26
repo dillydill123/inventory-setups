@@ -362,12 +362,14 @@ Other plugins can integrate with Inventory Setups by posting [`PluginMessage`](h
 The API broadcasts the following messages:
 * `setups-changed`: The list of setups has changed. This could mean a setup was added, deleted, or its name was updated.
 * `active-setup-changed`: The active setup has changed, or its contents (inventory, equipment, etc.) have been modified.
+* `add-setup-result`: The outcome of an `add-setup` request: the saved setup name, or the reason it was refused, with the request's `requestId`.
 
 The API can receive the following messages and provide data or act upon the message:
 * `get-setups`: A list of all setups.
 * `get-active-setup-contents`: Get the contents (inventory, equipment, etc.) of the active setup.
 * `view`: Open a setup.
 * `clear`: Close the current setup.
+* `add-setup`: Create a new setup from item ids and quantities, including additional filtered items, rune pouch, bolt pouch and quiver contents, spellbook and display options, optionally inside a section (never replaces an existing setup).
 
 The message names, payload keys, and usage details are documented in [`InventorySetupsPluginMessageHandler`](src/main/java/inventorysetups/InventorySetupsPluginMessageHandler.java).
 

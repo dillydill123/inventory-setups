@@ -45,7 +45,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,7 @@ import net.runelite.api.events.VarClientIntChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.Item;
+import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.KeyCode;
 import net.runelite.api.Menu;
@@ -127,6 +130,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.stream.IntStream;
 
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_ADDITIONAL_ITEM_IDS;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_ADDITIONAL_QUANTITIES;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_BOLT_POUCH_ITEM_IDS;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_BOLT_POUCH_QUANTITIES;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_EQUIPMENT_ITEM_IDS;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_EQUIPMENT_QUANTITIES;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_ICON_ID;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_INVENTORY_ITEM_IDS;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_INVENTORY_QUANTITIES;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_QUIVER_ITEM_ID;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_QUIVER_QUANTITY;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_RUNE_POUCH_ITEM_IDS;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_RUNE_POUCH_QUANTITIES;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_SETUP;
+import static inventorysetups.InventorySetupsPluginMessageHandler.API_DATA_SPELLBOOK;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_AMOUNT_VARBITS;
 import static inventorysetups.ui.InventorySetupsRunePouchPanel.RUNE_POUCH_RUNE_VARBITS;
 
@@ -1096,17 +1114,297 @@ public class InventorySetupsPlugin extends Plugin
 				config.highlightUnorderedDifference(),
 				spellbook, false, -1, attackOption);
 
-			cache.addSetup(invSetup);
-			inventorySetups.add(invSetup);
-			dataManager.updateConfig(true, false);
-
-			Layout setupLayout = layoutUtilities.createSetupLayout(invSetup);
-			layoutManager.saveLayout(setupLayout);
-			tagManager.setHidden(setupLayout.getTag(), true);
-
-			SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
-
+			saveNewSetup(invSetup, null);
 		});
+	}
+
+	// Creates a setup from an add-setup request (PluginMessage API). Must run on the client thread (item names
+	// come from the item manager). Every rule of the request is checked first (checkAddSetupRequest), and a
+	// broken one throws IllegalArgumentException with nothing saved. Never replaces an existing setup: the name
+	// is made unique, and the name actually saved is returned. Options the request leaves out take the Add
+	// Setup button's config defaults, but nothing is read from the player: no spellbook and no attack option.
+	String addInventorySetup(final InventorySetupsAddSetupRequest request)
+	{
+		assert client.isClientThread() : "addInventorySetup must be called on the client thread";
+		checkAddSetupRequest(request);
+
+		final boolean fuzzy = request.getFuzzy() != null ? request.getFuzzy() : config.fuzzy();
+		final List<InventorySetupsItem> eqp = itemsFromIds(request.getEquipmentIds(), request.getEquipmentQuantities(),
+			NUM_EQUIPMENT_ITEMS, InventorySetupsSlotID.EQUIPMENT, fuzzy);
+		final List<InventorySetupsItem> inv = itemsFromIds(request.getInventoryIds(), request.getInventoryQuantities(),
+			NUM_INVENTORY_ITEMS, InventorySetupsSlotID.INVENTORY, fuzzy);
+
+		// Additional filtered items, keyed like the panel's own "add to additional filtered items":
+		// the canonical (un-noted, un-placeholdered) id.
+		final Map<Integer, InventorySetupsItem> additional = new HashMap<>();
+		if (request.getAdditionalIds() != null)
+		{
+			final InventorySetupsStackCompareID additionalStackCompare = panel != null && panel.isStackCompareForSlotAllowed(InventorySetupsSlotID.ADDITIONAL_ITEMS, 0) ?
+				config.stackCompareType() : InventorySetupsStackCompareID.None;
+			for (int i = 0; i < request.getAdditionalIds().size(); i++)
+			{
+				final int id = request.getAdditionalIds().get(i);
+				if (id < 0)
+				{
+					continue;
+				}
+				final int processedItemId = itemManager.canonicalize(id);
+				additional.put(processedItemId, new InventorySetupsItem(processedItemId,
+					itemManager.getItemComposition(processedItemId).getName(),
+					quantityAt(request.getAdditionalQuantities(), i), fuzzy, additionalStackCompare));
+			}
+		}
+
+		// Special containers hold what the request gives for them, never the player's live containers, which
+		// say nothing about a setup another plugin planned. Their items are never fuzzy, like the ones the
+		// Add Setup button reads from the game.
+		final InventorySetupsRunePouchType pouchType = ammoHandler.getRunePouchTypeFromContainer(inv);
+		final List<InventorySetupsItem> runePouch = pouchType == InventorySetupsRunePouchType.NONE ? null
+			: itemsFromIds(request.getRunePouchIds(), request.getRunePouchQuantities(), pouchType.getSize(),
+				InventorySetupsSlotID.RUNE_POUCH, false);
+		final List<InventorySetupsItem> boltPouch = !ammoHandler.containerContainsBoltPouch(inv) ? null
+			: itemsFromIds(request.getBoltPouchIds(), request.getBoltPouchQuantities(), BOLT_POUCH_SLOTS,
+				InventorySetupsSlotID.BOLT_POUCH, false);
+		final List<InventorySetupsItem> quiver = !ammoHandler.setupContainsQuiver(inv, eqp) ? null
+			: itemsFromIds(request.getQuiverItemId() == null ? null : Collections.singletonList(request.getQuiverItemId()),
+				request.getQuiverQuantity() == null ? null : Collections.singletonList(request.getQuiverQuantity()),
+				1, InventorySetupsSlotID.QUIVER, false);
+
+		final String name = InventorySetupsPluginMessageHandler.uniqueName(request.getName(),
+			cache.getInventorySetupNames().keySet(), MAX_SETUP_NAME_LENGTH);
+		final Color displayColor = request.getDisplayColor() != null ? new Color(request.getDisplayColor())
+			: config.enableDisplayColor() ? config.displayColor() : null;
+		final InventorySetup invSetup = new InventorySetup(inv, eqp, runePouch, boltPouch, quiver,
+			additional,
+			name,
+			request.getNotes() == null ? "" : request.getNotes(),
+			request.getHighlightColor() != null ? new Color(request.getHighlightColor()) : config.highlightColor(),
+			request.getHighlightDifference() != null ? request.getHighlightDifference() : config.highlightDifference(),
+			displayColor,
+			request.getFilterBank() != null ? request.getFilterBank() : config.bankFilter(),
+			request.getUnorderedHighlight() != null ? request.getUnorderedHighlight() : config.highlightUnorderedDifference(),
+			request.getSpellbook() != null ? request.getSpellbook() : SPELLBOOK_NONE,
+			request.getFavorite() != null && request.getFavorite(),
+			request.getIconId() != null ? request.getIconId() : -1,
+			request.getAttackOption() == null ? "" : request.getAttackOption());
+
+		saveNewSetup(invSetup, request.getSection());
+		return name;
+	}
+
+	// Saves a newly built setup: the cache, the config, its bank tag layout and the panel. Puts it in the named
+	// section (created when absent) when sectionName is not blank. Shared by the Add Setup button and add-setup.
+	private void saveNewSetup(final InventorySetup invSetup, final String sectionName)
+	{
+		cache.addSetup(invSetup);
+		inventorySetups.add(invSetup);
+
+		final boolean inSection = sectionName != null && !sectionName.isBlank();
+		if (inSection)
+		{
+			final String trimmedSection = sectionName.length() > MAX_SETUP_NAME_LENGTH
+				? sectionName.substring(0, MAX_SETUP_NAME_LENGTH) : sectionName;
+			InventorySetupsSection section = cache.getSectionNames().get(trimmedSection);
+			if (section == null)
+			{
+				section = new InventorySetupsSection(trimmedSection);
+				cache.addSection(section);
+				sections.add(section);
+			}
+			cache.addSetupToSection(section, invSetup);
+			section.getSetups().add(invSetup.getName());
+		}
+		dataManager.updateConfig(true, inSection);
+
+		Layout setupLayout = layoutUtilities.createSetupLayout(invSetup);
+		layoutManager.saveLayout(setupLayout);
+		tagManager.setHidden(setupLayout.getTag(), true);
+
+		SwingUtilities.invokeLater(() -> panel.redrawOverviewPanel(false));
+	}
+
+	// The bolt pouch's slots: three bolt types and the extra ammo slot.
+	private static final int BOLT_POUCH_SLOTS = 4;
+	// InventorySetup's spellbook value for "no spellbook".
+	private static final int SPELLBOOK_NONE = 4;
+
+	// Every rule of an add-setup request, in one place. Throws IllegalArgumentException naming the first one
+	// broken, by its PluginMessage key. Runs on the client thread: item ids are checked with the item manager.
+	private void checkAddSetupRequest(final InventorySetupsAddSetupRequest request)
+	{
+		if (request.getName() == null || request.getName().isBlank())
+		{
+			throw new IllegalArgumentException("'" + API_DATA_SETUP + "' must be a non-blank String");
+		}
+		if (request.getEquipmentIds() == null || request.getInventoryIds() == null)
+		{
+			throw new IllegalArgumentException("'" + API_DATA_EQUIPMENT_ITEM_IDS + "' and '" + API_DATA_INVENTORY_ITEM_IDS
+				+ "' are required");
+		}
+		checkIds(API_DATA_EQUIPMENT_ITEM_IDS, request.getEquipmentIds(), NUM_EQUIPMENT_ITEMS);
+		checkIds(API_DATA_INVENTORY_ITEM_IDS, request.getInventoryIds(), NUM_INVENTORY_ITEMS);
+		checkIds(API_DATA_ADDITIONAL_ITEM_IDS, request.getAdditionalIds(), Integer.MAX_VALUE);
+		checkIds(API_DATA_RUNE_POUCH_ITEM_IDS, request.getRunePouchIds(), Integer.MAX_VALUE);
+		checkIds(API_DATA_BOLT_POUCH_ITEM_IDS, request.getBoltPouchIds(), BOLT_POUCH_SLOTS);
+		checkQuantities(API_DATA_EQUIPMENT_QUANTITIES, request.getEquipmentQuantities(), request.getEquipmentIds());
+		checkQuantities(API_DATA_INVENTORY_QUANTITIES, request.getInventoryQuantities(), request.getInventoryIds());
+		checkQuantities(API_DATA_ADDITIONAL_QUANTITIES, request.getAdditionalQuantities(), request.getAdditionalIds());
+		checkQuantities(API_DATA_RUNE_POUCH_QUANTITIES, request.getRunePouchQuantities(), request.getRunePouchIds());
+		checkQuantities(API_DATA_BOLT_POUCH_QUANTITIES, request.getBoltPouchQuantities(), request.getBoltPouchIds());
+
+		final Integer quiverItem = request.getQuiverItemId();
+		final Integer quiverQuantity = request.getQuiverQuantity();
+		if (quiverQuantity != null && quiverItem == null)
+		{
+			throw new IllegalArgumentException("'" + API_DATA_QUIVER_QUANTITY + "' needs '" + API_DATA_QUIVER_ITEM_ID + "'");
+		}
+		if ((quiverItem != null && quiverItem < -1) || (quiverQuantity != null && quiverQuantity < 1))
+		{
+			throw new IllegalArgumentException("'" + API_DATA_QUIVER_ITEM_ID + "' must be an item id and '"
+				+ API_DATA_QUIVER_QUANTITY + "' at least 1");
+		}
+		if (request.getSpellbook() != null && (request.getSpellbook() < 0 || request.getSpellbook() > SPELLBOOK_NONE))
+		{
+			throw new IllegalArgumentException("'" + API_DATA_SPELLBOOK + "' must be 0 to " + SPELLBOOK_NONE);
+		}
+		if (request.getIconId() != null && request.getIconId() < -1)
+		{
+			throw new IllegalArgumentException("'" + API_DATA_ICON_ID + "' must be an item id");
+		}
+
+		for (final List<Integer> ids : Arrays.asList(request.getEquipmentIds(), request.getInventoryIds(),
+			request.getAdditionalIds(), request.getRunePouchIds(), request.getBoltPouchIds(),
+			Arrays.asList(quiverItem, request.getIconId())))
+		{
+			if (ids != null)
+			{
+				ids.forEach(this::requireItem);
+			}
+		}
+
+		// Contents are only accepted for a special container the setup holds. A list that is empty or only -1
+		// gives no contents, so it is accepted either way, like a key left out.
+		final List<InventorySetupsItem> inv = itemsFromIds(request.getInventoryIds(), null, NUM_INVENTORY_ITEMS,
+			InventorySetupsSlotID.INVENTORY, false);
+		final List<InventorySetupsItem> eqp = itemsFromIds(request.getEquipmentIds(), null, NUM_EQUIPMENT_ITEMS,
+			InventorySetupsSlotID.EQUIPMENT, false);
+		final InventorySetupsRunePouchType pouchType = ammoHandler.getRunePouchTypeFromContainer(inv);
+		if (holdsItems(request.getRunePouchIds()) && pouchType == InventorySetupsRunePouchType.NONE)
+		{
+			throw new IllegalArgumentException("'" + API_DATA_RUNE_POUCH_ITEM_IDS + "' given, but the inventory holds no rune pouch");
+		}
+		if (pouchType != InventorySetupsRunePouchType.NONE && request.getRunePouchIds() != null
+			&& request.getRunePouchIds().size() > pouchType.getSize())
+		{
+			throw new IllegalArgumentException("'" + API_DATA_RUNE_POUCH_ITEM_IDS + "' holds more than the pouch's "
+				+ pouchType.getSize() + " slots");
+		}
+		if (holdsItems(request.getBoltPouchIds()) && !ammoHandler.containerContainsBoltPouch(inv))
+		{
+			throw new IllegalArgumentException("'" + API_DATA_BOLT_POUCH_ITEM_IDS + "' given, but the inventory holds no bolt pouch");
+		}
+		if (quiverItem != null && quiverItem >= 0 && !ammoHandler.setupContainsQuiver(inv, eqp))
+		{
+			throw new IllegalArgumentException("'" + API_DATA_QUIVER_ITEM_ID + "' given, but the setup holds no Dizana's quiver");
+		}
+	}
+
+	// Whether a list of item ids holds any item (not just empty slots).
+	private static boolean holdsItems(final List<Integer> ids)
+	{
+		return ids != null && ids.stream().anyMatch(id -> id != null && id >= 0);
+	}
+
+	// Item ids: each at least -1 (an empty slot), at most maxSize of them.
+	private static void checkIds(final String key, final List<Integer> ids, final int maxSize)
+	{
+		if (ids == null)
+		{
+			return;
+		}
+		if (ids.size() > maxSize)
+		{
+			throw new IllegalArgumentException("'" + key + "' holds more than " + maxSize + " slots");
+		}
+		for (final Integer id : ids)
+		{
+			if (id == null || id < -1)
+			{
+				throw new IllegalArgumentException("'" + key + "' holds " + id + ", not an item id");
+			}
+		}
+	}
+
+	// Quantities for the given ids: no more than the ids, each at least 1 where its slot holds an item (an empty
+	// slot's quantity is ignored).
+	private static void checkQuantities(final String key, final List<Integer> quantities, final List<Integer> ids)
+	{
+		if (quantities == null)
+		{
+			return;
+		}
+		if (ids == null || quantities.size() > ids.size())
+		{
+			throw new IllegalArgumentException("'" + key + "' holds more quantities than there are ids");
+		}
+		for (int i = 0; i < quantities.size(); i++)
+		{
+			if (ids.get(i) >= 0 && (quantities.get(i) == null || quantities.get(i) < 1))
+			{
+				throw new IllegalArgumentException("'" + key + "' holds " + quantities.get(i) + " for item " + ids.get(i)
+					+ ", a quantity must be at least 1");
+			}
+		}
+	}
+
+	// Throws when an id (other than -1, an empty slot) is not a real item.
+	private void requireItem(final Integer id)
+	{
+		if (id == null || id < 0)
+		{
+			return;
+		}
+		ItemComposition composition;
+		try
+		{
+			composition = itemManager.getItemComposition(id);
+		}
+		catch (RuntimeException e)
+		{
+			composition = null;
+		}
+		if (composition == null || composition.getName() == null || "null".equals(composition.getName()))
+		{
+			throw new IllegalArgumentException("unknown item id " + id);
+		}
+	}
+
+	// The quantity at index i of an optional quantity list, 1 when absent.
+	private static int quantityAt(final List<Integer> quantities, final int i)
+	{
+		return quantities != null && i < quantities.size() && quantities.get(i) != null ? quantities.get(i) : 1;
+	}
+
+	// A normalized container from item ids: size slots, -1 (or a missing entry) is an empty slot.
+	// Quantities default to 1 when absent.
+	private List<InventorySetupsItem> itemsFromIds(final List<Integer> ids, final List<Integer> quantities,
+		final int size, final InventorySetupsSlotID slotID, final boolean fuzzy)
+	{
+		final List<InventorySetupsItem> items = new ArrayList<>(size);
+		for (int i = 0; i < size; i++)
+		{
+			final int id = ids != null && i < ids.size() && ids.get(i) != null ? ids.get(i) : -1;
+			if (id < 0)
+			{
+				items.add(InventorySetupsItem.getDummyItem());
+				continue;
+			}
+			final InventorySetupsStackCompareID stackCompareType = panel != null && panel.isStackCompareForSlotAllowed(slotID, i) ?
+				config.stackCompareType() : InventorySetupsStackCompareID.None;
+			items.add(new InventorySetupsItem(id, itemManager.getItemComposition(id).getName(),
+				quantityAt(quantities, i), fuzzy, stackCompareType));
+		}
+		return items;
 	}
 
 	public void addSection()

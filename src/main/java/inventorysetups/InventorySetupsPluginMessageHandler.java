@@ -8,6 +8,7 @@ import net.runelite.client.events.PluginMessage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,12 +32,15 @@ import java.util.Map;
 public class InventorySetupsPluginMessageHandler
 {
 	public static final String API_NAMESPACE = "inventory-setups";
-	// Bumped when the contract below changes in a breaking way. Shipped in setups-changed as data["version"].
-	public static final int API_VERSION = 1;
+	// Bumped when the contract below changes in a breaking way, or gains a message a sender needs to detect.
+	// Shipped in setups-changed as data["version"], and in the get-setups reply.
+	// 2: add-setup; get-setups puts data["version"].
+	public static final int API_VERSION = 2;
 	// out: broadcast when the setups change. data["setups"] = List<String> of names, data["version"] = int.
 	public static final String API_MSG_SETUPS_CHANGED = "setups-changed";
 	// in: list setups on demand (for plugins that start after us). Put a mutable Collection<String> under
-	// "setups"; it is filled synchronously with the current setup names.
+	// "setups"; it is filled synchronously with the current setup names. When the data map itself is
+	// mutable, data["version"] is set to API_VERSION too, so a sender can tell which messages exist.
 	public static final String API_MSG_GET_SETUPS = "get-setups";
 	// in: open a setup, filtering the bank like the worn items menu. data["setup"] = name.
 	public static final String API_MSG_VIEW = "view";
@@ -54,6 +58,60 @@ public class InventorySetupsPluginMessageHandler
 	// data["activeSetup"] is set to the active setup's name (String) when one
 	// is active and bank filtering is allowed, or "" otherwise.
 	public static final String API_MSG_GET_ACTIVE_SETUP_CONTENTS = "get-active-setup-contents";
+	// in (version 2): create a setup from item ids, e.g. a gear planner saving the set it recommends.
+	// Required: data["setup"] = the requested name (String); "equipmentItemIds" = Collection<Integer>
+	// (EquipmentInventorySlot order, at most 14, -1 for an empty slot); "inventoryItemIds" = Collection<Integer>
+	// (at most 28, -1 empty). Missing trailing slots are empty.
+	// Optional - each one left out takes the Add Setup button's config default, but nothing is read from the
+	// player (a planned setup is not the player's current one): no spellbook and no attack option.
+	//   "requestId" = any value, echoed in the add-setup-result broadcast
+	//   "equipmentQuantities", "inventoryQuantities" = Collection<Integer> matching the ids (default 1)
+	//   "additionalItemIds" + "additionalQuantities" = Collection<Integer>, the additional filtered items
+	//   "runePouchItemIds" + "runePouchQuantities" = Collection<Integer>, the rune pouch's runes in slot order,
+	//     when the inventory holds a rune pouch (normal or divine)
+	//   "boltPouchItemIds" + "boltPouchQuantities" = Collection<Integer>, the bolt pouch's slots (at most 4:
+	//     three bolt types and the extra ammo slot), when the inventory holds a bolt pouch
+	//   "quiverItemId" + "quiverQuantity" = Integer, Dizana's quiver's ammo, when the setup holds the quiver
+	//   "spellbook" = Integer: 0 Standard, 1 Ancient, 2 Lunar, 3 Arceuus, 4 none (default 4)
+	//   "favorite", "filterBank", "highlightDifference", "unorderedHighlight", "fuzzy" = Boolean
+	//   "highlightColor", "displayColor" = Integer RGB; "iconId" = Integer, an item id
+	//   "section" = String, the section to put the setup in (created when absent)
+	//   "notes", "attackOption" = String
+	// Contents for a pouch or quiver the setup lacks are refused, but an empty list (or only -1) is accepted.
+	// Quantities must be at least 1, and every id must be a real item. A request that breaks a rule saves
+	// nothing. An existing setup is never replaced: the name gets " (2)", " (3)"... when taken.
+	// The setup is created on the client thread, and an add-setup-result is always broadcast. Posted from the
+	// client thread, the outcome is also in the data map when post() returns (if it is mutable): data["setup"]
+	// holds the name actually saved, or data["error"] the reason it was refused.
+	public static final String API_MSG_ADD_SETUP = "add-setup";
+	// out (version 2): the outcome of an add-setup. data["requestId"] = the request's requestId (when it had one),
+	// data["setup"] = the name saved (on failure, the name requested), data["error"] = String, only on failure.
+	public static final String API_MSG_ADD_SETUP_RESULT = "add-setup-result";
+	public static final String API_DATA_REQUEST_ID = "requestId";
+	public static final String API_DATA_ERROR = "error";
+	// Keys only add-setup reads. Package-private: other plugins post the strings, and only this package
+	// (the handler and the plugin's request checks) needs the constants.
+	static final String API_DATA_EQUIPMENT_QUANTITIES = "equipmentQuantities";
+	static final String API_DATA_INVENTORY_QUANTITIES = "inventoryQuantities";
+	static final String API_DATA_ADDITIONAL_QUANTITIES = "additionalQuantities";
+	static final String API_DATA_RUNE_POUCH_ITEM_IDS = "runePouchItemIds";
+	static final String API_DATA_RUNE_POUCH_QUANTITIES = "runePouchQuantities";
+	static final String API_DATA_BOLT_POUCH_ITEM_IDS = "boltPouchItemIds";
+	static final String API_DATA_BOLT_POUCH_QUANTITIES = "boltPouchQuantities";
+	static final String API_DATA_QUIVER_ITEM_ID = "quiverItemId";
+	static final String API_DATA_QUIVER_QUANTITY = "quiverQuantity";
+	static final String API_DATA_SPELLBOOK = "spellbook";
+	static final String API_DATA_FAVORITE = "favorite";
+	static final String API_DATA_FILTER_BANK = "filterBank";
+	static final String API_DATA_HIGHLIGHT_DIFFERENCE = "highlightDifference";
+	static final String API_DATA_UNORDERED_HIGHLIGHT = "unorderedHighlight";
+	static final String API_DATA_FUZZY = "fuzzy";
+	static final String API_DATA_HIGHLIGHT_COLOR = "highlightColor";
+	static final String API_DATA_DISPLAY_COLOR = "displayColor";
+	static final String API_DATA_ICON_ID = "iconId";
+	static final String API_DATA_SECTION = "section";
+	static final String API_DATA_NOTES = "notes";
+	static final String API_DATA_ATTACK_OPTION = "attackOption";
 	public static final String API_DATA_SETUPS = "setups";
 	public static final String API_DATA_SETUP = "setup";
 	public static final String API_DATA_VERSION = "version";
@@ -117,7 +175,8 @@ public class InventorySetupsPluginMessageHandler
 		{
 			return;
 		}
-		if (API_MSG_SETUPS_CHANGED.equals(message.getName()) || API_MSG_ACTIVE_SETUP_CHANGED.equals(message.getName()))
+		if (API_MSG_SETUPS_CHANGED.equals(message.getName()) || API_MSG_ACTIVE_SETUP_CHANGED.equals(message.getName())
+			|| API_MSG_ADD_SETUP_RESULT.equals(message.getName()))
 		{
 			// Our own outgoing broadcast.
 			return;
@@ -145,6 +204,11 @@ public class InventorySetupsPluginMessageHandler
 				handleGetActiveSetupContents(message);
 				break;
 			}
+			case API_MSG_ADD_SETUP:
+			{
+				handleAddSetup(message);
+				break;
+			}
 			default:
 			{
 				log.warn("Ignoring unsupported message '{}' in the {} namespace", message.getName(), API_NAMESPACE);
@@ -166,6 +230,198 @@ public class InventorySetupsPluginMessageHandler
 		else
 		{
 			log.warn("Ignoring {} message without a Collection under '{}'", API_MSG_GET_SETUPS, API_DATA_SETUPS);
+		}
+		try
+		{
+			message.getData().put(API_DATA_VERSION, API_VERSION);
+		}
+		catch (UnsupportedOperationException e)
+		{
+			// An immutable data map (Map.of): the caller did not ask for the version.
+		}
+	}
+
+	private void handleAddSetup(final PluginMessage message)
+	{
+		final Map<String, Object> data = message.getData();
+		final Object requestId = data.get(API_DATA_REQUEST_ID);
+		final Object nameObj = data.get(API_DATA_SETUP);
+		// The posted map is only written while post() is still running on the client thread; a later write from
+		// the client thread could race the sender reading it.
+		final boolean replyInMap = plugin.getClient().isClientThread();
+		final InventorySetupsAddSetupRequest request;
+		try
+		{
+			request = parseAddSetup(data);
+		}
+		catch (IllegalArgumentException e)
+		{
+			finishAddSetup(replyInMap ? data : null, requestId, nameObj instanceof String ? (String) nameObj : "",
+				null, e.getMessage());
+			return;
+		}
+
+		final Runnable add = () ->
+		{
+			String saved = null;
+			String error = null;
+			try
+			{
+				saved = plugin.addInventorySetup(request);
+			}
+			catch (IllegalArgumentException e)
+			{
+				error = e.getMessage();
+			}
+			finishAddSetup(replyInMap ? data : null, requestId, request.getName(), saved, error);
+		};
+		if (replyInMap)
+		{
+			add.run();
+		}
+		else
+		{
+			clientThread.invokeLater(add);
+		}
+	}
+
+	// Broadcasts add-setup-result, and replies in the posted map when one is given (and it is mutable).
+	private void finishAddSetup(final Map<String, Object> data, final Object requestId, final String requested,
+		final String saved, final String error)
+	{
+		if (error != null)
+		{
+			log.warn("Ignoring {} message: {}", API_MSG_ADD_SETUP, error);
+		}
+		if (data != null)
+		{
+			try
+			{
+				data.put(error == null ? API_DATA_SETUP : API_DATA_ERROR, error == null ? saved : error);
+			}
+			catch (UnsupportedOperationException e)
+			{
+				// An immutable data map: the caller reads the result broadcast instead.
+			}
+		}
+
+		final Map<String, Object> result = new HashMap<>();
+		if (requestId != null)
+		{
+			result.put(API_DATA_REQUEST_ID, requestId);
+		}
+		result.put(API_DATA_SETUP, error == null ? saved : requested);
+		if (error != null)
+		{
+			result.put(API_DATA_ERROR, error);
+		}
+		eventBus.post(new PluginMessage(API_NAMESPACE, API_MSG_ADD_SETUP_RESULT, result));
+	}
+
+	// Reads an add-setup payload into a request, checking only the type under each key; throws
+	// IllegalArgumentException naming the first key of the wrong type. Every other rule is checked by the plugin
+	// on the client thread (InventorySetupsPlugin#checkAddSetupRequest).
+	static InventorySetupsAddSetupRequest parseAddSetup(final Map<String, Object> data)
+	{
+		return InventorySetupsAddSetupRequest.builder()
+			.name(string(data, API_DATA_SETUP))
+			.equipmentIds(integers(data, API_DATA_EQUIPMENT_ITEM_IDS))
+			.equipmentQuantities(integers(data, API_DATA_EQUIPMENT_QUANTITIES))
+			.inventoryIds(integers(data, API_DATA_INVENTORY_ITEM_IDS))
+			.inventoryQuantities(integers(data, API_DATA_INVENTORY_QUANTITIES))
+			.additionalIds(integers(data, API_DATA_ADDITIONAL_ITEM_IDS))
+			.additionalQuantities(integers(data, API_DATA_ADDITIONAL_QUANTITIES))
+			.runePouchIds(integers(data, API_DATA_RUNE_POUCH_ITEM_IDS))
+			.runePouchQuantities(integers(data, API_DATA_RUNE_POUCH_QUANTITIES))
+			.boltPouchIds(integers(data, API_DATA_BOLT_POUCH_ITEM_IDS))
+			.boltPouchQuantities(integers(data, API_DATA_BOLT_POUCH_QUANTITIES))
+			.quiverItemId(integer(data, API_DATA_QUIVER_ITEM_ID))
+			.quiverQuantity(integer(data, API_DATA_QUIVER_QUANTITY))
+			.notes(string(data, API_DATA_NOTES))
+			.section(string(data, API_DATA_SECTION))
+			.attackOption(string(data, API_DATA_ATTACK_OPTION))
+			.spellbook(integer(data, API_DATA_SPELLBOOK))
+			.iconId(integer(data, API_DATA_ICON_ID))
+			.highlightColor(integer(data, API_DATA_HIGHLIGHT_COLOR))
+			.displayColor(integer(data, API_DATA_DISPLAY_COLOR))
+			.favorite(bool(data, API_DATA_FAVORITE))
+			.filterBank(bool(data, API_DATA_FILTER_BANK))
+			.highlightDifference(bool(data, API_DATA_HIGHLIGHT_DIFFERENCE))
+			.unorderedHighlight(bool(data, API_DATA_UNORDERED_HIGHLIGHT))
+			.fuzzy(bool(data, API_DATA_FUZZY))
+			.build();
+	}
+
+	private static List<Integer> integers(final Map<String, Object> data, final String key)
+	{
+		final Object obj = data.get(key);
+		if (obj == null)
+		{
+			return null;
+		}
+		if (!(obj instanceof Collection))
+		{
+			throw new IllegalArgumentException("'" + key + "' must be a Collection<Integer>");
+		}
+		final List<Integer> values = new ArrayList<>();
+		for (final Object element : (Collection<?>) obj)
+		{
+			if (!(element instanceof Integer))
+			{
+				throw new IllegalArgumentException("'" + key + "' must be a Collection<Integer>");
+			}
+			values.add((Integer) element);
+		}
+		return values;
+	}
+
+	private static Integer integer(final Map<String, Object> data, final String key)
+	{
+		final Object obj = data.get(key);
+		if (obj != null && !(obj instanceof Integer))
+		{
+			throw new IllegalArgumentException("'" + key + "' must be an Integer");
+		}
+		return (Integer) obj;
+	}
+
+	private static Boolean bool(final Map<String, Object> data, final String key)
+	{
+		final Object obj = data.get(key);
+		if (obj != null && !(obj instanceof Boolean))
+		{
+			throw new IllegalArgumentException("'" + key + "' must be a Boolean");
+		}
+		return (Boolean) obj;
+	}
+
+	private static String string(final Map<String, Object> data, final String key)
+	{
+		final Object obj = data.get(key);
+		if (obj != null && !(obj instanceof String))
+		{
+			throw new IllegalArgumentException("'" + key + "' must be a String");
+		}
+		return (String) obj;
+	}
+
+	// The requested name, cut to the maximum length, made unique against the taken names with
+	// " (2)", " (3)"... (the base is shortened so the suffix still fits).
+	static String uniqueName(final String requested, final Collection<String> taken, final int maxLength)
+	{
+		final String base = requested.trim().length() > maxLength ? requested.trim().substring(0, maxLength) : requested.trim();
+		if (!taken.contains(base))
+		{
+			return base;
+		}
+		for (int n = 2; ; n++)
+		{
+			final String suffix = " (" + n + ")";
+			final String head = base.length() + suffix.length() > maxLength ? base.substring(0, maxLength - suffix.length()) : base;
+			if (!taken.contains(head + suffix))
+			{
+				return head + suffix;
+			}
 		}
 	}
 
